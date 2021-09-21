@@ -1,0 +1,4 @@
+- name: Install Python dependencies
+  ansible.builtin.pip:
+    name: "{{ python_libraries }}"
+    executable: "pip{{ ansible_python_version | splitext | first }}"

@@ -1,0 +1,3 @@
+---
+# defaults file for ec2_elb_lb
+elb_name: 'ansible-test-{{ tiny_prefix }}'

@@ -1,0 +1,3 @@
+dependencies:
+  - role: prepare_tests
+  - role: setup_botocore_pip

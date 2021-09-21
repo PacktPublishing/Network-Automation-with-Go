@@ -1,0 +1,51 @@
+- name: get image ID to create an instance
+  ec2_ami_info:
+    filters:
+      architecture: x86_64
+      owner-id: '125523088429'
+      virtualization-type: hvm
+      root-device-type: ebs
+      name: 'Fedora-Cloud-Base-34-1.2.x86_64*'
+  register: fedora_images
+
+- set_fact:
+    image_id: '{{ fedora_images.images.0.image_id }}'
+    vpc_cidr: '10.{{ 256 | random(seed=resource_prefix) }}.0.0/16'
+    subnet_cidr: '10.{{ 256 | random(seed=resource_prefix) }}.0.0/24'
+
+- name: create a VPC to work in
+  ec2_vpc_net:
+    cidr_block: '{{ vpc_cidr }}'
+    state: present
+    name: '{{ resource_prefix }}_setup'
+    resource_tags:
+      Name: '{{ resource_prefix }}_setup'
+  register: setup_vpc
+
+- set_fact:
+    vpc_id: '{{ setup_vpc.vpc.id }}'
+
+- name: create a subnet to use for creating an ec2 instance
+  ec2_vpc_subnet:
+    az: '{{ aws_region }}a'
+    tags: '{{ resource_prefix }}_setup'
+    vpc_id: '{{ setup_vpc.vpc.id }}'
+    cidr: '{{ subnet_cidr }}'
+    state: present
+    resource_tags:
+      Name: '{{ resource_prefix }}_setup'
+  register: setup_subnet
+
+- set_fact:
+    subnet_id: '{{ setup_subnet.subnet.id }}'
+
+- name: create a security group to use for creating an ec2 instance
+  ec2_group:
+    name: '{{ resource_prefix }}_setup'
+    description: 'created by Ansible integration tests'
+    state: present
+    vpc_id: '{{ setup_vpc.vpc.id }}'
+  register: setup_sg
+
+- set_fact:
+    sg_id: '{{ setup_sg.group_id }}'

@@ -1,0 +1,19 @@
+name: mylab
+
+topology:
+  nodes:
+    router1:
+      kind: cvx
+      image: docker.io/networkop/cx:4.3.0
+      runtime: docker
+      binds:
+        - router1/interfaces:/etc/network/interfaces.d/host-mounts
+    router2:
+      kind: linux
+      image: docker.io/frrouting/frr:v7.5.1
+      binds:
+        - router2/daemons:/etc/frr/daemons
+        - router2/frr.cfg:/etc/frr/frr.conf
+
+  links:
+    - endpoints: ["router1:swp12", "router2:eth1"]

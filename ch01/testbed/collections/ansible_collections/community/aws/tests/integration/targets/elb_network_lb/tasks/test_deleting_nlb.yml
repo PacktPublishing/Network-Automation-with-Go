@@ -1,0 +1,39 @@
+- block:
+
+  - name: destroy NLB with listener
+    elb_network_lb:
+      name: "{{ nlb_name }}"
+      subnets: "{{ nlb_subnets }}"
+      state: absent
+      listeners:
+        - Protocol: TCP
+          Port: 80
+          DefaultActions:
+            - Type: forward
+              TargetGroupName: "{{ tg_name }}"
+      wait: yes
+      wait_timeout: 300
+    register: nlb
+
+  - assert:
+      that:
+        - nlb.changed
+
+  - name: test idempotence
+    elb_network_lb:
+      name: "{{ nlb_name }}"
+      subnets: "{{ nlb_subnets }}"
+      state: absent
+      listeners:
+        - Protocol: TCP
+          Port: 80
+          DefaultActions:
+            - Type: forward
+              TargetGroupName: "{{ tg_name }}"
+      wait: yes
+      wait_timeout: 300
+    register: nlb
+
+  - assert:
+      that:
+        - not nlb.changed

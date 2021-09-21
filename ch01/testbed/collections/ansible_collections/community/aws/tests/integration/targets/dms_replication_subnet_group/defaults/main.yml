@@ -1,0 +1,2 @@
+dms_sg_identifier: "{{ resource_prefix }}-dms"
+dms_role_role_name: dms-vpc-role

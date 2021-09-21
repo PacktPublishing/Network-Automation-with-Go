@@ -1,0 +1,51 @@
+- name: Create SSH Key Pair for instance
+  amazon.aws.ec2_key:
+    name: "{{ ec2_resource_prefix }}-key"
+    region: "{{ ec2_region }}"
+  register: create_key
+
+- name: Save Private Key
+  ansible.builtin.copy:
+    content: "{{ create_key.key.private_key }}"
+    dest: "{{ playbook_dir }}/{{ ec2_resource_prefix }}-private.pem"
+    mode: '0400'
+  when: create_key.changed
+
+- name: Make sure S3 bucket for persistent storage of EC2 Key exists
+  amazon.aws.s3_bucket:
+    name: "{{ ec2_resource_prefix|lower }}.{{ s3_identifier|lower }}.private"
+    state: present
+    region: "{{ ec2_region }}"
+    tags:
+      Environment: "{{ ec2_environment }}"
+  retries: 4
+  delay: 15
+  register: s3_result
+  until:
+    - s3_result.failed == false
+
+- name: Store Private Key in S3
+  amazon.aws.aws_s3:
+    bucket: "{{ ec2_resource_prefix|lower }}.{{ s3_identifier|lower }}.private"
+    mode: put
+    object: "{{ ec2_resource_prefix }}-private.pem"
+    src: "{{ playbook_dir }}/{{ ec2_resource_prefix }}-private.pem"
+    encrypt: true
+    region: "{{ ec2_region }}"
+  when: create_key.changed
+
+- name: Save Private key from S3 Bucket when not generating it
+  amazon.aws.aws_s3:
+    bucket: "{{ ec2_resource_prefix|lower }}.{{ s3_identifier|lower }}.private"
+    mode: get
+    object: "{{ ec2_resource_prefix }}-private.pem"
+    dest: "{{ playbook_dir }}/{{ ec2_resource_prefix }}-private.pem"
+    encrypt: true
+    region: "{{ ec2_region }}"
+  when: not create_key.changed
+
+- name: Change Private key ownership, group and permissions
+  ansible.builtin.file:
+    path: "{{ playbook_dir }}/{{ ec2_resource_prefix }}-private.pem"
+    mode: '0400'
+  when: not create_key.changed

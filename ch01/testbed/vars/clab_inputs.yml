@@ -1,0 +1,5 @@
+# Containerlab specific
+clab_version: 0.18.0
+clab_dir: /usr/local/bin
+clab_base_url: https://github.com/srl-labs/containerlab/releases/download/
+clab_download_url: "{{ clab_base_url }}v{{ clab_version }}/containerlab_{{ clab_version }}_{{ GOOS }}_{{ GOARCH }}.tar.gz"

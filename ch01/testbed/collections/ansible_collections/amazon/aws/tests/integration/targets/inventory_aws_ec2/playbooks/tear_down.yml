@@ -1,0 +1,31 @@
+- set_fact:
+    vpc_cidr: '10.{{ 256 | random(seed=resource_prefix) }}.0.0/16'
+    subnet_cidr: '10.{{ 256 | random(seed=resource_prefix) }}.0.0/24'
+
+- name: remove setup security group
+  ec2_group:
+    name: '{{ resource_prefix }}_setup'
+    description: 'created by Ansible integration tests'
+    state: absent
+    vpc_id: '{{ vpc_id }}'
+  ignore_errors: yes
+
+- name: remove setup subnet
+  ec2_vpc_subnet:
+    az: '{{ aws_region }}a'
+    tags: '{{ resource_prefix }}_setup'
+    vpc_id: '{{ vpc_id }}'
+    cidr: '{{ subnet_cidr }}'
+    state: absent
+    resource_tags:
+      Name: '{{ resource_prefix }}_setup'
+  ignore_errors: yes
+
+- name: remove setup VPC
+  ec2_vpc_net:
+    cidr_block: '{{ vpc_cidr }}'
+    state: absent
+    name: '{{ resource_prefix }}_setup'
+    resource_tags:
+      Name: '{{ resource_prefix }}_setup'
+  ignore_errors: yes

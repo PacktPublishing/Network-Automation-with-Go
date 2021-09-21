@@ -1,0 +1,13 @@
+- name: Wait until we can SSH to the instance
+  ansible.builtin.wait_for:
+    host: "{{ item.public_ip_address }}"
+    port: 22
+    state: started
+
+- name: Print the public IP address
+  ansible.builtin.debug:
+    msg: "We are able to SSH to {{ item.public_ip_address }}"
+
+- name: Save access details
+  ansible.builtin.set_fact:
+    ssh_info: "ssh -i {{ ec2_resource_prefix }}-private.pem {{ ec2_username }}@{{ item.public_dns_name }}"

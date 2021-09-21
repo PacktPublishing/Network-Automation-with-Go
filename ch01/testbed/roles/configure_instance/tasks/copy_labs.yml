@@ -1,0 +1,7 @@
+- name: Copy file Lab folder with owner and permissions
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/lab"
+    dest: "/home/{{ ansible_user }}"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0755'

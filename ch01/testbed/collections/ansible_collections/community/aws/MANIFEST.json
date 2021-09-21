@@ -1,0 +1,35 @@
+{
+ "collection_info": {
+  "namespace": "community",
+  "name": "aws",
+  "version": "1.5.0",
+  "authors": [
+   "Ansible (https://github.com/ansible)"
+  ],
+  "readme": "README.md",
+  "tags": [
+   "community",
+   "aws",
+   "cloud",
+   "amazon"
+  ],
+  "description": null,
+  "license": [],
+  "license_file": "COPYING",
+  "dependencies": {
+   "amazon.aws": ">=1.5.0"
+  },
+  "repository": "https://github.com/ansible-collections/community.aws",
+  "documentation": "https://github.com/ansible-collections/community.aws/tree/main/docs",
+  "homepage": "https://github.com/ansible-collections/community.aws",
+  "issues": "https://github.com/ansible-collections/community.aws/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc"
+ },
+ "file_manifest_file": {
+  "name": "FILES.json",
+  "ftype": "file",
+  "chksum_type": "sha256",
+  "chksum_sha256": "be584c15ed934a9db57c6feacc2cb9f371f56025f0256e96d8b8000b933a4280",
+  "format": 1
+ },
+ "format": 1
+}

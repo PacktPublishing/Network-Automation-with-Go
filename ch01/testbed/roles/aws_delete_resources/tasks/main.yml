@@ -1,0 +1,24 @@
+- name: Grab VPC details
+  amazon.aws.ec2_vpc_net_info:
+    region: "{{ ec2_region }}"
+    filters:
+      "tag:Environment": "{{ ec2_environment }}"
+  register: all_vpcs
+
+- name: Delete Route Table
+  include_tasks: delete_rt_table.yml
+
+- name: Delete Internet Gateway
+  include_tasks: delete_igw.yml
+
+- name: Delete Subnet
+  include_tasks: delete_subnet.yml
+
+- name: Delete Security Group
+  include_tasks: delete_security_group.yml
+
+- name: Delete VPC
+  include_tasks: delete_vpc.yml
+
+- name: Delete SSH Key Pair
+  include_tasks: delete_key_pair.yml

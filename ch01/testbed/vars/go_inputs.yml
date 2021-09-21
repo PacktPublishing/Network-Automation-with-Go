@@ -1,0 +1,12 @@
+# Go specific
+go_version: 1.17.1
+HOME: "/home/{{ user }}"
+GOPATH: "{{ HOME }}/go"
+GOROOT: /usr/local/go
+GOPROXY: https://proxy.golang.org
+type:
+  x86_64: amd64
+  armv7l: armv7
+GOARCH: "{{ type[ansible_architecture] }}"
+GOOS: "{{ ansible_system | lower }}"
+go_download_url: "https://golang.org/dl/go{{ go_version }}.{{ GOOS }}-{{ GOARCH }}.tar.gz"

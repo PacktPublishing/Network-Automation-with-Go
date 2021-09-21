@@ -1,0 +1,20 @@
+# Fedora 34 x86_64 Cloud Base AMIs 
+# From: https://alt.fedoraproject.org/cloud/
+fedora_ami:
+  us_east_1: ami-09e08e82e8f927ba4
+  us_east_2: ami-04d6c97822332a0a6
+  us_west_1: ami-0d828c0715f284b51
+  eu_west_1: ami-03a2d2ea7d3d04d8c
+  eu_west_2: ami-034794b0310a1d8b7
+  eu_central_1: ami-0efd1b90025adc1a0 
+  ca_central_1: ami-005b80509885a0ea1
+  ap_northeast_1: ami-0eaac58066939c2ff
+  sa_east_1: ami-0231fa741ad2e0a08
+  ap_southeast_2: ami-0627bcdb0bea81d1b
+  ap_south_1: ami-01d3bd808e1fd393c
+  ap_northeast_2: ami-08b7a97648409e75b
+  ap_southeast_1: ami-0de1a1ee38e9d0267
+
+ec2_ami_id: "{{ fedora_ami[ec2_region | replace('-','_')] }}"
+ec2_name_tag: "{{ ec2_resource_prefix }}"
+ec2_username: fedora

@@ -1,0 +1,19 @@
+- name: Configure common Linux stuff
+  include_tasks: common.yml
+
+- name: Install Go
+  include_tasks: install_go.yml
+
+- name: Install Docker
+  include_tasks: install_docker.yml
+
+- name: Copy Labs folder
+  include_tasks: copy_labs.yml
+
+- name: Install Containerlab
+  include_tasks: install_clab.yml
+
+- name: Reverse Systemd configuration to use cgroup v1
+  include_tasks: cgroup.yml
+  when:
+  - ansible_distribution == "Fedora" and ansible_distribution_major_version >= '31'

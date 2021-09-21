@@ -1,0 +1,250 @@
+---
+# Run through the different ways we can enable/change encryption
+# Enable (check_mode)
+# Enable
+# Idempotency - compared to ID (idempotency)
+# Idempotency - compared to ID
+# Idempotency - compared to Alias (idempotency)
+# Idempotency - compared to Alias
+# Idempotency - compared to ARN (idempotency)
+# Idempotency - compared to ARN
+# Disable (check_mode)
+# Disable
+#
+# Known issue:
+# - key_id needs to be in the same form as is already set to return changed=False
+#
+- name: 'Enable encryption using {{ key_type }} (CHECK_MODE)'
+  check_mode: yes
+  kinesis_stream:
+    name: '{{ kinesis_stream_name }}'
+    encryption_state: 'enabled'
+    encryption_type: 'KMS'
+    key_id: '{{ kinesis_key }}'
+  register: result
+- name: 'Assert state is changed when enabling encryption (CHECK_MODE)'
+  assert:
+    that:
+    - result is success
+    - result is changed
+
+- name: 'Enable encryption using {{ key_type }}'
+  kinesis_stream:
+    name: '{{ kinesis_stream_name }}'
+    encryption_state: 'enabled'
+    encryption_type: 'KMS'
+    key_id: '{{ kinesis_key }}'
+  register: result
+- name: 'Assert that state is changed when enabling encryption'
+  assert:
+    that:
+    - result is success
+    - result is changed
+    - result.encryption_type == 'KMS'
+    - result.key_id in kms_cmk_1
+    - result.open_shards_count == 1
+    - result.retention_period_hours == 48
+    - result.stream_arn == kinesis_stream_arn
+    - result.stream_name == kinesis_stream_name
+    - result.stream_status == 'ACTIVE'
+    - result.tags == kinesis_stream_tags_2
+
+- name: 'Re-Enable encryption using {{ key_type }} (CHECK_MODE)'
+  kinesis_stream:
+    name: '{{ kinesis_stream_name }}'
+    encryption_state: 'enabled'
+    encryption_type: 'KMS'
+    key_id: '{{ kinesis_key }}'
+  check_mode: True
+  register: result
+- name: 'Assert that state is not changed when enabling encryption'
+  assert:
+    that:
+    - result is success
+    - result is not changed
+    - result.encryption_type == 'KMS'
+    - result.key_id in kms_cmk_1
+    - result.open_shards_count == 1
+    - result.retention_period_hours == 48
+    - result.stream_arn == kinesis_stream_arn
+    - result.stream_name == kinesis_stream_name
+    - result.stream_status == 'ACTIVE'
+    - result.tags == kinesis_stream_tags_2
+
+- name: 'Re-Enable encryption using {{ key_type }}'
+  kinesis_stream:
+    name: '{{ kinesis_stream_name }}'
+    encryption_state: 'enabled'
+    encryption_type: 'KMS'
+    key_id: '{{ kinesis_key }}'
+  register: result
+- name: 'Assert that state is not changed when enabling encryption'
+  assert:
+    that:
+    - result is success
+    - result is not changed
+    - result.encryption_type == 'KMS'
+    - result.key_id in kms_cmk_1
+    - result.open_shards_count == 1
+    - result.retention_period_hours == 48
+    - result.stream_arn == kinesis_stream_arn
+    - result.stream_name == kinesis_stream_name
+    - result.stream_status == 'ACTIVE'
+    - result.tags == kinesis_stream_tags_2
+
+- name: 'Test encryption idempotency comparing {{ key_type }} and ID (CHECK_MODE)'
+  check_mode: yes
+  kinesis_stream:
+    name: '{{ kinesis_stream_name }}'
+    encryption_state: 'enabled'
+    encryption_type: 'KMS'
+    key_id: '{{ kinesis_key_id }}'
+  register: result
+- name: 'Assert state is not changed when comparing {{ key_id }} and ID (CHECK_MODE)'
+  assert:
+    that:
+    - result is success
+    - result is not changed
+  ignore_errors: yes
+
+- name: 'Test encryption idempotency comparing {{ key_type }} and ID'
+  kinesis_stream:
+    name: '{{ kinesis_stream_name }}'
+    encryption_state: 'enabled'
+    encryption_type: 'KMS'
+    key_id: '{{ kinesis_key_id }}'
+  register: result
+- name: 'Assert that state is not changed when comparing {{ key_type }} and ID'
+  assert:
+    that:
+    - result is not changed
+  ignore_errors: yes
+- name: 'Assert expected return values'
+  assert:
+    that:
+    - result is success
+    - result.encryption_type == 'KMS'
+    - result.key_id in kms_cmk_1
+    - result.open_shards_count == 1
+    - result.retention_period_hours == 48
+    - result.stream_arn == kinesis_stream_arn
+    - result.stream_name == kinesis_stream_name
+    - result.stream_status == 'ACTIVE'
+    - result.tags == kinesis_stream_tags_2
+
+
+- name: 'Test encryption idempotency comparing {{ key_type }} and Alias (CHECK_MODE)'
+  check_mode: yes
+  kinesis_stream:
+    name: '{{ kinesis_stream_name }}'
+    encryption_state: 'enabled'
+    encryption_type: 'KMS'
+    key_id: '{{ kinesis_key_alias }}'
+  register: result
+- name: 'Assert state is not changed when comparing {{ key_type }} and Alias (CHECK_MODE)'
+  assert:
+    that:
+    - result is success
+    - result is not changed
+  ignore_errors: yes
+
+- name: 'Test encryption idempotency comparing {{ key_type }} and Alias'
+  kinesis_stream:
+    name: '{{ kinesis_stream_name }}'
+    encryption_state: 'enabled'
+    encryption_type: 'KMS'
+    key_id: '{{ kinesis_key_alias }}'
+  register: result
+- name: 'Assert that state is not changed when comparing {{ key_type }} and Alias'
+  assert:
+    that:
+    - result is not changed
+  ignore_errors: yes
+- name: 'Assert expected return values'
+  assert:
+    that:
+    - result is success
+    - result.encryption_type == 'KMS'
+    - result.key_id in kms_cmk_1
+    - result.open_shards_count == 1
+    - result.retention_period_hours == 48
+    - result.stream_arn == kinesis_stream_arn
+    - result.stream_name == kinesis_stream_name
+    - result.stream_status == 'ACTIVE'
+    - result.tags == kinesis_stream_tags_2
+
+- name: 'Test encryption idempotency comparing {{ key_type }} and ARN (CHECK_MODE)'
+  check_mode: yes
+  kinesis_stream:
+    name: '{{ kinesis_stream_name }}'
+    encryption_state: 'enabled'
+    encryption_type: 'KMS'
+    key_id: '{{ kinesis_key_arn }}'
+  register: result
+- name: 'Assert state is not changed when comparing {{ key_type }} and ARN (CHECK_MODE)'
+  assert:
+    that:
+    - result is success
+    - result is not changed
+  ignore_errors: yes
+
+- name: 'Test encryption idempotency comparing {{ key_type }} and ARN'
+  kinesis_stream:
+    name: '{{ kinesis_stream_name }}'
+    encryption_state: 'enabled'
+    encryption_type: 'KMS'
+    key_id: '{{ kinesis_key_arn }}'
+  register: result
+- name: 'Assert that state is not changed when comparing {{ key_type }} and ARN'
+  assert:
+    that:
+    - result is not changed
+  ignore_errors: yes
+- name: 'Assert expected return values'
+  assert:
+    that:
+    - result is success
+    - result.encryption_type == 'KMS'
+    - result.key_id in kms_cmk_1
+    - result.open_shards_count == 1
+    - result.retention_period_hours == 48
+    - result.stream_arn == kinesis_stream_arn
+    - result.stream_name == kinesis_stream_name
+    - result.stream_status == 'ACTIVE'
+    - result.tags == kinesis_stream_tags_2
+
+- name: 'Disable encryption (CHECK_MODE)'
+  kinesis_stream:
+    name: '{{ kinesis_stream_name }}'
+    encryption_state: 'disabled'
+    encryption_type: 'KMS'
+    # XXX Oddity of Kinesis - This needs to match the existing setting
+    key_id: '{{ kinesis_key_arn }}'
+  register: result
+  check_mode: yes
+- name: 'Assert state is changed when disabling encryption (CHECK_MODE)'
+  assert:
+    that:
+    - result is success
+    - result is changed
+
+- name: 'Disable encryption'
+  kinesis_stream:
+    name: '{{ kinesis_stream_name }}'
+    encryption_state: 'disabled'
+    encryption_type: 'KMS'
+    # XXX Oddity of Kinesis - This needs to match the existing setting
+    key_id: '{{ kinesis_key_arn }}'
+  register: result
+- name: 'Assert state is changed when disabling encryption'
+  assert:
+    that:
+    - result is success
+    - result is changed
+    - result.encryption_type == 'NONE'
+    - result.open_shards_count == 1
+    - result.retention_period_hours == 48
+    - result.stream_arn == kinesis_stream_arn
+    - result.stream_name == kinesis_stream_name
+    - result.stream_status == 'ACTIVE'
+    - result.tags == kinesis_stream_tags_2
