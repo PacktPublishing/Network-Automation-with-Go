@@ -1,13 +1,13 @@
 package ping_test
 
 import (
-	"testing"
 	"github.com/PacktPublishing/Network-Automation-with-Go/ch02/ping"
+	"testing"
 )
 
 func TestSend(t *testing.T) {
 	cases := []struct {
-		want   string
+		want string
 	}{
 		{want: "pong"},
 	}

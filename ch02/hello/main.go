@@ -7,11 +7,11 @@ const F = 42
 func main() {
 
 	if Version != "" {
-		fmt.Printf("Version: %s\n", Version)
+		fmt.Printf("Version: %q\n", Version)
 	}
 
 	if GitCommit != "" {
-		fmt.Printf("Git Commit: %s\n", GitCommit)
+		fmt.Printf("Git Commit: %q\n", GitCommit)
 	}
 
 	fmt.Println("Hello World")
