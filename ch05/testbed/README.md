@@ -1,6 +1,8 @@
 # Setting Up a Testing Environment
 
-Some code examples in the later chapters interact with other systems—such as virtual network devices—which, for this book, we run as containers with [Docker]. Now, instead of asking you to install Docker on your computer to run these examples, we think is more practical for you to recreate the Linux environment we actually used to write and test the code examples in every chapter of this book, which comes with Docker and any other dependency already installed, so you can run the examples without a hitch. We want to make sure you have a pleasant experience running the examples. 
+You can run the Go code snippets in the first part of this book in the [Go Playground] or on your personal computer if you have already installed Go. 
+
+Code examples in chapters four and later might interact with other systems—such as virtual network devices—which, for this book, we run as containers with [Docker]. Now, instead of asking you to install Docker on your computer to run these examples, we think is more practical for you to recreate the Linux environment we actually used to write and test the code examples in every chapter of this book, which comes with Docker and any other dependency already installed, so you can run the examples without a hitch. We want to make sure you have a pleasant experience running the examples.
 
 ## What Is a Testing Environment?
 
