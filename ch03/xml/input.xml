@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<routers>
+  <router>
+    <hostname>router1.example.com</hostname>
+    <ip>192.0.2.1</ip>
+    <asn>64512</asn>
+  </router>
+  <router>
+    <hostname>router2.example.com</hostname>
+    <ip>198.51.100.1</ip>
+    <asn>65535</asn>
+  </router>
+</routers>
