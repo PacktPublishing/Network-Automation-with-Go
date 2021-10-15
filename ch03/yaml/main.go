@@ -23,12 +23,12 @@ func main() {
 		panic(err)
 	}
 	defer file.Close()
-	src := yaml.NewDecoder(file)
+	d := yaml.NewDecoder(file)
 	
 	var inv Inventory
-	// Decode reads the next YAML-encoded value from its
-	// input and stores it in the value pointed to by v.
-	err = src.Decode(&inv)
+
+	// Decode YAML from the source and store it in the value pointed to by inv.
+	err = d.Decode(&inv)
 	if err != nil {
 		panic(err)
 	}

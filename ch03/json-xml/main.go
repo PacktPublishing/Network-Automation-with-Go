@@ -3,7 +3,9 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 
+	"encoding/xml"
 	"encoding/json"
 )
 
@@ -18,12 +20,12 @@ type Inventory struct {
 }
 
 func main() {
-	file, err := os.Open("input.json")
+	src, err := os.Open("input.json")
 	if err != nil {
 		panic(err)
 	}
-	defer file.Close()
-	d := json.NewDecoder(file)
+	defer src.Close()
+	d := json.NewDecoder(src)
 
 	var inv Inventory
 
@@ -33,5 +35,15 @@ func main() {
 		panic(err)
 	}
 
-	fmt.Printf("%+v\n", inv)
+	// Now we can write inv to a destination in a different format.
+	var dest strings.Builder
+
+	e := xml.NewEncoder(&dest)
+	err = e.Encode(&inv)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Printf("%+v\n", dest.String())
+
 }

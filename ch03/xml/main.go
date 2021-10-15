@@ -23,12 +23,12 @@ func main() {
 		panic(err)
 	}
 	defer file.Close()
-	src := xml.NewDecoder(file)
+	d := xml.NewDecoder(file)
 
 	var inv Inventory
-	// Decode reads the next XML-encoded value from its
-	// input and stores it in the value pointed to by v.
-	err = src.Decode(&inv)
+
+	// Decode XML from the source and store it in the value pointed to by inv.
+	err = d.Decode(&inv)
 	if err != nil {
 		panic(err)
 	}
