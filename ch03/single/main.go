@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"sync"
 	"time"
 
 	"github.com/scrapli/scrapligo/driver/base"
@@ -86,18 +85,5 @@ func main() {
 		panic(err)
 	}
 
-	var wg sync.WaitGroup
-
-	for _, v := range inv.Routers {
-		wg.Add(1)
-
-		// It's KEY to make a copy of v. Closures (nested functions)
-		// have access to the parent variables, so the value of v is un predictable otherwise.
-		go func(r Router) {
-			defer wg.Done()
-			getVersion(r)
-		}(v)
-
-	}
-	wg.Wait()
+	getVersion(inv.Routers[0])
 }
