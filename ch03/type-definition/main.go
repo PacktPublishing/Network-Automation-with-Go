@@ -7,7 +7,7 @@ import (
 
 func main() {
 	// type int, size 8 bytes on a 64-bit machine
-	a := 123
+	a := -1
 
 	// unsigned 32-bit integer, size 4 bytes
 	var b uint32
