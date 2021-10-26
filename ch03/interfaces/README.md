@@ -7,6 +7,24 @@
 
 ## Outputs
 
+### Devices
+
+```bash
+# show version | i time
+csr1000v-1 uptime is 1 hour, 25 minutes
+Uptime for this control processor is 1 hour, 27 minutes
+```
+
+```bash
+# show version | i time
+  BIOS compile time:  
+  NXOS compile time:  12/22/2019 2:00:00 [12/22/2019 14:00:37]
+Kernel uptime is 6 day(s), 6 hour(s), 0 minute(s), 38 second(s)
+```
+
+### Program
+
+
 ```bash
 Hostname: sandbox-iosxe-latest-1.cisco.com
 Hardware: [CSR1000V]

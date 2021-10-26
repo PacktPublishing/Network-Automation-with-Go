@@ -8,7 +8,7 @@ import (
 	"github.com/scrapli/scrapligo/driver/core"
 )
 
-type Router struct {
+type NetworkDevice struct {
 	Hostname  string
 	Platform  string
 	Username  string
@@ -17,10 +17,10 @@ type Router struct {
 }
 
 type Inventory struct {
-	Routers []Router
+	Devices []NetworkDevice
 }
 
-func getUptime(r Router) {
+func getUptime(r NetworkDevice) (string, error) {
 	d, err := core.NewCoreDriver(
 		r.Hostname,
 		r.Platform,
@@ -31,28 +31,25 @@ func getUptime(r Router) {
 	)
 
 	if err != nil {
-		fmt.Printf("failed to create driver for %s: %+v\n", r.Hostname, err)
-		return
+		return "", fmt.Errorf("failed to create driver for %s: %w", r.Hostname, err)
 	}
 
 	err = d.Open()
 	if err != nil {
-		fmt.Printf("failed to open driver for %s: %+v\n", r.Hostname, err)
-		return
+		return "", fmt.Errorf("failed to open driver for %s: %w", r.Hostname, err)
 	}
 	defer d.Close()
 
 	rs, err := d.SendCommand("show version")
 	if err != nil {
-		fmt.Printf("failed to send command for %s: %+v\n", r.Hostname, err)
-		return
+		return "", fmt.Errorf("failed to send command for %s: %w", r.Hostname, err)
 	}
 
 	parsedOut, err := rs.TextFsmParse(r.Platform + "_show_version.textfsm")
 	if err != nil {
-		fmt.Printf("failed to parse command for %s: %+v\n", r.Hostname, err)
-		return
+		return "", fmt.Errorf("failed to parse command for %s: %w", r.Hostname, err)
 	}
+
 	uptime := "N/A"
 
 	switch r.Platform {
@@ -63,7 +60,7 @@ func getUptime(r Router) {
 	default:
 	}
 
-	fmt.Printf("Hostname: %s\nUptime: %s\n\n", r.Hostname, uptime)
+	return fmt.Sprintf("Hostname: %s\nUptime: %s\n", r.Hostname, uptime), nil
 }
 
 func parseIOS(s string) (u string) {
@@ -99,14 +96,14 @@ func parseNXOS(s string) (u string) {
 }
 
 func main() {
-	ios := Router{
+	ios := NetworkDevice{
 		Hostname:  "sandbox-iosxe-latest-1.cisco.com",
 		Platform:  "cisco_iosxe",
 		Username:  "developer",
 		Password:  "C1sco12345",
 		StrictKey: false,
 	}
-	nxos := Router{
+	nxos := NetworkDevice{
 		Hostname:  "sandbox-nxos-1.cisco.com",
 		Platform:  "cisco_nxos",
 		Username:  "admin",
@@ -115,11 +112,14 @@ func main() {
 	}
 
 	inv := Inventory{
-		Routers: []Router{ios, nxos},
+		Devices: []NetworkDevice{ios, nxos},
 	}
 
-	for _, v := range inv.Routers {
-		getUptime(v)
+	for _, v := range inv.Devices {
+		s, err := getUptime(v)
+		if err != nil {
+			fmt.Printf("[ERROR]: %s\n", err.Error())
+		}
+		fmt.Println(s)
 	}
-
 }
