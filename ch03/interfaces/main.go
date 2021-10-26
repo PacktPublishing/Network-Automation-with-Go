@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	//"strconv"
 	"strings"
 
 	"github.com/scrapli/scrapligo/driver/base"
@@ -50,49 +51,41 @@ func getUptime(r NetworkDevice) (string, error) {
 		return "", fmt.Errorf("failed to parse command for %s: %w", r.Hostname, err)
 	}
 
-	uptime := "N/A"
+
+	symbol := "s"
 
 	switch r.Platform {
 	case "cisco_iosxe":
-		uptime = parseIOS(parsedOut[0]["UPTIME"].(string))
+		symbol = "s"
 	case "cisco_nxos":
-		uptime = parseNXOS(parsedOut[0]["UPTIME"].(string))
+		symbol = "(s)"
 	default:
 	}
 
+	// Split uptime string in Hour, Day, Minute, etc. on a slice
+	slc := strings.Split(parsedOut[0]["UPTIME"].(string), ",")
+	
+	m := make(map[string]string)
+	for _, item := range slc {
+		// Divide the number from the item
+		spl := strings.Split(strings.TrimSpace(item), " ")
+
+		// Remove 's', '(s)', tec.
+		nos := strings.TrimRight(spl[1], symbol)
+
+		m[nos] = spl[0]
+	}
+
+	// day, _ := strconv.Atoi(m["day"])
+	// hour, _ := strconv.Atoi(m["hour"])
+	// min, _ := strconv.Atoi(m["minute"])
+    // un := 24 * 60 * day + 60 * hour + min 
+	// fmt.Printf("INT: %v\n", un)
+
+	uptime := fmt.Sprintf("Day: %v, Hour: %v, Minute: %v\n",
+	m["day"], m["hour"], m["minute"])
+
 	return fmt.Sprintf("Hostname: %s\nUptime: %s\n", r.Hostname, uptime), nil
-}
-
-func parseIOS(s string) (u string) {
-	slc := strings.Split(s, ",")
-	m := make(map[string]string)
-	for _, item := range slc {
-		spl := strings.Split(strings.TrimSpace(item), " ")
-
-		nos := strings.TrimRight(spl[1], "s")
-
-		m[nos] = spl[0]
-
-	}
-	return fmt.Sprintf("Day: %v, Hour: %v, Minute: %v\n",
-		m["day"], m["hour"], m["minute"])
-
-}
-
-func parseNXOS(s string) (u string) {
-	slc := strings.Split(s, ",")
-	m := make(map[string]string)
-	for _, item := range slc {
-		spl := strings.Split(strings.TrimSpace(item), " ")
-
-		nos := strings.TrimRight(spl[1], "(s)")
-
-		m[nos] = spl[0]
-
-	}
-	return fmt.Sprintf("Day: %v, Hour: %v, Minute: %v\n",
-		m["day"], m["hour"], m["minute"])
-
 }
 
 func main() {
