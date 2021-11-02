@@ -39,4 +39,16 @@ func main() {
 
 	// Full header -> prints [10100000 00000010]
 	fmt.Printf("%08b\n", b)
+
+	// We are only interested if a TCP SYN flag has been set
+	tcpSynFlag := (b[14] & 0x02) != 0
+
+	// Shift the header length right and drop any low-order bits
+	parsedHeaderWords := b[13] >> 4
+
+	// prints "TCP Flag is set: true"
+	fmt.Printf("TCP Flag is set: %t\n", tcpSynFlag)
+
+	// prints "TCP header words: 5"
+	fmt.Printf("TCP header words: %d\n", parsedHeaderWords)
 }
