@@ -1,0 +1,21 @@
+Value UPTIME ((\d+\s\w+.s.,?\s?){4})
+Value LAST_REBOOT_REASON (.+)
+Value VERSION (\d+.\d+(.+)?)
+Value BOOT_IMAGE (.*)
+Value HARDWARE (\w+)
+Value HOSTNAME (.*)
+Value SERIAL (\w+)
+
+Start
+  ^\s+(NXOS: version|system:\s+version)\s+${VERSION}\s*$$
+  ^\s+(NXOS|kickstart)\s+image\s+file\s+is:\s+${BOOT_IMAGE}\s*$$
+  ^\s+cisco\s+${HARDWARE}\s+[cC]hassis
+  ^\s+cisco\s+Nexus\d+\s+${HARDWARE}
+  # Cisco N5K platform
+  ^\s+cisco\s+Nexus\s+${HARDWARE}\s+[cC]hassis
+  ^\s+Device\s+name:\s+${HOSTNAME}$$
+  ^\s+cisco\s+.+-${HARDWARE}\s*
+  # Nexus intel platform uses Board ID as serial/license
+  ^\s*Processor\s[Bb]oard\sID\s+${SERIAL}$$
+  ^Kernel\s+uptime\s+is\s+${UPTIME}
+  ^\s+Reason:\s${LAST_REBOOT_REASON} -> Record

@@ -1,0 +1,2 @@
+Host *.cisco.com
+  PreferredAuthentications password

@@ -1,0 +1,14 @@
+{
+  "router": [
+    {
+      "hostname": "router1.example.com",
+      "ip": "192.0.2.1",
+      "asn": 64512
+    },
+    {
+      "hostname": "router2.example.com",
+      "ip": "198.51.100.1",
+      "asn": 65535
+    }
+  ]
+}
