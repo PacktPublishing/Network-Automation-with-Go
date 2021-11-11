@@ -35,13 +35,13 @@ func run() error {
 		goto exception
 	}
 
-exception:
+	exception:
 	panic("Unexpected response")
 
-failure:
+	failure:
 	return fmt.Errorf("Failed to connect: %v", err)
 
-exit:
+	exit:
 	fmt.Println("Connection successful")
 	return nil
 }
