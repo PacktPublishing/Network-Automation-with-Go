@@ -1,2 +1,0 @@
----
-ip_set_name: '{{ resource_prefix }}-ipset'

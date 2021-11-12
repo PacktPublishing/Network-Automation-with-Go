@@ -1,2 +1,0 @@
-- name: 'Delete temporary pip environment'
-  include_tasks: cleanup.yml

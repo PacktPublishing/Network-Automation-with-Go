@@ -1,5 +1,0 @@
-# netaddr is needed for ansible.netcommon.ipv6
-netaddr
-virtualenv
-boto3 
-botocore
