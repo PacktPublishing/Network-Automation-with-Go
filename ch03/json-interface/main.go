@@ -21,6 +21,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	fmt.Printf("%v\n", empty)
 
 	for _, r := range empty["router"].([]interface{}) {
 		fmt.Printf("%v\n", r)
