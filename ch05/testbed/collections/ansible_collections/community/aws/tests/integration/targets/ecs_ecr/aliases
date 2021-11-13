@@ -1,5 +1,0 @@
-# reason: boto2
-unstable
-
-cloud/aws
-shippable/aws/group2

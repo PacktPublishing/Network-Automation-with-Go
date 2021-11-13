@@ -1,7 +1,0 @@
-# reason: missing-policy
-# ansible/ansible#36520 - attempts were made to get it running in CI but were unsuccessful
-unsupported
-
-cloud/aws
-
-efs_info
