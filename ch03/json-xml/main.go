@@ -5,18 +5,18 @@ import (
 	"os"
 	"strings"
 
-	"encoding/xml"
 	"encoding/json"
+	"encoding/xml"
 )
 
 type Router struct {
-	Hostname string `json:"hostname"`
-	IP       string `json:"ip"`
-	ASN      uint16 `json:"asn"`
+	Hostname string `json:"hostname" xml:"hostname"`
+	IP       string `json:"ip" xml:"ip"`
+	ASN      uint16 `json:"asn" xml:"asn"`
 }
 
 type Inventory struct {
-	Routers []Router `json:"router"`
+	Routers []Router `json:"router" xml:"router"`
 }
 
 func main() {
