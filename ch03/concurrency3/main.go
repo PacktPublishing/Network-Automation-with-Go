@@ -10,11 +10,6 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-func timeTrack(start time.Time) {
-	elapsed := time.Since(start)
-	fmt.Printf("This process took %s\n", elapsed)
-}
-
 type Router struct {
 	Hostname  string `yaml:"hostname"`
 	Platform  string `yaml:"platform"`
@@ -27,7 +22,7 @@ type Inventory struct {
 	Routers []Router `yaml:"router"`
 }
 
-func getVersion(r Router, out chan map[string]interface{}, last bool) {
+func getVersion(r Router, out chan map[string]interface{}) {
 	d, err := core.NewCoreDriver(
 		r.Hostname,
 		r.Platform,
@@ -64,25 +59,9 @@ func getVersion(r Router, out chan map[string]interface{}, last bool) {
 	parsedOut[0]["HOSTNAME"] = r.Hostname
 	out <- parsedOut[0]
 
-	if last {
-		close(out)
-	}
-
-}
-
-func printer(in chan map[string]interface{}) {
-
-	for out := range in {
-		fmt.Printf("Hostname: %s\nHardware: %s\nSW Version: %s\nUptime: %s\n\n",
-			out["HOSTNAME"], out["HARDWARE"],
-			out["VERSION"], out["UPTIME"])
-	}
 }
 
 func main() {
-	// To time this process
-	defer timeTrack(time.Now())
-
 	src, err := os.Open("input.yml")
 	if err != nil {
 		panic(err)
@@ -99,10 +78,20 @@ func main() {
 
 	ch := make(chan map[string]interface{})
 
-	for i, v := range inv.Routers {
-		go getVersion(v, ch, i == len(inv.Routers)-1)
+	for _, v := range inv.Routers {
+		go getVersion(v, ch)
 	}
 
-	printer(ch)
-
+	for {
+		select {
+		case out := <-ch:
+			fmt.Printf("Hostname: %s\nHardware: %s\nSW Version: %s\nUptime: %s\n\n",
+				out["HOSTNAME"], out["HARDWARE"],
+				out["VERSION"], out["UPTIME"])
+		case <-time.After(5 * time.Second):
+			close(ch)
+			fmt.Println("Timeout")
+			os.Exit(0)
+		}
+	}
 }
