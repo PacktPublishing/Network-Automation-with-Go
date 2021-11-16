@@ -3,6 +3,7 @@ Value UPTIME (.+?)
 Value LOCATION (\S+)
 Value HARDWARE (.+)
 Value BUILD_HOST (\S+)
+Value LABEL (\S+)
 
 Start
   ^Cisco.+Software.+Version\s+${VERSION}
@@ -30,6 +31,7 @@ Build_Info
   ^\s+Workspace\s+:\s\S+
   ^\s+Version\s+:
   ^\s+Location\s+:\s${LOCATION}
+  ^\s+Label\s+:\s${LABEL}
   ^\s*$$ -> Start
   ^.* -> Error
 

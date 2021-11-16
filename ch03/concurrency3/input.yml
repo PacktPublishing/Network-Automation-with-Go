@@ -10,3 +10,9 @@ router:
   strictkey: false
   username: admin
   password: Admin_1234!
+
+- hostname: sandbox-iosxr-1.cisco.com
+  platform: cisco_iosxr
+  strictkey: false
+  username: admin
+  password: C1sco12345

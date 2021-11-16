@@ -61,6 +61,7 @@ func getVersion(r Router, out chan map[string]interface{}, last bool) {
 		return
 	}
 
+	parsedOut[0]["HOSTNAME"] = r.Hostname
 	out <- parsedOut[0]
 
 	if last {
