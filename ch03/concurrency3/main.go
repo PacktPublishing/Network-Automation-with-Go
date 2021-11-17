@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
-	"time"
+	"sync"
 
 	"github.com/scrapli/scrapligo/driver/base"
 	"github.com/scrapli/scrapligo/driver/core"
@@ -22,7 +22,9 @@ type Inventory struct {
 	Routers []Router `yaml:"router"`
 }
 
-func getVersion(r Router, out chan map[string]interface{}) {
+func getVersion(r Router, out chan map[string]interface{}, wg *sync.WaitGroup) {
+	defer wg.Done()
+
 	d, err := core.NewCoreDriver(
 		r.Hostname,
 		r.Platform,
@@ -61,6 +63,14 @@ func getVersion(r Router, out chan map[string]interface{}) {
 
 }
 
+func printer(in chan map[string]interface{}) {
+	for out := range in {
+		fmt.Printf("Hostname: %s\nHardware: %s\nSW Version: %s\nUptime: %s\n\n",
+			out["HOSTNAME"], out["HARDWARE"],
+			out["VERSION"], out["UPTIME"])
+	}
+}
+
 func main() {
 	src, err := os.Open("input.yml")
 	if err != nil {
@@ -78,20 +88,14 @@ func main() {
 
 	ch := make(chan map[string]interface{})
 
+	go printer(ch)
+
+	var wg sync.WaitGroup
 	for _, v := range inv.Routers {
-		go getVersion(v, ch)
+		wg.Add(1)
+		go getVersion(v, ch, &wg)
 	}
 
-	for {
-		select {
-		case out := <-ch:
-			fmt.Printf("Hostname: %s\nHardware: %s\nSW Version: %s\nUptime: %s\n\n",
-				out["HOSTNAME"], out["HARDWARE"],
-				out["VERSION"], out["UPTIME"])
-		case <-time.After(5 * time.Second):
-			close(ch)
-			fmt.Println("Timeout")
-			os.Exit(0)
-		}
-	}
+	wg.Wait()
+	close(ch)
 }
