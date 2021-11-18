@@ -90,8 +90,8 @@ func main() {
 				out["VERSION"], out["UPTIME"])
 		case <-time.After(5 * time.Second):
 			close(ch)
-			fmt.Println("Timeout")
-			os.Exit(0)
+			fmt.Println("Timeout: 5 seconds")
+			return
 		}
 	}
 }
