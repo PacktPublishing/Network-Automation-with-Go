@@ -30,7 +30,9 @@ type Inventory struct {
 
 var m sync.RWMutex = sync.RWMutex{}
 
-func getVersion(r Router, out chan map[string]interface{}, last bool, isAlive map[string]bool) {
+func getVersion(r Router, out chan map[string]interface{}, wg *sync.WaitGroup, isAlive map[string]bool) {
+	defer wg.Done()
+	
 	d, err := core.NewCoreDriver(
 		r.Hostname,
 		r.Platform,
@@ -71,16 +73,11 @@ func getVersion(r Router, out chan map[string]interface{}, last bool, isAlive ma
 		return
 	}
 
+	parsedOut[0]["HOSTNAME"] = r.Hostname
 	out <- parsedOut[0]
-
-	if last {
-		close(out)
-	}
-
 }
 
 func printer(in chan map[string]interface{}) {
-
 	for out := range in {
 		fmt.Printf("Hostname: %s\nHardware: %s\nSW Version: %s\nUptime: %s\n\n",
 			out["HOSTNAME"], out["HARDWARE"],
@@ -110,16 +107,20 @@ func main() {
 
 	isAlive := make(map[string]bool)
 
-	for i, v := range inv.Routers {
-		go getVersion(v, ch, i == len(inv.Routers)-1, isAlive)
-	}
+	go printer(ch)
 
-	printer(ch)
+	var wg sync.WaitGroup
+	for _, v := range inv.Routers {
+		wg.Add(1)
+		go getVersion(v, ch, &wg, isAlive)
+	}
+	wg.Wait()
 
 	m.RLock()
 	for name, v := range isAlive {
 		fmt.Printf("Router %s is alive: %t\n", name, v)
 	}
 	m.RUnlock()
-
+	
+	close(ch)
 }
