@@ -18,22 +18,32 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	var loopback *net.Interface
 	for _, l := range links {
-
 		if l.Name == "lo" {
 			loopback = l
 			log.Printf("Name: %s, Flags:%s\n", l.Name, l.Flags)
 		}
 	}
 
-	_ = conn.LinkDown(loopback)
-	loopback, _ = conn.LinkByIndex(loopback.Index)
+	err = conn.LinkDown(loopback)
+	if err != nil {
+		log.Fatal(err)
+	}
+	loopback, err = conn.LinkByIndex(loopback.Index)
+	if err != nil {
+		log.Fatal(err)
+	}
 	log.Printf("Name: %s, Flags:%s\n", loopback.Name, loopback.Flags)
 
-	_ = conn.LinkUp(loopback)
-	loopback, _ = conn.LinkByIndex(loopback.Index)
+	err = conn.LinkUp(loopback)
+	if err != nil {
+		log.Fatal(err)
+	}
+	loopback, err = conn.LinkByIndex(loopback.Index)
+	if err != nil {
+		log.Fatal(err)
+	}
 	log.Printf("Name: %s, Flags:%s\n", loopback.Name, loopback.Flags)
 
 }
