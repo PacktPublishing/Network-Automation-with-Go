@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"log"
 	"net"
 	"os"
@@ -23,64 +24,64 @@ type vip struct {
 	netlink *rtnl.Conn
 	intf    *net.Interface
 	raw     *raw.Conn
-	cancelF context.CancelFunc
 }
 
-func newVIP(ip string, intf *net.Interface, nl *rtnl.Conn, raw *raw.Conn, cf context.CancelFunc) *vip {
+func newVIP(ip string, intf *net.Interface, nl *rtnl.Conn, raw *raw.Conn) *vip {
 	return &vip{
 		IP:      ip,
 		intf:    intf,
 		netlink: nl,
 		raw:     raw,
-		cancelF: cf,
 	}
 }
 
-func (c *vip) setupSigHandlers() {
+func setupSigHandlers(cancel context.CancelFunc) {
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGTERM, syscall.SIGINT, syscall.SIGHUP)
 
 	go func() {
 		sig := <-sigs
-		log.Printf("Received syscall:%+v", sig)
-		c.cancelF()
+		log.Printf("Received syscall: %+v", sig)
+		cancel()
 	}()
 
 }
 
-func (c *vip) removeVIP() {
+func (c *vip) removeVIP() error {
 	err := c.netlink.AddrDel(c.intf, rtnl.MustParseAddr(c.IP))
 	if err != nil {
-		log.Printf("could not del address: %s", err)
+		return fmt.Errorf("could not del address: %s", err)
 	}
+	return nil
 }
 
-func (c *vip) addVIP() {
+func (c *vip) addVIP() error {
 	err := c.netlink.AddrAdd(c.intf, rtnl.MustParseAddr(c.IP))
 	if err != nil {
-		log.Printf("could not add address: %s", err)
-		c.cancelF()
+		return fmt.Errorf("could not add address: %s", err)
 	}
+	return nil
 }
 
-func (c *vip) emitFrame(frame *ethernet.Frame) {
+func (c *vip) emitFrame(frame *ethernet.Frame) error {
 	b, err := frame.MarshalBinary()
 	if err != nil {
-		log.Printf("failed to marshal frame: %s", err)
-		return
+		return fmt.Errorf("error serializing frame: %s", err)
 	}
 
 	addr := &raw.Addr{HardwareAddr: ethernet.Broadcast}
 	if _, err := c.raw.WriteTo(b, addr); err != nil {
-		log.Printf("emitFrame failed: %s", err)
+		return fmt.Errorf("emitFrame failed: %s", err)
 	}
+
 	log.Printf("GARP sent: %+v", frame)
+	return nil
 }
 
-func (c *vip) sendGARP() {
+func (c *vip) sendGARP() error {
 	ip, _, err := net.ParseCIDR(c.IP)
 	if err != nil {
-		log.Printf("error parsing IP: %s", err)
+		return fmt.Errorf("error parsing IP: %s", err)
 	}
 
 	arpPayload, err := arp.NewPacket(
@@ -91,12 +92,12 @@ func (c *vip) sendGARP() {
 		ip,                  //dstIP
 	)
 	if err != nil {
-		log.Printf("arpPayload: %s", err)
+		return fmt.Errorf("error building ARP packet: %s", err)
 	}
 
 	arpBinary, err := arpPayload.MarshalBinary()
 	if err != nil {
-		log.Printf("arpBinary: %s", err)
+		return fmt.Errorf("error serializing ARP packet: %s", err)
 	}
 
 	ethFrame := &ethernet.Frame{
@@ -106,8 +107,7 @@ func (c *vip) sendGARP() {
 		Payload:     arpBinary,
 	}
 
-	c.emitFrame(ethFrame)
-
+	return c.emitFrame(ethFrame)
 }
 
 func main() {
@@ -136,20 +136,30 @@ func main() {
 	defer raw.Close()
 
 	ctx, cancel := context.WithCancel(context.Background())
+	setupSigHandlers(cancel)
 
-	v := newVIP(VIP1, netIntf, rtnl, raw, cancel)
+	v := newVIP(VIP1, netIntf, rtnl, raw)
 
-	v.setupSigHandlers()
-
-	v.addVIP()
+	err = v.addVIP()
+	if err != nil {
+		log.Fatalf("failed to add VIP: %s", err)
+	}
 
 	for {
 		select {
 		case <-ctx.Done():
-			v.removeVIP()
+			if err := v.removeVIP(); err != nil {
+				log.Fatalf("failed to remove VIP: %s", err)
+			}
+
+			log.Printf("Cleanup complete")
 			return
 		default:
-			v.sendGARP()
+			if err := v.sendGARP(); err != nil {
+				log.Printf("failed to send GARP: %s", err)
+				cancel()
+			}
+
 			time.Sleep(3 * time.Second)
 		}
 	}
