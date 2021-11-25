@@ -26,15 +26,6 @@ type vip struct {
 	raw     *raw.Conn
 }
 
-func newVIP(ip string, intf *net.Interface, nl *rtnl.Conn, raw *raw.Conn) *vip {
-	return &vip{
-		IP:      ip,
-		intf:    intf,
-		netlink: nl,
-		raw:     raw,
-	}
-}
-
 func setupSigHandlers(cancel context.CancelFunc) {
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGTERM, syscall.SIGINT, syscall.SIGHUP)
@@ -74,7 +65,7 @@ func (c *vip) emitFrame(frame *ethernet.Frame) error {
 		return fmt.Errorf("emitFrame failed: %s", err)
 	}
 
-	log.Printf("GARP sent: %+v", frame)
+	log.Println("GARP sent")
 	return nil
 }
 
@@ -138,7 +129,12 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	setupSigHandlers(cancel)
 
-	v := newVIP(VIP1, netIntf, rtnl, raw)
+	v := &vip{
+		IP:      VIP1,
+		intf:    netIntf,
+		netlink: rtnl,
+		raw:     raw,
+	}
 
 	err = v.addVIP()
 	if err != nil {
