@@ -2,16 +2,24 @@ package main
 
 import (
 	"bufio"
-	"flag"
-	"fmt"
 	"io"
 	"log"
-	"net"
 	"net/http"
 	"strings"
 )
 
 const wiresharkDB = "https://gitlab.com/wireshark/wireshark/-/raw/master/manuf"
+
+var macDB map[string]string
+
+func init() {
+	var err error
+	macDB, err = download()
+	if err != nil {
+		log.Fatalf("Failed to download mac DB: %s", err)
+	}
+	log.Printf("macDB initialized")
+}
 
 func parse(db io.Reader, out map[string]string) map[string]string {
 
@@ -51,43 +59,4 @@ func download() (map[string]string, error) {
 	parse(resp.Body, result)
 
 	return result, nil
-}
-
-func lookup(mac net.HardwareAddr) (string, error) {
-	db, err := download()
-	if err != nil {
-		return "", err
-	}
-
-	oui := mac[:3].String()
-	oui = strings.ToUpper(oui)
-
-	result, ok := db[oui]
-	if !ok {
-		return "", fmt.Errorf("OUI %s not found in the DB", oui)
-	}
-
-	return result, nil
-}
-
-func main() {
-	macStr := flag.String("mac", "", "MAC address")
-	flag.Parse()
-
-	if *macStr == "" {
-		log.Fatal("Please provide -mac flag")
-	}
-
-	mac, err := net.ParseMAC(*macStr)
-	if err != nil {
-		log.Fatalf("Failed to parse MAC: %s", err)
-	}
-
-	log.Printf("MAC: %s", mac.String())
-
-	vendor, err := lookup(mac)
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Printf("Vendor: %s", vendor)
 }
