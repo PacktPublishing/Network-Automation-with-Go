@@ -27,10 +27,10 @@ func receive(udpConn net.UDPConn) {
 			log.Printf("Out of order packet seq/expected: %d/%d", p.SeqNum, nextSeq)
 			nextSeq = p.SeqNum
 		}
-		log.Printf("Current TS: %d", time.Now().Unix())
+		log.Printf("Current TS: %d", time.Now().UnixNano())
 		log.Printf("Received TS: %d", p.SendTS)
-		latency := time.Unix(0, time.Now().Unix()-p.SendTS)
-		log.Printf("E2E latency: %d ns", latency.Nanosecond())
+		latency := time.Now().UnixNano() - p.SendTS
+		log.Printf("E2E latency: %d ns", latency)
 
 		nextSeq++
 	}
@@ -70,7 +70,7 @@ func main() {
 			log.Printf("Sending probe %d", seq)
 			p := &probe{
 				SeqNum: seq,
-				SendTS: time.Now().Unix(),
+				SendTS: time.Now().UnixNano(),
 			}
 
 			if err := udpConn.SetWriteDeadline(time.Now().Add(retryTimeout)); err != nil {
