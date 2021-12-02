@@ -13,6 +13,7 @@ func receive(udpConn net.UDPConn) {
 	log.Printf("Starting UDP ping receive loop")
 
 	var nextSeq uint8
+	var lost int
 	for {
 
 		p := &probe{}
@@ -21,17 +22,19 @@ func receive(udpConn net.UDPConn) {
 			return
 		}
 
+		log.Printf("Received probe %d", p.SeqNum)
 		if p.SeqNum < nextSeq {
 			log.Printf("Out of order packet seq/expected: %d/%d", p.SeqNum, nextSeq)
+			lost -= 1
 		} else if p.SeqNum > nextSeq {
 			log.Printf("Out of order packet seq/expected: %d/%d", p.SeqNum, nextSeq)
+			lost += int(p.SeqNum - nextSeq)
 			nextSeq = p.SeqNum
 		}
-		log.Printf("Current TS: %d", time.Now().UnixNano())
-		log.Printf("Received TS: %d", p.SendTS)
-		latency := time.Now().UnixNano() - p.SendTS
-		log.Printf("E2E latency: %d ns", latency)
 
+		latency := time.Now().UnixMilli() - p.SendTS
+		log.Printf("E2E latency: %d ms", latency)
+		log.Printf("Lost packets: %d", lost)
 		nextSeq++
 	}
 }
@@ -70,7 +73,7 @@ func main() {
 			log.Printf("Sending probe %d", seq)
 			p := &probe{
 				SeqNum: seq,
-				SendTS: time.Now().UnixNano(),
+				SendTS: time.Now().UnixMilli(),
 			}
 
 			if err := udpConn.SetWriteDeadline(time.Now().Add(retryTimeout)); err != nil {
