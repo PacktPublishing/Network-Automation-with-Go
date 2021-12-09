@@ -23,7 +23,7 @@ type vip struct {
 	IP      string
 	netlink *rtnl.Conn
 	intf    *net.Interface
-	raw     *raw.Conn
+	l2Sock  *raw.Conn
 }
 
 func setupSigHandlers(cancel context.CancelFunc) {
@@ -61,7 +61,7 @@ func (c *vip) emitFrame(frame *ethernet.Frame) error {
 	}
 
 	addr := &raw.Addr{HardwareAddr: ethernet.Broadcast}
-	if _, err := c.raw.WriteTo(b, addr); err != nil {
+	if _, err := c.l2Sock.WriteTo(b, addr); err != nil {
 		return fmt.Errorf("emitFrame failed: %s", err)
 	}
 
@@ -120,11 +120,11 @@ func main() {
 	}
 	defer rtnl.Close()
 
-	raw, err := raw.ListenPacket(netIntf, uint16(ethernet.EtherTypeARP), nil)
+	ethSocket, err := raw.ListenPacket(netIntf, uint16(ethernet.EtherTypeARP), nil)
 	if err != nil {
 		log.Printf("failed to ListenPacket: %v", err)
 	}
-	defer raw.Close()
+	defer ethSocket.Close()
 
 	ctx, cancel := context.WithCancel(context.Background())
 	setupSigHandlers(cancel)
@@ -133,7 +133,7 @@ func main() {
 		IP:      VIP1,
 		intf:    netIntf,
 		netlink: rtnl,
-		raw:     raw,
+		l2Sock:  ethSocket,
 	}
 
 	err = v.addVIP()
