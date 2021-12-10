@@ -41,12 +41,12 @@ func main() {
 	port := flag.Int("port", listenPort, "UDP listen port")
 	flag.Parse()
 
-	listenAddr := &net.UDPAddr{
+	listenSoc := &net.UDPAddr{
 		IP:   net.ParseIP(listenAddr),
 		Port: *port,
 	}
 
-	udpConn, err := net.ListenUDP("udp", listenAddr)
+	udpConn, err := net.ListenUDP("udp", listenSoc)
 	if err != nil {
 		log.Fatalf("failed to listen on %s:%d: %s", listenAddr, *port, err)
 	}
