@@ -87,8 +87,9 @@ func main() {
 	http.HandleFunc("/check", check)
 
 	log.Println("Starting web server at 0.0.0.0:8080")
-	//server := http.Server{Addr: "0.0.0.0:8080", Handler: nil}
-	//log.Fatal(server.ListenAndServe())
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	//srv := http.Server{Addr: "0.0.0.0:8080", Handler: nil}
+	srv := http.Server{Addr: "0.0.0.0:8080"}
+	log.Fatal(srv.ListenAndServe())
+	//log.Fatal(http.ListenAndServe(":8080", nil))
 
 }
