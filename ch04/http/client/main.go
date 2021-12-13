@@ -2,11 +2,17 @@ package main
 
 import (
 	"flag"
-	"fmt"
-	"io/ioutil"
+	"os"
+	"io"
 	"log"
 	"net/http"
+	"net/url"
 )
+
+// Examples:
+// go run main.go -lookup ip 1.1.1.1
+// go run main.go -lookup mac 68b5.99fc.d1df
+// go run main.go -lookup domain networkautomation.com
 
 func main() {
 	server := flag.String("server", "127.0.0.1:8080", "HTTP server URL")
@@ -14,8 +20,8 @@ func main() {
 	lookup := flag.String("lookup", "domain", "lookup data [mac, ip, domain]")
 	flag.Parse()
 
-	if flag.NArg() != 1 {
-		log.Println("must provide exactly one query argyment")
+	if flag.NArg() != 1 && !(*check) {
+		log.Println("must provide exactly one query argument")
 		return
 	}
 
@@ -24,28 +30,18 @@ func main() {
 		path = "/check"
 	}
 
-	url := fmt.Sprintf("http://%s%s", *server, path)
-
-	req, err := http.NewRequest(http.MethodGet, url, nil)
+	addr, err := url.Parse("http://" + *server + path)
 	if err != nil {
 		log.Fatal(err)
 	}
+	params := url.Values{}
+	params.Add(*lookup, flag.Arg(0))
+	addr.RawQuery = params.Encode()
 
-	q := req.URL.Query()
-	q.Add(*lookup, flag.Arg(0))
-	req.URL.RawQuery = q.Encode()
-
-	res, err := http.DefaultClient.Do(req)
+	res, err := http.DefaultClient.Get(addr.String())
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer res.Body.Close()
-
-	body, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Println(string(body))
-
+	io.Copy(os.Stdout, res.Body)
 }

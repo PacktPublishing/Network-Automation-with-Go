@@ -69,19 +69,18 @@ func lookup(w http.ResponseWriter, req *http.Request) {
 		case "domain":
 			response = getWhois(v)
 		default:
-			response = fmt.Sprintf("query %q not recognised", k)
+			response = fmt.Sprintf("query %q not recognized", k)
 		}
 
 	}
-
 	fmt.Fprintf(w, response)
-
 }
 
 func check(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprintf(w, "OK\n")
 }
 
+// Run with 'go run *.go'
 func main() {
 	http.HandleFunc("/lookup", lookup)
 

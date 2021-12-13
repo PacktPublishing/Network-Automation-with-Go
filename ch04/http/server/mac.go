@@ -22,7 +22,6 @@ func init() {
 }
 
 func parse(db io.Reader, out map[string]string) map[string]string {
-
 	lineScanner := bufio.NewScanner(db)
 	for lineScanner.Scan() {
 		if len(lineScanner.Bytes()) < 1 {
