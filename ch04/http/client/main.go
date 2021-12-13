@@ -15,7 +15,7 @@ import (
 // go run main.go -lookup domain networkautomation.com
 
 func main() {
-	server := flag.String("server", "127.0.0.1:8080", "HTTP server URL")
+	server := flag.String("server", "localhost:8080", "HTTP server URL")
 	check := flag.Bool("check", false, "healthcheck flag")
 	lookup := flag.String("lookup", "domain", "lookup data [mac, ip, domain]")
 	flag.Parse()
