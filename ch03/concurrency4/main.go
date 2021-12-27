@@ -57,15 +57,15 @@ func getVersion(r Router, out chan map[string]interface{}, wg *sync.WaitGroup, i
 	rs, err := d.SendCommand("show version")
 	if err != nil {
 		fmt.Printf("failed to send command for %s: %+v\n", r.Hostname, err)
-		//m.Lock()
+		m.Lock()
 		isAlive[r.Hostname] = false
-		//m.Unlock()
+		m.Unlock()
 		return
 	}
 
-	//m.Lock()
+	m.Lock()
 	isAlive[r.Hostname] = true
-	//m.Unlock()
+	m.Unlock()
 
 	parsedOut, err := rs.TextFsmParse(r.Platform + "_show_version.textfsm")
 	if err != nil {
