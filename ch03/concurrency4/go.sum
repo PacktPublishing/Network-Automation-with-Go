@@ -1,10 +1,14 @@
 github.com/carlmontanari/difflibgo v0.0.0-20210718170140-424f52054f94/go.mod h1:+3MuSIeC3qmdSesR12cTLeb47R/Vvo+bHdB6hC5HShk=
 github.com/creack/pty v1.1.11 h1:07n33Z8lZxZ2qwegKbObQohDhXDQxiMMz1NOUGYlesw=
 github.com/creack/pty v1.1.11/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
+github.com/creack/pty v1.1.17 h1:QeVUsEDNrLBW4tMgZHvxy18sKtr6VI492kBhUfhDJNI=
+github.com/creack/pty v1.1.17/go.mod h1:MOBLtS5ELjhRRrroQr9kyvTxUAFNvYEK993ew/Vr4O4=
 github.com/google/go-cmp v0.5.6 h1:BKbKCqvP6I+rmFHt06ZmyQtvB8xAkWdhFyr0ZUNZcxQ=
 github.com/google/go-cmp v0.5.6/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=
 github.com/scrapli/scrapligo v0.1.1 h1:kSRgH81a4Ec0qM3VK1AHp3/C0mvPclVteQMaW7vTXS0=
 github.com/scrapli/scrapligo v0.1.1/go.mod h1:0tHMgiCiTuWOvSceFU7klaYThXvRZNvc7k+fmQrtH54=
+github.com/scrapli/scrapligo v0.1.2 h1:LCGJH8EZChPFr2AxrqFjAjCY9ImeLTBWey6axkzEyUs=
+github.com/scrapli/scrapligo v0.1.2/go.mod h1:0tHMgiCiTuWOvSceFU7klaYThXvRZNvc7k+fmQrtH54=
 github.com/sirikothe/gotextfsm v1.0.0 h1:4kKwbUziG9G+31PfLY+vI3FzYK/kcByh4ndT3NyPMkc=
 github.com/sirikothe/gotextfsm v1.0.0/go.mod h1:CJYqpTg9u5VPCoD0VEl9E68prCIiWQD8m457k098DdQ=
 golang.org/x/crypto v0.0.0-20210421170649-83a5a9bb288b h1:7mWr3k41Qtv8XlltBkDkl8LoP3mpSgBW8BUoxtEdbXg=
