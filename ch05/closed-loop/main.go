@@ -120,12 +120,13 @@ func printer(in chan map[string]interface{}) {
 }
 
 func save(in chan Config) {
-	layout := "01-02-2021_15-04-05-EST"
+	layout := "01-02-2006_15-04_EST"
 
 	for out := range in {
 		f, err := os.Create("backups/" + out.Device + "_" + out.Timestamp.Format(layout) + ".cfg")
 		if err != nil {
-			fmt.Printf("failed to create send 'show run' file for %s: %+v\n", out.Device, err)
+			fmt.Printf("failed to create 'show run' file for %s: %+v\n", out.Device, err)
+			return
 		}
 
 		_, err = io.WriteString(f, out.Running)

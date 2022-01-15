@@ -1,0 +1,4531 @@
+{
+ "data": {
+  "Cisco-IOS-XR-infra-syslog-cfg:syslog": {
+   "console-logging": {
+    "logging-level": "disable"
+   },
+   "host-name-prefix": "1.2.3.5"
+  },
+  "Cisco-IOS-XR-aaa-lib-cfg:aaa": {
+   "Cisco-IOS-XR-aaa-locald-cfg:usernames": {
+    "username": [
+     {
+      "ordering-index": 0,
+      "name": "root",
+      "usergroup-under-usernames": {
+       "usergroup-under-username": [
+        {
+         "name": "root-lr"
+        },
+        {
+         "name": "cisco-support"
+        }
+       ]
+      },
+      "secret": {
+       "type": "type10",
+       "secret10": "$6$XvYiZ/CdPNuK4Z/.$3/15yGC1Br2nlIy/AwZVNsl0BbD.XLbqAL2h8hR4CpBxM.ir4ZilYykiaTqMwe/EB6UySyH7ea/x09ajR6NXz."
+      }
+     },
+     {
+      "ordering-index": 1,
+      "name": "admin",
+      "usergroup-under-usernames": {
+       "usergroup-under-username": [
+        {
+         "name": "root-lr"
+        },
+        {
+         "name": "cisco-support"
+        }
+       ]
+      },
+      "secret": {
+       "type": "type10",
+       "secret10": "$6$vEaDc/Yt1OyU4c/.$v0lze75JluVDfcM6rgDlsFY3oMB6ODv6l5rgRnk3bFrvnzSFnoEIF.hcc1O/2.YxnAuRLSy7VQGmGedvoBlOp."
+      }
+     }
+    ]
+   },
+   "authorizations": {
+    "authorization": [
+     {
+      "type": "exec",
+      "listname": "default",
+      "method1": "local"
+     }
+    ]
+   },
+   "authentications": {
+    "authentication": [
+     {
+      "type": "login",
+      "listname": "default",
+      "method1": "local"
+     }
+    ]
+   }
+  },
+  "Cisco-IOS-XR-snmp-agent-cfg:snmp": {
+   "trap-hosts": {
+    "trap-host": [
+     {
+      "ip-address": "34.130.135.202",
+      "default-user-communities": {
+       "default-user-community": [
+        {
+         "community-name": "SachinAll",
+         "version": "1",
+         "basic-trap-types": 0,
+         "advanced-trap-types1": 0,
+         "advanced-trap-types2": 0
+        }
+       ]
+      }
+     }
+    ]
+   },
+   "administration": {
+    "default-communities": {
+     "default-community": [
+      {
+       "community-name": "SachinAll",
+       "priviledge": "read-only"
+      }
+     ]
+    }
+   },
+   "notification": {
+    "Cisco-IOS-XR-snmp-mib-rfmib-cfg:rf": {
+     "enable": [
+      null
+     ]
+    },
+    "Cisco-IOS-XR-ip-bfd-cfg:bfd": {
+     "enable": [
+      null
+     ]
+    },
+    "Cisco-IOS-XR-ipv4-bgp-cfg:bgp": {
+     "cisco-bgp4mib": {
+      "enable": [
+       null
+      ],
+      "up-down": [
+       null
+      ]
+     },
+     "bgp4mib": {
+      "enable": [
+       null
+      ],
+      "up-down": [
+       null
+      ]
+     }
+    },
+    "Cisco-IOS-XR-ip-ntp-cfg:ntp": {
+     "enable": [
+      null
+     ]
+    },
+    "Cisco-IOS-XR-snmp-ciscopkimib-traps-cfg:pki": [
+     null
+    ],
+    "Cisco-IOS-XR-infra-confcopymib-cfg:config-copy": {
+     "completion": [
+      null
+     ]
+    },
+    "Cisco-IOS-XR-ipv4-hsrp-cfg:hsrp": {
+     "enable": [
+      null
+     ]
+    },
+    "Cisco-IOS-XR-man-ipsla-cfg:ipsla": true,
+    "snmp": {
+     "enable": [
+      null
+     ],
+     "Cisco-IOS-XR-snmp-ifmib-cfg:link-up": [
+      null
+     ],
+     "Cisco-IOS-XR-snmp-ifmib-cfg:link-down": [
+      null
+     ],
+     "cold-start": [
+      null
+     ],
+     "warm-start": [
+      null
+     ],
+     "authentication": [
+      null
+     ]
+    },
+    "Cisco-IOS-XR-ipv4-vrrp-cfg:vrrp": {
+     "enable": [
+      null
+     ]
+    },
+    "Cisco-IOS-XR-flashmib-cfg:flash": {
+     "removal": [
+      null
+     ],
+     "insertion": [
+      null
+     ]
+    },
+    "Cisco-IOS-XR-crypto-mibs-ipsecflowmon-cfg:ip-sec": {
+     "tunnel-stop": [
+      null
+     ],
+     "tunnel-start": [
+      null
+     ]
+    },
+    "Cisco-IOS-XR-mpls-te-cfg:mpls-te": {
+     "up": [
+      null
+     ],
+     "down": [
+      null
+     ],
+     "reroute": [
+      null
+     ],
+     "reoptimize": [
+      null
+     ]
+    },
+    "Cisco-IOS-XR-config-mibs-cfg:config-man": {
+     "enable": [
+      null
+     ]
+    },
+    "Cisco-IOS-XR-snmp-entitymib-cfg:entity": {
+     "enable": [
+      null
+     ]
+    },
+    "Cisco-IOS-XR-mpls-te-cfg:mpls-frr": {
+     "enable": [
+      null
+     ],
+     "protected": [
+      null
+     ],
+     "unprotected": [
+      null
+     ]
+    },
+    "Cisco-IOS-XR-crypto-mibs-ipsecflowmon-cfg:isakmp": {
+     "tunnel-stop": [
+      null
+     ],
+     "tunnel-start": [
+      null
+     ]
+    },
+    "Cisco-IOS-XR-clns-isis-cfg:isis": {
+     "database-overflow": "false",
+     "manual-address-drops": "false",
+     "corrupted-lsp-detected": "false",
+     "attempt-to-exceed-max-sequence": "false",
+     "id-length-mismatch": "false",
+     "max-area-address-mismatch": "false",
+     "own-lsp-purge": "false",
+     "sequence-number-skip": "false",
+     "authentication-type-failure": "false",
+     "authentication-failure": "false",
+     "version-skew": "false",
+     "area-mismatch": "false",
+     "rejected-adjacency": "false",
+     "lsp-too-large-to-propagate": "false",
+     "originated-lsp-buffer-size-mismatch": "false",
+     "protocols-supported-mismatch": "false",
+     "adjacency-change": "false",
+     "lsp-error-detected": "false",
+     "all": "true"
+    },
+    "Cisco-IOS-XR-mpls-ldp-cfg:mpls-ldp": {
+     "session-up": [
+      null
+     ],
+     "session-down": [
+      null
+     ],
+     "init-session-threshold-exceeded": [
+      null
+     ]
+    },
+    "Cisco-IOS-XR-snmp-ciscosensormib-cfg:sensor": {
+     "enable": [
+      null
+     ]
+    },
+    "Cisco-IOS-XR-infra-rsi-cfg:selective-vrf-download": {
+     "role-change": [
+      null
+     ]
+    },
+    "Cisco-IOS-XR-snmp-syslogmib-cfg:syslog": {
+     "enable": [
+      null
+     ]
+    },
+    "Cisco-IOS-XR-infra-systemmib-cfg:system": {
+     "enable": [
+      null
+     ]
+    },
+    "Cisco-IOS-XR-ipv4-ospf-cfg:ospf": {
+     "lsa": {
+      "max-age-lsa": [
+       null
+      ],
+      "originate-lsa": [
+       null
+      ]
+     },
+     "error": {
+      "bad-packet": [
+       null
+      ],
+      "authentication-failure": [
+       null
+      ],
+      "config-error": [
+       null
+      ],
+      "virtual-bad-packet": [
+       null
+      ],
+      "virtual-authentication-failure": [
+       null
+      ],
+      "virtual-config-error": [
+       null
+      ]
+     },
+     "retransmit": {
+      "packet": [
+       null
+      ],
+      "virtual-packet": [
+       null
+      ]
+     },
+     "state-change": {
+      "interface": [
+       null
+      ],
+      "neighbor": [
+       null
+      ],
+      "virtual-interface": [
+       null
+      ],
+      "virtual-neighbor": [
+       null
+      ]
+     }
+    },
+    "Cisco-IOS-XR-mpls-te-cfg:mpls-te-p2mp": {
+     "up": [
+      null
+     ],
+     "down": [
+      null
+     ]
+    },
+    "Cisco-IOS-XR-ip-rsvp-cfg:rsvp": {
+     "enable": [
+      null
+     ],
+     "new-flow": [
+      null
+     ],
+     "lost-flow": [
+      null
+     ]
+    },
+    "Cisco-IOS-XR-tunnel-l2tun-proto-mibs-cfg:l2tun": {
+     "sessions": true,
+     "tunnel-up": true,
+     "tunnel-down": true,
+     "pseudowire-status": true
+    },
+    "Cisco-IOS-XR-l2vpn-cfg:vpls": {
+     "enable": [
+      null
+     ],
+     "status": [
+      null
+     ],
+     "full-clear": [
+      null
+     ],
+     "full-raise": [
+      null
+     ]
+    },
+    "Cisco-IOS-XR-aaa-diameter-base-mib-cfg:diametermib": {
+     "peerup": true,
+     "peerdown": true,
+     "protocolerror": true,
+     "permanentfail": true,
+     "transientfail": true
+    },
+    "Cisco-IOS-XR-l2vpn-cfg:l2vpn": {
+     "enable": [
+      null
+     ],
+     "vc-up": [
+      null
+     ],
+     "vc-down": [
+      null
+     ]
+    },
+    "Cisco-IOS-XR-mpls-vpn-cfg:mpls-l3vpn": {
+     "enable": [
+      null
+     ],
+     "vrf-up": [
+      null
+     ],
+     "vrf-down": [
+      null
+     ],
+     "max-threshold-cleared": [
+      null
+     ],
+     "max-threshold-exceeded": [
+      null
+     ],
+     "mid-threshold-exceeded": [
+      null
+     ],
+     "max-threshold-reissue-notification-time": 1
+    },
+    "Cisco-IOS-XR-snmp-bridgemib-cfg:bridge": {
+     "enable": [
+      null
+     ]
+    },
+    "Cisco-IOS-XR-ipv6-ospfv3-cfg:ospfv3": {
+     "error": {
+      "bad-packet": [
+       null
+      ],
+      "config-error": [
+       null
+      ],
+      "virtual-bad-packet": [
+       null
+      ]
+     },
+     "state-change": {
+      "interface": [
+       null
+      ],
+      "neighbor": [
+       null
+      ],
+      "virtual-interface": [
+       null
+      ],
+      "virtual-neighbor": [
+       null
+      ],
+      "restart": [
+       null
+      ],
+      "restart-virtual-helper": [
+       null
+      ]
+     }
+    },
+    "Cisco-IOS-XR-snmp-frucontrolmib-cfg:fru-control": {
+     "enable": [
+      null
+     ]
+    },
+    "Cisco-IOS-XR-subscriber-session-mon-mibs-cfg:subscriber-mib": {
+     "session-aggregate": {
+      "node": [
+       null
+      ],
+      "access-interface": [
+       null
+      ]
+     }
+    },
+    "Cisco-IOS-XR-ip-daps-mib-cfg:addresspool-mib": {
+     "low": true,
+     "high": true
+    },
+    "Cisco-IOS-XR-snmp-entityextmib-cfg:cisco-entity-ext": {
+     "enable": [
+      null
+     ]
+    },
+    "Cisco-IOS-XR-snmp-entstatemib-cfg:entity-state": {
+     "oper-status": [
+      null
+     ],
+     "switchover": [
+      null
+     ]
+    },
+    "Cisco-IOS-XR-infra-ceredundancymib-cfg:entity-redundancy": {
+     "enable": [
+      null
+     ],
+     "status": [
+      null
+     ],
+     "switchover": [
+      null
+     ]
+    }
+   }
+  },
+  "Cisco-IOS-XR-man-xml-ttyagent-cfg:xr-xml": {
+   "agent": {
+    "tty": {
+     "enable": [
+      null
+     ],
+     "iteration-size": 0
+    }
+   }
+  },
+  "Cisco-IOS-XR-man-xml-ttyagent-cfg:netconf": {
+   "agent": {
+    "tty": {
+     "enable": [
+      null
+     ]
+    }
+   }
+  },
+  "Cisco-IOS-XR-ipv4-bgp-cfg:bgp": {
+   "instance": [
+    {
+     "instance-name": "default",
+     "instance-as": [
+      {
+       "as": 0,
+       "four-byte-as": [
+        {
+         "as": 65503,
+         "bgp-running": [
+          null
+         ],
+         "default-vrf": {
+          "global": {
+           "router-id": "1.1.1.1",
+           "neighbor-logging-detail": [
+            null
+           ],
+           "global-afs": {
+            "global-af": [
+             {
+              "af-name": "ipv4-unicast",
+              "enable": [
+               null
+              ],
+              "sourced-networks": {
+               "sourced-network": [
+                {
+                 "network-addr": "10.10.10.0",
+                 "network-prefix": 24
+                }
+               ]
+              }
+             },
+             {
+              "af-name": "ipv6-unicast",
+              "enable": [
+               null
+              ]
+             }
+            ]
+           }
+          },
+          "bgp-entity": {
+           "session-groups": {
+            "session-group": [
+             {
+              "session-group-name": "sachin",
+              "create": [
+               null
+              ],
+              "remote-as": {
+               "as-xx": 0,
+               "as-yy": 100
+              },
+              "update-source-interface": "Loopback0"
+             }
+            ]
+           },
+           "neighbor-groups": {
+            "neighbor-group": [
+             {
+              "neighbor-group-name": "sachin",
+              "create": [
+               null
+              ],
+              "session-group-add-member": "sachin",
+              "neighbor-group-afs": {
+               "neighbor-group-af": [
+                {
+                 "af-name": "ipv4-unicast",
+                 "activate": [
+                  null
+                 ]
+                },
+                {
+                 "af-name": "ipv6-unicast",
+                 "activate": [
+                  null
+                 ]
+                }
+               ]
+              }
+             }
+            ]
+           },
+           "neighbors": {
+            "neighbor": [
+             {
+              "neighbor-address": "5.5.5.5",
+              "neighbor-group-add-member": "sachin"
+             }
+            ]
+           }
+          }
+         }
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "Cisco-IOS-XR-call-home-cfg:call-home": {
+   "active": [
+    null
+   ],
+   "contact-smart-licensing": true,
+   "profiles": {
+    "profile": [
+     {
+      "profile-name": "CiscoTAC-1",
+      "active": [
+       null
+      ],
+      "methods": {
+       "method": [
+        {
+         "method": "email",
+         "enable": false
+        },
+        {
+         "method": "http",
+         "enable": true
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  "Cisco-IOS-XR-ipv4-ospf-cfg:ospf": {
+   "processes": {
+    "process": [
+     {
+      "process-name": "1",
+      "default-vrf": {
+       "area-addresses": {
+        "area-area-id": [
+         {
+          "area-id": 100,
+          "area-scope": {
+           "authentication": {
+            "type": {
+             "authen-type": "keychain",
+             "keychain-authen-type": "keychain",
+             "keychain-name": "cisco"
+            }
+           },
+           "hello-interval": 2
+          }
+         }
+        ]
+       }
+      }
+     },
+     {
+      "process-name": "123",
+      "protocol-shutdown": "full"
+     },
+     {
+      "process-name": "1000",
+      "default-vrf": {
+       "area-addresses": {
+        "area-area-id": [
+         {
+          "area-id": 0,
+          "name-scopes": {
+           "name-scope": [
+            {
+             "interface-name": "Bundle-Ether40",
+             "cost-fallback": {
+              "cost": 65100,
+              "threshold": 200001
+             }
+            },
+            {
+             "interface-name": "GigabitEthernet0/0/0/2",
+             "cost": 100
+            }
+           ]
+          }
+         },
+         {
+          "area-id": 420,
+          "name-scopes": {
+           "name-scope": [
+            {
+             "interface-name": "Bundle-Ether42",
+             "cost-fallback": {
+              "cost": 2000,
+              "threshold": 10001
+             }
+            },
+            {
+             "interface-name": "Bundle-Ether43",
+             "cost-fallback": {
+              "cost": 2000,
+              "threshold": 10001
+             }
+            },
+            {
+             "interface-name": "Bundle-Ether44",
+             "cost-fallback": {
+              "cost": 2000,
+              "threshold": 10001
+             }
+            },
+            {
+             "interface-name": "Bundle-Ether45",
+             "cost-fallback": {
+              "cost": 2000,
+              "threshold": 20001
+             }
+            },
+            {
+             "interface-name": "Bundle-Ether46",
+             "cost-fallback": {
+              "cost": 2000,
+              "threshold": 20001
+             }
+            },
+            {
+             "interface-name": "Bundle-Ether47",
+             "cost-fallback": {
+              "cost": 2000,
+              "threshold": 20001
+             }
+            },
+            {
+             "interface-name": "Bundle-Ether48",
+             "cost-fallback": {
+              "cost": 2000,
+              "threshold": 10001
+             }
+            },
+            {
+             "interface-name": "Bundle-Ether49",
+             "cost-fallback": {
+              "cost": 2000,
+              "threshold": 10001
+             }
+            },
+            {
+             "interface-name": "Bundle-Ether50",
+             "cost-fallback": {
+              "cost": 2000,
+              "threshold": 20001
+             }
+            },
+            {
+             "interface-name": "Bundle-Ether51",
+             "cost-fallback": {
+              "cost": 2000,
+              "threshold": 20001
+             }
+            },
+            {
+             "interface-name": "Bundle-Ether52",
+             "cost-fallback": {
+              "cost": 2000,
+              "threshold": 20001
+             }
+            },
+            {
+             "interface-name": "Bundle-Ether53",
+             "cost-fallback": {
+              "cost": 2000,
+              "threshold": 20001
+             }
+            },
+            {
+             "interface-name": "Bundle-Ether54",
+             "cost-fallback": {
+              "cost": 2000,
+              "threshold": 10001
+             }
+            },
+            {
+             "interface-name": "Bundle-Ether55",
+             "cost-fallback": {
+              "cost": 2000,
+              "threshold": 10001
+             }
+            },
+            {
+             "interface-name": "Bundle-Ether56",
+             "cost-fallback": {
+              "cost": 2000,
+              "threshold": 20001
+             }
+            },
+            {
+             "interface-name": "Bundle-Ether73",
+             "cost-fallback": {
+              "cost": 200,
+              "threshold": 200001
+             }
+            },
+            {
+             "interface-name": "Bundle-Ether74",
+             "cost-fallback": {
+              "cost": 200,
+              "threshold": 200001
+             }
+            }
+           ]
+          }
+         }
+        ]
+       }
+      }
+     }
+    ]
+   }
+  },
+  "Cisco-IOS-XR-clns-isis-cfg:isis": {
+   "instances": {
+    "instance": [
+     {
+      "instance-name": "default",
+      "running": [
+       null
+      ],
+      "overload-bits": {
+       "overload-bit": [
+        {
+         "level": "not-set",
+         "overload-bit-mode": "startup-period",
+         "hippity-period": 360
+        }
+       ]
+      },
+      "is-type": "level1",
+      "nets": {
+       "net": [
+        {
+         "net-name": "49.0001.1111.1111.0000.00"
+        }
+       ]
+      },
+      "nsf": {
+       "flavor": "ietf-standard-nsf"
+      },
+      "log-adjacency-changes": [
+       null
+      ],
+      "lsp-generation-intervals": {
+       "lsp-generation-interval": [
+        {
+         "level": "not-set",
+         "maximum-wait": 20,
+         "initial-wait": 1,
+         "secondary-wait": 20
+        }
+       ]
+      },
+      "log-pdu-drops": [
+       null
+      ],
+      "lsp-refresh-intervals": {
+       "lsp-refresh-interval": [
+        {
+         "level": "not-set",
+         "interval": 65000
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  "Cisco-IOS-XR-policy-repository-cfg:routing-policy": {
+   "sets": {
+    "prefix-sets": {
+     "prefix-set": [
+      {
+       "set-name": "TEST",
+       "rpl-prefix-set": "prefix-set TEST\n  10.100.100.0/24,\n  172.19.127.200/29\nend-set\n"
+      },
+      {
+       "set-name": "JAN06",
+       "rpl-prefix-set": "prefix-set JAN06\n  172.16.10.0/30,\n  10.10.10.0/24\nend-set\n"
+      },
+      {
+       "set-name": "vrf-red",
+       "rpl-prefix-set": "prefix-set vrf-red\n  1.1.1.1/32\nend-set\n"
+      }
+     ]
+    }
+   }
+  },
+  "Cisco-IOS-XR-man-ems-cfg:grpc": {
+   "port": 57777,
+   "enable": [
+    null
+   ],
+   "address-family": "ipv4"
+  },
+  "Cisco-IOS-XR-ip-static-cfg:router-static": {
+   "default-vrf": {
+    "address-family": {
+     "vrfipv4": {
+      "vrf-unicast": {
+       "vrf-prefixes": {
+        "vrf-prefix": [
+         {
+          "prefix": "0.0.0.0",
+          "prefix-length": 0,
+          "vrf-route": {
+           "vrf-next-hop-table": {
+            "vrf-next-hop-next-hop-address": [
+             {
+              "next-hop-address": "10.10.20.254"
+             }
+            ]
+           }
+          }
+         },
+         {
+          "prefix": "10.230.0.0",
+          "prefix-length": 16,
+          "vrf-route": {
+           "vrf-next-hop-table": {
+            "vrf-next-hop-next-hop-address": [
+             {
+              "next-hop-address": "1.1.1.14",
+              "description": "PH1_Subnet"
+             }
+            ]
+           }
+          }
+         },
+         {
+          "prefix": "10.230.0.0",
+          "prefix-length": 17,
+          "vrf-route": {
+           "vrf-next-hop-table": {
+            "vrf-next-hop-next-hop-address": [
+             {
+              "next-hop-address": "1.1.1.14",
+              "description": "PH1_Subnet"
+             },
+             {
+              "next-hop-address": "1.1.1.15",
+              "description": "PH2_Subnet"
+             }
+            ]
+           }
+          }
+         },
+         {
+          "prefix": "192.0.2.16",
+          "prefix-length": 28,
+          "vrf-route": {
+           "vrf-next-hop-table": {
+            "vrf-next-hop-interface-name-next-hop-address": [
+             {
+              "interface-name": "FastEthernet0/0/0/1",
+              "next-hop-address": "192.0.2.10",
+              "tag": 10,
+              "description": "LAB",
+              "load-metric": 120
+             }
+            ]
+           }
+          }
+         }
+        ]
+       }
+      }
+     }
+    }
+   }
+  },
+  "Cisco-IOS-XR-ip-domain-cfg:ip-domain": {
+   "vrfs": {
+    "vrf": [
+     {
+      "vrf-name": "default",
+      "name": "cisco.com",
+      "servers": {
+       "server": [
+        {
+         "order": 7,
+         "server-address": "8.8.4.4"
+        },
+        {
+         "order": 8,
+         "server-address": "8.8.8.8"
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  "Cisco-IOS-XR-man-netconf-cfg:netconf-yang": {
+   "agent": {
+    "ssh": {
+     "enable": [
+      null
+     ]
+    }
+   }
+  },
+  "Cisco-IOS-XR-shellutil-cfg:host-names": {
+   "host-name": "iosxr"
+  },
+  "Cisco-IOS-XR-infra-rsi-cfg:vrfs": {
+   "vrf": [
+    {
+     "vrf-name": "OM",
+     "create": [
+      null
+     ],
+     "afs": {
+      "af": [
+       {
+        "af-name": "ipv4",
+        "saf-name": "unicast",
+        "topology-name": "default",
+        "create": [
+         null
+        ],
+        "Cisco-IOS-XR-ipv4-bgp-cfg:bgp": {
+         "import-route-targets": {
+          "route-targets": {
+           "route-target": [
+            {
+             "type": "as",
+             "as-or-four-byte-as": [
+              {
+               "as-xx": 0,
+               "as": 1,
+               "as-index": 1,
+               "stitching-rt": 0
+              }
+             ]
+            }
+           ]
+          }
+         },
+         "export-route-targets": {
+          "route-targets": {
+           "route-target": [
+            {
+             "type": "as",
+             "as-or-four-byte-as": [
+              {
+               "as-xx": 0,
+               "as": 1,
+               "as-index": 1,
+               "stitching-rt": 0
+              }
+             ]
+            }
+           ]
+          }
+         }
+        }
+       }
+      ]
+     }
+    }
+   ]
+  },
+  "Cisco-IOS-XR-tty-server-cfg:tty": {
+   "tty-lines": {
+    "tty-line": [
+     {
+      "name": "console",
+      "exec": {
+       "timeout": {
+        "minutes": 0,
+        "seconds": 0
+       }
+      },
+      "general": {
+       "absolute-timeout": 0
+      },
+      "Cisco-IOS-XR-tty-management-cfg:connection": {
+       "session-timeout": {
+        "timeout": 0,
+        "direction": "in"
+       }
+      }
+     },
+     {
+      "name": "default",
+      "exec": {
+       "timeout": {
+        "minutes": 0,
+        "seconds": 0
+       }
+      },
+      "general": {
+       "absolute-timeout": 0
+      },
+      "Cisco-IOS-XR-tty-management-cfg:connection": {
+       "session-timeout": {
+        "timeout": 0,
+        "direction": "in"
+       }
+      }
+     }
+    ]
+   }
+  },
+  "Cisco-IOS-XR-ipv4-mfwd-cfg:mfwd": {
+   "default-context": {
+    "ipv4": {
+     "multicast-forwarding": [
+      null
+     ],
+     "interfaces": {
+      "interface": [
+       {
+        "interface-name": "Bundle-Ether19",
+        "enable-on-interface": true
+       }
+      ]
+     }
+    }
+   }
+  },
+  "Cisco-IOS-XR-ifmgr-cfg:interface-configurations": {
+   "interface-configuration": [
+    {
+     "active": "act",
+     "interface-name": "BVI220",
+     "interface-virtual": [
+      null
+     ],
+     "shutdown": [
+      null
+     ]
+    },
+    {
+     "active": "act",
+     "interface-name": "BVI221",
+     "interface-virtual": [
+      null
+     ],
+     "shutdown": [
+      null
+     ]
+    },
+    {
+     "active": "act",
+     "interface-name": "BVI225",
+     "interface-virtual": [
+      null
+     ],
+     "shutdown": [
+      null
+     ]
+    },
+    {
+     "active": "act",
+     "interface-name": "BVI991",
+     "interface-virtual": [
+      null
+     ],
+     "description": "DNP | TEST_MGMT",
+     "Cisco-IOS-XR-ipv4-io-cfg:ipv4-network": {
+      "addresses": {
+       "primary": {
+        "address": "172.19.127.201",
+        "netmask": "255.255.255.248"
+       }
+      }
+     },
+     "Cisco-IOS-XR-infra-statsd-cfg:statistics": {
+      "load-interval": 30
+     }
+    },
+    {
+     "active": "act",
+     "interface-name": "Loopback0",
+     "interface-virtual": [
+      null
+     ],
+     "Cisco-IOS-XR-ipv4-io-cfg:ipv4-network": {
+      "addresses": {
+       "primary": {
+        "address": "1.1.1.1",
+        "netmask": "255.255.255.255"
+       }
+      }
+     }
+    },
+    {
+     "active": "act",
+     "interface-name": "Loopback10",
+     "interface-virtual": [
+      null
+     ],
+     "Cisco-IOS-XR-ipv4-io-cfg:ipv4-network": {
+      "addresses": {
+       "primary": {
+        "address": "192.168.10.1",
+        "netmask": "255.255.255.0"
+       }
+      }
+     }
+    },
+    {
+     "active": "act",
+     "interface-name": "Loopback20",
+     "interface-virtual": [
+      null
+     ],
+     "description": "another_testing",
+     "Cisco-IOS-XR-ipv4-io-cfg:ipv4-network": {
+      "addresses": {
+       "primary": {
+        "address": "192.168.20.1",
+        "netmask": "255.255.255.0"
+       }
+      }
+     }
+    },
+    {
+     "active": "act",
+     "interface-name": "Loopback25",
+     "interface-virtual": [
+      null
+     ],
+     "description": "my loopback interface"
+    },
+    {
+     "active": "act",
+     "interface-name": "Loopback99",
+     "interface-virtual": [
+      null
+     ],
+     "description": "loopback99 on iosxr",
+     "Cisco-IOS-XR-ipv4-io-cfg:ipv4-network": {
+      "addresses": {
+       "primary": {
+        "address": "192.168.0.99",
+        "netmask": "255.255.255.0"
+       }
+      }
+     }
+    },
+    {
+     "active": "act",
+     "interface-name": "Loopback100",
+     "interface-virtual": [
+      null
+     ],
+     "description": "***MERGE LOOPBACK 100****",
+     "Cisco-IOS-XR-ipv4-io-cfg:ipv4-network": {
+      "addresses": {
+       "primary": {
+        "address": "1.1.1.100",
+        "netmask": "255.255.255.255"
+       }
+      }
+     }
+    },
+    {
+     "active": "act",
+     "interface-name": "Loopback101",
+     "interface-virtual": [
+      null
+     ],
+     "Cisco-IOS-XR-ipv4-io-cfg:ipv4-network": {
+      "addresses": {
+       "primary": {
+        "address": "192.168.101.1",
+        "netmask": "255.255.255.0"
+       }
+      }
+     }
+    },
+    {
+     "active": "act",
+     "interface-name": "Loopback103",
+     "interface-virtual": [
+      null
+     ],
+     "Cisco-IOS-XR-ipv4-io-cfg:ipv4-network": {
+      "addresses": {
+       "primary": {
+        "address": "192.168.103.1",
+        "netmask": "255.255.255.0"
+       }
+      }
+     }
+    },
+    {
+     "active": "act",
+     "interface-name": "Loopback111",
+     "interface-virtual": [
+      null
+     ],
+     "description": "test loopback111",
+     "shutdown": [
+      null
+     ]
+    },
+    {
+     "active": "act",
+     "interface-name": "Loopback112",
+     "interface-virtual": [
+      null
+     ],
+     "description": "Configured by NETCONF Invalid"
+    },
+    {
+     "active": "act",
+     "interface-name": "Loopback123",
+     "interface-virtual": [
+      null
+     ],
+     "description": "test"
+    },
+    {
+     "active": "act",
+     "interface-name": "Loopback200",
+     "interface-virtual": [
+      null
+     ],
+     "description": "***MERGE LOOPBACK 200****",
+     "Cisco-IOS-XR-ipv4-io-cfg:ipv4-network": {
+      "addresses": {
+       "primary": {
+        "address": "1.1.1.200",
+        "netmask": "255.255.255.255"
+       }
+      }
+     }
+    },
+    {
+     "active": "act",
+     "interface-name": "Loopback555",
+     "interface-virtual": [
+      null
+     ],
+     "description": "Configured by Salt-Nornir using NETCONF"
+    },
+    {
+     "active": "act",
+     "interface-name": "Loopback1000",
+     "interface-virtual": [
+      null
+     ]
+    },
+    {
+     "active": "act",
+     "interface-name": "Loopback1234",
+     "interface-virtual": [
+      null
+     ]
+    },
+    {
+     "active": "act",
+     "interface-name": "tunnel-ip12445",
+     "interface-virtual": [
+      null
+     ],
+     "description": "Testsimple2-39533-1044",
+     "bandwidth": "300000",
+     "Cisco-IOS-XR-ipv4-io-cfg:ipv4-network": {
+      "addresses": {
+       "primary": {
+        "address": "10.220.45.41",
+        "netmask": "255.255.255.252"
+       }
+      }
+     },
+     "Cisco-IOS-XR-infra-statsd-cfg:statistics": {
+      "load-interval": 30
+     },
+     "Cisco-IOS-XR-tunnel-gre-cfg:tunnel-ip": {
+      "source": {
+       "type": 2,
+       "address": "185.121.241.14"
+      },
+      "destination": {
+       "type": 1,
+       "address": "38.135.71.23"
+      }
+     }
+    },
+    {
+     "active": "act",
+     "interface-name": "Bundle-Ether165",
+     "interface-virtual": [
+      null
+     ],
+     "shutdown": [
+      null
+     ]
+    },
+    {
+     "active": "act",
+     "interface-name": "Bundle-Ether167",
+     "interface-virtual": [
+      null
+     ],
+     "shutdown": [
+      null
+     ]
+    },
+    {
+     "active": "act",
+     "interface-name": "Bundle-Ether175",
+     "interface-virtual": [
+      null
+     ],
+     "shutdown": [
+      null
+     ]
+    },
+    {
+     "active": "act",
+     "interface-name": "Bundle-Ether177",
+     "interface-virtual": [
+      null
+     ],
+     "shutdown": [
+      null
+     ]
+    },
+    {
+     "active": "act",
+     "interface-name": "MgmtEth0/RP0/CPU0/0",
+     "Cisco-IOS-XR-ipv4-io-cfg:ipv4-network": {
+      "addresses": {
+       "primary": {
+        "address": "10.10.20.175",
+        "netmask": "255.255.255.0"
+       }
+      }
+     }
+    },
+    {
+     "active": "act",
+     "interface-name": "GigabitEthernet0/0/0/0",
+     "shutdown": [
+      null
+     ]
+    },
+    {
+     "active": "act",
+     "interface-name": "GigabitEthernet0/0/0/1",
+     "description": "DNP",
+     "Cisco-IOS-XR-ipv4-io-cfg:ipv4-network": {
+      "addresses": {
+       "primary": {
+        "address": "10.100.100.1",
+        "netmask": "255.255.255.0"
+       }
+      }
+     }
+    },
+    {
+     "active": "act",
+     "interface-name": "GigabitEthernet0/0/0/2",
+     "Cisco-IOS-XR-ipv4-io-cfg:ipv4-network": {
+      "addresses": {
+       "primary": {
+        "address": "192.168.40.1",
+        "netmask": "255.255.255.0"
+       }
+      }
+     }
+    },
+    {
+     "active": "act",
+     "interface-name": "GigabitEthernet0/0/0/3",
+     "Cisco-IOS-XR-ipv4-io-cfg:ipv4-network": {
+      "addresses": {
+       "primary": {
+        "address": "192.168.40.1",
+        "netmask": "255.255.255.0"
+       },
+       "secondaries": {
+        "secondary": [
+         {
+          "address": "192.168.2.1",
+          "netmask": "255.255.255.0"
+         },
+         {
+          "address": "192.168.30.1",
+          "netmask": "255.255.255.0"
+         }
+        ]
+       }
+      }
+     },
+     "shutdown": [
+      null
+     ]
+    },
+    {
+     "active": "act",
+     "interface-name": "GigabitEthernet0/0/0/4",
+     "description": "test",
+     "Cisco-IOS-XR-ipv4-io-cfg:ipv4-network": {
+      "addresses": {
+       "primary": {
+        "address": "192.168.20.1",
+        "netmask": "255.255.255.0"
+       }
+      }
+     },
+     "Cisco-IOS-XR-ipv6-ma-cfg:ipv6-network": {
+      "addresses": {
+       "regular-addresses": {
+        "regular-address": [
+         {
+          "address": "2001:db8:ff::11",
+          "prefix-length": 64,
+          "zone": "0"
+         }
+        ]
+       }
+      }
+     }
+    },
+    {
+     "active": "act",
+     "interface-name": "GigabitEthernet0/0/0/6",
+     "Cisco-IOS-XR-qos-ma-cfg:qos": {
+      "output": {
+       "service-policy": [
+        {
+         "service-policy-name": "p1"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "active": "act",
+     "interface-name": "GigabitEthernet0/0/0/0.123",
+     "interface-mode-non-physical": "default",
+     "Cisco-IOS-XR-l2-eth-infra-cfg:vlan-sub-configuration": {
+      "vlan-identifier": {
+       "vlan-type": "vlan-type-dot1q",
+       "first-tag": 123
+      }
+     }
+    },
+    {
+     "active": "pre",
+     "interface-name": "HundredGigE0/0/1/0",
+     "description": "test",
+     "Cisco-IOS-XR-ipv4-io-cfg:ipv4-network": {
+      "addresses": {
+       "primary": {
+        "address": "203.0.113.11",
+        "netmask": "255.255.255.0"
+       }
+      }
+     },
+     "Cisco-IOS-XR-ipv6-ma-cfg:ipv6-network": {
+      "addresses": {
+       "regular-addresses": {
+        "regular-address": [
+         {
+          "address": "2001:db8:ff::11",
+          "prefix-length": 64,
+          "zone": "0"
+         }
+        ]
+       }
+      }
+     }
+    }
+   ]
+  },
+  "Cisco-IOS-XR-infra-policymgr-cfg:policy-manager": {
+   "class-maps": {
+    "class-map": [
+     {
+      "type": "qos",
+      "name": "c1",
+      "class-map-mode-match-any": [
+       null
+      ],
+      "match": {
+       "ipv4-precedence": [
+        3
+       ]
+      }
+     },
+     {
+      "type": "qos",
+      "name": "SAMPLE-CLASSMAP",
+      "class-map-mode-match-any": [
+       null
+      ],
+      "match": {
+       "protocol": [
+        "ipv6"
+       ],
+       "dscp": [
+        "af11"
+       ]
+      }
+     }
+    ]
+   },
+   "policy-maps": {
+    "policy-map": [
+     {
+      "type": "qos",
+      "name": "a",
+      "policy-map-rule": [
+       {
+        "class-name": "class-default",
+        "class-type": "qos",
+        "shape": {
+         "rate": {
+          "value": 1,
+          "unit": "mbps"
+         }
+        }
+       }
+      ]
+     },
+     {
+      "type": "qos",
+      "name": "p1",
+      "policy-map-rule": [
+       {
+        "class-name": "class-default",
+        "class-type": "qos",
+        "priority-level": 1
+       }
+      ]
+     }
+    ]
+   }
+  },
+  "Cisco-IOS-XR-crypto-ssh-cfg:ssh": {
+   "server": {
+    "v2": [
+     null
+    ],
+    "vrf-table": {
+     "vrf": [
+      {
+       "vrf-name": "default",
+       "enable": [
+        null
+       ]
+      }
+     ]
+    },
+    "netconf": 830,
+    "netconf-vrf-table": {
+     "vrf": [
+      {
+       "vrf-name": "default",
+       "enable": [
+        null
+       ]
+      }
+     ]
+    }
+   }
+  },
+  "Cisco-IOS-XR-ipv4-acl-cfg:ipv4-acl-and-prefix-list": {
+   "accesses": {
+    "access": [
+     {
+      "access-list-name": "acl_1",
+      "access-list-entries": {
+       "access-list-entry": [
+        {
+         "sequence-number": 16,
+         "remark": "TEST_ACL_1_REMARK",
+         "sequence-str": "16"
+        },
+        {
+         "sequence-number": 21,
+         "grant": "permit",
+         "protocol": "tcp",
+         "source-network": {
+          "source-address": "192.0.2.10"
+         },
+         "destination-network": {
+          "destination-address": "198.51.100.0",
+          "destination-wild-card-bits": "0.0.0.15"
+         },
+         "source-port": {
+          "source-operator": "range",
+          "first-source-port": "pop3",
+          "second-source-port": 121
+         },
+         "tcp": {
+          "tcp-bits": "rst"
+         },
+         "sequence-str": "21"
+        },
+        {
+         "sequence-number": 23,
+         "grant": "deny",
+         "protocol": "icmp",
+         "destination-network": {
+          "destination-address": "198.51.100.0",
+          "destination-wild-card-bits": "0.0.0.15"
+         },
+         "dscp": {
+          "dscp-operator": "less-than",
+          "dscp-min": "af12"
+         },
+         "icmp": {
+          "icmp-type-code": "reassembly-timeout"
+         },
+         "sequence-str": "23"
+        }
+       ]
+      }
+     },
+     {
+      "access-list-name": "acl_2",
+      "access-list-entries": {
+       "access-list-entry": [
+        {
+         "sequence-number": 10,
+         "remark": "TEST_ACL_2_REMARK",
+         "sequence-str": "10"
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  "Cisco-IOS-XR-l2vpn-cfg:l2vpn": {
+   "enable": [
+    null
+   ],
+   "database": {
+    "bridge-domain-groups": {
+     "bridge-domain-group": [
+      {
+       "name": "991",
+       "bridge-domains": {
+        "bridge-domain": [
+         {
+          "name": "TEST_MGMT",
+          "routed-interfaces": {
+           "routed-interface": [
+            {
+             "interface-name": "BVI991"
+            }
+           ]
+          }
+         }
+        ]
+       }
+      }
+     ]
+    }
+   }
+  },
+  "Cisco-IOS-XR-kim-tpa-cfg:tpa": {
+   "vrf-names": {
+    "vrf-name": [
+     {
+      "vrf-name": "default",
+      "address-family": {
+       "ipv4": {
+        "default-route": "mgmt"
+       }
+      }
+     }
+    ]
+   }
+  },
+  "Cisco-IOS-XR-ip-tcp-cfg:ip": {
+   "cinetd": {
+    "services": {
+     "telnet": {
+      "vrfs": {
+       "vrf": [
+        {
+         "vrf-name": "default",
+         "ipv4": {
+          "tcp": {
+           "maximum-server": 10
+          }
+         }
+        }
+       ]
+      }
+     }
+    }
+   }
+  },
+  "Cisco-IOS-XR-um-netconf-yang-cfg:netconf-yang": {
+   "agent": {
+    "ssh": {
+
+    }
+   }
+  },
+  "Cisco-IOS-XR-um-ipv4-access-list-cfg:ipv4": {
+   "access-lists": {
+    "access-list": [
+     {
+      "access-list-name": "acl_1",
+      "sequences": {
+       "sequence": [
+        {
+         "sequence-number": 16,
+         "remark": "TEST_ACL_1_REMARK"
+        },
+        {
+         "sequence-number": 21,
+         "permit": {
+          "protocol": "tcp",
+          "source": {
+           "host": "192.0.2.10",
+           "port": {
+            "range": {
+             "start-value": "POP3",
+             "end-value": 121
+            }
+           }
+          },
+          "destination": {
+           "address": "198.51.100.0",
+           "wildcard-mask": "0.0.0.15"
+          },
+          "tcp-flags": {
+           "tcp-bits": "rst"
+          }
+         }
+        },
+        {
+         "sequence-number": 23,
+         "deny": {
+          "protocol": "icmp",
+          "source": {
+           "any": {
+
+           }
+          },
+          "destination": {
+           "address": "198.51.100.0",
+           "wildcard-mask": "0.0.0.15"
+          },
+          "dscp": {
+           "lt": "af12"
+          },
+          "icmp": {
+           "message-type-name": "ReassemblyTimeout"
+          }
+         }
+        }
+       ]
+      }
+     },
+     {
+      "access-list-name": "acl_2",
+      "sequences": {
+       "sequence": [
+        {
+         "sequence-number": 10,
+         "remark": "TEST_ACL_2_REMARK"
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  "Cisco-IOS-XR-um-interface-cfg:interfaces": {
+   "interface": [
+    {
+     "interface-name": "BVI220",
+     "shutdown": {
+
+     }
+    },
+    {
+     "interface-name": "BVI221",
+     "shutdown": {
+
+     }
+    },
+    {
+     "interface-name": "BVI225",
+     "shutdown": {
+
+     }
+    },
+    {
+     "interface-name": "BVI991",
+     "description": "DNP | TEST_MGMT",
+     "ipv4": {
+      "Cisco-IOS-XR-um-if-ip-address-cfg:addresses": {
+       "address": {
+        "address": "172.19.127.201",
+        "netmask": "255.255.255.248"
+       }
+      }
+     },
+     "Cisco-IOS-XR-um-statistics-cfg:load-interval": 30
+    },
+    {
+     "interface-name": "Loopback0",
+     "ipv4": {
+      "Cisco-IOS-XR-um-if-ip-address-cfg:addresses": {
+       "address": {
+        "address": "1.1.1.1",
+        "netmask": "255.255.255.255"
+       }
+      }
+     }
+    },
+    {
+     "interface-name": "Loopback10",
+     "ipv4": {
+      "Cisco-IOS-XR-um-if-ip-address-cfg:addresses": {
+       "address": {
+        "address": "192.168.10.1",
+        "netmask": "255.255.255.0"
+       }
+      }
+     }
+    },
+    {
+     "interface-name": "Loopback20",
+     "description": "another_testing",
+     "ipv4": {
+      "Cisco-IOS-XR-um-if-ip-address-cfg:addresses": {
+       "address": {
+        "address": "192.168.20.1",
+        "netmask": "255.255.255.0"
+       }
+      }
+     }
+    },
+    {
+     "interface-name": "Loopback25",
+     "description": "my loopback interface"
+    },
+    {
+     "interface-name": "Loopback99",
+     "description": "loopback99 on iosxr",
+     "ipv4": {
+      "Cisco-IOS-XR-um-if-ip-address-cfg:addresses": {
+       "address": {
+        "address": "192.168.0.99",
+        "netmask": "255.255.255.0"
+       }
+      }
+     }
+    },
+    {
+     "interface-name": "Loopback100",
+     "description": "***MERGE LOOPBACK 100****",
+     "ipv4": {
+      "Cisco-IOS-XR-um-if-ip-address-cfg:addresses": {
+       "address": {
+        "address": "1.1.1.100",
+        "netmask": "255.255.255.255"
+       }
+      }
+     }
+    },
+    {
+     "interface-name": "Loopback101",
+     "ipv4": {
+      "Cisco-IOS-XR-um-if-ip-address-cfg:addresses": {
+       "address": {
+        "address": "192.168.101.1",
+        "netmask": "255.255.255.0"
+       }
+      }
+     }
+    },
+    {
+     "interface-name": "Loopback103",
+     "ipv4": {
+      "Cisco-IOS-XR-um-if-ip-address-cfg:addresses": {
+       "address": {
+        "address": "192.168.103.1",
+        "netmask": "255.255.255.0"
+       }
+      }
+     }
+    },
+    {
+     "interface-name": "Loopback111",
+     "description": "test loopback111",
+     "shutdown": {
+
+     }
+    },
+    {
+     "interface-name": "Loopback112",
+     "description": "Configured by NETCONF Invalid"
+    },
+    {
+     "interface-name": "Loopback123",
+     "description": "test"
+    },
+    {
+     "interface-name": "Loopback200",
+     "description": "***MERGE LOOPBACK 200****",
+     "ipv4": {
+      "Cisco-IOS-XR-um-if-ip-address-cfg:addresses": {
+       "address": {
+        "address": "1.1.1.200",
+        "netmask": "255.255.255.255"
+       }
+      }
+     }
+    },
+    {
+     "interface-name": "Loopback555",
+     "description": "Configured by Salt-Nornir using NETCONF"
+    },
+    {
+     "interface-name": "Loopback1000"
+    },
+    {
+     "interface-name": "Loopback1234"
+    },
+    {
+     "interface-name": "tunnel-ip12445",
+     "description": "Testsimple2-39533-1044",
+     "bandwidth": 300000,
+     "ipv4": {
+      "Cisco-IOS-XR-um-if-ip-address-cfg:addresses": {
+       "address": {
+        "address": "10.220.45.41",
+        "netmask": "255.255.255.252"
+       }
+      }
+     },
+     "Cisco-IOS-XR-um-statistics-cfg:load-interval": 30,
+     "Cisco-IOS-XR-um-if-tunnel-cfg:tunnel": {
+      "source": {
+       "ipv4-address": "185.121.241.14"
+      },
+      "destination": {
+       "ipv4-address": "38.135.71.23"
+      }
+     }
+    },
+    {
+     "interface-name": "Bundle-Ether165",
+     "shutdown": {
+
+     }
+    },
+    {
+     "interface-name": "Bundle-Ether167",
+     "shutdown": {
+
+     }
+    },
+    {
+     "interface-name": "Bundle-Ether175",
+     "shutdown": {
+
+     }
+    },
+    {
+     "interface-name": "Bundle-Ether177",
+     "shutdown": {
+
+     }
+    },
+    {
+     "interface-name": "MgmtEth0/RP0/CPU0/0",
+     "ipv4": {
+      "Cisco-IOS-XR-um-if-ip-address-cfg:addresses": {
+       "address": {
+        "address": "10.10.20.175",
+        "netmask": "255.255.255.0"
+       }
+      }
+     }
+    },
+    {
+     "interface-name": "GigabitEthernet0/0/0/0",
+     "shutdown": {
+
+     }
+    },
+    {
+     "interface-name": "GigabitEthernet0/0/0/1",
+     "description": "DNP",
+     "ipv4": {
+      "Cisco-IOS-XR-um-if-ip-address-cfg:addresses": {
+       "address": {
+        "address": "10.100.100.1",
+        "netmask": "255.255.255.0"
+       }
+      }
+     }
+    },
+    {
+     "interface-name": "GigabitEthernet0/0/0/2",
+     "ipv4": {
+      "Cisco-IOS-XR-um-if-ip-address-cfg:addresses": {
+       "address": {
+        "address": "192.168.40.1",
+        "netmask": "255.255.255.0"
+       }
+      }
+     }
+    },
+    {
+     "interface-name": "GigabitEthernet0/0/0/3",
+     "ipv4": {
+      "Cisco-IOS-XR-um-if-ip-address-cfg:addresses": {
+       "address": {
+        "address": "192.168.40.1",
+        "netmask": "255.255.255.0"
+       },
+       "secondaries": {
+        "secondary": [
+         {
+          "address": "192.168.2.1",
+          "netmask": "255.255.255.0"
+         },
+         {
+          "address": "192.168.30.1",
+          "netmask": "255.255.255.0"
+         }
+        ]
+       }
+      }
+     },
+     "shutdown": {
+
+     }
+    },
+    {
+     "interface-name": "GigabitEthernet0/0/0/4",
+     "description": "test",
+     "ipv4": {
+      "Cisco-IOS-XR-um-if-ip-address-cfg:addresses": {
+       "address": {
+        "address": "192.168.20.1",
+        "netmask": "255.255.255.0"
+       }
+      }
+     },
+     "ipv6": {
+      "Cisco-IOS-XR-um-if-ip-address-cfg:addresses": {
+       "ipv6-address": [
+        {
+         "address": "2001:db8:ff::11",
+         "prefix-length": 64,
+         "zone": 0
+        }
+       ]
+      }
+     }
+    },
+    {
+     "interface-name": "GigabitEthernet0/0/0/6",
+     "Cisco-IOS-XR-um-if-service-policy-qos-cfg:service-policy": {
+      "output": [
+       {
+        "service-policy-name": "p1"
+       }
+      ]
+     }
+    },
+    {
+     "interface-name": "GigabitEthernet0/0/0/0.123",
+     "Cisco-IOS-XR-um-l2-ethernet-cfg:encapsulation": {
+      "dot1q": {
+       "vlan-id": 123
+      }
+     }
+    }
+   ],
+   "interface-preconfigure": [
+    {
+     "interface-name": "HundredGigE0/0/1/0",
+     "description": "test",
+     "ipv4": {
+      "Cisco-IOS-XR-um-if-ip-address-cfg:addresses": {
+       "address": {
+        "address": "203.0.113.11",
+        "netmask": "255.255.255.0"
+       }
+      }
+     },
+     "ipv6": {
+      "Cisco-IOS-XR-um-if-ip-address-cfg:addresses": {
+       "ipv6-address": [
+        {
+         "address": "2001:db8:ff::11",
+         "prefix-length": 64,
+         "zone": 0
+        }
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "Cisco-IOS-XR-um-router-ospf-cfg:router": {
+   "ospf": {
+    "processes": {
+     "process": [
+      {
+       "process-name": "1",
+       "areas": {
+        "area": [
+         {
+          "area-id": 100,
+          "authentication": {
+           "keychain": {
+
+           },
+           "keychain-name": "cisco"
+          },
+          "hello-interval": 2
+         }
+        ]
+       }
+      },
+      {
+       "process-name": "123",
+       "protocol": {
+        "shutdown": {
+
+        }
+       }
+      },
+      {
+       "process-name": "1000",
+       "areas": {
+        "area": [
+         {
+          "area-id": 0,
+          "interfaces": {
+           "interface": [
+            {
+             "interface-name": "Bundle-Ether40",
+             "cost-fallback": {
+              "cost": 65100,
+              "threshold": 200001
+             }
+            },
+            {
+             "interface-name": "GigabitEthernet0/0/0/2",
+             "cost": 100
+            }
+           ]
+          }
+         },
+         {
+          "area-id": 420,
+          "interfaces": {
+           "interface": [
+            {
+             "interface-name": "Bundle-Ether42",
+             "cost-fallback": {
+              "cost": 2000,
+              "threshold": 10001
+             }
+            },
+            {
+             "interface-name": "Bundle-Ether43",
+             "cost-fallback": {
+              "cost": 2000,
+              "threshold": 10001
+             }
+            },
+            {
+             "interface-name": "Bundle-Ether44",
+             "cost-fallback": {
+              "cost": 2000,
+              "threshold": 10001
+             }
+            },
+            {
+             "interface-name": "Bundle-Ether45",
+             "cost-fallback": {
+              "cost": 2000,
+              "threshold": 20001
+             }
+            },
+            {
+             "interface-name": "Bundle-Ether46",
+             "cost-fallback": {
+              "cost": 2000,
+              "threshold": 20001
+             }
+            },
+            {
+             "interface-name": "Bundle-Ether47",
+             "cost-fallback": {
+              "cost": 2000,
+              "threshold": 20001
+             }
+            },
+            {
+             "interface-name": "Bundle-Ether48",
+             "cost-fallback": {
+              "cost": 2000,
+              "threshold": 10001
+             }
+            },
+            {
+             "interface-name": "Bundle-Ether49",
+             "cost-fallback": {
+              "cost": 2000,
+              "threshold": 10001
+             }
+            },
+            {
+             "interface-name": "Bundle-Ether50",
+             "cost-fallback": {
+              "cost": 2000,
+              "threshold": 20001
+             }
+            },
+            {
+             "interface-name": "Bundle-Ether51",
+             "cost-fallback": {
+              "cost": 2000,
+              "threshold": 20001
+             }
+            },
+            {
+             "interface-name": "Bundle-Ether52",
+             "cost-fallback": {
+              "cost": 2000,
+              "threshold": 20001
+             }
+            },
+            {
+             "interface-name": "Bundle-Ether53",
+             "cost-fallback": {
+              "cost": 2000,
+              "threshold": 20001
+             }
+            },
+            {
+             "interface-name": "Bundle-Ether54",
+             "cost-fallback": {
+              "cost": 2000,
+              "threshold": 10001
+             }
+            },
+            {
+             "interface-name": "Bundle-Ether55",
+             "cost-fallback": {
+              "cost": 2000,
+              "threshold": 10001
+             }
+            },
+            {
+             "interface-name": "Bundle-Ether56",
+             "cost-fallback": {
+              "cost": 2000,
+              "threshold": 20001
+             }
+            },
+            {
+             "interface-name": "Bundle-Ether73",
+             "cost-fallback": {
+              "cost": 200,
+              "threshold": 200001
+             }
+            },
+            {
+             "interface-name": "Bundle-Ether74",
+             "cost-fallback": {
+              "cost": 200,
+              "threshold": 200001
+             }
+            }
+           ]
+          }
+         }
+        ]
+       }
+      }
+     ]
+    }
+   }
+  },
+  "Cisco-IOS-XR-um-router-static-cfg:router": {
+   "static": {
+    "address-family": {
+     "ipv4": {
+      "unicast": {
+       "prefixes": {
+        "prefix": [
+         {
+          "prefix-address": "0.0.0.0",
+          "prefix-length": 0,
+          "nexthop-addresses": {
+           "nexthop-address": [
+            {
+             "address": "10.10.20.254"
+            }
+           ]
+          }
+         },
+         {
+          "prefix-address": "10.230.0.0",
+          "prefix-length": 16,
+          "nexthop-addresses": {
+           "nexthop-address": [
+            {
+             "address": "1.1.1.14",
+             "description": "PH1_Subnet"
+            }
+           ]
+          }
+         },
+         {
+          "prefix-address": "10.230.0.0",
+          "prefix-length": 17,
+          "nexthop-addresses": {
+           "nexthop-address": [
+            {
+             "address": "1.1.1.14",
+             "description": "PH1_Subnet"
+            },
+            {
+             "address": "1.1.1.15",
+             "description": "PH2_Subnet"
+            }
+           ]
+          }
+         },
+         {
+          "prefix-address": "192.0.2.16",
+          "prefix-length": 28,
+          "nexthop-interface-addresses": {
+           "nexthop-interface-address": [
+            {
+             "interface-name": "FastEthernet0/0/0/1",
+             "address": "192.0.2.10",
+             "tag": 10,
+             "description": "LAB",
+             "metric": 120
+            }
+           ]
+          }
+         }
+        ]
+       }
+      }
+     }
+    }
+   }
+  },
+  "Cisco-IOS-XR-um-multicast-routing-cfg:multicast-routing": {
+   "address-family": {
+    "ipv4": {
+     "interface": {
+      "interfaces": {
+       "interface": [
+        {
+         "interface-name": "Bundle-Ether19",
+         "enable": {
+
+         }
+        }
+       ]
+      }
+     }
+    }
+   }
+  },
+  "Cisco-IOS-XR-um-router-isis-cfg:router": {
+   "isis": {
+    "processes": {
+     "process": [
+      {
+       "process-id": "default",
+       "set-overload-bit": {
+        "on-startup": {
+         "advertise-as-overloaded": {
+          "time-to-advertise": 360
+         }
+        }
+       },
+       "is-type": "level-1",
+       "nets": {
+        "net": [
+         {
+          "net-id": "49.0001.1111.1111.0000.00"
+         }
+        ]
+       },
+       "nsf": {
+        "ietf": {
+
+        }
+       },
+       "log": {
+        "adjacency": {
+         "changes": {
+
+         }
+        },
+        "pdu": {
+         "drops": {
+
+         }
+        }
+       },
+       "lsp-gen-interval": {
+        "maximum-wait": {
+         "maximum-wait-time": 20
+        },
+        "initial-wait": {
+         "initial-wait-time": 1
+        },
+        "secondary-wait": {
+         "secondary-wait-time": 20
+        }
+       },
+       "lsp-refresh-interval": {
+        "lsp-refresh-interval-time": 65000
+       }
+      }
+     ]
+    }
+   }
+  },
+  "Cisco-IOS-XR-um-policymap-classmap-cfg:class-map": {
+   "type": {
+    "qos": [
+     {
+      "class-map-name": "c1",
+      "match-any": {
+
+      },
+      "match": {
+       "precedence-ipv4": {
+        "value": [
+         3
+        ]
+       }
+      }
+     },
+     {
+      "class-map-name": "SAMPLE-CLASSMAP",
+      "match-any": {
+
+      },
+      "match": {
+       "protocol": {
+        "number": [
+         "ipv6"
+        ]
+       },
+       "dscp": {
+        "value": [
+         "af11"
+        ]
+       }
+      }
+     }
+    ]
+   }
+  },
+  "Cisco-IOS-XR-um-policymap-classmap-cfg:policy-map": {
+   "type": {
+    "qos": [
+     {
+      "policy-map-name": "a",
+      "class": [
+       {
+        "name": "class-default",
+        "type": "qos",
+        "shape": {
+         "average": {
+          "rate": {
+           "value": 1,
+           "unit": "mbps"
+          }
+         }
+        }
+       }
+      ]
+     },
+     {
+      "policy-map-name": "p1",
+      "class": [
+       {
+        "name": "class-default",
+        "type": "qos",
+        "priority": {
+         "level": 1
+        }
+       }
+      ]
+     }
+    ]
+   }
+  },
+  "Cisco-IOS-XR-um-grpc-cfg:grpc": {
+   "port": 57777,
+   "address-family": {
+    "ipv4": {
+
+    }
+   }
+  },
+  "Cisco-IOS-XR-um-vrf-cfg:vrfs": {
+   "vrf": [
+    {
+     "vrf-name": "OM",
+     "address-family": {
+      "ipv4": {
+       "unicast": {
+        "Cisco-IOS-XR-um-router-bgp-cfg:import": {
+         "route-target": {
+          "two-byte-as-rts": {
+           "two-byte-as-rt": [
+            {
+             "as-number": 1,
+             "index": 1,
+             "stitching": false
+            }
+           ]
+          }
+         }
+        },
+        "Cisco-IOS-XR-um-router-bgp-cfg:export": {
+         "route-target": {
+          "two-byte-as-rts": {
+           "two-byte-as-rt": [
+            {
+             "as-number": 1,
+             "index": 1,
+             "stitching": false
+            }
+           ]
+          }
+         }
+        }
+       }
+      }
+     }
+    }
+   ]
+  },
+  "Cisco-IOS-XR-um-snmp-server-cfg:snmp-server": {
+   "traps": {
+    "Cisco-IOS-XR-um-router-bgp-cfg:bgp": {
+     "cbgp2": {
+
+     },
+     "bgp4-mib": {
+
+     }
+    },
+    "Cisco-IOS-XR-um-mpls-te-cfg:mpls": {
+     "traffic-eng": {
+      "up": {
+
+      },
+      "down": {
+
+      },
+      "reroute": {
+
+      },
+      "reoptimize": {
+
+      },
+      "p2mp": {
+       "up": {
+
+       },
+       "down": {
+
+       }
+      }
+     },
+     "frr": {
+      "all": {
+
+      },
+      "protected": {
+
+      },
+      "unprotected": {
+
+      }
+     }
+    },
+    "Cisco-IOS-XR-um-router-isis-cfg:isis": {
+     "database-overload": "disable",
+     "manual-address-drops": "disable",
+     "corrupted-lsp-detected": "disable",
+     "attempt-to-exceed-max-sequence": "disable",
+     "id-len-mismatch": "disable",
+     "max-area-addresses-mismatch": "disable",
+     "own-lsp-purge": "disable",
+     "sequence-number-skip": "disable",
+     "authentication-type-failure": "disable",
+     "authentication-failure": "disable",
+     "version-skew": "disable",
+     "area-mismatch": "disable",
+     "rejected-adjacency": "disable",
+     "lsp-too-large-to-propagate": "disable",
+     "orig-lsp-buff-size-mismatch": "disable",
+     "protocols-supported-mismatch": "disable",
+     "adjacency-change": "disable",
+     "lsp-error-detected": "disable",
+     "all": "enable"
+    },
+    "Cisco-IOS-XR-um-traps-mpls-ldp-cfg:mpls": {
+     "ldp": {
+      "up": {
+
+      },
+      "down": {
+
+      },
+      "threshold": {
+
+      }
+     }
+    },
+    "Cisco-IOS-XR-um-router-ospf-cfg:ospf": {
+     "lsa": {
+      "lsa-maxage": {
+
+      },
+      "lsa-originate": {
+
+      }
+     },
+     "errors": {
+      "bad-packet": {
+
+      },
+      "authentication-failure": {
+
+      },
+      "config-error": {
+
+      },
+      "virt-bad-packet": {
+
+      },
+      "virt-authentication-failure": {
+
+      },
+      "virt-config-error": {
+
+      }
+     },
+     "retransmit": {
+      "packets": {
+
+      },
+      "virt-packets": {
+
+      }
+     },
+     "state-change": {
+      "if-state-change": {
+
+      },
+      "neighbor-state-change": {
+
+      },
+      "virtif-state-change": {
+
+      },
+      "virtneighbor-state-change": {
+
+      }
+     }
+    },
+    "Cisco-IOS-XR-um-mpls-l3vpn-cfg:mpls": {
+     "l3vpn": {
+      "all": {
+
+      },
+      "vrf-up": {
+
+      },
+      "vrf-down": {
+
+      },
+      "max-threshold-cleared": {
+
+      },
+      "max-threshold-exceeded": {
+
+      },
+      "mid-threshold-exceeded": {
+
+      },
+      "max-threshold-reissue-notif-time": 1
+     }
+    },
+    "Cisco-IOS-XR-um-router-ospfv3-cfg:ospfv3": {
+     "errors": {
+      "bad-packet": {
+
+      },
+      "config-error": {
+
+      },
+      "virt-bad-packet": {
+
+      }
+     },
+     "state-change": {
+      "if-state-change": {
+
+      },
+      "neighbor-state-change": {
+
+      },
+      "virtif-state-change": {
+
+      },
+      "virtneighbor-state-change": {
+
+      },
+      "restart-status-change": {
+
+      },
+      "restart-virtual-helper-status-change": {
+
+      }
+     }
+    }
+   }
+  },
+  "Cisco-IOS-XR-um-router-bgp-cfg:router": {
+   "bgp": {
+    "as": [
+     {
+      "as-number": 65503,
+      "bgp": {
+       "router-id": "1.1.1.1",
+       "log": {
+        "neighbor": {
+         "changes": {
+          "detail": {
+
+          }
+         }
+        }
+       }
+      },
+      "address-families": {
+       "address-family": [
+        {
+         "af-name": "ipv4-unicast",
+         "networks": {
+          "network": [
+           {
+            "address": "10.10.10.0",
+            "masklength": 24
+           }
+          ]
+         }
+        },
+        {
+         "af-name": "ipv6-unicast"
+        }
+       ]
+      },
+      "session-groups": {
+       "session-group": [
+        {
+         "session-group-name": "sachin",
+         "remote-as": 100,
+         "update-source": "Loopback0"
+        }
+       ]
+      },
+      "neighbor-groups": {
+       "neighbor-group": [
+        {
+         "neighbor-group-name": "sachin",
+         "use": {
+          "session-group": "sachin"
+         },
+         "address-families": {
+          "address-family": [
+           {
+            "af-name": "ipv4-unicast"
+           },
+           {
+            "af-name": "ipv6-unicast"
+           }
+          ]
+         }
+        }
+       ]
+      },
+      "neighbors": {
+       "neighbor": [
+        {
+         "neighbor-address": "5.5.5.5",
+         "use": {
+          "neighbor-group": "sachin"
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  "tailf-aaa:aaa": {
+   "authentication": {
+    "users": {
+     "user": [
+      {
+       "name": "root",
+       "uid": 9000,
+       "gid": 100,
+       "password": "$6$XvYiZ/CdPNuK4Z/.$3/15yGC1Br2nlIy/AwZVNsl0BbD.XLbqAL2h8hR4CpBxM.ir4ZilYykiaTqMwe/EB6UySyH7ea/x09ajR6NXz.",
+       "ssh_keydir": "/var/confd/homes/root/.ssh",
+       "homedir": "/var/confd/homes/root"
+      }
+     ]
+    },
+    "groups": {
+     "group": [
+      {
+       "name": "aaa-r",
+       "gid": 100,
+       "users": "%%__system_user__%%"
+      },
+      {
+       "name": "admin-r",
+       "gid": 100,
+       "users": "%%__system_user__%%"
+      },
+      {
+       "name": "root-system",
+       "gid": 100,
+       "users": "%%__system_user__%% root"
+      }
+     ]
+    }
+   },
+   "authorization": {
+    "cmdrules": {
+     "cmdrule": [
+      {
+       "index": 1,
+       "context": "*",
+       "command": "*",
+       "group": "root-system",
+       "ops": "rx",
+       "action": "accept"
+      },
+      {
+       "index": 2,
+       "context": "*",
+       "command": "show running-config aaa",
+       "group": "aaa-r",
+       "ops": "rx",
+       "action": "accept"
+      },
+      {
+       "index": 3,
+       "context": "*",
+       "command": "show tech-support aaa",
+       "group": "aaa-r",
+       "ops": "rx",
+       "action": "accept"
+      },
+      {
+       "index": 4,
+       "context": "*",
+       "command": "show aaa",
+       "group": "aaa-r",
+       "ops": "rx",
+       "action": "accept"
+      },
+      {
+       "index": 5,
+       "context": "*",
+       "command": "show",
+       "group": "admin-r",
+       "ops": "rx",
+       "action": "accept"
+      }
+     ]
+    },
+    "datarules": {
+     "datarule": [
+      {
+       "index": 1,
+       "namespace": "*",
+       "context": "*",
+       "keypath": "*",
+       "group": "root-system",
+       "ops": "rwx",
+       "action": "accept"
+      },
+      {
+       "index": 2,
+       "namespace": "*",
+       "context": "*",
+       "keypath": "/aaa",
+       "group": "aaa-r",
+       "ops": "r",
+       "action": "accept"
+      },
+      {
+       "index": 3,
+       "namespace": "*",
+       "context": "*",
+       "keypath": "/aaa",
+       "group": "admin-r",
+       "ops": "rwx",
+       "action": "reject"
+      },
+      {
+       "index": 4,
+       "namespace": "*",
+       "context": "*",
+       "keypath": "/",
+       "group": "admin-r",
+       "ops": "r",
+       "action": "accept"
+      }
+     ]
+    }
+   },
+   "Cisco-IOS-XR-sysadmin-aaa-command-accounting:admin-accounting": {
+    "enable": "false"
+   }
+  },
+  "SNMP-COMMUNITY-MIB:SNMP-COMMUNITY-MIB": {
+   "snmpCommunityTable": {
+    "snmpCommunityEntry": [
+     {
+      "snmpCommunityIndex": "public",
+      "snmpCommunityName": "public",
+      "snmpCommunitySecurityName": "public",
+      "snmpCommunityContextEngineID": "80:00:61:81:05:01",
+      "snmpCommunityContextName": "",
+      "snmpCommunityTransportTag": "",
+      "snmpCommunityStorageType": "permanent"
+     }
+    ]
+   }
+  },
+  "SNMP-NOTIFICATION-MIB:SNMP-NOTIFICATION-MIB": {
+   "snmpNotifyTable": {
+    "snmpNotifyEntry": [
+     {
+      "snmpNotifyName": "std_v1_trap",
+      "snmpNotifyTag": "std_v1_trap",
+      "snmpNotifyType": "trap",
+      "snmpNotifyStorageType": "nonVolatile"
+     },
+     {
+      "snmpNotifyName": "std_v2_inform",
+      "snmpNotifyTag": "std_v2_inform",
+      "snmpNotifyType": "inform",
+      "snmpNotifyStorageType": "nonVolatile"
+     },
+     {
+      "snmpNotifyName": "std_v2_trap",
+      "snmpNotifyTag": "std_v2_trap",
+      "snmpNotifyType": "trap",
+      "snmpNotifyStorageType": "nonVolatile"
+     },
+     {
+      "snmpNotifyName": "std_v3_inform",
+      "snmpNotifyTag": "std_v3_inform",
+      "snmpNotifyType": "inform",
+      "snmpNotifyStorageType": "nonVolatile"
+     },
+     {
+      "snmpNotifyName": "std_v3_trap",
+      "snmpNotifyTag": "std_v3_trap",
+      "snmpNotifyType": "trap",
+      "snmpNotifyStorageType": "nonVolatile"
+     }
+    ]
+   }
+  },
+  "SNMP-TARGET-MIB:SNMP-TARGET-MIB": {
+   "snmpTargetAddrTable": {
+    "snmpTargetAddrEntry": [
+     {
+      "snmpTargetAddrName": "127.0.0.1 v1",
+      "snmpTargetAddrTDomain": "1.3.6.1.6.1.1",
+      "snmpTargetAddrTAddress": "127.0.0.1.19.136",
+      "snmpTargetAddrTimeout": 1500,
+      "snmpTargetAddrRetryCount": 3,
+      "snmpTargetAddrTagList": "std_v1_trap std_trap std_v1_inform std_inform",
+      "snmpTargetAddrParams": "target_v1",
+      "snmpTargetAddrStorageType": "nonVolatile",
+      "snmpTargetAddrEngineID": "",
+      "snmpTargetAddrTMask": "",
+      "snmpTargetAddrMMS": 2048,
+      "enabled": true
+     },
+     {
+      "snmpTargetAddrName": "127.0.0.1 v2",
+      "snmpTargetAddrTDomain": "1.3.6.1.6.1.1",
+      "snmpTargetAddrTAddress": "127.0.0.1.23.112",
+      "snmpTargetAddrTimeout": 1500,
+      "snmpTargetAddrRetryCount": 3,
+      "snmpTargetAddrTagList": "std_v2_trap std_trap std_v2_inform std_inform",
+      "snmpTargetAddrParams": "target_v2",
+      "snmpTargetAddrStorageType": "nonVolatile",
+      "snmpTargetAddrEngineID": "",
+      "snmpTargetAddrTMask": "",
+      "snmpTargetAddrMMS": 2048,
+      "enabled": true
+     },
+     {
+      "snmpTargetAddrName": "127.0.0.1 v3",
+      "snmpTargetAddrTDomain": "1.3.6.1.6.1.1",
+      "snmpTargetAddrTAddress": "127.0.0.1.27.88",
+      "snmpTargetAddrTimeout": 1500,
+      "snmpTargetAddrRetryCount": 3,
+      "snmpTargetAddrTagList": "std_v3_trap std_trap",
+      "snmpTargetAddrParams": "trap_target_v3",
+      "snmpTargetAddrStorageType": "nonVolatile",
+      "snmpTargetAddrEngineID": "",
+      "snmpTargetAddrTMask": "",
+      "snmpTargetAddrMMS": 2048,
+      "enabled": true
+     },
+     {
+      "snmpTargetAddrName": "127.0.0.1 v3.inform",
+      "snmpTargetAddrTDomain": "1.3.6.1.6.1.1",
+      "snmpTargetAddrTAddress": "127.0.0.1.27.88",
+      "snmpTargetAddrTimeout": 1500,
+      "snmpTargetAddrRetryCount": 3,
+      "snmpTargetAddrTagList": "std_v3_inform std_inform",
+      "snmpTargetAddrParams": "inform_target_v3",
+      "snmpTargetAddrStorageType": "nonVolatile",
+      "snmpTargetAddrEngineID": "80:00:1f:88:04:74:65:73:74:69:6e:67",
+      "snmpTargetAddrTMask": "",
+      "snmpTargetAddrMMS": 2048,
+      "enabled": true
+     }
+    ]
+   },
+   "snmpTargetParamsTable": {
+    "snmpTargetParamsEntry": [
+     {
+      "snmpTargetParamsName": "inform_target_v3",
+      "snmpTargetParamsMPModel": 3,
+      "snmpTargetParamsSecurityModel": 3,
+      "snmpTargetParamsSecurityName": "remote",
+      "snmpTargetParamsSecurityLevel": "noAuthNoPriv",
+      "snmpTargetParamsStorageType": "nonVolatile"
+     },
+     {
+      "snmpTargetParamsName": "target_v1",
+      "snmpTargetParamsMPModel": 0,
+      "snmpTargetParamsSecurityModel": 1,
+      "snmpTargetParamsSecurityName": "public",
+      "snmpTargetParamsSecurityLevel": "noAuthNoPriv",
+      "snmpTargetParamsStorageType": "nonVolatile"
+     },
+     {
+      "snmpTargetParamsName": "target_v2",
+      "snmpTargetParamsMPModel": 1,
+      "snmpTargetParamsSecurityModel": 2,
+      "snmpTargetParamsSecurityName": "public",
+      "snmpTargetParamsSecurityLevel": "noAuthNoPriv",
+      "snmpTargetParamsStorageType": "nonVolatile"
+     },
+     {
+      "snmpTargetParamsName": "trap_target_v3",
+      "snmpTargetParamsMPModel": 3,
+      "snmpTargetParamsSecurityModel": 3,
+      "snmpTargetParamsSecurityName": "public",
+      "snmpTargetParamsSecurityLevel": "noAuthNoPriv",
+      "snmpTargetParamsStorageType": "nonVolatile"
+     }
+    ]
+   }
+  },
+  "SNMP-USER-BASED-SM-MIB:SNMP-USER-BASED-SM-MIB": {
+   "usmUserTable": {
+    "usmUserEntry": [
+     {
+      "usmUserEngineID": "80:00:61:81:05:01",
+      "usmUserName": "initial",
+      "usmUserSecurityName": "initial",
+      "usmUserAuthProtocol": "1.3.6.1.6.3.10.1.1.1",
+      "usmUserPrivProtocol": "1.3.6.1.6.3.10.1.2.1",
+      "usmUserStorageType": "nonVolatile"
+     },
+     {
+      "usmUserEngineID": "80:00:61:81:05:01",
+      "usmUserName": "initial_auth",
+      "usmUserSecurityName": "initial_auth",
+      "usmUserAuthProtocol": "1.3.6.1.6.3.10.1.1.2",
+      "usmUserPrivProtocol": "1.3.6.1.6.3.10.1.2.1",
+      "usmUserStorageType": "nonVolatile",
+      "usmUserAuthKey": "10:2c:bd:65:e3:eb:e2:16:0d:63:db:23:73:f3:17:b2"
+     },
+     {
+      "usmUserEngineID": "80:00:61:81:05:01",
+      "usmUserName": "initial_authPriv",
+      "usmUserSecurityName": "initial_authPriv",
+      "usmUserAuthProtocol": "1.3.6.1.6.3.10.1.1.2",
+      "usmUserPrivProtocol": "1.3.6.1.6.3.10.1.2.2",
+      "usmUserStorageType": "nonVolatile",
+      "usmUserAuthKey": "10:2c:bd:65:e3:eb:e2:16:0d:63:db:23:73:f3:17:b2",
+      "usmUserPrivKey": "10:2c:bd:65:e3:eb:e2:16:0d:63:db:23:73:f3:17:b2"
+     }
+    ]
+   }
+  },
+  "SNMP-VIEW-BASED-ACM-MIB:SNMP-VIEW-BASED-ACM-MIB": {
+   "vacmSecurityToGroupTable": {
+    "vacmSecurityToGroupEntry": [
+     {
+      "vacmSecurityModel": 1,
+      "vacmSecurityName": "public",
+      "vacmGroupName": "all-rights",
+      "vacmSecurityToGroupStorageType": "nonVolatile"
+     },
+     {
+      "vacmSecurityModel": 2,
+      "vacmSecurityName": "public",
+      "vacmGroupName": "all-rights",
+      "vacmSecurityToGroupStorageType": "nonVolatile"
+     },
+     {
+      "vacmSecurityModel": 3,
+      "vacmSecurityName": "initial",
+      "vacmGroupName": "initial",
+      "vacmSecurityToGroupStorageType": "nonVolatile"
+     },
+     {
+      "vacmSecurityModel": 3,
+      "vacmSecurityName": "initial_auth",
+      "vacmGroupName": "initial",
+      "vacmSecurityToGroupStorageType": "nonVolatile"
+     },
+     {
+      "vacmSecurityModel": 3,
+      "vacmSecurityName": "initial_authPriv",
+      "vacmGroupName": "initial",
+      "vacmSecurityToGroupStorageType": "nonVolatile"
+     }
+    ]
+   },
+   "vacmAccessTable": {
+    "vacmAccessEntry": [
+     {
+      "vacmGroupName": "initial",
+      "vacmAccessContextPrefix": "",
+      "vacmAccessSecurityModel": 3,
+      "vacmAccessSecurityLevel": "noAuthNoPriv",
+      "vacmAccessContextMatch": "exact",
+      "vacmAccessReadViewName": "internet",
+      "vacmAccessWriteViewName": "internet",
+      "vacmAccessNotifyViewName": "internet",
+      "vacmAccessStorageType": "nonVolatile"
+     },
+     {
+      "vacmGroupName": "initial",
+      "vacmAccessContextPrefix": "",
+      "vacmAccessSecurityModel": 3,
+      "vacmAccessSecurityLevel": "authNoPriv",
+      "vacmAccessContextMatch": "exact",
+      "vacmAccessReadViewName": "internet",
+      "vacmAccessWriteViewName": "internet",
+      "vacmAccessNotifyViewName": "internet",
+      "vacmAccessStorageType": "nonVolatile"
+     },
+     {
+      "vacmGroupName": "initial",
+      "vacmAccessContextPrefix": "",
+      "vacmAccessSecurityModel": 3,
+      "vacmAccessSecurityLevel": "authPriv",
+      "vacmAccessContextMatch": "exact",
+      "vacmAccessReadViewName": "internet",
+      "vacmAccessWriteViewName": "internet",
+      "vacmAccessNotifyViewName": "internet",
+      "vacmAccessStorageType": "nonVolatile"
+     },
+     {
+      "vacmGroupName": "all-rights",
+      "vacmAccessContextPrefix": "",
+      "vacmAccessSecurityModel": 0,
+      "vacmAccessSecurityLevel": "noAuthNoPriv",
+      "vacmAccessContextMatch": "exact",
+      "vacmAccessReadViewName": "internet",
+      "vacmAccessWriteViewName": "internet",
+      "vacmAccessNotifyViewName": "internet",
+      "vacmAccessStorageType": "nonVolatile"
+     }
+    ]
+   },
+   "vacmViewTreeFamilyTable": {
+    "vacmViewTreeFamilyEntry": [
+     {
+      "vacmViewTreeFamilyViewName": "internet",
+      "vacmViewTreeFamilySubtree": "1.3.6.1",
+      "vacmViewTreeFamilyMask": "",
+      "vacmViewTreeFamilyType": "included",
+      "vacmViewTreeFamilyStorageType": "nonVolatile"
+     }
+    ]
+   }
+  },
+  "SNMPv2-MIB:SNMPv2-MIB": {
+   "system": {
+    "sysContact": "",
+    "sysName": "",
+    "sysLocation": ""
+   },
+   "snmp": {
+    "snmpEnableAuthenTraps": "disabled"
+   }
+  },
+  "Cisco-IOS-XR-sysadmin-fpd-infra-cli-fpd:fpd": {
+   "config": {
+    "auto-upgrade": "disable"
+   }
+  },
+  "Cisco-IOS-XR-sysadmin-sdr-mgr:sdr-config": {
+   "sdr": [
+    {
+     "name": "default-sdr",
+     "resources": {
+      "card-type": [
+       {
+        "type": "RP",
+        "vm-memory": 2,
+        "vm-cpu": 1
+       },
+       {
+        "type": "LC",
+        "vm-memory": 1,
+        "vm-cpu": 1
+       }
+      ]
+     },
+     "location": [
+      {
+       "node-location": "all"
+      }
+     ]
+    }
+   ]
+  },
+  "Cisco-IOS-XR-sysadmin-sdr-mgr:private-sdr": {
+   "sdr-name": [
+    {
+     "name": "default-sdr",
+     "id": 2,
+     "lead_rack0": 0,
+     "lead_rack1": 0,
+     "pairing": [
+      {
+       "num": 0,
+       "second_exist": false,
+       "rp1_rack": 0,
+       "rp1_slot": 0
+      }
+     ]
+    }
+   ]
+  },
+  "Cisco-IOS-XR-sysadmin-services:service": {
+   "cli": {
+    "interactive": {
+     "enabled": true
+    }
+   }
+  },
+  "Cisco-IOS-XR-sysadmin-vm:vm": {
+   "config": {
+    "memory": {
+     "admin": 1,
+     "rp": 14,
+     "lc": 8
+    },
+    "cpu": {
+     "assign": "0-5/6-7"
+    }
+   }
+  },
+  "openconfig-system:system": {
+   "aaa": {
+    "authentication": {
+     "users": {
+      "user": [
+       {
+        "username": "root",
+        "config": {
+         "username": "root",
+         "role": "root-lr",
+         "password-hashed": "$6$XvYiZ/CdPNuK4Z/.$3/15yGC1Br2nlIy/AwZVNsl0BbD.XLbqAL2h8hR4CpBxM.ir4ZilYykiaTqMwe/EB6UySyH7ea/x09ajR6NXz."
+        }
+       },
+       {
+        "username": "admin",
+        "config": {
+         "username": "admin",
+         "role": "root-lr",
+         "password-hashed": "$6$vEaDc/Yt1OyU4c/.$v0lze75JluVDfcM6rgDlsFY3oMB6ODv6l5rgRnk3bFrvnzSFnoEIF.hcc1O/2.YxnAuRLSy7VQGmGedvoBlOp."
+        }
+       }
+      ]
+     },
+     "config": {
+      "authentication-method": [
+       "openconfig-aaa-types:LOCAL"
+      ]
+     }
+    },
+    "authorization": {
+     "config": {
+      "authorization-method": [
+       "openconfig-aaa-types:LOCAL"
+      ]
+     },
+     "events": {
+      "event": [
+       {
+        "event-type": "openconfig-aaa-types:AAA_AUTHORIZATION_EVENT_CONFIG",
+        "config": {
+         "event-type": "openconfig-aaa-types:AAA_AUTHORIZATION_EVENT_CONFIG"
+        }
+       }
+      ]
+     }
+    }
+   },
+   "grpc-server": {
+    "config": {
+     "port": 57777,
+     "enable": true
+    }
+   },
+   "config": {
+    "hostname": "iosxr"
+   },
+   "ssh-server": {
+    "config": {
+     "enable": true,
+     "protocol-version": "V2"
+    }
+   }
+  },
+  "openconfig-network-instance:network-instances": {
+   "network-instance": [
+    {
+     "name": "default",
+     "protocols": {
+      "protocol": [
+       {
+        "identifier": "openconfig-policy-types:BGP",
+        "name": "default",
+        "config": {
+         "identifier": "openconfig-policy-types:BGP",
+         "name": "default"
+        },
+        "bgp": {
+         "global": {
+          "config": {
+           "as": 65503,
+           "router-id": "1.1.1.1"
+          },
+          "afi-safis": {
+           "afi-safi": [
+            {
+             "afi-safi-name": "openconfig-bgp-types:IPV4_UNICAST",
+             "config": {
+              "afi-safi-name": "openconfig-bgp-types:IPV4_UNICAST",
+              "enabled": true
+             }
+            },
+            {
+             "afi-safi-name": "openconfig-bgp-types:IPV6_UNICAST",
+             "config": {
+              "afi-safi-name": "openconfig-bgp-types:IPV6_UNICAST",
+              "enabled": true
+             }
+            }
+           ]
+          }
+         },
+         "peer-groups": {
+          "peer-group": [
+           {
+            "peer-group-name": "sachin",
+            "config": {
+             "peer-group-name": "sachin"
+            },
+            "afi-safis": {
+             "afi-safi": [
+              {
+               "afi-safi-name": "openconfig-bgp-types:IPV4_UNICAST",
+               "config": {
+                "afi-safi-name": "openconfig-bgp-types:IPV4_UNICAST",
+                "enabled": true
+               }
+              },
+              {
+               "afi-safi-name": "openconfig-bgp-types:IPV6_UNICAST",
+               "config": {
+                "afi-safi-name": "openconfig-bgp-types:IPV6_UNICAST",
+                "enabled": true
+               }
+              }
+             ]
+            }
+           }
+          ]
+         },
+         "neighbors": {
+          "neighbor": [
+           {
+            "neighbor-address": "5.5.5.5",
+            "config": {
+             "neighbor-address": "5.5.5.5",
+             "peer-group": "sachin"
+            }
+           }
+          ]
+         }
+        }
+       },
+       {
+        "identifier": "openconfig-policy-types:ISIS",
+        "name": "default",
+        "config": {
+         "identifier": "openconfig-policy-types:ISIS",
+         "name": "default"
+        },
+        "isis": {
+         "global": {
+          "lsp-bit": {
+           "overload-bit": {
+            "config": {
+             "set-bit-on-boot": true
+            },
+            "reset-triggers": {
+             "reset-trigger": [
+              {
+               "reset-trigger": "openconfig-isis-types:WAIT_FOR_SYSTEM",
+               "config": {
+                "reset-trigger": "openconfig-isis-types:WAIT_FOR_SYSTEM",
+                "delay": 360
+               }
+              }
+             ]
+            }
+           }
+          },
+          "config": {
+           "level-capability": "LEVEL_1",
+           "net": [
+            "49.0001.1111.1111.0000.00"
+           ]
+          },
+          "graceful-restart": {
+           "config": {
+            "enabled": true
+           }
+          },
+          "timers": {
+           "lsp-generation": {
+            "config": {
+             "lsp-max-wait-interval": "20",
+             "lsp-first-wait-interval": "1",
+             "lsp-second-wait-interval": "20"
+            }
+           },
+           "config": {
+            "lsp-refresh-interval": 65000
+           }
+          }
+         }
+        }
+       },
+       {
+        "identifier": "openconfig-policy-types:STATIC",
+        "name": "DEFAULT",
+        "config": {
+         "identifier": "openconfig-policy-types:STATIC",
+         "name": "DEFAULT"
+        },
+        "static-routes": {
+         "static": [
+          {
+           "prefix": "0.0.0.0/0",
+           "config": {
+            "prefix": "0.0.0.0/0"
+           },
+           "next-hops": {
+            "next-hop": [
+             {
+              "index": "##10.10.20.254##",
+              "config": {
+               "index": "##10.10.20.254##",
+               "next-hop": "10.10.20.254"
+              }
+             }
+            ]
+           }
+          },
+          {
+           "prefix": "10.230.0.0/16",
+           "config": {
+            "prefix": "10.230.0.0/16"
+           },
+           "next-hops": {
+            "next-hop": [
+             {
+              "index": "##1.1.1.14##",
+              "config": {
+               "index": "##1.1.1.14##",
+               "next-hop": "1.1.1.14"
+              }
+             }
+            ]
+           }
+          },
+          {
+           "prefix": "10.230.0.0/17",
+           "config": {
+            "prefix": "10.230.0.0/17"
+           },
+           "next-hops": {
+            "next-hop": [
+             {
+              "index": "##1.1.1.14##",
+              "config": {
+               "index": "##1.1.1.14##",
+               "next-hop": "1.1.1.14"
+              }
+             },
+             {
+              "index": "##1.1.1.15##",
+              "config": {
+               "index": "##1.1.1.15##",
+               "next-hop": "1.1.1.15"
+              }
+             }
+            ]
+           }
+          },
+          {
+           "prefix": "192.0.2.16/28",
+           "config": {
+            "prefix": "192.0.2.16/28",
+            "set-tag": 10
+           },
+           "next-hops": {
+            "next-hop": [
+             {
+              "index": "##FastEthernet0/0/0/1##192.0.2.10##",
+              "config": {
+               "index": "##FastEthernet0/0/0/1##192.0.2.10##",
+               "next-hop": "192.0.2.10"
+              },
+              "interface-ref": {
+               "config": {
+                "interface": "FastEthernet0/0/0/1",
+                "subinterface": 0
+               }
+              }
+             }
+            ]
+           }
+          }
+         ]
+        }
+       }
+      ]
+     },
+     "config": {
+      "name": "default"
+     }
+    },
+    {
+     "name": "OM",
+     "config": {
+      "name": "OM",
+      "enabled-address-families": [
+       "openconfig-types:IPV4"
+      ]
+     }
+    }
+   ]
+  },
+  "openconfig-routing-policy:routing-policy": {
+   "defined-sets": {
+    "prefix-sets": {
+     "prefix-set": [
+      {
+       "name": "TEST",
+       "config": {
+        "name": "TEST",
+        "mode": "IPV4"
+       },
+       "prefixes": {
+        "prefix": [
+         {
+          "ip-prefix": "10.100.100.0/24",
+          "config": {
+           "ip-prefix": "10.100.100.0/24",
+           "masklength-range": "exact"
+          },
+          "masklength-range": "exact"
+         },
+         {
+          "ip-prefix": "172.19.127.200/29",
+          "config": {
+           "ip-prefix": "172.19.127.200/29",
+           "masklength-range": "exact"
+          },
+          "masklength-range": "exact"
+         }
+        ]
+       }
+      },
+      {
+       "name": "JAN06",
+       "config": {
+        "name": "JAN06",
+        "mode": "IPV4"
+       },
+       "prefixes": {
+        "prefix": [
+         {
+          "ip-prefix": "172.16.10.0/30",
+          "config": {
+           "ip-prefix": "172.16.10.0/30",
+           "masklength-range": "exact"
+          },
+          "masklength-range": "exact"
+         },
+         {
+          "ip-prefix": "10.10.10.0/24",
+          "config": {
+           "ip-prefix": "10.10.10.0/24",
+           "masklength-range": "exact"
+          },
+          "masklength-range": "exact"
+         }
+        ]
+       }
+      },
+      {
+       "name": "vrf-red",
+       "config": {
+        "name": "vrf-red",
+        "mode": "IPV4"
+       },
+       "prefixes": {
+        "prefix": [
+         {
+          "ip-prefix": "1.1.1.1/32",
+          "config": {
+           "ip-prefix": "1.1.1.1/32",
+           "masklength-range": "exact"
+          },
+          "masklength-range": "exact"
+         }
+        ]
+       }
+      }
+     ]
+    }
+   }
+  },
+  "openconfig-interfaces:interfaces": {
+   "interface": [
+    {
+     "name": "BVI220",
+     "config": {
+      "name": "BVI220",
+      "type": "iana-if-type:propVirtual",
+      "enabled": false
+     }
+    },
+    {
+     "name": "BVI221",
+     "config": {
+      "name": "BVI221",
+      "type": "iana-if-type:propVirtual",
+      "enabled": false
+     }
+    },
+    {
+     "name": "BVI225",
+     "config": {
+      "name": "BVI225",
+      "type": "iana-if-type:propVirtual",
+      "enabled": false
+     }
+    },
+    {
+     "name": "BVI991",
+     "config": {
+      "name": "BVI991",
+      "type": "iana-if-type:propVirtual",
+      "description": "DNP | TEST_MGMT"
+     },
+     "subinterfaces": {
+      "subinterface": [
+       {
+        "index": 0,
+        "openconfig-if-ip:ipv4": {
+         "addresses": {
+          "address": [
+           {
+            "ip": "172.19.127.201",
+            "config": {
+             "ip": "172.19.127.201",
+             "prefix-length": 29
+            }
+           }
+          ]
+         }
+        }
+       }
+      ]
+     }
+    },
+    {
+     "name": "Loopback0",
+     "config": {
+      "name": "Loopback0",
+      "type": "iana-if-type:softwareLoopback"
+     },
+     "subinterfaces": {
+      "subinterface": [
+       {
+        "index": 0,
+        "openconfig-if-ip:ipv4": {
+         "addresses": {
+          "address": [
+           {
+            "ip": "1.1.1.1",
+            "config": {
+             "ip": "1.1.1.1",
+             "prefix-length": 32
+            }
+           }
+          ]
+         }
+        }
+       }
+      ]
+     }
+    },
+    {
+     "name": "Loopback10",
+     "config": {
+      "name": "Loopback10",
+      "type": "iana-if-type:softwareLoopback"
+     },
+     "subinterfaces": {
+      "subinterface": [
+       {
+        "index": 0,
+        "openconfig-if-ip:ipv4": {
+         "addresses": {
+          "address": [
+           {
+            "ip": "192.168.10.1",
+            "config": {
+             "ip": "192.168.10.1",
+             "prefix-length": 24
+            }
+           }
+          ]
+         }
+        }
+       }
+      ]
+     }
+    },
+    {
+     "name": "Loopback20",
+     "config": {
+      "name": "Loopback20",
+      "type": "iana-if-type:softwareLoopback",
+      "description": "another_testing"
+     },
+     "subinterfaces": {
+      "subinterface": [
+       {
+        "index": 0,
+        "openconfig-if-ip:ipv4": {
+         "addresses": {
+          "address": [
+           {
+            "ip": "192.168.20.1",
+            "config": {
+             "ip": "192.168.20.1",
+             "prefix-length": 24
+            }
+           }
+          ]
+         }
+        }
+       }
+      ]
+     }
+    },
+    {
+     "name": "Loopback25",
+     "config": {
+      "name": "Loopback25",
+      "type": "iana-if-type:softwareLoopback",
+      "description": "my loopback interface"
+     }
+    },
+    {
+     "name": "Loopback99",
+     "config": {
+      "name": "Loopback99",
+      "type": "iana-if-type:softwareLoopback",
+      "description": "loopback99 on iosxr"
+     },
+     "subinterfaces": {
+      "subinterface": [
+       {
+        "index": 0,
+        "openconfig-if-ip:ipv4": {
+         "addresses": {
+          "address": [
+           {
+            "ip": "192.168.0.99",
+            "config": {
+             "ip": "192.168.0.99",
+             "prefix-length": 24
+            }
+           }
+          ]
+         }
+        }
+       }
+      ]
+     }
+    },
+    {
+     "name": "Loopback100",
+     "config": {
+      "name": "Loopback100",
+      "type": "iana-if-type:softwareLoopback",
+      "description": "***MERGE LOOPBACK 100****"
+     },
+     "subinterfaces": {
+      "subinterface": [
+       {
+        "index": 0,
+        "openconfig-if-ip:ipv4": {
+         "addresses": {
+          "address": [
+           {
+            "ip": "1.1.1.100",
+            "config": {
+             "ip": "1.1.1.100",
+             "prefix-length": 32
+            }
+           }
+          ]
+         }
+        }
+       }
+      ]
+     }
+    },
+    {
+     "name": "Loopback101",
+     "config": {
+      "name": "Loopback101",
+      "type": "iana-if-type:softwareLoopback"
+     },
+     "subinterfaces": {
+      "subinterface": [
+       {
+        "index": 0,
+        "openconfig-if-ip:ipv4": {
+         "addresses": {
+          "address": [
+           {
+            "ip": "192.168.101.1",
+            "config": {
+             "ip": "192.168.101.1",
+             "prefix-length": 24
+            }
+           }
+          ]
+         }
+        }
+       }
+      ]
+     }
+    },
+    {
+     "name": "Loopback103",
+     "config": {
+      "name": "Loopback103",
+      "type": "iana-if-type:softwareLoopback"
+     },
+     "subinterfaces": {
+      "subinterface": [
+       {
+        "index": 0,
+        "openconfig-if-ip:ipv4": {
+         "addresses": {
+          "address": [
+           {
+            "ip": "192.168.103.1",
+            "config": {
+             "ip": "192.168.103.1",
+             "prefix-length": 24
+            }
+           }
+          ]
+         }
+        }
+       }
+      ]
+     }
+    },
+    {
+     "name": "Loopback111",
+     "config": {
+      "name": "Loopback111",
+      "type": "iana-if-type:softwareLoopback",
+      "enabled": false,
+      "description": "test loopback111"
+     }
+    },
+    {
+     "name": "Loopback112",
+     "config": {
+      "name": "Loopback112",
+      "type": "iana-if-type:softwareLoopback",
+      "description": "Configured by NETCONF Invalid"
+     }
+    },
+    {
+     "name": "Loopback123",
+     "config": {
+      "name": "Loopback123",
+      "type": "iana-if-type:softwareLoopback",
+      "description": "test"
+     }
+    },
+    {
+     "name": "Loopback200",
+     "config": {
+      "name": "Loopback200",
+      "type": "iana-if-type:softwareLoopback",
+      "description": "***MERGE LOOPBACK 200****"
+     },
+     "subinterfaces": {
+      "subinterface": [
+       {
+        "index": 0,
+        "openconfig-if-ip:ipv4": {
+         "addresses": {
+          "address": [
+           {
+            "ip": "1.1.1.200",
+            "config": {
+             "ip": "1.1.1.200",
+             "prefix-length": 32
+            }
+           }
+          ]
+         }
+        }
+       }
+      ]
+     }
+    },
+    {
+     "name": "Loopback555",
+     "config": {
+      "name": "Loopback555",
+      "type": "iana-if-type:softwareLoopback",
+      "description": "Configured by Salt-Nornir using NETCONF"
+     }
+    },
+    {
+     "name": "Loopback1000",
+     "config": {
+      "name": "Loopback1000",
+      "type": "iana-if-type:softwareLoopback"
+     }
+    },
+    {
+     "name": "Loopback1234",
+     "config": {
+      "name": "Loopback1234",
+      "type": "iana-if-type:softwareLoopback"
+     }
+    },
+    {
+     "name": "tunnel-ip12445",
+     "config": {
+      "name": "tunnel-ip12445",
+      "type": "iana-if-type:tunnel",
+      "description": "Testsimple2-39533-1044"
+     },
+     "subinterfaces": {
+      "subinterface": [
+       {
+        "index": 0,
+        "openconfig-if-ip:ipv4": {
+         "addresses": {
+          "address": [
+           {
+            "ip": "10.220.45.41",
+            "config": {
+             "ip": "10.220.45.41",
+             "prefix-length": 30
+            }
+           }
+          ]
+         }
+        }
+       }
+      ]
+     },
+     "openconfig-if-tunnel:tunnel": {
+      "ipv4": {
+       "addresses": {
+        "address": [
+         {
+          "ip": "10.220.45.41",
+          "config": {
+           "ip": "10.220.45.41",
+           "prefix-length": 30
+          }
+         }
+        ]
+       }
+      },
+      "config": {
+       "src": "185.121.241.14",
+       "dst": "38.135.71.23"
+      }
+     }
+    },
+    {
+     "name": "Bundle-Ether165",
+     "config": {
+      "name": "Bundle-Ether165",
+      "type": "iana-if-type:ieee8023adLag",
+      "enabled": false
+     }
+    },
+    {
+     "name": "Bundle-Ether167",
+     "config": {
+      "name": "Bundle-Ether167",
+      "type": "iana-if-type:ieee8023adLag",
+      "enabled": false
+     }
+    },
+    {
+     "name": "Bundle-Ether175",
+     "config": {
+      "name": "Bundle-Ether175",
+      "type": "iana-if-type:ieee8023adLag",
+      "enabled": false
+     }
+    },
+    {
+     "name": "Bundle-Ether177",
+     "config": {
+      "name": "Bundle-Ether177",
+      "type": "iana-if-type:ieee8023adLag",
+      "enabled": false
+     }
+    },
+    {
+     "name": "MgmtEth0/RP0/CPU0/0",
+     "config": {
+      "name": "MgmtEth0/RP0/CPU0/0",
+      "type": "iana-if-type:ethernetCsmacd"
+     },
+     "openconfig-if-ethernet:ethernet": {
+      "config": {
+       "auto-negotiate": false
+      }
+     },
+     "subinterfaces": {
+      "subinterface": [
+       {
+        "index": 0,
+        "openconfig-if-ip:ipv4": {
+         "addresses": {
+          "address": [
+           {
+            "ip": "10.10.20.175",
+            "config": {
+             "ip": "10.10.20.175",
+             "prefix-length": 24
+            }
+           }
+          ]
+         }
+        }
+       }
+      ]
+     }
+    },
+    {
+     "name": "GigabitEthernet0/0/0/0",
+     "config": {
+      "name": "GigabitEthernet0/0/0/0",
+      "type": "iana-if-type:ethernetCsmacd",
+      "enabled": false
+     },
+     "openconfig-if-ethernet:ethernet": {
+      "config": {
+       "auto-negotiate": false
+      }
+     },
+     "subinterfaces": {
+      "subinterface": [
+       {
+        "index": 123,
+        "config": {
+         "index": 123
+        },
+        "openconfig-vlan:vlan": {
+         "config": {
+          "vlan-id": 123
+         }
+        }
+       }
+      ]
+     }
+    },
+    {
+     "name": "GigabitEthernet0/0/0/1",
+     "config": {
+      "name": "GigabitEthernet0/0/0/1",
+      "type": "iana-if-type:ethernetCsmacd",
+      "description": "DNP"
+     },
+     "openconfig-if-ethernet:ethernet": {
+      "config": {
+       "auto-negotiate": false
+      }
+     },
+     "subinterfaces": {
+      "subinterface": [
+       {
+        "index": 0,
+        "openconfig-if-ip:ipv4": {
+         "addresses": {
+          "address": [
+           {
+            "ip": "10.100.100.1",
+            "config": {
+             "ip": "10.100.100.1",
+             "prefix-length": 24
+            }
+           }
+          ]
+         }
+        }
+       }
+      ]
+     }
+    },
+    {
+     "name": "GigabitEthernet0/0/0/2",
+     "config": {
+      "name": "GigabitEthernet0/0/0/2",
+      "type": "iana-if-type:ethernetCsmacd"
+     },
+     "openconfig-if-ethernet:ethernet": {
+      "config": {
+       "auto-negotiate": false
+      }
+     },
+     "subinterfaces": {
+      "subinterface": [
+       {
+        "index": 0,
+        "openconfig-if-ip:ipv4": {
+         "addresses": {
+          "address": [
+           {
+            "ip": "192.168.40.1",
+            "config": {
+             "ip": "192.168.40.1",
+             "prefix-length": 24
+            }
+           }
+          ]
+         }
+        }
+       }
+      ]
+     }
+    },
+    {
+     "name": "GigabitEthernet0/0/0/3",
+     "config": {
+      "name": "GigabitEthernet0/0/0/3",
+      "type": "iana-if-type:ethernetCsmacd",
+      "enabled": false
+     },
+     "openconfig-if-ethernet:ethernet": {
+      "config": {
+       "auto-negotiate": false
+      }
+     },
+     "subinterfaces": {
+      "subinterface": [
+       {
+        "index": 0,
+        "openconfig-if-ip:ipv4": {
+         "addresses": {
+          "address": [
+           {
+            "ip": "192.168.40.1",
+            "config": {
+             "ip": "192.168.40.1",
+             "prefix-length": 24
+            }
+           },
+           {
+            "ip": "192.168.2.1",
+            "config": {
+             "ip": "192.168.2.1",
+             "prefix-length": 24
+            }
+           },
+           {
+            "ip": "192.168.30.1",
+            "config": {
+             "ip": "192.168.30.1",
+             "prefix-length": 24
+            }
+           }
+          ]
+         }
+        }
+       }
+      ]
+     }
+    },
+    {
+     "name": "GigabitEthernet0/0/0/4",
+     "config": {
+      "name": "GigabitEthernet0/0/0/4",
+      "type": "iana-if-type:ethernetCsmacd",
+      "description": "test"
+     },
+     "openconfig-if-ethernet:ethernet": {
+      "config": {
+       "auto-negotiate": false
+      }
+     },
+     "subinterfaces": {
+      "subinterface": [
+       {
+        "index": 0,
+        "openconfig-if-ip:ipv4": {
+         "addresses": {
+          "address": [
+           {
+            "ip": "192.168.20.1",
+            "config": {
+             "ip": "192.168.20.1",
+             "prefix-length": 24
+            }
+           }
+          ]
+         }
+        },
+        "openconfig-if-ip:ipv6": {
+         "addresses": {
+          "address": [
+           {
+            "ip": "2001:db8:ff::11",
+            "config": {
+             "ip": "2001:db8:ff::11",
+             "prefix-length": 64
+            }
+           }
+          ]
+         }
+        }
+       }
+      ]
+     }
+    },
+    {
+     "name": "GigabitEthernet0/0/0/6",
+     "config": {
+      "name": "GigabitEthernet0/0/0/6",
+      "type": "iana-if-type:ethernetCsmacd"
+     },
+     "openconfig-if-ethernet:ethernet": {
+      "config": {
+       "auto-negotiate": false
+      }
+     }
+    }
+   ]
+  },
+  "openconfig-acl:acl": {
+   "acl-sets": {
+    "acl-set": [
+     {
+      "name": "acl_1",
+      "type": "ACL_IPV4",
+      "config": {
+       "name": "acl_1",
+       "type": "ACL_IPV4"
+      },
+      "acl-entries": {
+       "acl-entry": [
+        {
+         "sequence-id": 16,
+         "config": {
+          "sequence-id": 16
+         }
+        },
+        {
+         "sequence-id": 21,
+         "config": {
+          "sequence-id": 21
+         },
+         "actions": {
+          "config": {
+           "forwarding-action": "ACCEPT"
+          }
+         },
+         "ipv4": {
+          "config": {
+           "protocol": 6,
+           "source-address": "192.0.2.10/32",
+           "destination-address": "198.51.100.0/28"
+          }
+         },
+         "transport": {
+          "config": {
+           "source-port": "110..121",
+           "tcp-flags": [
+            "openconfig-packet-match-types:TCP_RST"
+           ]
+          }
+         }
+        },
+        {
+         "sequence-id": 23,
+         "config": {
+          "sequence-id": 23
+         },
+         "actions": {
+          "config": {
+           "forwarding-action": "REJECT"
+          }
+         },
+         "ipv4": {
+          "config": {
+           "protocol": 1,
+           "destination-address": "198.51.100.0/28"
+          }
+         }
+        }
+       ]
+      }
+     },
+     {
+      "name": "acl_2",
+      "type": "ACL_IPV4",
+      "config": {
+       "name": "acl_2",
+       "type": "ACL_IPV4"
+      },
+      "acl-entries": {
+       "acl-entry": [
+        {
+         "sequence-id": 10,
+         "config": {
+          "sequence-id": 10
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  }
+ }
+}
