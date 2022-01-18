@@ -191,14 +191,14 @@ func main() {
 	////////////////////////////////
 	// Service Definition
 	////////////////////////////////
-	svc := Service{
+	intent := Service{
 		Name:     "grpc",
 		Port:     "57777",
 		AF:       "ipv4",
 		Insecure: false,
 		CLI:      "show grpc status",
 	}
-	svcHash, err := hashstructure.Hash(svc, hashstructure.FormatV2, nil)
+	intentHash, err := hashstructure.Hash(intent, hashstructure.FormatV2, nil)
 	check(err)
 
 	////////////////////////////////////////
@@ -242,14 +242,14 @@ func main() {
 			////////////////////////////////
 			// Get Operational Data
 			////////////////////////////////
-			opr, err := iosxr.getOper(svc)
+			opr, err := iosxr.getOper(intent)
 			check(err)
 			// fmt.Println(opr.Output)
 
 			////////////////////////////////
 			// Parse Operational Data
 			////////////////////////////////
-			parsed, err := svc.parseOper(opr.Output)
+			parsed, err := intent.parseOper(opr.Output)
 			check(err)
 			fmt.Printf("  Operational state from device:\n   service: %v\n   addr-family: %v\n   port: %v\n   TLS: %v\n\n",
 				parsed.Name, parsed.AF, parsed.Port, !(parsed.Insecure))
@@ -260,16 +260,16 @@ func main() {
 			////////////////////////////////
 			// Validate State
 			////////////////////////////////
-			if oprHash == svcHash {
+			if oprHash == intentHash {
 				continue
 			}
 
 			////////////////////////////////
 			// Generate config
 			////////////////////////////////
-			conf, err := svc.genConfig()
+			conf, err := intent.genConfig()
 			check(err)
-			svc.Config = conf
+			intent.Config = conf
 
 			////////////////////////////////
 			// Send config if necessary
