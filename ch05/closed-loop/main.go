@@ -12,6 +12,7 @@ import (
 	"github.com/scrapli/scrapligo/driver/base"
 	"github.com/scrapli/scrapligo/driver/core"
 	"github.com/scrapli/scrapligo/driver/network"
+	"github.com/scrapli/scrapligo/cfg"
 	"gopkg.in/yaml.v2"
 )
 
@@ -21,7 +22,7 @@ type Router struct {
 	Username  string `yaml:"username"`
 	Password  string `yaml:"password"`
 	StrictKey bool   `yaml:"strictkey"`
-	Conn *network.Driver
+	Conn      *network.Driver
 }
 
 type Inventory struct {
@@ -30,7 +31,7 @@ type Inventory struct {
 
 type DeviceInfo struct {
 	Device    string
-	Output   string
+	Output    string
 	Timestamp time.Time
 }
 
@@ -39,7 +40,7 @@ type Service struct {
 	Port     string
 	AF       string
 	Insecure bool
-	CLI string
+	CLI      string
 }
 
 func (r Router) getConfig() (c DeviceInfo, err error) {
@@ -49,7 +50,7 @@ func (r Router) getConfig() (c DeviceInfo, err error) {
 	}
 	c = DeviceInfo{
 		Device:    r.Hostname,
-		Output:   rs.Result,
+		Output:    rs.Result,
 		Timestamp: time.Now(),
 	}
 	return c, nil
@@ -62,11 +63,32 @@ func (r Router) getOper(s Service) (o DeviceInfo, err error) {
 	}
 	o = DeviceInfo{
 		Device:    r.Hostname,
-		Output:   rs.Result,
+		Output:    rs.Result,
 		Timestamp: time.Now(),
 	}
 	return o, nil
 }
+
+func (r Router) sendConfig(conf string) error {
+	c, err := cfg.NewCfgDriver(r.Conn, r.Platform)
+	if err != nil {
+		return fmt.Errorf("failed create config driver for %s: %w", r.Hostname, err)
+	}
+	err = c.Prepare()
+	if err != nil {
+		return fmt.Errorf("failed to prepare config for %s: %w", r.Hostname, err)
+	}
+	_, err = c.LoadConfig(conf, false)
+	if err != nil {
+		return fmt.Errorf("failed to load config for %s: %w", r.Hostname, err)
+	}
+	_, err = c.CommitConfig()
+	if err != nil {
+		return fmt.Errorf("failed to commit the config for %s: %w", r.Hostname, err)
+	}
+	return nil
+}
+
 
 func (c DeviceInfo) save() error {
 	layout := "01-02-2006_15-04_EST"
@@ -84,7 +106,7 @@ func (c DeviceInfo) save() error {
 	return f.Sync()
 }
 
-func check(err error){
+func check(err error) {
 	if err != nil {
 		panic(err)
 	}
@@ -108,7 +130,7 @@ func (s Service) genConfig() (string, error) {
 	return b.String(), nil
 }
 
-func (s Service) parseOper(input string) (Service, error){
+func (s Service) parseOper(input string) (Service, error) {
 	if s.Name != "grpc" {
 		return Service{}, fmt.Errorf("service %s not supported", s.Name)
 	}
@@ -136,10 +158,10 @@ func (s Service) parseOper(input string) (Service, error){
 		af = "ipv4"
 	}
 
-	o := Service {
-		Name: nsl[len(nsl)-1],
-		Port: psl[len(psl)-1],
-		AF: af,
+	o := Service{
+		Name:     nsl[len(nsl)-1],
+		Port:     psl[len(psl)-1],
+		AF:       af,
 		Insecure: noTLS,
 	}
 
@@ -174,7 +196,7 @@ func main() {
 	)
 	check(err)
 	iosxr.Conn = conn
-	
+
 	err = conn.Open()
 	check(err)
 	defer conn.Close()
@@ -184,7 +206,7 @@ func main() {
 	////////////////////////////////
 	config, err := iosxr.getConfig()
 	check(err)
-	
+
 	err = config.save()
 	check(err)
 
@@ -192,15 +214,15 @@ func main() {
 	// Generate config
 	////////////////////////////////
 	svc := Service{
-		Name: "grpc",
-		Port: "57777",
-		AF: "ipv4", 
+		Name:     "grpc",
+		Port:     "57777",
+		AF:       "ipv4",
 		Insecure: false,
-		CLI:"show grpc status",	
+		CLI:      "show grpc status",
 	}
-	cfg, err := svc.genConfig()
+	conf, err := svc.genConfig()
 	check(err)
-	fmt.Println(cfg)
+	fmt.Println(conf)
 
 	////////////////////////////////
 	// Get Operational Data
@@ -215,4 +237,11 @@ func main() {
 	parsed, err := svc.parseOper(opr.Output)
 	check(err)
 	fmt.Printf("%v\n", parsed)
+
+	////////////////////////////////
+	// Send config
+	////////////////////////////////
+	err = iosxr.sendConfig(conf)
+	check(err)
+
 }

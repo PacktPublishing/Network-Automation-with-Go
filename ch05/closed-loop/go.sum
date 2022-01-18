@@ -1,3 +1,4 @@
+github.com/carlmontanari/difflibgo v0.0.0-20210718170140-424f52054f94 h1:NGwk1xS2VoCNj8Y7RSVM/oEI6p7yUihghKjNbY5QRDs=
 github.com/carlmontanari/difflibgo v0.0.0-20210718170140-424f52054f94/go.mod h1:+3MuSIeC3qmdSesR12cTLeb47R/Vvo+bHdB6hC5HShk=
 github.com/creack/pty v1.1.11/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/creack/pty v1.1.17 h1:QeVUsEDNrLBW4tMgZHvxy18sKtr6VI492kBhUfhDJNI=
