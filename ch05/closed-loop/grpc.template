@@ -1,0 +1,6 @@
+no grpc
+grpc
+ port {{ .Port }}
+ {{if .Insecure}}no-tls {{end}}
+ address-family {{ .AF }}
+!

@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"sync"
+	"strings"
+	"text/template"
 	"time"
 
 	"github.com/scrapli/scrapligo/driver/base"
@@ -30,50 +31,14 @@ type Config struct {
 	Timestamp time.Time
 }
 
-func getVersion(r Router, out chan map[string]interface{}, wg *sync.WaitGroup) {
-	defer wg.Done()
-
-	d, err := core.NewCoreDriver(
-		r.Hostname,
-		r.Platform,
-		base.WithAuthStrictKey(r.StrictKey),
-		base.WithAuthUsername(r.Username),
-		base.WithAuthPassword(r.Password),
-		base.WithSSHConfigFile("ssh_config"),
-	)
-
-	if err != nil {
-		fmt.Printf("failed to create driver for %s: %+v\n", r.Hostname, err)
-		return
-	}
-
-	err = d.Open()
-	if err != nil {
-		fmt.Printf("failed to open driver for %s: %+v\n", r.Hostname, err)
-		return
-	}
-	defer d.Close()
-
-	rs, err := d.SendCommand("show version")
-	if err != nil {
-		fmt.Printf("failed to send 'show version' for %s: %+v\n", r.Hostname, err)
-		return
-	}
-
-	parsedOut, err := rs.TextFsmParse(r.Platform + "_show_version.textfsm")
-	if err != nil {
-		fmt.Printf("failed to parse 'show version' for %s: %+v\n", r.Hostname, err)
-		return
-	}
-
-	parsedOut[0]["HOSTNAME"] = r.Hostname
-	out <- parsedOut[0]
-
+type Service struct {
+	Name     string
+	Port     string
+	AF       string
+	Insecure bool
 }
 
-func getConfig(r Router, out chan Config, wg *sync.WaitGroup) {
-	defer wg.Done()
-
+func (r Router) getConfig() (c Config, err error) {
 	d, err := core.NewCoreDriver(
 		r.Hostname,
 		r.Platform,
@@ -84,97 +49,93 @@ func getConfig(r Router, out chan Config, wg *sync.WaitGroup) {
 	)
 
 	if err != nil {
-		fmt.Printf("failed to create driver for %s: %+v\n", r.Hostname, err)
-		return
+		return c, fmt.Errorf("failed to create driver for %s: %w", r.Hostname, err)
 	}
 
 	err = d.Open()
 	if err != nil {
-		fmt.Printf("failed to open driver for %s: %+v\n", r.Hostname, err)
-		return
+		return c, fmt.Errorf("failed to open driver for %s: %w", r.Hostname, err)
 	}
 	defer d.Close()
 
 	rs, err := d.SendCommand("show run")
 	if err != nil {
-		fmt.Printf("failed to send 'show run' for %s: %+v\n", r.Hostname, err)
-		return
+		return c, fmt.Errorf("failed to send 'show run' for %s: %w", r.Hostname, err)
 	}
 
-	output := Config{
+	c = Config{
 		Device:    r.Hostname,
 		Running:   rs.Result,
 		Timestamp: time.Now(),
 	}
 
-	out <- output
-
+	return c, nil
 }
 
-func printer(in chan map[string]interface{}) {
-	for out := range in {
-		fmt.Printf("Hostname: %s\nHardware: %s\nSW Version: %s\nUptime: %s\n\n",
-			out["HOSTNAME"], out["HARDWARE"],
-			out["VERSION"], out["UPTIME"])
-	}
-}
-
-func save(in chan Config) {
+func (c Config) save() error {
 	layout := "01-02-2006_15-04_EST"
 
-	for out := range in {
-		f, err := os.Create("backups/" + out.Device + "_" + out.Timestamp.Format(layout) + ".cfg")
-		if err != nil {
-			fmt.Printf("failed to create 'show run' file for %s: %+v\n", out.Device, err)
-			return
-		}
-
-		_, err = io.WriteString(f, out.Running)
-		if err != nil {
-			fmt.Printf("failed to create write 'show run' for %s: %+v\n", out.Device, err)
-		}
-		f.Sync()
-		f.Close()
+	f, err := os.Create("backups/" + c.Device + "_" + c.Timestamp.Format(layout) + ".cfg")
+	if err != nil {
+		return fmt.Errorf("failed to create 'show run' file for %s: %w", c.Device, err)
 	}
+	defer f.Close()
+
+	_, err = io.WriteString(f, c.Running)
+	if err != nil {
+		return fmt.Errorf("failed to create write 'show run' for %s: %w", c.Device, err)
+	}
+	return f.Sync()
+}
+
+func check(err error){
+	if err != nil {
+		panic(err)
+	}
+}
+
+func (s Service) genConfig() (string, error) {
+	base, err := os.ReadFile(s.Name + ".template")
+	if err != nil {
+		return "", fmt.Errorf("failed to read template file for %s: %w", s.Name, err)
+	}
+
+	t, err := template.New("service").Parse(string(base))
+	if err != nil {
+		return "", fmt.Errorf("failed to parse template for %s: %w", s.Name, err)
+	}
+	var b strings.Builder
+	err = t.Execute(&b, s)
+	if err != nil {
+		return "", fmt.Errorf("failed to parse template for %s: %w", s.Name, err)
+	}
+	return b.String(), nil
 }
 
 func main() {
 	src, err := os.Open("input.yml")
-	if err != nil {
-		panic(err)
-	}
+	check(err)
 	defer src.Close()
 
 	d := yaml.NewDecoder(src)
 
 	var inv Inventory
 	err = d.Decode(&inv)
-	if err != nil {
-		panic(err)
-	}
+	check(err)
+	iosxr := inv.Routers[0]
 
-	ch := make(chan map[string]interface{})
+	// Backup config
+	config, err := iosxr.getConfig()
+	check(err)
+	
+	err = config.save()
+	check(err)
 
-	go printer(ch)
+	// Generate config
+	svc := Service{"grpc", "57777", "ipv4", false}
+	cfg, err := svc.genConfig()
+	check(err)
+	fmt.Println(cfg)
 
-	var wg sync.WaitGroup
-	for _, v := range inv.Routers {
-		wg.Add(1)
-		go getVersion(v, ch, &wg)
-	}
-
-	wg.Wait()
-	close(ch)
-
-	ch2 := make(chan Config)
-	go save(ch2)
-
-	var wg2 sync.WaitGroup
-	for _, v := range inv.Routers {
-		wg2.Add(1)
-		go getConfig(v, ch2, &wg2)
-	}
-
-	wg2.Wait()
-	close(ch2)
+	
 }
