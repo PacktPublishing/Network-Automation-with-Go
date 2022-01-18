@@ -42,6 +42,7 @@ type Service struct {
 	AF       string
 	Insecure bool
 	CLI      string
+	Config   string
 }
 
 func (r Router) getConfig() (c DeviceInfo, err error) {
@@ -113,6 +114,10 @@ func check(err error) {
 }
 
 func (s Service) genConfig() (string, error) {
+	if s.Config != "" {
+		return s.Config, nil
+	}
+
 	base, err := os.ReadFile(s.Name + ".template")
 	if err != nil {
 		return "", fmt.Errorf("failed to read template file for %s: %w", s.Name, err)
@@ -165,7 +170,6 @@ func (s Service) parseOper(input string) (Service, error) {
 		Insecure: noTLS,
 		CLI:      "show grpc status",
 	}
-
 	return o, nil
 }
 
@@ -183,6 +187,19 @@ func main() {
 	err = d.Decode(&inv)
 	check(err)
 	iosxr := inv.Routers[0]
+
+	////////////////////////////////
+	// Service Definition
+	////////////////////////////////
+	svc := Service{
+		Name:     "grpc",
+		Port:     "57777",
+		AF:       "ipv4",
+		Insecure: false,
+		CLI:      "show grpc status",
+	}
+	svcHash, err := hashstructure.Hash(svc, hashstructure.FormatV2, nil)
+	check(err)
 
 	////////////////////////////////////////
 	// Open connection to the network device
@@ -212,34 +229,14 @@ func main() {
 	check(err)
 
 	////////////////////////////////
-	// Service Definition
-	////////////////////////////////
-	svc := Service{
-		Name:     "grpc",
-		Port:     "57777",
-		AF:       "ipv4",
-		Insecure: false,
-		CLI:      "show grpc status",
-	}
-	svcHash, err := hashstructure.Hash(svc, hashstructure.FormatV2, nil)
-	check(err)
-
-	////////////////////////////////
-	// Generate config
-	////////////////////////////////
-	conf, err := svc.genConfig()
-	check(err)
-	// fmt.Println(conf)
-
-	////////////////////////////////
 	// Continuous/Enforcement loop
 	////////////////////////////////
-	fmt.Println("Entering to continuous loop")
+	fmt.Println("Entering to continuous loop ====>")
 	ticker := time.NewTicker(time.Second * 30)
 	defer ticker.Stop()
 
 	go func() {
-		for ; true; <- ticker.C {
+		for ; true; <-ticker.C {
 			h, m, s := time.Now().Clock()
 			fmt.Printf(" Loop at %02d:%02d:%02d\n", h, m, s)
 			////////////////////////////////
@@ -268,9 +265,16 @@ func main() {
 			}
 
 			////////////////////////////////
+			// Generate config
+			////////////////////////////////
+			conf, err := svc.genConfig()
+			check(err)
+			svc.Config = conf
+
+			////////////////////////////////
 			// Send config if necessary
 			////////////////////////////////
-			fmt.Printf("Configuring device\n")
+			fmt.Printf("Configuring device ====>\n\n")
 			err = iosxr.sendConfig(conf)
 			check(err)
 		}
