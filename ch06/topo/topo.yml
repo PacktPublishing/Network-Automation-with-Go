@@ -1,0 +1,24 @@
+name: ch06
+
+topology:
+  nodes:
+    srl:
+      kind: srl
+      image: ghcr.io/nokia/srlinux
+      ports:
+        - 22:22
+    ceos:
+      kind: ceos
+      image: ceos:4.23.8M
+      ports:
+        - 23:22
+    sw1:
+      kind: cvx
+      image: networkop/cx:5.0.0
+      runtime: docker
+      ports:
+        - 8765:8765
+
+  links:
+    - endpoints: ["srl:e1-1", "ceos:eth1"]
+    - endpoints: ["sw1:swp1", "ceos:eth2"]
