@@ -9,10 +9,11 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/mitchellh/hashstructure/v2"
+	"github.com/scrapli/scrapligo/cfg"
 	"github.com/scrapli/scrapligo/driver/base"
 	"github.com/scrapli/scrapligo/driver/core"
 	"github.com/scrapli/scrapligo/driver/network"
-	"github.com/scrapli/scrapligo/cfg"
 	"gopkg.in/yaml.v2"
 )
 
@@ -89,7 +90,6 @@ func (r Router) sendConfig(conf string) error {
 	return nil
 }
 
-
 func (c DeviceInfo) save() error {
 	layout := "01-02-2006_15-04_EST"
 
@@ -163,6 +163,7 @@ func (s Service) parseOper(input string) (Service, error) {
 		Port:     psl[len(psl)-1],
 		AF:       af,
 		Insecure: noTLS,
+		CLI:      "show grpc status",
 	}
 
 	return o, nil
@@ -211,7 +212,7 @@ func main() {
 	check(err)
 
 	////////////////////////////////
-	// Generate config
+	// Service Definition
 	////////////////////////////////
 	svc := Service{
 		Name:     "grpc",
@@ -220,28 +221,61 @@ func main() {
 		Insecure: false,
 		CLI:      "show grpc status",
 	}
+	svcHash, err := hashstructure.Hash(svc, hashstructure.FormatV2, nil)
+	check(err)
+
+	////////////////////////////////
+	// Generate config
+	////////////////////////////////
 	conf, err := svc.genConfig()
 	check(err)
-	fmt.Println(conf)
+	// fmt.Println(conf)
 
 	////////////////////////////////
-	// Get Operational Data
+	// Continuous/Enforcement loop
 	////////////////////////////////
-	opr, err := iosxr.getOper(svc)
-	check(err)
-	// fmt.Println(opr.Output)
+	fmt.Println("Entering to continuous loop")
+	ticker := time.NewTicker(time.Second * 30)
+	defer ticker.Stop()
 
-	////////////////////////////////
-	// Parse Operational Data
-	////////////////////////////////
-	parsed, err := svc.parseOper(opr.Output)
-	check(err)
-	fmt.Printf("%v\n", parsed)
+	go func() {
+		for ; true; <- ticker.C {
+			h, m, s := time.Now().Clock()
+			fmt.Printf(" Loop at %02d:%02d:%02d\n", h, m, s)
+			////////////////////////////////
+			// Get Operational Data
+			////////////////////////////////
+			opr, err := iosxr.getOper(svc)
+			check(err)
+			// fmt.Println(opr.Output)
 
-	////////////////////////////////
-	// Send config
-	////////////////////////////////
-	err = iosxr.sendConfig(conf)
-	check(err)
+			////////////////////////////////
+			// Parse Operational Data
+			////////////////////////////////
+			parsed, err := svc.parseOper(opr.Output)
+			check(err)
+			fmt.Printf("  Operational state from device:\n   service: %v\n   addr-family: %v\n   port: %v\n   TLS: %v\n\n",
+				parsed.Name, parsed.AF, parsed.Port, !(parsed.Insecure))
 
+			oprHash, err := hashstructure.Hash(parsed, hashstructure.FormatV2, nil)
+			check(err)
+
+			////////////////////////////////
+			// Validate State
+			////////////////////////////////
+			if oprHash == svcHash {
+				continue
+			}
+
+			////////////////////////////////
+			// Send config if necessary
+			////////////////////////////////
+			fmt.Printf("Configuring device\n")
+			err = iosxr.sendConfig(conf)
+			check(err)
+		}
+	}()
+
+	time.Sleep(time.Second * 200)
+	fmt.Println("End of the program")
 }

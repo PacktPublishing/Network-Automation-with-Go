@@ -3,6 +3,7 @@ module github.com/PacktPublishing/Network-Automation-with-Go/ch05/closed-loop
 go 1.17
 
 require (
+	github.com/mitchellh/hashstructure/v2 v2.0.2
 	github.com/scrapli/scrapligo v0.1.2
 	gopkg.in/yaml.v2 v2.4.0
 )
