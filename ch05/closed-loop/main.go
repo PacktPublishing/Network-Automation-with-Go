@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"regexp"
 	"strings"
 	"text/template"
 	"time"
@@ -107,6 +108,44 @@ func (s Service) genConfig() (string, error) {
 	return b.String(), nil
 }
 
+func (s Service) parseOper(input string) (Service, error){
+	if s.Name != "grpc" {
+		return Service{}, fmt.Errorf("service %s not supported", s.Name)
+	}
+	n := regexp.MustCompile(`transport.*`)
+	n.Find([]byte(input))
+	nsl := strings.Split(string(n.Find([]byte(input))), " ")
+
+	p := regexp.MustCompile(`listening-port.*`)
+	p.Find([]byte(input))
+	psl := strings.Split(string(p.Find([]byte(input))), " ")
+
+	i := regexp.MustCompile(`TLS.*`)
+	i.Find([]byte(input))
+	isl := strings.Split(string(i.Find([]byte(input))), " ")
+	noTLS := true
+	if isl[len(isl)-1] == "enabled" {
+		noTLS = false
+	}
+
+	a := regexp.MustCompile(`access-family.*`)
+	a.Find([]byte(input))
+	asl := strings.Split(string(a.Find([]byte(input))), " ")
+	af := "ipv6"
+	if asl[len(asl)-1] == "tcp4" {
+		af = "ipv4"
+	}
+
+	o := Service {
+		Name: nsl[len(nsl)-1],
+		Port: psl[len(psl)-1],
+		AF: af,
+		Insecure: noTLS,
+	}
+
+	return o, nil
+}
+
 func main() {
 	////////////////////////////////
 	// Read input data
@@ -168,6 +207,12 @@ func main() {
 	////////////////////////////////
 	opr, err := iosxr.getOper(svc)
 	check(err)
-	fmt.Println(opr)
+	// fmt.Println(opr.Output)
 
+	////////////////////////////////
+	// Parse Operational Data
+	////////////////////////////////
+	parsed, err := svc.parseOper(opr.Output)
+	check(err)
+	fmt.Printf("%v\n", parsed)
 }
