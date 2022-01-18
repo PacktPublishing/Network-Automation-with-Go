@@ -10,6 +10,7 @@ import (
 
 	"github.com/scrapli/scrapligo/driver/base"
 	"github.com/scrapli/scrapligo/driver/core"
+	"github.com/scrapli/scrapligo/driver/network"
 	"gopkg.in/yaml.v2"
 )
 
@@ -19,15 +20,16 @@ type Router struct {
 	Username  string `yaml:"username"`
 	Password  string `yaml:"password"`
 	StrictKey bool   `yaml:"strictkey"`
+	Conn *network.Driver
 }
 
 type Inventory struct {
 	Routers []Router `yaml:"router"`
 }
 
-type Config struct {
+type DeviceInfo struct {
 	Device    string
-	Running   string
+	Output   string
 	Timestamp time.Time
 }
 
@@ -36,43 +38,36 @@ type Service struct {
 	Port     string
 	AF       string
 	Insecure bool
+	CLI string
 }
 
-func (r Router) getConfig() (c Config, err error) {
-	d, err := core.NewCoreDriver(
-		r.Hostname,
-		r.Platform,
-		base.WithAuthStrictKey(r.StrictKey),
-		base.WithAuthUsername(r.Username),
-		base.WithAuthPassword(r.Password),
-		base.WithSSHConfigFile("ssh_config"),
-	)
-
-	if err != nil {
-		return c, fmt.Errorf("failed to create driver for %s: %w", r.Hostname, err)
-	}
-
-	err = d.Open()
-	if err != nil {
-		return c, fmt.Errorf("failed to open driver for %s: %w", r.Hostname, err)
-	}
-	defer d.Close()
-
-	rs, err := d.SendCommand("show run")
+func (r Router) getConfig() (c DeviceInfo, err error) {
+	rs, err := r.Conn.SendCommand("show run")
 	if err != nil {
 		return c, fmt.Errorf("failed to send 'show run' for %s: %w", r.Hostname, err)
 	}
-
-	c = Config{
+	c = DeviceInfo{
 		Device:    r.Hostname,
-		Running:   rs.Result,
+		Output:   rs.Result,
 		Timestamp: time.Now(),
 	}
-
 	return c, nil
 }
 
-func (c Config) save() error {
+func (r Router) getOper(s Service) (o DeviceInfo, err error) {
+	rs, err := r.Conn.SendCommand(s.CLI)
+	if err != nil {
+		return o, fmt.Errorf("failed to send %s for %s: %w", s.CLI, r.Hostname, err)
+	}
+	o = DeviceInfo{
+		Device:    r.Hostname,
+		Output:   rs.Result,
+		Timestamp: time.Now(),
+	}
+	return o, nil
+}
+
+func (c DeviceInfo) save() error {
 	layout := "01-02-2006_15-04_EST"
 
 	f, err := os.Create("backups/" + c.Device + "_" + c.Timestamp.Format(layout) + ".cfg")
@@ -81,7 +76,7 @@ func (c Config) save() error {
 	}
 	defer f.Close()
 
-	_, err = io.WriteString(f, c.Running)
+	_, err = io.WriteString(f, c.Output)
 	if err != nil {
 		return fmt.Errorf("failed to create write 'show run' for %s: %w", c.Device, err)
 	}
@@ -113,6 +108,9 @@ func (s Service) genConfig() (string, error) {
 }
 
 func main() {
+	////////////////////////////////
+	// Read input data
+	////////////////////////////////
 	src, err := os.Open("input.yml")
 	check(err)
 	defer src.Close()
@@ -124,18 +122,52 @@ func main() {
 	check(err)
 	iosxr := inv.Routers[0]
 
+	////////////////////////////////////////
+	// Open connection to the network device
+	///////////////////////////////////////
+	conn, err := core.NewCoreDriver(
+		iosxr.Hostname,
+		iosxr.Platform,
+		base.WithAuthStrictKey(iosxr.StrictKey),
+		base.WithAuthUsername(iosxr.Username),
+		base.WithAuthPassword(iosxr.Password),
+		base.WithSSHConfigFile("ssh_config"),
+	)
+	check(err)
+	iosxr.Conn = conn
+	
+	err = conn.Open()
+	check(err)
+	defer conn.Close()
+
+	////////////////////////////////
 	// Backup config
+	////////////////////////////////
 	config, err := iosxr.getConfig()
 	check(err)
 	
 	err = config.save()
 	check(err)
 
+	////////////////////////////////
 	// Generate config
-	svc := Service{"grpc", "57777", "ipv4", false}
+	////////////////////////////////
+	svc := Service{
+		Name: "grpc",
+		Port: "57777",
+		AF: "ipv4", 
+		Insecure: false,
+		CLI:"show grpc status",	
+	}
 	cfg, err := svc.genConfig()
 	check(err)
 	fmt.Println(cfg)
 
-	
+	////////////////////////////////
+	// Get Operational Data
+	////////////////////////////////
+	opr, err := iosxr.getOper(svc)
+	check(err)
+	fmt.Println(opr)
+
 }
