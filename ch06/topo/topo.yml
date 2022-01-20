@@ -4,21 +4,15 @@ topology:
   nodes:
     srl:
       kind: srl
-      image: ghcr.io/nokia/srlinux
-      ports:
-        - 22:22
+      image: ghcr.io/nokia/srlinux:21.6.4
     ceos:
       kind: ceos
-      image: ceos:4.23.8M
-      ports:
-        - 23:22
-    sw1:
+      image: ceos:4.26.4M
+    cvx:
       kind: cvx
       image: networkop/cx:5.0.0
       runtime: docker
-      ports:
-        - 8765:8765
 
   links:
     - endpoints: ["srl:e1-1", "ceos:eth1"]
-    - endpoints: ["sw1:swp1", "ceos:eth2"]
+    - endpoints: ["cvx:swp1", "ceos:eth2"]
