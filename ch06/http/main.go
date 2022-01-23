@@ -70,25 +70,22 @@ type nvue struct {
 }
 
 type Input struct {
-	Uplink struct {
-		Name string `yaml:"name"`
-		IP   string `yaml:"ip"`
-	} `yaml:"uplink"`
+	Uplinks []struct {
+		Name   string `yaml:"name"`
+		Prefix string `yaml:"prefix"`
+	} `yaml:"uplinks"`
 	Loopback struct {
 		IP string `yaml:"ip"`
 	} `yaml:"loopback"`
-	ASN  int `yaml:"asn"`
-	Peer struct {
+	ASN   int `yaml:"asn"`
+	Peers []struct {
 		IP  string `yaml:"ip"`
 		ASN int    `yaml:"asn"`
-	} `yaml:"peer"`
+	} `yaml:"peers"`
 }
 
 func populateData(i Input, o *nvue) {
 	o.Interface = map[string]Interface{
-		i.Uplink.Name: Interface{
-			Type: "swp",
-		},
 		"lo": Interface{
 			Type: "loopback",
 			IP: &IPAddress{
@@ -98,12 +95,31 @@ func populateData(i Input, o *nvue) {
 			},
 		},
 	}
+	for _, uplink := range i.Uplinks {
+		o.Interface[uplink.Name] = Interface{
+			Type: "swp",
+			IP: &IPAddress{
+				Address: map[string]struct{}{
+					uplink.Prefix: struct{}{},
+				},
+			},
+		}
+	}
 	o.Router = router{
 		Bgp: bgp{
 			RouterID: i.Loopback.IP,
 			ASN:      i.ASN,
 		},
 	}
+
+	var peers = make(map[string]neighbor)
+	for _, peer := range i.Peers {
+		peers[peer.IP] = neighbor{
+			RemoteAS: peer.ASN,
+			Type:     "numbered",
+		}
+	}
+
 	o.Vrf = map[string]vrf{
 		"default": vrf{
 			Router: router{
@@ -118,13 +134,8 @@ func populateData(i Input, o *nvue) {
 							},
 						},
 					},
-					Enabled: "on",
-					Neighbor: map[string]neighbor{
-						i.Peer.IP: neighbor{
-							RemoteAS: i.Peer.ASN,
-							Type:     "numbered",
-						},
-					},
+					Enabled:  "on",
+					Neighbor: peers,
 				},
 			},
 		},
@@ -165,7 +176,7 @@ func createRevision(c cvx) (string, error) {
 func applyRevision(c cvx, id string) error {
 	applyPath := "/nvue_v1/revision/" + url.PathEscape(id)
 
-	body := []byte("{\"state\": \"apply\", \"auto-prompt\": {\"ays\": \"ays_yes\"}}")
+	body := []byte("{\"state\": \"apply\", \"auto-prompt\": {\"ays\": \"ays_yes\", \"ignore_fail\": \"ignore_fail_yes\"}} ")
 
 	req, err := http.NewRequest("PATCH", c.url+applyPath, bytes.NewReader(body))
 	if err != nil {
@@ -220,6 +231,9 @@ func main() {
 	// populate the device data model
 	var data nvue
 	populateData(input, &data)
+
+	view, _ := json.MarshalIndent(data, "", " ")
+	log.Print("generated config ", string(view))
 
 	body := new(bytes.Buffer)
 	err = json.NewEncoder(body).Encode(data)

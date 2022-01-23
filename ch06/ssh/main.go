@@ -15,9 +15,11 @@ import (
 
 const srlTemplate = `
 enter candidate
-set / interface {{ .Uplink.Name }} subinterface 0 ipv4 address {{ .Uplink.IP }}/31
+{{- range $uplink := .Uplinks }}
+set / interface {{ $uplink.Name }} subinterface 0 ipv4 address {{ $uplink.IP }}/31
+set / network-instance default interface {{ $uplink.Name }}.0
+{{- end }}
 set / interface system0 subinterface 0 ipv4 address {{ .Loopback.IP }}/32
-set / network-instance default interface {{ .Uplink.Name }}.0
 set / network-instance default interface system0.0
 set / routing-policy policy all default-action accept
 set / network-instance default protocols bgp autonomous-system {{ .ASN }}
@@ -25,8 +27,10 @@ set / network-instance default protocols bgp router-id {{ .Loopback.IP }}
 set / network-instance default protocols bgp group EBGP
 set / network-instance default protocols bgp group EBGP export-policy all
 set / network-instance default protocols bgp group EBGP import-policy all
-set / network-instance default protocols bgp group EBGP peer-as {{ .Peer.ASN }}
-set / network-instance default protocols bgp neighbor {{ .Peer.IP }} peer-group EBGP
+{{- range $peer := .Peers }}
+set / network-instance default protocols bgp neighbor {{ $peer.IP }} peer-as {{ $peer.ASN }}
+set / network-instance default protocols bgp neighbor {{ $peer.IP }} peer-group EBGP
+{{- end }}
 set / network-instance default protocols bgp ipv4-unicast admin-state enable
 commit now
 quit
@@ -37,18 +41,18 @@ var (
 )
 
 type Input struct {
-	Uplink struct {
+	Uplinks []struct {
 		Name string `yaml:"name"`
 		IP   string `yaml:"ip"`
-	} `yaml:"uplink"`
+	} `yaml:"uplinks"`
 	Loopback struct {
 		IP string `yaml:"ip"`
 	} `yaml:"loopback"`
-	ASN  int `yaml:"asn"`
-	Peer struct {
+	ASN   int `yaml:"asn"`
+	Peers []struct {
 		IP  string `yaml:"ip"`
 		ASN int    `yaml:"asn"`
-	} `yaml:"peer"`
+	} `yaml:"peers"`
 }
 
 func main() {

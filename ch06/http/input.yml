@@ -1,10 +1,10 @@
 asn: 65002
 loopback: 
   ip: "198.51.100.3"
-uplink:
-  name: "swp1"
-  ip: "192.0.2.3"
-peer:
-  ip: "192.0.2.2"
-  asn: 65001
+uplinks:
+  - name: "swp1"
+    prefix: "192.0.2.3/31"
+peers:
+  - ip: "192.0.2.2"
+    asn: 65001
   
