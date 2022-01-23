@@ -16,7 +16,7 @@ import (
 const srlTemplate = `
 enter candidate
 {{- range $uplink := .Uplinks }}
-set / interface {{ $uplink.Name }} subinterface 0 ipv4 address {{ $uplink.IP }}/31
+set / interface {{ $uplink.Name }} subinterface 0 ipv4 address {{ $uplink.Prefix }}
 set / network-instance default interface {{ $uplink.Name }}.0
 {{- end }}
 set / interface system0 subinterface 0 ipv4 address {{ .Loopback.IP }}/32
@@ -42,8 +42,8 @@ var (
 
 type Input struct {
 	Uplinks []struct {
-		Name string `yaml:"name"`
-		IP   string `yaml:"ip"`
+		Name   string `yaml:"name"`
+		Prefix string `yaml:"prefix"`
 	} `yaml:"uplinks"`
 	Loopback struct {
 		IP string `yaml:"ip"`
