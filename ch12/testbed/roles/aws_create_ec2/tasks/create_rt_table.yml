@@ -1,0 +1,15 @@
+- name: Create Route Table
+  community.aws.ec2_vpc_route_table:
+    region: "{{ ec2_region }}"
+    vpc_id: "{{ create_vpc.vpc.id }}"
+    subnets:
+      - "{{ create_subnet.subnet.id }}"
+    routes:
+      - dest: 0.0.0.0/0
+        gateway_id: "{{ igw.gateway_id }}"
+    tags:
+      Environment: "{{ ec2_environment }}"
+      Name: "{{ ec2_resource_prefix }}-route-table"
+  register: rt_table
+  until: rt_table is not failed
+  retries: 5

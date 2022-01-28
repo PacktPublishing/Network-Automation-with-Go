@@ -1,0 +1,11 @@
+- name: Create AWS VPC
+  amazon.aws.ec2_vpc_net:
+    name: "{{ ec2_resource_prefix }}-vpc"
+    cidr_block:
+      - "{{ ec2_cidr_block }}"
+    region: "{{ ec2_region }}"
+    tags:
+      Environment: "{{ ec2_environment }}"
+  register: create_vpc
+  until: create_vpc is not failed
+  retries: 5

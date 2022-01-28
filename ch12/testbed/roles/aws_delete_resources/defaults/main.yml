@@ -1,0 +1,3 @@
+ec2_cidr_block: "172.16.0.0/16"
+ec2_subnet: "172.16.0.0/24"
+ec2_environment: "{{ ec2_resource_prefix }}"

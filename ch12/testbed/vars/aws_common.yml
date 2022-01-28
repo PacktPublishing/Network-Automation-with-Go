@@ -1,0 +1,18 @@
+skip_check: false
+ssh_key_filename: id_rsa_testbed
+temp_dir: /tmp
+ec2_distro: "{{ aws_distro | default('fedora') }}"
+supported_distros: ['fedora', 'ubuntu']
+ec2_resource_prefix: "{{ aws_prefix | default('testbed') }}"
+ec2_region: "{{ aws_region | default('us-east-1') }}"
+ec2_instance_type: "{{ instance_type | default('t2.micro') }}"
+ec2_environment: "{{ ec2_resource_prefix }}"
+s3_identifier: "{{ aws_s3 | default('somethingRandom') }}"
+dependencies_check: false
+delete: true
+ec2_volume:
+  - device_name: /dev/sda1
+    ebs:
+      volume_type: "{{ volume_type | default('gp2') }}"
+      volume_size: 30
+      delete_on_termination: true

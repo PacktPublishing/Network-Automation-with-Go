@@ -1,0 +1,5 @@
+- name: Configure systemd.unified_cgroup_hierarchy=0 in kernelopts
+  ansible.builtin.command:
+    cmd: grubby --update-kernel=ALL --args="systemd.unified_cgroup_hierarchy=0"
+  notify: Reboot machine
+  when: ansible_distribution == "Fedora"

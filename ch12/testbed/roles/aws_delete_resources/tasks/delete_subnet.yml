@@ -1,0 +1,6 @@
+- name: Delete Subnet
+  amazon.aws.ec2_vpc_subnet:
+    region: "{{ ec2_region }}"
+    vpc_id: "{{ all_vpcs.vpcs[0].vpc_id }}"
+    cidr: "{{ ec2_subnet }}"
+    state: absent

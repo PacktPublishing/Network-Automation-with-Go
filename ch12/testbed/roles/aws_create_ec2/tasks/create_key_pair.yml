@@ -1,0 +1,6 @@
+- name: Create SSH Key Pair for instance
+  amazon.aws.ec2_key:
+    name: "{{ ec2_resource_prefix }}-key"
+    region: "{{ ec2_region }}"
+    key_material: "{{ pub_key }}"    
+  register: create_key

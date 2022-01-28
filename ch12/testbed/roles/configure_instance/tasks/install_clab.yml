@@ -1,0 +1,29 @@
+- name: Download Containerlab
+  ansible.builtin.get_url:
+    url: "{{ clab_download_url }}"
+    dest: "/tmp/clab.tar.gz"
+    mode: '0644'
+
+- name: Unarchive Containerlab
+  ansible.builtin.unarchive:
+    src: "/tmp/clab.tar.gz"
+    dest: "/tmp"
+    remote_src: yes
+    mode: '0755'
+
+- name: Copy Containerlab binary
+  ansible.builtin.copy:
+    src: "/tmp/containerlab"
+    dest: "{{ clab_dir }}/containerlab"
+    remote_src: yes
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: a+x
+
+- name: Create a symbolic link
+  ansible.builtin.file:
+    src: "{{ clab_dir }}/containerlab"
+    dest: "{{ clab_dir }}/clab"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    state: link

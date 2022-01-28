@@ -1,0 +1,31 @@
+# Play 1: Delete the instance we created on AWS
+# Another Playbook deletes the other resources created (VPC, Subnet, SG, SSH Key Pair, Internet Gateway)
+- name: Delete EC2 instance
+  hosts: localhost
+  become: false
+  gather_facts: true
+  vars_files:
+    - ./vars/aws_common.yml
+
+  roles:
+      - { role: check_vars }
+      - { role: install_dependencies, when: dependencies_check }
+
+  tasks:
+    - name: Include Linux distribution variables
+      include_vars: "./vars/aws_{{ ec2_distro }}.yml"
+
+    - name: Delete EC2 instance
+      community.aws.ec2_instance:
+        region: "{{ ec2_region }}"
+        state: absent
+        filters:
+          instance-state-name: running
+          "tag:Name": "{{ ec2_name_tag }}"
+          "tag:Environment": "{{ ec2_environment }}"
+
+    # Delete AWS resources created (VPC, Subnet, SG, SSH Key Pair, Internet Gateway)
+    - name: Delete all AWS remaining resources
+      ansible.builtin.include_role:
+        name: aws_delete_resources
+      when: delete | bool

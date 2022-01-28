@@ -1,0 +1,3 @@
+*.pem
+.vscode
+ansible_collections

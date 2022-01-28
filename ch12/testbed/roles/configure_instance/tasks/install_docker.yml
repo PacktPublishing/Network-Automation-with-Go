@@ -1,0 +1,66 @@
+- name: Add Docker repo on Fedora
+  block:
+    - name: Add Docker GPG key
+      ansible.builtin.rpm_key:
+        key: "{{ docker_repo_url }}/{{ ansible_distribution | lower }}/gpg"
+        state: present
+
+    - name: Add Docker repository
+      ansible.builtin.get_url:
+        url: "{{ docker_repo_url }}/{{ ansible_distribution | lower }}/docker-ce.repo"
+        dest: '/etc/yum.repos.d/docker-ce.repo'
+        owner: root
+        group: root
+        mode: 0644
+  when: ansible_distribution == "Fedora"
+
+- name: Add Docker repo on Ubuntu
+  block:
+    - name: Ensure dependencies are installed
+      ansible.builtin.package:
+        name:
+        - apt-transport-https
+        - ca-certificates
+        - gnupg
+        - curl
+        - lsb-release
+        state: present
+
+    - name: Add Docker apt key
+      ansible.builtin.apt_key:
+        url: "{{ docker_repo_url }}/{{ ansible_distribution | lower }}/gpg"
+        id: 9DC858229FC7DD38854AE2D88D81803C0EBFCD88
+        state: present
+      ignore_errors: true
+
+    - name: Add Docker repository
+      ansible.builtin.apt_repository:
+        repo: "deb [arch=amd64] {{ docker_repo_url }}/{{ ansible_distribution | lower }} {{ ansible_distribution_release }} stable"
+        state: present
+        update_cache: true
+  when: ansible_distribution == 'Ubuntu'
+
+- name: Install Docker
+  ansible.builtin.package:
+    name:
+    - docker-ce
+    - docker-ce-cli
+    - containerd.io
+    state: present
+
+- name: Ensure group "docker" exists
+  ansible.builtin.group:
+    name: docker
+    state: present
+
+- name: Append user {{ ansible_user }} to the group 'docker'
+  ansible.builtin.user:
+    name: "{{ ansible_user }}"
+    groups: docker
+    append: yes
+
+- name: Ensure Docker is started and enabled at boot
+  ansible.builtin.service:
+    name: docker
+    state: started
+    enabled: true
