@@ -21,7 +21,7 @@ Once your account is confirmed, you can log in and access the [Software Download
 From there, you can download cEOS.
 
 <p align="center">
-  <img height="300" title="Download cEOS" src="pictures/Download_cEOS.png"><br>
+  <img height="600" title="Download cEOS" src="pictures/Download_cEOS.png"><br>
   <b>Download cEOS</b><br>
 </p>
 

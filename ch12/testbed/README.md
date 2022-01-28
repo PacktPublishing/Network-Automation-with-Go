@@ -202,7 +202,7 @@ topology:
 This topology file defines a two node topology as displayed in the next picture. One node runs Nokia SR Linux and the other FRRouting (FRR). We chose these for this example, as you can conveniently get their images in a public container registry.
 
 <p align="center">
-  <img height="250" title="Network Topology" src="pictures/ch6-topo.png"><br>
+  <img title="Network Topology" src="pictures/ch6-topo.png"><br>
 </p>
 
 ### Launching a Virtual Network
