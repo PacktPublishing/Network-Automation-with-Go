@@ -1,0 +1,7 @@
+collections:
+  - name: amazon.aws
+    source: https://galaxy.ansible.com
+    version: 3.0.0
+  - name: community.crypto
+    source: https://galaxy.ansible.com
+    version: 2.1.0

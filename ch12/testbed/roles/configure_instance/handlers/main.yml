@@ -1,0 +1,3 @@
+  - name: Reboot machine
+    ansible.builtin.reboot:
+      reboot_timeout: 900

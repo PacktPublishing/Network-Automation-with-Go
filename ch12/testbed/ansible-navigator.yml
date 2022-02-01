@@ -1,0 +1,28 @@
+---
+ansible-navigator:
+  ansible:
+    config: ansible.cfg
+    inventories:
+    - ./hosts
+
+  editor:
+    command: code -g {filename}:{line_number}
+    console: false
+
+  logging:
+    level: warning
+
+  execution-environment:
+    container-engine: podman
+    enabled: true
+    pull-policy: missing
+    image: quay.io/nleiva/ee-testbed-image
+    environment-variables:
+      pass:
+        - AWS_ACCESS_KEY_ID
+        - AWS_SECRET_ACCESS_KEY
+
+  playbook-artifact:
+    enable: False
+
+  mode: stdout

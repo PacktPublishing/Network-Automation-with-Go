@@ -1,0 +1,10 @@
+- name: Create Internet Gateway
+  community.aws.ec2_vpc_igw:
+    region: "{{ ec2_region }}"
+    vpc_id: "{{ create_vpc.vpc.id }}"
+    tags:
+      Environment: "{{ ec2_environment }}"
+      Name: "{{ ec2_resource_prefix }}-igw"
+  register: igw
+  until: igw is not failed
+  retries: 5

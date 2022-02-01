@@ -1,0 +1,31 @@
+- name: Download Go
+  ansible.builtin.get_url:
+    url: "{{ go_download_url }}"
+    dest: "/tmp/go{{ go_version }}.tar.gz"
+    mode: '0644'
+
+- name: Remove a previous installation at /usr/local/go, if any, prior to extracting
+  ansible.builtin.file:
+    state: absent
+    path: /usr/local/go
+
+- name: Unarchive Go
+  ansible.builtin.unarchive:
+    src: "/tmp/go{{ go_version }}.tar.gz"
+    dest: "/usr/local"
+    remote_src: yes
+    mode: '0755'
+
+- name: Recursively change ownership of Go's local directory
+  ansible.builtin.file:
+    path: "/home/{{ ansible_user }}/go"
+    state: directory
+    recurse: yes
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+
+# .bash_profile does not exist in Ubuntu
+- name: Update PATH environment variable
+  ansible.builtin.lineinfile:
+    path: "/home/{{ ansible_user }}/.bashrc"
+    line: export PATH=$PATH:/usr/local/go/bin:$HOME/go/bin
