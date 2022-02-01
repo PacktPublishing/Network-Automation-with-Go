@@ -9,11 +9,13 @@ import (
 	"github.com/netbox-community/go-netbox/netbox"
 	"github.com/netbox-community/go-netbox/netbox/client"
 	"github.com/netbox-community/go-netbox/netbox/client/dcim"
+	"github.com/netbox-community/go-netbox/netbox/models"
 )
 
 var (
 	demoNetboxURL   = "https://demo.netbox.dev/"
 	demoNetboxToken = "0123456789abcdef0123456789abcdef01234567"
+	demoDeviceName  = "go-automation"
 )
 
 func main() {
@@ -30,15 +32,29 @@ func main() {
 
 	nbClient := netbox.NewNetboxWithAPIKey(url.Host, *token)
 
-	res, err := nbClient.Dcim.DcimDevicesList(&dcim.DcimDevicesListParams{
+	var fakeID int64 = 1
+	created, err := nbClient.Dcim.DcimDevicesCreate(&dcim.DcimDevicesCreateParams{
+		Context: context.Background(),
+		Data: &models.WritableDeviceWithConfigContext{
+			Name:       &demoDeviceName,
+			DeviceRole: &fakeID,
+			DeviceType: &fakeID,
+			Site:       &fakeID,
+			Tags:       []*models.NestedTag{},
+		},
+	}, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	res, err := nbClient.Dcim.DcimDevicesRead(&dcim.DcimDevicesReadParams{
+		ID:      created.Payload.ID,
 		Context: context.Background(),
 	}, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	for _, device := range res.Payload.Results {
-		log.Print("device ", *device.Name)
-	}
+	log.Print("Created device ", *res.Payload.Name)
 
 }
