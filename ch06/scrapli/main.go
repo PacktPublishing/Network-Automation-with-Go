@@ -53,7 +53,7 @@ type Input struct {
 }
 
 func main() {
-	deviceName := flag.String("device", "clab-ch06-ceos", "Device Hostname")
+	deviceName := flag.String("device", "clab-netgo-ceos", "Device Hostname")
 	username := flag.String("username", "admin", "SSH Username")
 	password := flag.String("password", "admin", "SSH password")
 	flag.Parse()

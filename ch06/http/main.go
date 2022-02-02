@@ -197,7 +197,7 @@ func applyRevision(c cvx, id string) error {
 }
 
 func main() {
-	deviceName := flag.String("device", "clab-ch06-cvx", "Device Hostname")
+	deviceName := flag.String("device", "clab-netgo-cvx", "Device Hostname")
 	username := flag.String("username", "cumulus", "SSH Username")
 	password := flag.String("password", "cumulus", "SSH password")
 	flag.Parse()
