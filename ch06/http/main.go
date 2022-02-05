@@ -272,8 +272,7 @@ func main() {
 	defer res.Body.Close()
 
 	// apply candidate revision
-	err = applyRevision(device, revisionID)
-	if err != nil {
+	if err := applyRevision(device, revisionID); err != nil {
 		log.Fatal(err)
 	}
 
