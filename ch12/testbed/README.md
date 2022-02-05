@@ -69,7 +69,7 @@ export AWS_SECRET_ACCESS_KEY=’…’
 The next step is to execute the playbook with the `ansible-playbook` command.
 
 ```bash
-$ ansible-playbook create-EC2-testbed.yml --extra-vars "instance_type=m5.large" -v
+ch12/testbed$ ansible-playbook create-EC2-testbed.yml --extra-vars "instance_type=m5.large" -v
 
 <snip>
 
@@ -179,7 +179,7 @@ The Linux environment comes with [Containerlab] in it. We use [Containerlab] to 
 You can find the topology definition files in the `lab` folder of the test VM. For example, the file `topology.yml` in the folder `~/lab/book/` that you can see in the next code snippet.
 
 ```yaml
-name: ch06
+name: netgo
 
 topology:
   nodes:
