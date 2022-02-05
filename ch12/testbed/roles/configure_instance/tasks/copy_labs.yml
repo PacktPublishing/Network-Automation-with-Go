@@ -1,7 +1,13 @@
-- name: Copy file Lab folder with owner and permissions
-  ansible.builtin.copy:
-    src: "{{ playbook_dir }}/lab"
-    dest: "/home/{{ ansible_user }}"
-    owner: "{{ ansible_user }}"
-    group: "{{ ansible_user }}"
-    mode: '0755'
+# - name: Copy file Lab folder with owner and permissions
+#   ansible.builtin.copy:
+#     src: "{{ playbook_dir }}/lab"
+#     dest: "/home/{{ ansible_user }}"
+#     owner: "{{ ansible_user }}"
+#     group: "{{ ansible_user }}"
+#     mode: '0755'
+
+- name: Clone the book's repo
+  ansible.builtin.git:
+    repo: https://github.com/PacktPublishing/Network-Automation-with-Go.git
+    dest: "/home/{{ ansible_user }}/Network-Automation-with-Go"
+  become: false

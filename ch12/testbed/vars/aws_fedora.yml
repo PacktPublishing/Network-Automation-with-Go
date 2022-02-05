@@ -1,19 +1,19 @@
 # Fedora 35 x86_64 Cloud Base AMIs 
 # From: https://alt.fedoraproject.org/cloud/
 fedora_ami:
-  us_east_1: ami-08b4ee602f76bff79
-  us_east_2: ami-0133ad8c5d900ddef
-  us_west_1: ami-052a62f38ec784c40
-  eu_west_1: ami-0e92872005f7dd580
-  eu_west_2: ami-05acdcf8c76666cb6
-  eu_central_1: ami-05983e3aff3bf44ba 
-  ca_central_1: ami-079db45252cff2ba7
-  ap_northeast_1: ami-0575f60b9ee1cd7f4
-  sa_east_1: ami-0396f0bca5fa0efe5
-  ap_southeast_2: ami-02ace19e7faa2ba49
-  ap_south_1: ami-0a60b5e120358751c
-  ap_northeast_2: ami-03b7d422d1e4e7959
-  ap_southeast_1: ami-070da004566f77c55
+  us_east_1: ami-08b4ee602f76bff79 # US East (N. Virginia)
+  us_east_2: ami-0133ad8c5d900ddef # US East (Ohio)
+  us_west_1: ami-052a62f38ec784c40 # US West (N. California)
+  eu_west_1: ami-0e92872005f7dd580 # EU West (Ireland)
+  eu_west_2: ami-05acdcf8c76666cb6 # EU West (London)
+  eu_central_1: ami-05983e3aff3bf44ba # EU Central (Frankfurt)
+  ca_central_1: ami-079db45252cff2ba7 # Canada (Central)
+  ap_northeast_1: ami-0575f60b9ee1cd7f4 # Asia Pacific NE (Tokyo)
+  sa_east_1: ami-0396f0bca5fa0efe5 # South America East (Sāo Paulo)
+  ap_southeast_2: ami-02ace19e7faa2ba49 # Asia Pacific SE (Sydney)
+  ap_south_1: ami-0a60b5e120358751c # Asia Pacific (Mumbai)
+  ap_northeast_2: ami-03b7d422d1e4e7959 # Asia Pacific (Seoul)
+  ap_southeast_1: ami-070da004566f77c55 # Asia Pacific SE (Singapore)
 
 ec2_ami_id: "{{ fedora_ami[ec2_region | replace('-','_')] }}"
 ec2_name_tag: "{{ ec2_resource_prefix }}"
