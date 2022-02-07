@@ -81,6 +81,8 @@ func getSRLRoutes(hostname, username, password string, out chan string) {
 func getCEOSRoutes(hostname, username, password string, out chan string) {
 	log.Print("Collecting CEOS routes")
 
+	template := "https://raw.githubusercontent.com/networktocode/ntc-templates/master/ntc_templates/templates/arista_eos_show_ip_route.textfsm"
+
 	lookupCmd := "sh ip route"
 
 	conn, err := core.NewEOSDriver(
@@ -104,7 +106,7 @@ func getCEOSRoutes(hostname, username, password string, out chan string) {
 		log.Fatal(err)
 	}
 
-	parsed, err := resp.TextFsmParse("./ceos.template")
+	parsed, err := resp.TextFsmParse(template)
 	if err != nil {
 		log.Fatal(err)
 	}
