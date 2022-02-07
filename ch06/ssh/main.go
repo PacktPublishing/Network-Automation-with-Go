@@ -41,18 +41,43 @@ var (
 )
 
 type Input struct {
-	Uplinks []struct {
-		Name   string `yaml:"name"`
-		Prefix string `yaml:"prefix"`
-	} `yaml:"uplinks"`
-	Loopback struct {
-		IP string `yaml:"ip"`
-	} `yaml:"loopback"`
-	ASN   int `yaml:"asn"`
-	Peers []struct {
-		IP  string `yaml:"ip"`
-		ASN int    `yaml:"asn"`
-	} `yaml:"peers"`
+	Uplinks  []Link `yaml:"uplinks"`
+	Peers    []Peer `yaml:"peers"`
+	ASN      int    `yaml:"asn"`
+	Loopback Addr   `yaml:"loopback"`
+}
+
+type Link struct {
+	Name   string `yaml:"name"`
+	Prefix string `yaml:"prefix"`
+}
+
+type Peer struct {
+	IP  string `yaml:"ip"`
+	ASN int    `yaml:"asn"`
+}
+
+type Addr struct {
+	IP string `yaml:"ip"`
+}
+
+func devConfig(in Input)(b bytes.Buffer, err error){
+	t, err := template.New("config").Parse(srlTemplate)
+	if err != nil {
+		return b, fmt.Errorf("failed create template: %w", err)
+	}
+
+	err = t.Execute(&b, in)
+	if err != nil {
+		return b, fmt.Errorf("failed create template: %w", err)
+	}
+	return b, nil
+}
+
+func check(err error) {
+	if err != nil {
+		panic(err)
+	}
 }
 
 func main() {
@@ -62,29 +87,17 @@ func main() {
 	flag.Parse()
 
 	src, err := os.Open("input.yml")
-	if err != nil {
-		log.Fatal(err)
-	}
+	check(err)
 	defer src.Close()
 
 	d := yaml.NewDecoder(src)
 
 	var input Input
 	err = d.Decode(&input)
-	if err != nil {
-		log.Fatal(err)
-	}
+	check(err)
 
-	t, err := template.New("config").Parse(srlTemplate)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	var b bytes.Buffer
-	err = t.Execute(&b, input)
-	if err != nil {
-		log.Fatal(err)
-	}
+	cfg, err := devConfig(input)
+	check(err)
 
 	config := &ssh.ClientConfig{
 		User: *username,
@@ -99,9 +112,7 @@ func main() {
 		fmt.Sprintf("%s:%d", *device, sshPort),
 		config,
 	)
-	if err != nil {
-		log.Fatal("unable to connect: ", err)
-	}
+	check(err)
 	defer conn.Close()
 
 	session, err := conn.NewSession()
@@ -138,6 +149,5 @@ func main() {
 	}
 
 	log.Print("connected. configuring...")
-	b.WriteTo(stdin)
-
+	cfg.WriteTo(stdin)
 }
