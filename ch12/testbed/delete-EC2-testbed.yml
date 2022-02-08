@@ -24,8 +24,18 @@
           "tag:Name": "{{ ec2_name_tag }}"
           "tag:Environment": "{{ ec2_environment }}"
 
-    # Delete AWS resources created (VPC, Subnet, SG, SSH Key Pair, Internet Gateway)
+    # Delete AWS resources created (VPC, Subnet, SG, SSH Key Pair, Internet Gateway)   
     - name: Delete all AWS remaining resources
-      ansible.builtin.include_role:
-        name: aws_delete_resources
+      block:
+      - name: Delete AWS resources
+        ansible.builtin.include_role:
+          name: aws_delete_resources
+      - name: Delete Private Key
+        ansible.builtin.file:
+          path: "{{ temp_dir }}/{{ ssh_key_filename }}"
+          state: absent
+      - name: Delete Public Key
+        ansible.builtin.file:
+          path: "{{ temp_dir }}/{{ ssh_key_filename }}.pub"
+          state: absent
       when: delete | bool

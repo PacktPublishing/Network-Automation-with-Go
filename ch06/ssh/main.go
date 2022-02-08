@@ -40,7 +40,7 @@ var (
 	sshPort = 22
 )
 
-type Input struct {
+type Model struct {
 	Uplinks  []Link `yaml:"uplinks"`
 	Peers    []Peer `yaml:"peers"`
 	ASN      int    `yaml:"asn"`
@@ -61,7 +61,7 @@ type Addr struct {
 	IP string `yaml:"ip"`
 }
 
-func devConfig(in Input)(b bytes.Buffer, err error){
+func devConfig(in Model)(b bytes.Buffer, err error){
 	t, err := template.New("config").Parse(srlTemplate)
 	if err != nil {
 		return b, fmt.Errorf("failed create template: %w", err)
@@ -92,7 +92,7 @@ func main() {
 
 	d := yaml.NewDecoder(src)
 
-	var input Input
+	var input Model
 	err = d.Decode(&input)
 	check(err)
 
