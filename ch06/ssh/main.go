@@ -61,7 +61,7 @@ type Addr struct {
 	IP string `yaml:"ip"`
 }
 
-func devConfig(in Model)(b bytes.Buffer, err error){
+func devConfig(in Model) (b bytes.Buffer, err error) {
 	t, err := template.New("config").Parse(srlTemplate)
 	if err != nil {
 		return b, fmt.Errorf("failed create template: %w", err)

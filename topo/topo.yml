@@ -12,7 +12,26 @@ topology:
       kind: cvx
       image: networkop/cx:5.0.0
       runtime: docker
+    host-1:
+      kind: linux
+      image: thebook:host
+      exec:
+      - ip addr add 203.0.113.0/31 dev eth1
+    host-2:
+      kind: linux
+      image: thebook:host
+      exec:
+      - ip addr add 203.0.113.2/31 dev eth1
+    host-3:
+      kind: linux
+      image: thebook:host
+      exec:
+      - ip addr add 203.0.113.4/31 dev eth1
 
   links:
     - endpoints: ["srl:e1-1", "ceos:eth1"]
     - endpoints: ["cvx:swp1", "ceos:eth2"]
+    # host links
+    - endpoints: ["srl:e1-2", "host-1:eth1"]
+    - endpoints: ["ceos:eth3", "host-2:eth1"]
+    - endpoints: ["cvx:swp2", "host-3:eth1"]
