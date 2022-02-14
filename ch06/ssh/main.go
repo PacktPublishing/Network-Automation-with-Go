@@ -99,7 +99,7 @@ func main() {
 	cfg, err := devConfig(input)
 	check(err)
 
-	config := &ssh.ClientConfig{
+	settings := &ssh.ClientConfig{
 		User: *username,
 		Auth: []ssh.AuthMethod{
 			ssh.Password(*password),
@@ -110,7 +110,7 @@ func main() {
 	conn, err := ssh.Dial(
 		"tcp",
 		fmt.Sprintf("%s:%d", *hostname, sshPort),
-		config,
+		settings,
 	)
 	check(err)
 	defer conn.Close()
