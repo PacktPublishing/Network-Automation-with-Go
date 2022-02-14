@@ -1,4 +1,4 @@
-module scrapli
+module github.com/PacktPublishing/Network-Automation-with-Go/ch06/scrapli
 
 go 1.17
 
