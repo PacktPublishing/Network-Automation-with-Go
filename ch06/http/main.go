@@ -127,23 +127,25 @@ func devConfig(in Model) (b bytes.Buffer, err error) {
 		}
 	}
 
+	my_bgp :=  bgp{
+		AF: map[string]addressFamily{
+			"ipv4-unicast": {
+				Enabled: "on",
+				Redistribute: map[string]redistribute{
+					"connected": {
+						Enabled: "on",
+					},
+				},
+			},
+		},
+		Enabled:  "on",
+		Neighbor: peers,
+	}
+
 	cfg.Vrf = map[string]vrf{
 		"default": {
 			Router: router{
-				Bgp: bgp{
-					AF: map[string]addressFamily{
-						"ipv4-unicast": {
-							Enabled: "on",
-							Redistribute: map[string]redistribute{
-								"connected": {
-									Enabled: "on",
-								},
-							},
-						},
-					},
-					Enabled:  "on",
-					Neighbor: peers,
-				},
+				Bgp: my_bgp,
 			},
 		},
 	}
