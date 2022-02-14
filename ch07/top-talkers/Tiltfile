@@ -1,0 +1,5 @@
+
+local_resource('host-2',
+               cmd='go build -o workdir/top-talker main.go', 
+               serve_cmd='ip netns exec clab-netgo-host-2 workdir/top-talker',
+               deps=['./main.go'])

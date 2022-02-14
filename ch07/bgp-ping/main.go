@@ -7,6 +7,9 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/jwhited/corebgp"
@@ -26,6 +29,7 @@ var (
 	remoteAS      = flag.Uint("ras", 0, "remote AS")
 	localAddress  = flag.String("laddr", "", "local address")
 	remoteAddress = flag.String("raddr", "", "remote address")
+	passive       = flag.Bool("p", true, "passive mode")
 )
 
 type plugin struct {
@@ -34,6 +38,7 @@ type plugin struct {
 	localAS   uint32
 	host      []byte
 	pingCh    chan ping
+	passive   bool
 }
 
 type ping struct {
@@ -83,6 +88,11 @@ func (p *plugin) OnEstablished(peer corebgp.PeerConfig, writer corebgp.UpdateMes
 				log.Printf("sent ping response to %s", src)
 
 			case <-update.C:
+
+				if p.passive {
+					continue
+				}
+
 				log.Printf("Sending periodic ping")
 				pingReq := ping{
 					source: p.host,
@@ -181,8 +191,7 @@ func (p *plugin) handleUpdate(peer corebgp.PeerConfig, u []byte) *corebgp.Notifi
 				continue
 			}
 
-			rtt := time.Since(ts)
-			log.Printf("Response from %s, RTT %d ms", dest, rtt.Milliseconds())
+			fmt.Printf("bgp_ping_rtt_ms{device=%s} %f", dest, float64(time.Since(ts).Nanoseconds())/1e6)
 			return nil
 		}
 
@@ -208,6 +217,7 @@ func main() {
 		localAS:   uint32(*localAS),
 		host:      []byte(*id),
 		pingCh:    make(chan ping),
+		passive:   *passive,
 	}
 
 	err = srv.AddPeer(corebgp.PeerConfig{
@@ -221,7 +231,23 @@ func main() {
 		log.Fatalf("error adding peer: %v", err)
 	}
 
-	srv.Serve([]net.Listener{})
+	srvErrCh := make(chan error)
+	go func() {
+		err := srv.Serve([]net.Listener{})
+		srvErrCh <- err
+	}()
+
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
+	select {
+	case <-sigCh:
+		log.Println("stopping program...")
+		srv.Close()
+		<-srvErrCh
+	case err := <-srvErrCh:
+		log.Fatalf("serve error: %v", err)
+	}
+
 }
 
 func newMPCap(afi uint16, safi uint8) corebgp.Capability {
