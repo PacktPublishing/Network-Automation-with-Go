@@ -1,4 +1,4 @@
-module http
+module github.com/PacktPublishing/Network-Automation-with-Go/ch06/http
 
 go 1.17
 

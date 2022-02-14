@@ -81,7 +81,7 @@ func check(err error) {
 }
 
 func main() {
-	device := flag.String("device", "clab-netgo-srl", "Device Hostname")
+	hostname := flag.String("device", "clab-netgo-srl", "Device Hostname")
 	username := flag.String("username", "admin", "SSH Username")
 	password := flag.String("password", "admin", "SSH password")
 	flag.Parse()
@@ -99,7 +99,7 @@ func main() {
 	cfg, err := devConfig(input)
 	check(err)
 
-	config := &ssh.ClientConfig{
+	settings := &ssh.ClientConfig{
 		User: *username,
 		Auth: []ssh.AuthMethod{
 			ssh.Password(*password),
@@ -109,8 +109,8 @@ func main() {
 
 	conn, err := ssh.Dial(
 		"tcp",
-		fmt.Sprintf("%s:%d", *device, sshPort),
-		config,
+		fmt.Sprintf("%s:%d", *hostname, sshPort),
+		settings,
 	)
 	check(err)
 	defer conn.Close()

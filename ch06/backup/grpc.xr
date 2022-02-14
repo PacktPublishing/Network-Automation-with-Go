@@ -1,5 +1,0 @@
-grpc
- port 57777
- no-tls
- address-family ipv4
-!

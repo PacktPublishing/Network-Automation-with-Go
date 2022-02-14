@@ -69,6 +69,7 @@ func devConfig(in Model) (b bytes.Buffer, err error) {
 	if err != nil {
 		return b, fmt.Errorf("failed create template: %w", err)
 	}
+	log.Print("Generated config: ", b.String())
 	return b, nil
 }
 
@@ -79,7 +80,7 @@ func check(err error) {
 }
 
 func main() {
-	device := flag.String("device", "clab-netgo-ceos", "Device Hostname")
+	hostname := flag.String("device", "clab-netgo-ceos", "Device Hostname")
 	username := flag.String("username", "admin", "SSH Username")
 	password := flag.String("password", "admin", "SSH password")
 	flag.Parse()
@@ -99,7 +100,7 @@ func main() {
 	check(err)
 
 	conn, err := core.NewEOSDriver(
-		*device,
+		*hostname,
 		base.WithAuthStrictKey(false),
 		base.WithAuthUsername(*username),
 		base.WithAuthPassword(*password),

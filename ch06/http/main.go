@@ -16,7 +16,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-var defaultNvuePort = 8765
+var defaultNVUEPort = 8765
 
 type cvx struct {
 	url   string
@@ -69,77 +69,98 @@ type nvue struct {
 	Vrf       map[string]vrf       `json:"vrf"`
 }
 
-type Input struct {
-	Uplinks []struct {
-		Name   string `yaml:"name"`
-		Prefix string `yaml:"prefix"`
-	} `yaml:"uplinks"`
-	Loopback struct {
-		IP string `yaml:"ip"`
-	} `yaml:"loopback"`
-	ASN   int `yaml:"asn"`
-	Peers []struct {
-		IP  string `yaml:"ip"`
-		ASN int    `yaml:"asn"`
-	} `yaml:"peers"`
+type Model struct {
+	Uplinks  []Link `yaml:"uplinks"`
+	Peers    []Peer `yaml:"peers"`
+	ASN      int    `yaml:"asn"`
+	Loopback Addr   `yaml:"loopback"`
 }
 
-func populateData(i Input, o *nvue) {
-	o.Interface = map[string]Interface{
-		"lo": Interface{
+type Link struct {
+	Name   string `yaml:"name"`
+	Prefix string `yaml:"prefix"`
+}
+
+type Peer struct {
+	IP  string `yaml:"ip"`
+	ASN int    `yaml:"asn"`
+}
+
+type Addr struct {
+	IP string `yaml:"ip"`
+}
+
+func devConfig(in Model) (b bytes.Buffer, err error) {
+	var cfg nvue
+	cfg.Interface = map[string]Interface{
+		"lo": {
 			Type: "loopback",
 			IP: &IPAddress{
 				Address: map[string]struct{}{
-					fmt.Sprintf("%s/32", i.Loopback.IP): struct{}{},
+					fmt.Sprintf("%s/32", in.Loopback.IP): {},
 				},
 			},
 		},
 	}
-	for _, uplink := range i.Uplinks {
-		o.Interface[uplink.Name] = Interface{
+	for _, uplink := range in.Uplinks {
+		cfg.Interface[uplink.Name] = Interface{
 			Type: "swp",
 			IP: &IPAddress{
 				Address: map[string]struct{}{
-					uplink.Prefix: struct{}{},
+					uplink.Prefix: {},
 				},
 			},
 		}
 	}
-	o.Router = router{
+	cfg.Router = router{
 		Bgp: bgp{
-			RouterID: i.Loopback.IP,
-			ASN:      i.ASN,
+			RouterID: in.Loopback.IP,
+			ASN:      in.ASN,
 		},
 	}
 
 	var peers = make(map[string]neighbor)
-	for _, peer := range i.Peers {
+	for _, peer := range in.Peers {
 		peers[peer.IP] = neighbor{
 			RemoteAS: peer.ASN,
 			Type:     "numbered",
 		}
 	}
 
-	o.Vrf = map[string]vrf{
-		"default": vrf{
-			Router: router{
-				Bgp: bgp{
-					AF: map[string]addressFamily{
-						"ipv4-unicast": addressFamily{
-							Enabled: "on",
-							Redistribute: map[string]redistribute{
-								"connected": redistribute{
-									Enabled: "on",
-								},
-							},
-						},
+	my_bgp :=  bgp{
+		AF: map[string]addressFamily{
+			"ipv4-unicast": {
+				Enabled: "on",
+				Redistribute: map[string]redistribute{
+					"connected": {
+						Enabled: "on",
 					},
-					Enabled:  "on",
-					Neighbor: peers,
 				},
 			},
 		},
+		Enabled:  "on",
+		Neighbor: peers,
 	}
+
+	cfg.Vrf = map[string]vrf{
+		"default": {
+			Router: router{
+				Bgp: my_bgp,
+			},
+		},
+	}
+	view, err := json.MarshalIndent(cfg, "", " ")
+	if err != nil {
+		return b, fmt.Errorf("failed to create json indented view of config: %w", err)
+	}
+	log.Print("Generated config: ", string(view))
+
+	err = json.NewEncoder(&b).Encode(cfg)
+	if err != nil {
+		return b, fmt.Errorf("failed json encode the config: %w", err)
+	}
+
+	return b, nil
 }
 
 func createRevision(c cvx) (string, error) {
@@ -196,15 +217,35 @@ func applyRevision(c cvx, id string) error {
 	return nil
 }
 
+func check(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
+
 func main() {
-	deviceName := flag.String("device", "clab-netgo-cvx", "Device Hostname")
+	hostname := flag.String("device", "clab-netgo-cvx", "Device Hostname")
 	username := flag.String("username", "cumulus", "SSH Username")
 	password := flag.String("password", "cumulus", "SSH password")
 	flag.Parse()
 
-	// store all device-related parameters
+	// read and parse the input file
+	src, err := os.Open("input.yml")
+	check(err)
+	defer src.Close()
+
+	d := yaml.NewDecoder(src)
+
+	var input Model
+	err = d.Decode(&input)
+	check(err)
+     
+	cfg, err := devConfig(input)
+	check(err)
+
+	// Store all HTTP device-related parameters
 	device := cvx{
-		url:   fmt.Sprintf("https://%s:%d", *deviceName, defaultNvuePort),
+		url:   fmt.Sprintf("https://%s:%d", *hostname, defaultNVUEPort),
 		token: base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s", *username, *password))),
 		httpC: http.Client{
 			Transport: &http.Transport{
@@ -213,67 +254,30 @@ func main() {
 		},
 	}
 
-	// read and parse the input file
-	src, err := os.Open("input.yml")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer src.Close()
-
-	d := yaml.NewDecoder(src)
-
-	var input Input
-	err = d.Decode(&input)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// populate the device data model
-	var data nvue
-	populateData(input, &data)
-
-	view, _ := json.MarshalIndent(data, "", " ")
-	log.Print("generated config ", string(view))
-
-	body := new(bytes.Buffer)
-	err = json.NewEncoder(body).Encode(data)
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	// create a new candidate configuration revision
 	revisionID, err := createRevision(device)
-	if err != nil {
-		log.Fatal(err)
-	}
+	check(err)
 
 	log.Print("Created revisionID: ", revisionID)
 
 	addr, err := url.Parse(device.url + "/nvue_v1/")
-	if err != nil {
-		log.Fatal(err)
-	}
+	check(err)
 	params := url.Values{}
 	params.Add("rev", revisionID)
 	addr.RawQuery = params.Encode()
 
-	// save the device data model in candidate configuration store
-	req, err := http.NewRequest("PATCH", addr.String(), body)
-	if err != nil {
-		log.Fatal(err)
-	}
+	// Save the device desired configuration in candidate configuration store
+	req, err := http.NewRequest("PATCH", addr.String(), &cfg)
+	check(err)
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Authorization", "Basic "+device.token)
 
 	res, err := device.httpC.Do(req)
-	if err != nil {
-		log.Fatal(err)
-	}
+	check(err)
 	defer res.Body.Close()
 
-	// apply candidate revision
+	// Apply candidate revision
 	if err := applyRevision(device, revisionID); err != nil {
 		log.Fatal(err)
 	}
-
 }
