@@ -16,7 +16,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-var defaultNvuePort = 8765
+var defaultNVUEPort = 8765
 
 type cvx struct {
 	url   string
@@ -90,8 +90,9 @@ type Addr struct {
 	IP string `yaml:"ip"`
 }
 
-func devConfig(in Model) (out nvue, err error) {
-	out.Interface = map[string]Interface{
+func devConfig(in Model) (b bytes.Buffer, err error) {
+	var cfg nvue
+	cfg.Interface = map[string]Interface{
 		"lo": {
 			Type: "loopback",
 			IP: &IPAddress{
@@ -102,7 +103,7 @@ func devConfig(in Model) (out nvue, err error) {
 		},
 	}
 	for _, uplink := range in.Uplinks {
-		out.Interface[uplink.Name] = Interface{
+		cfg.Interface[uplink.Name] = Interface{
 			Type: "swp",
 			IP: &IPAddress{
 				Address: map[string]struct{}{
@@ -111,7 +112,7 @@ func devConfig(in Model) (out nvue, err error) {
 			},
 		}
 	}
-	out.Router = router{
+	cfg.Router = router{
 		Bgp: bgp{
 			RouterID: in.Loopback.IP,
 			ASN:      in.ASN,
@@ -126,7 +127,7 @@ func devConfig(in Model) (out nvue, err error) {
 		}
 	}
 
-	out.Vrf = map[string]vrf{
+	cfg.Vrf = map[string]vrf{
 		"default": {
 			Router: router{
 				Bgp: bgp{
@@ -146,7 +147,18 @@ func devConfig(in Model) (out nvue, err error) {
 			},
 		},
 	}
-	return 
+	view, err := json.MarshalIndent(cfg, "", " ")
+	if err != nil {
+		return b, fmt.Errorf("failed to create json indented view of config: %w", err)
+	}
+	log.Print("Generated config: ", string(view))
+
+	err = json.NewEncoder(&b).Encode(cfg)
+	if err != nil {
+		return b, fmt.Errorf("failed json encode the config: %w", err)
+	}
+
+	return b, nil
 }
 
 func createRevision(c cvx) (string, error) {
@@ -226,15 +238,12 @@ func main() {
 	err = d.Decode(&input)
 	check(err)
      
-	config, err := devConfig(input)
+	cfg, err := devConfig(input)
 	check(err)
-
-	view, _ := json.MarshalIndent(config, "", " ")
-	log.Print("Generated config: ", string(view))
 
 	// Store all HTTP device-related parameters
 	device := cvx{
-		url:   fmt.Sprintf("https://%s:%d", *hostname, defaultNvuePort),
+		url:   fmt.Sprintf("https://%s:%d", *hostname, defaultNVUEPort),
 		token: base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s", *username, *password))),
 		httpC: http.Client{
 			Transport: &http.Transport{
@@ -242,10 +251,6 @@ func main() {
 			},
 		},
 	}
-
-	cfg := new(bytes.Buffer)
-	err = json.NewEncoder(cfg).Encode(config)
-	check(err)
 
 	// create a new candidate configuration revision
 	revisionID, err := createRevision(device)
@@ -260,7 +265,7 @@ func main() {
 	addr.RawQuery = params.Encode()
 
 	// Save the device desired configuration in candidate configuration store
-	req, err := http.NewRequest("PATCH", addr.String(), cfg)
+	req, err := http.NewRequest("PATCH", addr.String(), &cfg)
 	check(err)
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Authorization", "Basic "+device.token)
