@@ -1,10 +1,5 @@
 name: Container Image Push
-on:   
-  push:
-    # Publish `master` as Docker `latest` image.
-    branches:
-      - master
-      - seed
+on: [push]
 
 env:
   IMAGE_NAME: thegobook
