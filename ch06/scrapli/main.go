@@ -79,7 +79,7 @@ func check(err error) {
 }
 
 func main() {
-	device := flag.String("device", "clab-netgo-ceos", "Device Hostname")
+	hostname := flag.String("device", "clab-netgo-ceos", "Device Hostname")
 	username := flag.String("username", "admin", "SSH Username")
 	password := flag.String("password", "admin", "SSH password")
 	flag.Parse()
@@ -99,7 +99,7 @@ func main() {
 	check(err)
 
 	conn, err := core.NewEOSDriver(
-		*device,
+		*hostname,
 		base.WithAuthStrictKey(false),
 		base.WithAuthUsername(*username),
 		base.WithAuthPassword(*password),

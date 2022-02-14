@@ -249,36 +249,47 @@ This topology file defines a three node topology as the next figure shows. One n
 
 ## Launching a Virtual Network Topology
 
-To launch the virtual topology file, go to the `~/cd Network-Automation-with-Go/topo/` folder and run `clab deploy` with root privilege, as the next output shows.
+To launch the virtual topology file, run the command `make` from the home folder to access the `Network-Automation-with-Go/topo/` folder and run `clab deploy` with root privilege, as the next output shows.
 
 ```bash
-fedora@testbed ~ ⇨  cd Network-Automation-with-Go/topo/
-fedora@testbed topo ⇨  sudo containerlab deploy -t topo.yml --reconfigure
+fedora@testbed ~ ⇨  make
+sudo containerlab deploy -t ~/Network-Automation-with-Go/topo/topo.yml --reconfigure
 INFO[0000] Containerlab v0.23.0 started                 
 INFO[0000] Parsing & checking topology file: topo.yml   
-INFO[0000] Removing /home/fedora/Network-Automation-with-Go/topo/clab-netgo directory... 
-INFO[0000] Pulling docker.io/networkop/cx:5.0.0 Docker image 
-INFO[0025] Done pulling docker.io/networkop/cx:5.0.0    
-INFO[0025] Pulling ghcr.io/nokia/srlinux:21.6.4 Docker image 
-INFO[0049] Done pulling ghcr.io/nokia/srlinux:21.6.4    
-WARN[0049] it appears that container host has low memory available: ~0Gi. This might lead to runtime errors. Consider freeing up more memory. 
-INFO[0049] Creating lab directory: /home/fedora/Network-Automation-with-Go/topo/clab-netgo 
-INFO[0049] Creating docker network: Name='clab', IPv4Subnet='172.20.20.0/24', IPv6Subnet='2001:172:20:20::/64', MTU='1500' 
-INFO[0049] Creating container: cvx                      
-INFO[0049] Creating container: ceos                     
-INFO[0050] Creating container: srl                      
-INFO[0051] Creating virtual wire: cvx:swp1 <--> ceos:eth2 
-INFO[0052] Creating virtual wire: srl:e1-1 <--> ceos:eth1 
-INFO[0052] Running postdeploy actions for Nokia SR Linux 'srl' node 
-INFO[0052] Running postdeploy actions for Arista cEOS 'ceos' node 
+INFO[0000] Removing /home/fedora/clab-netgo directory... 
+INFO[0000] Pulling ghcr.io/nokia/srlinux:21.6.4 Docker image 
+INFO[0024] Done pulling ghcr.io/nokia/srlinux:21.6.4    
+INFO[0024] Pulling docker.io/networkop/cx:5.0.0 Docker image 
+INFO[0049] Done pulling docker.io/networkop/cx:5.0.0    
+INFO[0049] Pulling ghcr.io/packtpublishing/thegobook:latest Docker image 
+INFO[0053] Done pulling ghcr.io/packtpublishing/thegobook:latest 
+WARN[0053] it appears that container host has low memory available: ~0Gi. This might lead to runtime errors. Consider freeing up more memory. 
+INFO[0053] Creating lab directory: /home/fedora/clab-netgo 
+INFO[0054] Creating docker network: Name='clab', IPv4Subnet='172.20.20.0/24', IPv6Subnet='2001:172:20:20::/64', MTU='1500' 
+INFO[0054] Creating container: host-2                   
+INFO[0054] Creating container: host-1                   
+INFO[0054] Creating container: host-3                   
+INFO[0054] Creating container: ceos                     
+INFO[0054] Creating container: cvx                      
+INFO[0054] Creating container: srl                      
+INFO[0058] Creating virtual wire: srl:e1-1 <--> ceos:eth1 
+INFO[0058] Creating virtual wire: srl:e1-2 <--> host-1:eth1 
+INFO[0058] Creating virtual wire: cvx:swp2 <--> host-3:eth1 
+INFO[0058] Creating virtual wire: cvx:swp1 <--> ceos:eth2 
+INFO[0058] Creating virtual wire: ceos:eth3 <--> host-2:eth1 
+INFO[0058] Running postdeploy actions for Nokia SR Linux 'srl' node 
+INFO[0058] Running postdeploy actions for Arista cEOS 'ceos' node 
 INFO[0115] Adding containerlab host entries to /etc/hosts file 
-+---+-----------------+--------------+------------------------------+------+---------+----------------+----------------------+
-| # |      Name       | Container ID |            Image             | Kind |  State  |  IPv4 Address  |     IPv6 Address     |
-+---+-----------------+--------------+------------------------------+------+---------+----------------+----------------------+
-| 1 | clab-netgo-ceos | aa2ccab6bb62 | ceos:4.26.4M                 | ceos | running | 172.20.20.3/24 | 2001:172:20:20::3/64 |
-| 2 | clab-netgo-cvx  | 038cfcbae808 | networkop/cx:5.0.0           | cvx  | running | 172.20.20.2/24 | 2001:172:20:20::2/64 |
-| 3 | clab-netgo-srl  | 5d3b18973fed | ghcr.io/nokia/srlinux:21.6.4 | srl  | running | 172.20.20.4/24 | 2001:172:20:20::4/64 |
-+---+-----------------+--------------+------------------------------+------+---------+----------------+----------------------+
++---+-------------------+--------------+------------------------------------------+-------+---------+----------------+----------------------+
+| # |       Name        | Container ID |                  Image                   | Kind  |  State  |  IPv4 Address  |     IPv6 Address     |
++---+-------------------+--------------+------------------------------------------+-------+---------+----------------+----------------------+
+| 1 | clab-netgo-ceos   | 9c3aab820875 | ceos:4.26.4M                             | ceos  | running | 172.20.20.2/24 | 2001:172:20:20::2/64 |
+| 2 | clab-netgo-cvx    | 826c355995e3 | networkop/cx:5.0.0                       | cvx   | running | 172.20.20.5/24 | 2001:172:20:20::5/64 |
+| 3 | clab-netgo-host-1 | db5137eea4f7 | ghcr.io/packtpublishing/thegobook:latest | linux | running | 172.20.20.4/24 | 2001:172:20:20::4/64 |
+| 4 | clab-netgo-host-2 | 9b8a344467c0 | ghcr.io/packtpublishing/thegobook:latest | linux | running | 172.20.20.6/24 | 2001:172:20:20::6/64 |
+| 5 | clab-netgo-host-3 | e04b7b338aa0 | ghcr.io/packtpublishing/thegobook:latest | linux | running | 172.20.20.3/24 | 2001:172:20:20::3/64 |
+| 6 | clab-netgo-srl    | 37e464198377 | ghcr.io/nokia/srlinux:21.6.4             | srl   | running | 172.20.20.7/24 | 2001:172:20:20::7/64 |
++---+-------------------+--------------+------------------------------------------+-------+---------+----------------+----------------------+
 ```
 
 You now have routers `clab-netgo-ceos`, `clab-netgo-cvx` and `clab-netgo-srl` ready to go.
