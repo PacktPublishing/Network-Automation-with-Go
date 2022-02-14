@@ -69,6 +69,7 @@ func devConfig(in Model) (b bytes.Buffer, err error) {
 	if err != nil {
 		return b, fmt.Errorf("failed create template: %w", err)
 	}
+	log.Print("Generated config: ", b.String())
 	return b, nil
 }
 
@@ -97,8 +98,6 @@ func main() {
 
 	config, err := devConfig(input)
 	check(err)
-
-	log.Print("Generated config: ", config.String())
 
 	conn, err := core.NewEOSDriver(
 		*hostname,
