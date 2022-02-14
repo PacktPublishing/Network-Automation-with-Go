@@ -229,6 +229,9 @@ func main() {
 	config, err := devConfig(input)
 	check(err)
 
+	view, _ := json.MarshalIndent(config, "", " ")
+	log.Print("Generated config: ", string(view))
+
 	// Store all HTTP device-related parameters
 	device := cvx{
 		url:   fmt.Sprintf("https://%s:%d", *hostname, defaultNvuePort),
@@ -239,9 +242,6 @@ func main() {
 			},
 		},
 	}
-
-	//view, _ := json.MarshalIndent(config, "", " ")
-	//log.Print("generated config ", string(view))
 
 	cfg := new(bytes.Buffer)
 	err = json.NewEncoder(cfg).Encode(config)

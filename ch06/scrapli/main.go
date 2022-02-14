@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
+	"log"
 	"os"
 	"text/template"
 
@@ -96,6 +97,8 @@ func main() {
 
 	config, err := devConfig(input)
 	check(err)
+
+	log.Print("Generated config: ", config.String())
 
 	conn, err := core.NewEOSDriver(
 		*hostname,
