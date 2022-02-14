@@ -292,10 +292,10 @@ Some code examples in this book take advantage of these interfaces. Still, do no
 [Containerlab] uses Docker to run the containers. This means we can leverage some of Docker capabilities to connect to the routers, for example the `docker exec` command with the name of the container, and corresponding command-line interface process.
 
 ```bash
-ubuntu@testbed frr-srl ⇨  docker exec -it clab-mylab-router2 sr_cli
+fedora@testbed ~ ⇨  docker exec -it clab-netgo-srl sr_cli
 Welcome to the srlinux CLI.                      
-A:router2# show version | grep Software
-Software Version  : v21.6.2
+A:srl# show version | grep Software
+Software Version  : v21.6.4
 ```
 
 `sr_cli` in the preceding example is the command-line interface process for an SR Linux device. Other examples in the next table.
@@ -306,13 +306,21 @@ FRR | vtysh
 SR Linux | sr_cli
 EOS | Cli
 
-You can also SSH to the same device. Use the `ssh` command with the default credentials (admin/admin).
+You can also SSH to the same device. Use the `ssh` command with the credentials in the next table.
+
+| Device | Username | Password |
+| ------ | -------- | -------- |
+| clab-netgo-srl | admin | admin |
+| clab-netgo-ceos | admin | admin |
+| clab-netgo-cvx | cumulus | cumulus |
+
+For example: 
 
 ```bash
-ubuntu@testbed frr-srl ⇨  ssh admin@clab-mylab-router2
-admin@clab-mylab-router2's password: 
-Welcome to the srlinux CLI.                     
-A:router2#
+fedora@testbed ~ ⇨  ssh admin@clab-netgo-ceos
+(admin@clab-netgo-ceos) Password: admin
+ceos>en
+ceos#
 ```
 
 ### Destroying the Network Topology
@@ -360,14 +368,7 @@ Other great resources to run virtual network topologies are [GNS3], [EVE-NG], [n
 Last, but not least, [Cisco Modeling Labs] offer access to Cisco virtual images to create network simulations with this tool. The personal license is available for 199 dollars a year ([Cisco Modeling Labs - Personal]).
 
 <!-- links -->
-[book GitHub]: https://github.com/PacktPublishing/Network-Automation-with-Go
-[AWS]: https://aws.amazon.com/
 [AWS Free Tier]: https://aws.amazon.com/free/
-[Docker]: https://www.docker.com/
-[Python]: https://wiki.python.org/moin/BeginnersGuide/Download
-[Ansible]: https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html#installing-ansible-with-pip
-[Git]: https://git-scm.com/book/en/v2/Getting-Started-Installing-Git
-[pip]: https://pip.pypa.io/en/stable/installation/#supported-methods
 [AWS Programmatic access]: https://docs.aws.amazon.com/general/latest/gr/aws-sec-cred-types.html#access-keys-and-secret-access-keys
 [On-Demand Plans for Amazon EC2]: https://aws.amazon.com/ec2/pricing/on-demand/
 [Containerlab]: https://github.com/srl-labs/containerlab
