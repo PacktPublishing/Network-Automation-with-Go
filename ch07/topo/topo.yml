@@ -1,0 +1,47 @@
+name: netgo
+
+topology:
+  nodes:
+    srl:
+      kind: srl
+      image: ghcr.io/nokia/srlinux:21.6.4
+      startup-config: ch07/topo/workdir/srl.json
+    ceos:
+      kind: ceos
+      image: ceos:4.26.4M
+      startup-config: ch07/topo/workdir/ceos.startup
+    cvx:
+      kind: cvx
+      image: networkop/cx:5.0.0
+      binds:
+      - ch07/topo/workdir/cvx.yaml:/etc/nvue.d/startup.yaml
+      runtime: docker
+    host-1:
+      kind: linux
+      image: ghcr.io/packtpublishing/thegobook:latest
+      binds:
+      - ch07/:/workdir
+      exec:
+      - ip addr add 203.0.113.0/31 dev eth1
+    host-2:
+      kind: linux
+      image: ghcr.io/packtpublishing/thegobook:latest
+      binds:
+      - ch07/:/workdir
+      exec:
+      - ip addr add 203.0.113.2/31 dev eth1
+    host-3:
+      kind: linux
+      image: ghcr.io/packtpublishing/thegobook:latest
+      binds:
+      - ch07/:/workdir
+      exec:
+      - ip addr add 203.0.113.4/31 dev eth1
+
+  links:
+    - endpoints: ["srl:e1-1", "ceos:eth1"]
+    - endpoints: ["cvx:swp1", "ceos:eth2"]
+    # host links
+    - endpoints: ["srl:e1-2", "host-1:eth1"]
+    - endpoints: ["ceos:eth3", "host-2:eth1"]
+    - endpoints: ["cvx:swp2", "host-3:eth1"]

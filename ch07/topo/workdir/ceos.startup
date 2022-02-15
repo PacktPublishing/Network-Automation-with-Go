@@ -1,0 +1,46 @@
+!
+no aaa root
+!
+username admin privilege 15 role network-admin secret sha512 $6$9Md9pOIhGkCGvr1h$g842vu7nags6dIx4SaVeNtPz1PfEmfhNTsDB..GDT0imOjf0/VkNcXQ6zGrZgOlsBxZ/WzdUuL4ExKlWtOqA00
+!
+transceiver qsfp default-mode 4x10G
+!
+service routing protocols model multi-agent
+!
+hostname ceos
+!
+spanning-tree mode mstp
+!
+management api http-commands
+   no shutdown
+!
+management api gnmi
+   transport grpc default
+!
+management api netconf
+   transport ssh default
+!
+interface Ethernet1
+   no switchport
+   ip address 192.0.2.1/31
+!
+interface Ethernet2
+   no switchport
+   ip address 192.0.2.2/31
+!
+interface Ethernet3
+   no switchport
+   ip address 203.0.113.3/31
+!
+interface Loopback0
+   ip address 198.51.100.1/32
+!
+ip routing
+!
+router bgp 65001
+   router-id 198.51.100.1
+   neighbor 192.0.2.0 remote-as 65000
+   neighbor 192.0.2.3 remote-as 65002
+   neighbor 203.0.113.2 remote-as 65004
+   redistribute connected
+!

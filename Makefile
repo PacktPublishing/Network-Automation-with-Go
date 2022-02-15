@@ -1,12 +1,20 @@
 DEFAULT: lab
 
-## Build the lab
-lab:
-	sudo containerlab deploy -t ~/Network-Automation-with-Go/topo/topo.yml --reconfigure
+include ch06/targets.mk
+include ch07/targets.mk
+
+.DEFAULT_GOAL := help
+
+## Cleanup the lab environment
+cleanup:
+	sudo containerlab destroy --all
 
 ## Clone Arista's cEOS image after uploading it
 clone:
 	docker import cEOS64-lab-4.26.4M.tar ceos:4.26.4M
+
+
+## ########## Build labs ##########
 
 # From: https://gist.github.com/klmr/575726c7e05d8780505a
 help:

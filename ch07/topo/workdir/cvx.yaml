@@ -1,0 +1,40 @@
+- set:
+    interface:
+      lo:
+        ip:
+          address:
+            198.51.100.2/32: {}
+        type: loopback
+      swp1:
+        ip:
+          address:
+            192.0.2.3/31: {}
+        type: swp
+      swp2:
+        ip:
+          address:
+            203.0.113.5/31: {}
+        type: swp
+    router:
+      bgp:
+        autonomous-system: 65002
+        enable: on
+        router-id: 198.51.100.2
+    vrf:
+      default:
+        router:
+          bgp:
+            address-family:
+              ipv4-unicast:
+                enable: on
+                redistribute:
+                  connected:
+                    enable: on
+            enable: on
+            neighbor:
+              192.0.2.2:
+                remote-as: 65001
+                type: numbered
+              203.0.113.4:
+                remote-as: 65005
+                type: numbered
