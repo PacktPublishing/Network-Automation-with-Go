@@ -79,6 +79,10 @@
       - { role: configure_instance, become: true }
 
   tasks:
+    - name: Temporary until we figurate a way to write the key out of the container
+      ansible.builtin.debug: 
+        msg: "my_key is: {{ lookup('file', ansible_ssh_private_key_file) }}"
+
     - name: Print out SSH access details
       ansible.builtin.debug:
         msg: "{{ hostvars[inventory_hostname]['instance_ssh'] }}"
