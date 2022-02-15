@@ -1,6 +1,6 @@
 DEFAULT: lab
 
-## Build the lab
+## Build the lab with Containerlab
 lab:
 	sudo containerlab deploy -t ~/Network-Automation-with-Go/topo/topo.yml --reconfigure
 
