@@ -50,23 +50,25 @@ func generateUniqueName() string {
 	return fmt.Sprintf("%d", rand.Int())
 }
 
+func check(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
+
 func main() {
-	nbUrl := flag.String("netbox", demoNetboxURL, "Netbox URL")
+	nbURL := flag.String("netbox", demoNetboxURL, "Netbox URL")
 	username := flag.String("username", "admin", "admin username")
 	password := flag.String("password", "admin", "admin password")
 	flag.Parse()
 
-	url, err := url.Parse(*nbUrl)
-	if err != nil {
-		log.Fatal(err)
-	}
+	url, err := url.Parse(*nbURL)
+	check(err)
 
 	client.DefaultSchemes = []string{url.Scheme}
 
 	token, err := createToken(*username, *password, url)
-	if err != nil {
-		log.Fatal(err)
-	}
+	check(err)
 
 	nbClient := netbox.NewNetboxWithAPIKey(url.Host, token)
 
@@ -83,18 +85,13 @@ func main() {
 			Tags:       []*models.NestedTag{},
 		},
 	}, nil)
-	if err != nil {
-		log.Fatal(err)
-	}
+	check(err)
 
 	res, err := nbClient.Dcim.DcimDevicesRead(&dcim.DcimDevicesReadParams{
 		ID:      created.Payload.ID,
 		Context: context.Background(),
 	}, nil)
-	if err != nil {
-		log.Fatal(err)
-	}
+	check(err)
 
 	log.Print("Created device ", *res.Payload.Name)
-
 }

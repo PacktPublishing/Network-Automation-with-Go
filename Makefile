@@ -8,6 +8,10 @@ include ch07/targets.mk
 ## Cleanup the lab environment
 cleanup:
 	sudo containerlab destroy --all
+	
+## Build the lab with Containerlab
+lab:
+	sudo containerlab deploy -t ~/Network-Automation-with-Go/topo/topo.yml --reconfigure
 
 ## Clone Arista's cEOS image after uploading it
 clone:
@@ -15,6 +19,25 @@ clone:
 
 
 ## ########## Build labs ##########
+build-env: check-aws-key check-aws-secret ## Build test enviroment on AWS. Make sure you export your API credentials
+	@docker run -it \
+	--env AWS_ACCESS_KEY_ID \
+	--env AWS_SECRET_ACCESS_KEY \
+	ghcr.io/packtpublishing/thebuilder \
+	ansible-playbook create-EC2-testbed.yml \
+	--extra-vars "instance_type=t2.medium" -v
+
+check-aws-key: ## Check if AWS_ACCESS_KEY_ID variable is set. Brought to you by https://stackoverflow.com/a/4731504
+ifndef AWS_ACCESS_KEY_ID
+	$(error AWS_ACCESS_KEY_ID is undefined)
+endif
+	@echo "AWS_ACCESS_KEY_ID is ${AWS_ACCESS_KEY_ID}"
+
+check-aws-secret: ## Check if AWS_SECRET_ACCESS_KEY variable is set. Brought to you by https://stackoverflow.com/a/4731504
+ifndef AWS_SECRET_ACCESS_KEY
+	$(error AWS_SECRET_ACCESS_KEY is undefined)
+endif
+	@echo "AWS_SECRET_ACCESS_KEY is **************************"
 
 # From: https://gist.github.com/klmr/575726c7e05d8780505a
 help:
