@@ -4,6 +4,8 @@ ARG TESTBED_DIR=/Network-Automation-with-Go/ch12/testbed
 ARG COLLECTIONS_DIR=$TESTBED_DIR/collections
 ARG BOOK_REPO=https://github.com/PacktPublishing/Network-Automation-with-Go
 
+ENV PATH=/root/.local/bin:$PATH
+
 RUN microdnf --nodocs install git python38 \
     && alternatives --set python /usr/bin/python3 \
     && pip3.8 install --user --upgrade pip setuptools ansible>=2.11 botocore>=1.19.0 boto3>=1.16.0 cryptography \
