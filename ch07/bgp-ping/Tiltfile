@@ -1,16 +1,13 @@
 
 local_resource('host-1',
-               cmd='go build -o workdir/host-1 main.go', 
                serve_cmd='ip netns exec clab-netgo-host-1 go run main.go -id host-1 -nlri 100.64.0.0 -laddr 203.0.113.0 -raddr 203.0.113.1 -las 65003 -ras 65000 -p',
                deps=['./main.go'])
 
 local_resource('host-2',
-               cmd='go build -o workdir/host-2 main.go', 
                serve_cmd='ip netns exec clab-netgo-host-2 go run main.go -id host-2 -nlri 100.64.0.1 -laddr 203.0.113.2 -raddr 203.0.113.3 -las 65004 -ras 65001',
                deps=['./main.go'])
 
 local_resource('host-3',
-               cmd='go build -o workdir/host-3 main.go', 
                serve_cmd='ip netns exec clab-netgo-host-3 go run main.go -id host-3 -nlri 100.64.0.2 -laddr 203.0.113.254 -raddr 203.0.113.129 -las 65005 -ras 65002 -p',
                deps=['./main.go'])
 

@@ -6,8 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
-	"os"
-	"os/exec"
 	"sort"
 	"strconv"
 	"time"
@@ -16,6 +14,8 @@ import (
 	_ "github.com/netsampler/goflow2/format/json"
 
 	// flowpb "github.com/netsampler/goflow2/pb"
+	ui "github.com/gizak/termui/v3"
+	"github.com/gizak/termui/v3/widgets"
 	"github.com/netsampler/goflow2/utils"
 	log "github.com/sirupsen/logrus"
 )
@@ -33,7 +33,7 @@ type MyPacket struct {
 	DstPort     int    `json:"DstPort,omitempty"`
 	ProtoName   string `json:"ProtoName,omitempty"`
 	Count       int
-	index       int // The index of the item in the heap.
+	index       int // The index of the item in the heap (required for update)
 }
 
 type topTalker struct {
@@ -76,7 +76,7 @@ func (h *Heap) Pop() interface{} {
 }
 
 func (c *topTalker) Send(key, data []byte) error {
-	fmt.Printf("transport.Send : Key %s, data %+v\n", key, string(data))
+	log.Printf("transport.Send : Key %s, data %+v\n", key, string(data))
 
 	var myPacket MyPacket
 	json.Unmarshal(data, &myPacket)
@@ -142,16 +142,38 @@ func main() {
 
 	go sSFlow.FlowRoutine(1, hostname, int(port), false)
 
-	for {
-		cmd := exec.Command("clear")
-		cmd.Stdout = os.Stdout
-		cmd.Run()
-		fmt.Println("Dumping top flows")
-		for _, flow := range tt.heap {
-			fmt.Printf("flow %+v\n", flow)
-		}
-		time.Sleep(time.Second * 5)
+	if err := ui.Init(); err != nil {
+		log.Fatalf("failed to initialize termui: %v", err)
 	}
-	fmt.Println("app exiting...")
+	defer ui.Close()
+	table := widgets.NewTable()
+	table.BorderStyle = ui.NewStyle(ui.ColorGreen)
+	table.TextStyle = ui.NewStyle(ui.ColorWhite)
+	table.SetRect(0, 0, 60, 10)
+
+	go func() {
+		for {
+
+			table.Rows = [][]string{
+				[]string{"From", "To", "Proto"},
+				[]string{"1.1.1.1:80", "2.2.2.2:443", "TCP"},
+			}
+			for _, flow := range tt.heap {
+				table.Rows = append(table.Rows, []string{flow.Key, "asd"})
+			}
+
+			ui.Render(table)
+			time.Sleep(time.Second * 1)
+		}
+	}()
+
+	uiEvents := ui.PollEvents()
+	for {
+		e := <-uiEvents
+		switch e.ID {
+		case "q", "<C-c>":
+			return
+		}
+	}
 
 }

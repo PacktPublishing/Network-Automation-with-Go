@@ -6,8 +6,8 @@ include ch07/targets.mk
 .DEFAULT_GOAL := help
 
 ## Cleanup the lab environment
-cleanup:
-	sudo containerlab destroy --all
+cleanup: 07-down 06-down
+	
 	
 ## Build the lab with Containerlab
 lab:
