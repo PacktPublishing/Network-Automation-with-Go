@@ -1,4 +1,4 @@
-module nb
+module github.com/PacktPublishing/Network-Automation-with-Go/ch06/netbox
 
 go 1.17
 
