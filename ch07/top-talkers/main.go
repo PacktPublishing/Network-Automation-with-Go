@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
+	"os"
+	"os/exec"
 	"sort"
 	"strconv"
 	"time"
@@ -141,6 +143,9 @@ func main() {
 	go sSFlow.FlowRoutine(1, hostname, int(port), false)
 
 	for {
+		cmd := exec.Command("clear")
+		cmd.Stdout = os.Stdout
+		cmd.Run()
 		fmt.Println("Dumping top flows")
 		for _, flow := range tt.heap {
 			fmt.Printf("flow %+v\n", flow)
