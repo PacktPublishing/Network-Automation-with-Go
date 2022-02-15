@@ -13,7 +13,7 @@
       swp2:
         ip:
           address:
-            203.0.113.5/31: {}
+            203.0.113.129/25: {}
         type: swp
     router:
       bgp:
@@ -35,6 +35,6 @@
               192.0.2.2:
                 remote-as: 65001
                 type: numbered
-              203.0.113.4:
+              203.0.113.254:
                 remote-as: 65005
                 type: numbered

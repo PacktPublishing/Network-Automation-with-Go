@@ -60,7 +60,7 @@ func (p *plugin) OnOpenMessage(peer corebgp.PeerConfig, routerID net.IP, capabil
 func (p *plugin) OnEstablished(peer corebgp.PeerConfig, writer corebgp.UpdateMessageWriter) corebgp.UpdateMessageHandler {
 	log.Println("peer established")
 
-	log.Printf("Starting ping loop")
+	log.Printf("Starting main loop")
 	go func() {
 
 		period := time.Second * 10
