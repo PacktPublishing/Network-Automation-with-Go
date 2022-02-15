@@ -15,6 +15,8 @@ RUN microdnf --nodocs install git python38 \
     && microdnf clean all \
     && rm -rf /tmp/*
 
+RUN mkdir -p ~/.ssh
+
 RUN cp $TESTBED_DIR/config ~/.ssh/config
 
 WORKDIR $TESTBED_DIR
