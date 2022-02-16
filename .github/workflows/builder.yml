@@ -37,5 +37,5 @@ jobs:
           context: ch12/testbed/.
           push: true
           tags: |
-            ${{ github.repository_owner }}/$IMAGE_NAME:$VERSION
-            ${{ github.repository_owner }}/$IMAGE_NAME:latest
+            ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME:$VERSION
+            ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME:latest
