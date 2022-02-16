@@ -17,6 +17,7 @@ topology:
       image: networkop/cx:5.0.0
       binds:
       - ./workdir/cvx.yaml:/etc/nvue.d/startup.yaml
+      - ./workdir/hsflowd.conf:/etc/hsflowd.conf
       runtime: docker
     host-1:
       kind: linux

@@ -32,8 +32,8 @@ type MyPacket struct {
 	SrcPort     int    `json:"SrcPort,omitempty"`
 	DstPort     int    `json:"DstPort,omitempty"`
 	ProtoName   string `json:"ProtoName,omitempty"`
-	Count       int
-	index       int // The index of the item in the heap (required for update)
+	Count       int    // how many times we;ve received flow sample
+	index       int    // The index of the item in the heap (required for update)
 }
 
 type topTalker struct {
@@ -76,7 +76,7 @@ func (h *Heap) Pop() interface{} {
 }
 
 func (c *topTalker) Send(key, data []byte) error {
-	log.Printf("transport.Send : Key %s, data %+v\n", key, string(data))
+	//log.Printf("transport.Send : Key %s, data %+v\n", key, string(data))
 
 	var myPacket MyPacket
 	json.Unmarshal(data, &myPacket)
@@ -149,17 +149,22 @@ func main() {
 	table := widgets.NewTable()
 	table.BorderStyle = ui.NewStyle(ui.ColorGreen)
 	table.TextStyle = ui.NewStyle(ui.ColorWhite)
-	table.SetRect(0, 0, 60, 10)
+	table.SetRect(0, 0, 120, 10)
 
 	go func() {
 		for {
 
 			table.Rows = [][]string{
-				[]string{"From", "To", "Proto"},
-				[]string{"1.1.1.1:80", "2.2.2.2:443", "TCP"},
+				[]string{"Position", "From", "To", "Proto", "Count"},
 			}
-			for _, flow := range tt.heap {
-				table.Rows = append(table.Rows, []string{flow.Key, "asd"})
+			for i, flow := range tt.heap {
+				table.Rows = append(table.Rows, []string{
+					fmt.Sprintf("%d", i+1),
+					fmt.Sprintf("%s:%d", flow.SrcAddr, flow.SrcPort),
+					fmt.Sprintf("%s:%d", flow.DstAddr, flow.DstPort),
+					flow.ProtoName,
+					fmt.Sprintf("%d", flow.Count),
+				})
 			}
 
 			ui.Render(table)
