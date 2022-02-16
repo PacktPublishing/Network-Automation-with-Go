@@ -33,7 +33,8 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Organization name for container tag
-        run: echo ::set-env name=ORG::$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]')
+        run: |
+          echo ORG=$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
 
       - name: Build and push
         uses: docker/build-push-action@v2
