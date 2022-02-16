@@ -11,7 +11,8 @@ on:
   workflow_dispatch:
 
 env:
-  IMAGE_NAME: builder
+  REGISTRY: ghcr.io
+  IMAGE: builder
   VERSION: 1.0.0
 
 jobs:
@@ -27,9 +28,12 @@ jobs:
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v1
         with:
-          registry: ghcr.io
+          registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Organization name for container tag
+        run: echo ::set-env name=ORG::$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]')
 
       - name: Build and push
         uses: docker/build-push-action@v2
@@ -37,5 +41,5 @@ jobs:
           context: ch12/testbed/.
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
-            ghcr.io/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:latest
+            ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.IMAGE }}:${{ env.VERSION }}
+            ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.IMAGE }}:latest
