@@ -1,0 +1,46 @@
+name: AWS builder image (for testing environment)
+on:
+  # Triggers the workflow on push events but only for the main branch
+  push:
+    branches:
+      - main
+    paths:
+      - 'ch12/**'
+
+  # Allows you to run this workflow manually from the Actions tab    
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE: builder
+  VERSION: 1.0.1
+
+jobs:
+  push:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Organization name for container tag
+        run: |
+          echo ORG=$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
+
+      - name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: ch12/testbed/.
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.IMAGE }}:${{ env.VERSION }}
+            ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.IMAGE }}:latest

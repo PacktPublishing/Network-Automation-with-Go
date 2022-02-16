@@ -7,8 +7,7 @@ include ch07/targets.mk
 
 ## Cleanup the lab environment
 cleanup: 07-down 06-down
-	
-	
+		
 ## Build the lab with Containerlab
 lab:
 	sudo containerlab deploy -t ~/Network-Automation-with-Go/topo/topo.yml --reconfigure
@@ -17,13 +16,12 @@ lab:
 clone:
 	docker import cEOS64-lab-4.26.4M.tar ceos:4.26.4M
 
-
 ## ########## Build labs ##########
 build-env: check-aws-key check-aws-secret ## Build test enviroment on AWS. Make sure you export your API credentials
 	@docker run -it \
 	--env AWS_ACCESS_KEY_ID \
 	--env AWS_SECRET_ACCESS_KEY \
-	ghcr.io/packtpublishing/thebuilder \
+	ghcr.io/packtpublishing/builder:1.0.0 \
 	ansible-playbook create-EC2-testbed.yml \
 	--extra-vars "instance_type=t2.medium" -v
 

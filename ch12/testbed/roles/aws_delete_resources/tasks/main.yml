@@ -6,19 +6,19 @@
   register: all_vpcs
 
 - name: Delete Route Table
-  include_tasks: delete_rt_table.yml
+  ansible.builtin.include_tasks: delete_rt_table.yml
 
 - name: Delete Internet Gateway
-  include_tasks: delete_igw.yml
+  ansible.builtin.include_tasks: delete_igw.yml
 
 - name: Delete Subnet
-  include_tasks: delete_subnet.yml
+  ansible.builtin.include_tasks: delete_subnet.yml
 
 - name: Delete Security Group
-  include_tasks: delete_security_group.yml
+  ansible.builtin.include_tasks: delete_security_group.yml
 
 - name: Delete VPC
-  include_tasks: delete_vpc.yml
+  ansible.builtin.include_tasks: delete_vpc.yml
 
 - name: Delete SSH Key Pair
-  include_tasks: delete_key_pair.yml
+  ansible.builtin.include_tasks: delete_key_pair.yml

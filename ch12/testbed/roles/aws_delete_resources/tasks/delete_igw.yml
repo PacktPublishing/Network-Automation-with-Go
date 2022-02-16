@@ -1,5 +1,5 @@
 - name: Delete internet gateway in Environment {{ ec2_environment }}
-  community.aws.ec2_vpc_igw:
+  amazon.aws.ec2_vpc_igw:
     region: "{{ ec2_region }}"
     vpc_id: "{{ item.vpc_id }}"
     state: absent

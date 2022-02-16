@@ -12,6 +12,7 @@ RUN microdnf --nodocs install git python38 \
     && git clone $BOOK_REPO \
     && ansible-galaxy collection install amazon.aws:==3.0.0 -p $COLLECTIONS_DIR \
     && ansible-galaxy collection install community.crypto:==2.1.0 -p $COLLECTIONS_DIR \
+    && ansible-galaxy collection install ansible.posix:==1.3.0 -p $COLLECTIONS_DIR \
     && microdnf clean all \
     && rm -rf /tmp/*
 

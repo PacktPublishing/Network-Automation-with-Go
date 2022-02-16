@@ -1,5 +1,5 @@
 - name: Create Internet Gateway
-  community.aws.ec2_vpc_igw:
+  amazon.aws.ec2_vpc_igw:
     region: "{{ ec2_region }}"
     vpc_id: "{{ create_vpc.vpc.id }}"
     tags:
