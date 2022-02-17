@@ -6,4 +6,5 @@ RUN wget https://github.com/microsoft/ethr/releases/download/v1.0.0/ethr_linux.z
 
 RUN wget https://github.com/cloudprober/cloudprober/releases/download/v0.11.4/cloudprober-v0.11.4-linux-x86_64.zip && \
          unzip cloudprober-v0.11.4-linux-x86_64.zip && \
-         rm cloudprober-v0.11.4-linux-x86_64.zip
+         mv cloudprober-v0.11.4-linux-x86_64/cloudprober . && \
+         rm -rf cloudprober-v0.11.4-linux-* 
