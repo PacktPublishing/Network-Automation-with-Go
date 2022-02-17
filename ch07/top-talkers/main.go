@@ -6,16 +6,19 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
+	"os"
+	"os/exec"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/netsampler/goflow2/format"
 	_ "github.com/netsampler/goflow2/format/json"
 
 	// flowpb "github.com/netsampler/goflow2/pb"
-	ui "github.com/gizak/termui/v3"
-	"github.com/gizak/termui/v3/widgets"
+	"github.com/olekukonko/tablewriter"
+
 	"github.com/netsampler/goflow2/utils"
 	log "github.com/sirupsen/logrus"
 )
@@ -81,6 +84,10 @@ func (c *topTalker) Send(key, data []byte) error {
 	var myPacket MyPacket
 	json.Unmarshal(data, &myPacket)
 
+	if myPacket.ProtoName == "" {
+		return nil
+	}
+
 	ips := []string{myPacket.SrcAddr, myPacket.DstAddr}
 	sort.Strings(ips)
 
@@ -142,43 +149,22 @@ func main() {
 
 	go sSFlow.FlowRoutine(1, hostname, int(port), false)
 
-	if err := ui.Init(); err != nil {
-		log.Fatalf("failed to initialize termui: %v", err)
-	}
-	defer ui.Close()
-	table := widgets.NewTable()
-	table.BorderStyle = ui.NewStyle(ui.ColorGreen)
-	table.TextStyle = ui.NewStyle(ui.ColorWhite)
-	table.SetRect(0, 0, 120, 10)
+	table := tablewriter.NewWriter(os.Stdout)
+	table.SetHeader([]string{"#", "From", "To", "Proto", "Count"})
 
-	go func() {
-		for {
-
-			table.Rows = [][]string{
-				[]string{"Position", "From", "To", "Proto", "Count"},
-			}
-			for i, flow := range tt.heap {
-				table.Rows = append(table.Rows, []string{
-					fmt.Sprintf("%d", i+1),
-					fmt.Sprintf("%s:%d", flow.SrcAddr, flow.SrcPort),
-					fmt.Sprintf("%s:%d", flow.DstAddr, flow.DstPort),
-					flow.ProtoName,
-					fmt.Sprintf("%d", flow.Count),
-				})
-			}
-
-			ui.Render(table)
-			time.Sleep(time.Second * 1)
-		}
-	}()
-
-	uiEvents := ui.PollEvents()
 	for {
-		e := <-uiEvents
-		switch e.ID {
-		case "q", "<C-c>":
-			return
+		cmd := exec.Command("clear")
+		cmd.Stdout = os.Stdout
+		cmd.Run()
+		fmt.Println("Top Talkers")
+		table.ClearRows()
+		for i, flow := range tt.heap {
+			parts := strings.Split(flow.Key, "<->")
+			table.Append([]string{fmt.Sprintf("%d", i+1), parts[0], parts[1], flow.ProtoName, fmt.Sprintf("%d", flow.Count)})
 		}
+		table.Render()
+		time.Sleep(time.Second * 5)
 	}
+	fmt.Println("app exiting...")
 
 }
