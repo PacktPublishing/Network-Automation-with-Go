@@ -9,11 +9,15 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
+	epb "github.com/cloudprober/cloudprober/probes/external/proto"
+	"github.com/cloudprober/cloudprober/probes/external/serverutils"
 	"github.com/jwhited/corebgp"
 	bgp "github.com/osrg/gobgp/v3/pkg/packet/bgp"
+	"google.golang.org/protobuf/proto"
 )
 
 const (
@@ -29,7 +33,9 @@ var (
 	remoteAS      = flag.Uint("ras", 0, "remote AS")
 	localAddress  = flag.String("laddr", "", "local address")
 	remoteAddress = flag.String("raddr", "", "remote address")
-	passive       = flag.Bool("p", true, "passive mode")
+	passive       = flag.Bool("p", false, "passive mode")
+	cloudprober   = flag.Bool("c", false, "cloudprober mode")
+	interval      = flag.String("i", "10s", "probing interval")
 )
 
 type plugin struct {
@@ -38,6 +44,9 @@ type plugin struct {
 	localAS   uint32
 	host      []byte
 	pingCh    chan ping
+	probeCh   chan struct{}
+	resultsCh chan string
+	store     []string
 	passive   bool
 }
 
@@ -58,15 +67,12 @@ func (p *plugin) OnOpenMessage(peer corebgp.PeerConfig, routerID net.IP, capabil
 }
 
 func (p *plugin) OnEstablished(peer corebgp.PeerConfig, writer corebgp.UpdateMessageWriter) corebgp.UpdateMessageHandler {
-	log.Println("peer established")
+	log.Println("peer established, starting main loop")
 
-	log.Printf("Starting main loop")
 	go func() {
 
-		period := time.Second * 10
 		withdrawAfter := time.Second * 7
-		update := time.NewTicker(period)
-		withdraw := time.NewTicker(period)
+		withdraw := time.NewTicker(withdrawAfter)
 		withdraw.Stop()
 
 		for {
@@ -85,15 +91,11 @@ func (p *plugin) OnEstablished(peer corebgp.PeerConfig, writer corebgp.UpdateMes
 
 				writer.WriteUpdate(bytes)
 
-				log.Printf("sent ping response to %s", src)
+				log.Printf("sent ping response to %s\n", src)
 
-			case <-update.C:
+			case <-p.probeCh:
 
-				if p.passive {
-					continue
-				}
-
-				log.Printf("Sending periodic ping")
+				log.Println("Sending ping request")
 				pingReq := ping{
 					source: p.host,
 					ts:     time.Now().Unix(),
@@ -108,16 +110,20 @@ func (p *plugin) OnEstablished(peer corebgp.PeerConfig, writer corebgp.UpdateMes
 
 				writer.WriteUpdate(bytes)
 
+				p.store = make([]string, 0)
 				withdraw.Reset(withdrawAfter)
 
 			case <-withdraw.C:
-				log.Printf("Sending periodic withdraw")
+				log.Println("Sending ping withdraw")
 				bytes, err := p.buildWithdraw()
 				if err != nil {
 					log.Fatal(err)
 				}
 
 				writer.WriteUpdate(bytes)
+				withdraw.Stop()
+
+				p.resultsCh <- strings.Join(p.store, "\n")
 			}
 		}
 	}()
@@ -184,14 +190,17 @@ func (p *plugin) handleUpdate(peer corebgp.PeerConfig, u []byte) *corebgp.Notifi
 		}
 
 		if string(bytes.Trim(source, "\x00")) == *id {
-			log.Printf("Received a ping response")
+			log.Println("Received a ping response")
 
-			if len(string(bytes.Trim(dest, "\x00"))) == 0 {
-				log.Printf("Received a looped response, ignoring")
+			destHost := string(bytes.Trim(dest, "\x00"))
+			if len(destHost) == 0 {
+				log.Println("Received a looped response, ignoring")
 				continue
 			}
 
-			fmt.Printf("bgp_ping_rtt_ms{device=%s} %f", dest, float64(time.Since(ts).Nanoseconds())/1e6)
+			metric := fmt.Sprintf("bgp_ping_rtt_ms{device=%s} %f\n", destHost, float64(time.Since(ts).Nanoseconds())/1e6)
+			log.Println(metric)
+			p.store = append(p.store, metric)
 			return nil
 		}
 
@@ -205,11 +214,23 @@ func main() {
 
 	flag.Parse()
 
+	if *cloudprober && *passive {
+		log.Fatal("can't use both 'cloudprober' and 'passive' mods")
+	}
+
+	timeInterval, err := time.ParseDuration(*interval)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	log.Print("starting corebgp server")
 	srv, err := corebgp.NewServer(net.ParseIP(*localAddress))
 	if err != nil {
 		log.Fatalf("error constructing server: %v", err)
 	}
+
+	probeCh := make(chan struct{})
+	resultsCh := make(chan string)
 
 	p := &plugin{
 		localAddr: net.ParseIP(*localAddress),
@@ -217,6 +238,8 @@ func main() {
 		localAS:   uint32(*localAS),
 		host:      []byte(*id),
 		pingCh:    make(chan ping),
+		probeCh:   probeCh,
+		resultsCh: resultsCh,
 		passive:   *passive,
 	}
 
@@ -236,6 +259,27 @@ func main() {
 		err := srv.Serve([]net.Listener{})
 		srvErrCh <- err
 	}()
+
+	if *cloudprober {
+		go func() {
+			serverutils.Serve(func(request *epb.ProbeRequest, reply *epb.ProbeReply) {
+				probeCh <- struct{}{}
+				reply.Payload = proto.String(<-resultsCh)
+				if err != nil {
+					reply.ErrorMessage = proto.String(err.Error())
+				}
+			})
+		}()
+	}
+
+	if !*passive {
+		go func() {
+			update := time.NewTicker(timeInterval)
+			for range update.C {
+				probeCh <- struct{}{}
+			}
+		}()
+	}
 
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
