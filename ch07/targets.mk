@@ -11,6 +11,7 @@ top-talkers-stop:
 
 # to run: cd ch07/top-talkers; sudo ip netns clab-netgo-host-2 go run main.go
 top-talkers-start: 
+	docker exec -d clab-netgo-cvx systemctl start hsflowd
 	docker exec -d clab-netgo-host-3 ./ethr -s
 	docker exec -d clab-netgo-host-1 ./ethr -c 203.0.113.253 -b 900K -d 60s -p udp -l 1KB
 	docker exec -d clab-netgo-host-1 ./ethr -c 203.0.113.252 -b 600K -d 60s -p udp -l 1KB
