@@ -35,6 +35,7 @@ type MyPacket struct {
 	SrcPort     int    `json:"SrcPort,omitempty"`
 	DstPort     int    `json:"DstPort,omitempty"`
 	ProtoName   string `json:"ProtoName,omitempty"`
+	Bytes       int    `json:"Bytes,omitempty"`
 	Count       int    // how many times we;ve received flow sample
 	index       int    // The index of the item in the heap (required for update)
 }
@@ -151,6 +152,11 @@ func main() {
 
 	table := tablewriter.NewWriter(os.Stdout)
 	table.SetHeader([]string{"#", "From", "To", "Proto", "Count"})
+	table.SetColMinWidth(0, 3)
+	table.SetColMinWidth(1, 21)
+	table.SetColMinWidth(2, 21)
+	table.SetColMinWidth(3, 7)
+	table.SetColMinWidth(4, 7)
 
 	for {
 		cmd := exec.Command("clear")
