@@ -1,32 +1,36 @@
 version: '3'
+
 services:
-  influxdb:
-    image: influxdb:latest
-    environment: 
-       # Use these same configurations parameters in your telegraf configuration, mytelegraf.conf.
-      - DOCKER_INFLUXDB_INIT_MODE=setup
-      - DOCKER_INFLUXDB_INIT_USERNAME=admin
-      - DOCKER_INFLUXDB_INIT_PASSWORD=adminpassword
-      - DOCKER_INFLUXDB_INIT_ORG=myorg
-      - DOCKER_INFLUXDB_INIT_BUCKET=mybucket
-      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=mytoken
-    ports:
-      - "8086:8086"
-  telegraf:
-    image: telegraf
-    links:
-      - influxdb
+  prometheus:
+    image: prom/prometheus:v2.32.1
+    container_name: prometheus
     volumes:
-      - ./workdir/telegraf.conf:/etc/telegraf/telegraf.conf
-    environment: 
-      - DOCKER_INFLUXDB_INIT_ORG=myorg
-      - DOCKER_INFLUXDB_INIT_BUCKET=mybucket
-      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=mytoken
-    depends_on:
-      - influxdb_cli
+      - ./workdir/prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=2h'
+      - '--web.enable-lifecycle'
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:8.3.3
+    container_name: grafana
+    volumes:
+      - ./workdir/dashboards:/etc/grafana/provisioning/dashboards
+      - ./workdir/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
+    environment:
+      - GF_SECURITY_ADMIN_USER=${ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+
+
 networks:
   default:
     external: true
     name: clab
-volumes:
-  influxdb2:
