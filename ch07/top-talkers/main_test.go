@@ -46,7 +46,6 @@ func TestHeap(t *testing.T) {
 				t.Errorf("%s: unexpected count for packet key %s: %d, expected %d", test.name, p.Key, p.Count, p.DstPort)
 			}
 		}
-
 	}
 }
 
@@ -77,9 +76,14 @@ var testData = []testCase{
 		updates: []int{3, 0},
 	},
 	{
-		name:    "tie use case",
+		name:    "tie use case/first packet wins",
 		packets: []*MyPacket{testPacket("6-1", 2, 0, 4), testPacket("6-2", 3, 1, 4)},
 		updates: []int{2, 1},
+	},
+	{
+		name:    "odd number of packets",
+		packets: []*MyPacket{testPacket("7-1", 1, 2, 2), testPacket("7-2", 2, 0, 4), testPacket("7-3", 3, 1, 3)},
+		updates: []int{1, 2, 0},
 	},
 }
 
