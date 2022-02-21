@@ -3,6 +3,7 @@ module github.com/PacktPublishing/Network-Automation-with-Go/ch06/netbox
 go 1.17
 
 require (
+	github.com/go-openapi/strfmt v0.20.2
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/netbox-community/go-netbox v0.0.0-20211207200101-e5afdff979ba
 )
@@ -18,7 +19,6 @@ require (
 	github.com/go-openapi/loads v0.20.2 // indirect
 	github.com/go-openapi/runtime v0.19.31 // indirect
 	github.com/go-openapi/spec v0.20.3 // indirect
-	github.com/go-openapi/strfmt v0.20.2 // indirect
 	github.com/go-openapi/swag v0.19.15 // indirect
 	github.com/go-openapi/validate v0.20.2 // indirect
 	github.com/go-stack/stack v1.8.0 // indirect

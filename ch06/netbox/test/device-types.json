@@ -1,0 +1,29 @@
+[
+    {
+      "id": 7,
+      "display": "C9200-48P",
+      "manufacturer": {
+          "id": 3
+      },
+      "model": "C9200-48P",
+      "slug": "c9200-48p"
+  },
+  {
+    "id": 21,
+    "display": "Containerized EOS",
+    "manufacturer": {
+        "id": 1
+    },
+    "model": "cEOS",
+    "slug": "ceos"
+  },
+  {
+    "id": 22,
+    "display": "Cumulus VX",
+    "manufacturer": {
+        "id": 16
+    },
+    "model": "Cumulus-VX",
+    "slug": "cvx"
+  }
+]
