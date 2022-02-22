@@ -1,27 +1,24 @@
 [
-    {
-      "id": 7,
-      "display": "C9200-48P",
-      "manufacturer": {
-          "id": 3
-      },
-      "model": "C9200-48P",
-      "slug": "c9200-48p"
+  {
+    "display": "SR Linux",
+    "manufacturer": {
+      "slug": "nokia"
+    },
+    "model": "SR-Linux",
+    "slug": "srl"
   },
   {
-    "id": 21,
     "display": "Containerized EOS",
     "manufacturer": {
-        "id": 1
+      "slug": "arista"
     },
     "model": "cEOS",
     "slug": "ceos"
   },
   {
-    "id": 22,
     "display": "Cumulus VX",
     "manufacturer": {
-        "id": 16
+      "slug": "nvidia"
     },
     "model": "Cumulus-VX",
     "slug": "cvx"

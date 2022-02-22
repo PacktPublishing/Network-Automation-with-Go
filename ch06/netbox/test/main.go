@@ -26,31 +26,32 @@ type Manufacturers struct {
 }
 
 func createManufacturer(nb *client.NetBoxAPI, vnd models.Manufacturer) error {
-	crd, err := nb.Dcim.DcimManufacturersCreate(&dcim.DcimManufacturersCreateParams{
+	_, err := nb.Dcim.DcimManufacturersCreate(&dcim.DcimManufacturersCreateParams{
 		Context: context.Background(),
 		Data:    &vnd,
 	}, nil)
 	if err != nil {
 		return fmt.Errorf("failed to create manufacturer %s: %w", vnd.Display, err)
 	}
-	fmt.Println("Last Updated: ", crd.Payload.LastUpdated)
+	//fmt.Println("Last Updated: ", crd.Payload.LastUpdated)
 	return nil
 }
 
-func findManufacturer(nb *client.NetBoxAPI, vnd models.Manufacturer) (fnd bool, err error) {
+func findManufacturer(nb *client.NetBoxAPI, vnd models.Manufacturer) (fnd bool, id int64, err error) {
 	rsp, err := nb.Dcim.DcimManufacturersList(&dcim.DcimManufacturersListParams{
 		Context: context.Background(),
 		SlugIe:  vnd.Slug,
 	}, nil)
 	if err != nil {
-		return fnd, fmt.Errorf("failed to find manufacturer %s: %w", vnd.Display, err)
+		return fnd, id, fmt.Errorf("failed to find manufacturer %s: %w", vnd.Display, err)
 	}
 	if len(rsp.Payload.Results) != 0 {
 		fnd = true
+		id = rsp.Payload.Results[0].ID
 		fmt.Printf("Vendor: %s \tID: %v \n",
-			*rsp.Payload.Results[0].Name, rsp.Payload.Results[0].ID)
+			*rsp.Payload.Results[0].Name, id)
 	}
-	return fnd, nil
+	return fnd, id, nil
 }
 
 type DeviceTypes struct {
@@ -58,28 +59,38 @@ type DeviceTypes struct {
 }
 
 func createDeviceType(nb *client.NetBoxAPI, dt models.DeviceType) error {
+	man := models.Manufacturer{
+		Display: dt.Manufacturer.Display,
+		Name:    dt.Manufacturer.Name,
+		Slug:    dt.Manufacturer.Slug,
+	}
+
+	found, id, err := findManufacturer(nb, man)
+	if err != nil || !found {
+		return fmt.Errorf("error finding manufacturer %s: %w", man.Display, err)
+	}
+
 	ndt := models.WritableDeviceType{
-		Manufacturer: &dt.Manufacturer.ID,
-		ID:           dt.ID,
+		Manufacturer: &id,
 		Display:      dt.Display,
 		Model:        dt.Model,
 		Slug:         dt.Slug,
 		Tags:         []*models.NestedTag{},
 	}
 	f := strfmt.NewFormats()
-	err := ndt.Validate(f)
+	err = ndt.Validate(f)
 	if err != nil {
 		return fmt.Errorf("failed to validate values for type %s: %w", *dt.Model, err)
 	}
 
-	crd, err := nb.Dcim.DcimDeviceTypesCreate(&dcim.DcimDeviceTypesCreateParams{
+	_, err = nb.Dcim.DcimDeviceTypesCreate(&dcim.DcimDeviceTypesCreateParams{
 		Context: context.Background(),
 		Data:    &ndt,
 	}, nil)
 	if err != nil {
 		return fmt.Errorf("failed to create device type %s: %w", *dt.Model, err)
 	}
-	fmt.Println("Last Updated: ", crd.Payload.LastUpdated)
+	//fmt.Println("Last Updated: ", crd.Payload.LastUpdated)
 	return nil
 }
 
@@ -93,8 +104,9 @@ func findDeviceType(nb *client.NetBoxAPI, dt models.DeviceType) (fnd bool, err e
 	}
 	if len(rsp.Payload.Results) != 0 {
 		fnd = true
+		id := rsp.Payload.Results[0].ID
 		fmt.Printf("Device Type: %q \tID: %v \n",
-			strings.TrimSpace(*rsp.Payload.Results[0].Model), rsp.Payload.Results[0].ID)
+			strings.TrimSpace(*rsp.Payload.Results[0].Model), id)
 	}
 	return fnd, nil
 }
@@ -104,35 +116,68 @@ type DeviceRoles struct {
 }
 
 func createDeviceRole(nb *client.NetBoxAPI, dr models.DeviceRole) error {
-	ndr := models.DeviceRole{
-		ID:           dr.ID,
-		Display:      dr.Display,
-		Slug:         dr.Slug,
-	}
-	f := strfmt.NewFormats()
-	err := ndr.Validate(f)
-	if err != nil {
-		return fmt.Errorf("failed to validate values for role %s: %w", dr.Display, err)
-	}
-
-	crd, err := nb.Dcim.DcimDeviceRolesCreate(&dcim.DcimDeviceRolesCreateParams{
+	_, err := nb.Dcim.DcimDeviceRolesCreate(&dcim.DcimDeviceRolesCreateParams{
 		Context: context.Background(),
-		Data:    &ndr,
+		Data:    &dr,
 	}, nil)
 	if err != nil {
 		return fmt.Errorf("failed to create device role %s: %w", dr.Display, err)
 	}
-	fmt.Println("Last Updated: ", crd.Payload.LastUpdated)
+	//fmt.Println("Last Updated: ", crd.Payload.LastUpdated)
 	return nil
 }
 
 func findDeviceRole(nb *client.NetBoxAPI, dr models.DeviceRole) (fnd bool, err error) {
 	rsp, err := nb.Dcim.DcimDeviceRolesList(&dcim.DcimDeviceRolesListParams{
 		Context: context.Background(),
-		NameIe:   dr.Name,
+		SlugIe:  dr.Slug,
 	}, nil)
 	if err != nil {
 		return fnd, fmt.Errorf("failed to find device role %s: %w", *dr.Name, err)
+	}
+	if len(rsp.Payload.Results) != 0 {
+		fnd = true
+		id := rsp.Payload.Results[0].ID
+		fmt.Printf("Site: %q \tID: %v \n",
+			strings.TrimSpace(rsp.Payload.Results[0].Display), id)
+	}
+	return fnd, nil
+}
+
+type Sites struct {
+	List []models.Site
+}
+
+func createSite(nb *client.NetBoxAPI, s models.Site) error {
+	ns := models.WritableSite{
+		Name:    s.Name,
+		Display: s.Display,
+		Slug:    s.Slug,
+	}
+	f := strfmt.NewFormats()
+	err := ns.Validate(f)
+	if err != nil {
+		return fmt.Errorf("failed to validate values for site %s: %w", ns.Display, err)
+	}
+
+	_, err = nb.Dcim.DcimSitesCreate(&dcim.DcimSitesCreateParams{
+		Context: context.Background(),
+		Data:    &ns,
+	}, nil)
+	if err != nil {
+		return fmt.Errorf("failed to create site %s: %w", ns.Display, err)
+	}
+	//fmt.Println("Last Updated: ", crd.Payload.LastUpdated)
+	return nil
+}
+
+func findSite(nb *client.NetBoxAPI, s models.Site) (fnd bool, err error) {
+	rsp, err := nb.Dcim.DcimSitesList(&dcim.DcimSitesListParams{
+		Context: context.Background(),
+		SlugIe:  s.Slug,
+	}, nil)
+	if err != nil {
+		return fnd, fmt.Errorf("failed to find site %s: %w", *s.Name, err)
 	}
 	if len(rsp.Payload.Results) != 0 {
 		fnd = true
@@ -180,18 +225,17 @@ func createResources(nb *client.NetBoxAPI) error {
 	if err != nil {
 		return fmt.Errorf("cannot open manufacturers file: %w", err)
 	}
-	defer man.Close()
 
-	d1 := json.NewDecoder(man)
+	d := json.NewDecoder(man)
 
 	var manInput Manufacturers
-	err = d1.Decode(&manInput.List)
+	err = d.Decode(&manInput.List)
 	if err != nil {
 		return fmt.Errorf("cannot decode manufacturers data: %w", err)
 	}
 
 	for _, vendor := range manInput.List {
-		found, err := findManufacturer(nb, vendor)
+		found, _, err := findManufacturer(nb, vendor)
 		if err != nil {
 			return fmt.Errorf("error finding manufacturer %s: %w", vendor.Display, err)
 		}
@@ -202,6 +246,8 @@ func createResources(nb *client.NetBoxAPI) error {
 			}
 		}
 	}
+	man.Close()
+
 	////////////////////////////////
 	// Device Types
 	////////////////////////////////
@@ -209,17 +255,16 @@ func createResources(nb *client.NetBoxAPI) error {
 	if err != nil {
 		return fmt.Errorf("cannot open device types file: %w", err)
 	}
-	defer dev.Close()
 
-	d2 := json.NewDecoder(dev)
+	d = json.NewDecoder(dev)
 
-	var devInput DeviceTypes
-	err = d2.Decode(&devInput.List)
+	var devTypes DeviceTypes
+	err = d.Decode(&devTypes.List)
 	if err != nil {
 		return fmt.Errorf("cannot decode device types data: %w", err)
 	}
 
-	for _, devType := range devInput.List {
+	for _, devType := range devTypes.List {
 		found, err := findDeviceType(nb, devType)
 		if err != nil {
 			return fmt.Errorf("error finding device type %s: %w", devType.Display, err)
@@ -228,6 +273,67 @@ func createResources(nb *client.NetBoxAPI) error {
 			err = createDeviceType(nb, devType)
 			if err != nil {
 				return fmt.Errorf("error creating device type %s: %w", devType.Display, err)
+			}
+		}
+	}
+	dev.Close()
+
+	////////////////////////////////
+	// Device Role
+	////////////////////////////////
+	rol, err := os.Open("device-roles.json")
+	if err != nil {
+		return fmt.Errorf("cannot open device roles file: %w", err)
+	}
+
+	d = json.NewDecoder(rol)
+
+	var devRoles DeviceRoles
+	err = d.Decode(&devRoles.List)
+	if err != nil {
+		return fmt.Errorf("cannot decode device roles data: %w", err)
+	}
+
+	for _, devRole := range devRoles.List {
+		found, err := findDeviceRole(nb, devRole)
+		if err != nil {
+			return fmt.Errorf("error finding device role %s: %w", devRole.Display, err)
+		}
+		if !found {
+			err = createDeviceRole(nb, devRole)
+			if err != nil {
+				return fmt.Errorf("error creating device role %s: %w", devRole.Display, err)
+			}
+		}
+	}
+	dev.Close()
+
+	////////////////////////////////
+	// Sites
+	////////////////////////////////
+	sit, err := os.Open("sites.json")
+	if err != nil {
+		return fmt.Errorf("cannot open sites file: %w", err)
+	}
+	defer dev.Close()
+
+	d = json.NewDecoder(sit)
+
+	var devSites Sites
+	err = d.Decode(&devSites.List)
+	if err != nil {
+		return fmt.Errorf("cannot decode sites data: %w", err)
+	}
+
+	for _, devSite := range devSites.List {
+		found, err := findSite(nb, devSite)
+		if err != nil {
+			return fmt.Errorf("error finding site %s: %w", devSite.Display, err)
+		}
+		if !found {
+			err = createSite(nb, devSite)
+			if err != nil {
+				return fmt.Errorf("error creating site %s: %w", devSite.Display, err)
 			}
 		}
 	}
