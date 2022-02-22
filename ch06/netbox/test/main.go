@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"log"
 	"net/url"
 	"os"
 	"strings"
@@ -48,7 +47,7 @@ func findManufacturer(nb *client.NetBoxAPI, vnd models.Manufacturer) (fnd bool, 
 	}
 	if len(rsp.Payload.Results) != 0 {
 		fnd = true
-		fmt.Printf("Vendor: %s \t\tID: %v \n", 
+		fmt.Printf("Vendor: %s \tID: %v \n",
 			*rsp.Payload.Results[0].Name, rsp.Payload.Results[0].ID)
 	}
 	return fnd, nil
@@ -94,7 +93,7 @@ func findDeviceType(nb *client.NetBoxAPI, dt models.DeviceType) (fnd bool, err e
 	}
 	if len(rsp.Payload.Results) != 0 {
 		fnd = true
-		fmt.Printf("Device Type: %q \t\tID: %v \n", 
+		fmt.Printf("Device Type: %q \tID: %v \n",
 			strings.TrimSpace(*rsp.Payload.Results[0].Model), rsp.Payload.Results[0].ID)
 	}
 	return fnd, nil
@@ -106,28 +105,91 @@ func createToken(usr, pwd string, url *url.URL) (string, error) {
 
 	body := fmt.Sprintf(`{"username":"%s", "password":"%s"}`, usr, pwd)
 
-	response := make(map[string]interface{})
-	resp, err := client.R().
-		SetResult(&response).
+	result := make(map[string]interface{})
+	_, err := client.R().
+		SetResult(&result).
 		SetHeader("Content-Type", "application/json").
 		SetBody(body).
 		Post("/api/users/tokens/provision/")
+
 	if err != nil {
-		log.Fatal(err)
+		return "", fmt.Errorf("error requesting a token: %w", err)
 	}
 
-	log.Printf("response %+v", resp)
+	if val, ok := result["key"]; ok {
+		return val.(string), nil
+	}
 
-	// super unsafe
-	token := response["key"].(string)
-
-	return token, nil
+	return "", fmt.Errorf("empty token")
 }
 
 func check(err error) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func createResources(nb *client.NetBoxAPI) error {
+	////////////////////////////////
+	// Manufacturers
+	////////////////////////////////
+	man, err := os.Open("manufacturer.json")
+	if err != nil {
+		return fmt.Errorf("cannot open manufacturers file: %w", err)
+	}
+	defer man.Close()
+
+	d1 := json.NewDecoder(man)
+
+	var manInput Manufacturers
+	err = d1.Decode(&manInput.List)
+	if err != nil {
+		return fmt.Errorf("cannot decode manufacturers data: %w", err)
+	}
+
+	for _, vendor := range manInput.List {
+		found, err := findManufacturer(nb, vendor)
+		if err != nil {
+			return fmt.Errorf("error finding manufacturer %s: %w", vendor.Display, err)
+		}
+		if !found {
+			err = createManufacturer(nb, vendor)
+			if err != nil {
+				return fmt.Errorf("error creating manufacturer %s: %w", vendor.Display, err)
+			}
+		}
+	}
+	////////////////////////////////
+	// Device Types
+	////////////////////////////////
+	dev, err := os.Open("device-types.json")
+	if err != nil {
+		return fmt.Errorf("cannot open device types file: %w", err)
+	}
+	defer dev.Close()
+
+	d2 := json.NewDecoder(dev)
+
+	var devInput DeviceTypes
+	err = d2.Decode(&devInput.List)
+	if err != nil {
+		return fmt.Errorf("cannot decode device types data: %w", err)
+	}
+
+	for _, devType := range devInput.List {
+		found, err := findDeviceType(nb, devType)
+		if err != nil {
+			return fmt.Errorf("error finding device type %s: %w", devType.Display, err)
+		}
+		if !found {
+			err = createDeviceType(nb, devType)
+			if err != nil {
+				return fmt.Errorf("error creating device type %s: %w", devType.Display, err)
+			}
+		}
+	}
+
+	return nil
 }
 
 func main() {
@@ -146,47 +208,7 @@ func main() {
 
 	nbClient := netbox.NewNetboxWithAPIKey(url.Host, token)
 
-	////////////////////////////////
-	// Manufacturers
-	////////////////////////////////
-	man, err := os.Open("manufacturer.json")
-	check(err)
-	defer man.Close()
-
-	d1 := json.NewDecoder(man)
-
-	var manInput Manufacturers
-	err = d1.Decode(&manInput.List)
+	err = createResources(nbClient)
 	check(err)
 
-	for _, vendor := range manInput.List {
-		found, err := findManufacturer(nbClient, vendor)
-		check(err)
-		if !found {
-			err = createManufacturer(nbClient, vendor)
-			check(err)
-		}
-	}
-
-	////////////////////////////////
-	// Device Types
-	////////////////////////////////
-	dev, err := os.Open("device-types.json")
-	check(err)
-	defer dev.Close()
-
-	d2 := json.NewDecoder(dev)
-
-	var devInput DeviceTypes
-	err = d2.Decode(&devInput.List)
-	check(err)
-
-	for _, devType := range devInput.List {
-		found, err := findDeviceType(nbClient, devType)
-		check(err)
-		if !found {
-			err = createDeviceType(nbClient, devType)
-			check(err)
-		}
-	}
 }
