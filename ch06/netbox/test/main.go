@@ -99,6 +99,49 @@ func findDeviceType(nb *client.NetBoxAPI, dt models.DeviceType) (fnd bool, err e
 	return fnd, nil
 }
 
+type DeviceRoles struct {
+	List []models.DeviceRole
+}
+
+func createDeviceRole(nb *client.NetBoxAPI, dr models.DeviceRole) error {
+	ndr := models.DeviceRole{
+		ID:           dr.ID,
+		Display:      dr.Display,
+		Slug:         dr.Slug,
+	}
+	f := strfmt.NewFormats()
+	err := ndr.Validate(f)
+	if err != nil {
+		return fmt.Errorf("failed to validate values for role %s: %w", dr.Display, err)
+	}
+
+	crd, err := nb.Dcim.DcimDeviceRolesCreate(&dcim.DcimDeviceRolesCreateParams{
+		Context: context.Background(),
+		Data:    &ndr,
+	}, nil)
+	if err != nil {
+		return fmt.Errorf("failed to create device role %s: %w", dr.Display, err)
+	}
+	fmt.Println("Last Updated: ", crd.Payload.LastUpdated)
+	return nil
+}
+
+func findDeviceRole(nb *client.NetBoxAPI, dr models.DeviceRole) (fnd bool, err error) {
+	rsp, err := nb.Dcim.DcimDeviceRolesList(&dcim.DcimDeviceRolesListParams{
+		Context: context.Background(),
+		NameIe:   dr.Name,
+	}, nil)
+	if err != nil {
+		return fnd, fmt.Errorf("failed to find device role %s: %w", *dr.Name, err)
+	}
+	if len(rsp.Payload.Results) != 0 {
+		fnd = true
+		fmt.Printf("Device Role: %q \tID: %v \n",
+			strings.TrimSpace(rsp.Payload.Results[0].Display), rsp.Payload.Results[0].ID)
+	}
+	return fnd, nil
+}
+
 func createToken(usr, pwd string, url *url.URL) (string, error) {
 	client := resty.New()
 	client.SetBaseURL("https://" + url.Host)

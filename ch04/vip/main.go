@@ -14,7 +14,7 @@ import (
 	"github.com/jsimonetti/rtnetlink/rtnl"
 	"github.com/mdlayher/arp"
 	"github.com/mdlayher/ethernet"
-	"github.com/mdlayher/raw"
+	"github.com/mdlayher/packet"
 )
 
 const VIP1 = "198.51.100.1/32"
@@ -120,7 +120,7 @@ func main() {
 	}
 	defer rtnl.Close()
 
-	ethSocket, err := raw.ListenPacket(netIntf, uint16(ethernet.EtherTypeARP), nil)
+	ethSocket, err := packet.Listen(netIntf, uint16(ethernet.EtherTypeARP), nil)
 	if err != nil {
 		log.Printf("failed to ListenPacket: %v", err)
 	}
