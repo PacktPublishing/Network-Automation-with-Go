@@ -1,4 +1,4 @@
-module github.com/PacktPublishing/Network-Automation-with-Go/ch07/toptalkers
+module toptalkers
 
 go 1.17
 

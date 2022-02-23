@@ -1,6 +1,6 @@
 DEFAULT: lab
 
-include ch06/targets.mk
+#include ch06/targets.mk
 include ch07/targets.mk
 
 .DEFAULT_GOAL := help
@@ -25,17 +25,29 @@ build-env: check-aws-key check-aws-secret ## Build test enviroment on AWS. Make 
 	ansible-playbook create-EC2-testbed.yml \
 	--extra-vars "instance_type=t2.medium" -v
 
+tag: check-tag ## Build and tag. Make sure you TAG correctly (Example: export TAG=v0.1.4)
+	git add .
+	git commit -m "Bump to version ${TAG}"
+	git tag -a -m "Bump to version ${TAG}" ${TAG}
+	git push --follow-tags
+
 check-aws-key: ## Check if AWS_ACCESS_KEY_ID variable is set. Brought to you by https://stackoverflow.com/a/4731504
 ifndef AWS_ACCESS_KEY_ID
 	$(error AWS_ACCESS_KEY_ID is undefined)
 endif
 	@echo "AWS_ACCESS_KEY_ID is ${AWS_ACCESS_KEY_ID}"
 
-check-aws-secret: ## Check if AWS_SECRET_ACCESS_KEY variable is set. Brought to you by https://stackoverflow.com/a/4731504
+check-aws-secret: ## Check if AWS_SECRET_ACCESS_KEY variable is set.
 ifndef AWS_SECRET_ACCESS_KEY
 	$(error AWS_SECRET_ACCESS_KEY is undefined)
 endif
 	@echo "AWS_SECRET_ACCESS_KEY is **************************"
+
+check-tag: ## Check if TAG variable is set.
+ifndef TAG
+	$(error TAG is undefined)
+endif
+	@echo "TAG is ${TAG}"
 
 # From: https://gist.github.com/klmr/575726c7e05d8780505a
 help:

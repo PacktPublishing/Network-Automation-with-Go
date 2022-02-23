@@ -1,4 +1,4 @@
-module github.com/PacktPublishing/Network-Automation-with-Go/ch03/sequential
+module sequential
 
 go 1.17
 

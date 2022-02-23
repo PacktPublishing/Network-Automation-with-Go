@@ -1,4 +1,4 @@
-module github.com/PacktPublishing/Network-Automation-with-Go/ch02/pong
+module pong
 
 go 1.17
 

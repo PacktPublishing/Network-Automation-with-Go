@@ -1,4 +1,4 @@
-module github.com/PacktPublishing/Network-Automation-with-Go/ch04/geo
+module geo
 
 go 1.17
 
