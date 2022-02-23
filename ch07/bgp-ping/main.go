@@ -68,49 +68,45 @@ func (p *plugin) OnOpenMessage(peer corebgp.PeerConfig, routerID net.IP, capabil
 
 func (p *plugin) OnEstablished(peer corebgp.PeerConfig, writer corebgp.UpdateMessageWriter) corebgp.UpdateMessageHandler {
 	log.Println("peer established, starting main loop")
-
 	go func() {
-
+		// prepare withdraw timer
 		withdrawAfter := time.Second * 7
 		withdraw := time.NewTicker(withdrawAfter)
 		withdraw.Stop()
-
 		for {
 			select {
 			case pingReq := <-p.pingCh:
 				src := string(bytes.Trim(pingReq.source, "\x00"))
-
 				pingReq.dest = p.host
-
 				type42PathAttr := bgp.NewPathAttributeUnknown(type42Flags, bgpType42, buildPayload(pingReq))
-
 				bytes, err := p.buildUpdate(type42PathAttr)
 				if err != nil {
 					log.Fatal(err)
 				}
 
+				p.store = make([]string, 0)
 				writer.WriteUpdate(bytes)
+				withdraw.Reset(withdrawAfter)
 
 				log.Printf("sent ping response to %s\n", src)
 
 			case <-p.probeCh:
+				log.Println("sending ping request")
+				withdraw.Stop()
 
-				log.Println("Sending ping request")
 				pingReq := ping{
 					source: p.host,
 					ts:     time.Now().Unix(),
 				}
-
 				type42PathAttr := bgp.NewPathAttributeUnknown(type42Flags, bgpType42, buildPayload(pingReq))
-
 				bytes, err := p.buildUpdate(type42PathAttr)
 				if err != nil {
 					log.Fatal(err)
 				}
 
-				writer.WriteUpdate(bytes)
-
+				// reset results
 				p.store = make([]string, 0)
+				writer.WriteUpdate(bytes)
 				withdraw.Reset(withdrawAfter)
 
 			case <-withdraw.C:
@@ -123,7 +119,12 @@ func (p *plugin) OnEstablished(peer corebgp.PeerConfig, writer corebgp.UpdateMes
 				writer.WriteUpdate(bytes)
 				withdraw.Stop()
 
-				p.resultsCh <- strings.Join(p.store, "\n")
+				// optionally send results if receiver is ready
+				select {
+				case p.resultsCh <- strings.Join(p.store, "\n"):
+				default:
+				}
+
 			}
 		}
 	}()
@@ -131,44 +132,11 @@ func (p *plugin) OnEstablished(peer corebgp.PeerConfig, writer corebgp.UpdateMes
 	return p.handleUpdate
 }
 
-func (p *plugin) buildWithdraw() ([]byte, error) {
-
-	myNLRI := bgp.NewIPAddrPrefix(32, p.probe.String())
-
-	withdrawnRoutes := []*bgp.IPAddrPrefix{myNLRI}
-
-	msg := bgp.NewBGPUpdateMessage(withdrawnRoutes, []bgp.PathAttributeInterface{}, nil)
-
-	return msg.Body.Serialize()
-}
-
-func (p *plugin) buildUpdate(type42 *bgp.PathAttributeUnknown) ([]byte, error) {
-
-	withdrawnRoutes := []*bgp.IPAddrPrefix{}
-
-	nexthop := bgp.NewPathAttributeNextHop(p.localAddr.String())
-
-	asPath := bgp.NewPathAttributeAsPath([]bgp.AsPathParamInterface{bgp.NewAs4PathParam(bgp.BGP_ASPATH_ATTR_TYPE_SEQ, []uint32{p.localAS})})
-
-	origin := bgp.NewPathAttributeOrigin(2) // origin incomplete
-
-	myNLRI := bgp.NewIPAddrPrefix(32, p.probe.String())
-
-	msg := bgp.NewBGPUpdateMessage(
-		withdrawnRoutes,
-		[]bgp.PathAttributeInterface{type42, nexthop, asPath, origin},
-		[]*bgp.IPAddrPrefix{myNLRI},
-	)
-
-	return msg.Body.Serialize()
-}
-
 func (p *plugin) OnClose(peer corebgp.PeerConfig) {
 	log.Println("peer closed")
 }
 
 func (p *plugin) handleUpdate(peer corebgp.PeerConfig, u []byte) *corebgp.Notification {
-
 	msg, err := bgp.ParseBGPBody(&bgp.BGPHeader{Type: bgp.BGP_MSG_UPDATE}, u)
 	if err != nil {
 		log.Fatal("failed to parse bgp message ", err)
@@ -179,7 +147,7 @@ func (p *plugin) handleUpdate(peer corebgp.PeerConfig, u []byte) *corebgp.Notifi
 	}
 
 	for _, attr := range msg.Body.(*bgp.BGPUpdate).PathAttributes {
-
+		// ignore all attributes except for 42
 		if attr.GetType() != bgpType42 {
 			continue
 		}
@@ -188,20 +156,28 @@ func (p *plugin) handleUpdate(peer corebgp.PeerConfig, u []byte) *corebgp.Notifi
 		if err != nil {
 			log.Fatal(err)
 		}
+		sourceHost := string(bytes.Trim(source, "\x00"))
+		destHost := string(bytes.Trim(dest, "\x00"))
 
-		if string(bytes.Trim(source, "\x00")) == *id {
+		// if source is us, it may be a response
+		if sourceHost == *id {
 			log.Println("Received a ping response")
-
-			destHost := string(bytes.Trim(dest, "\x00"))
+			// some BGP stacks reflect all eBGP routes back to the sender
 			if len(destHost) == 0 {
 				log.Println("Received a looped response, ignoring")
 				continue
 			}
 
+			// destHost is always set on a response
 			metric := fmt.Sprintf("bgp_ping_rtt_ms{device=%s} %f\n", destHost, float64(time.Since(ts).Nanoseconds())/1e6)
 			log.Println(metric)
 			p.store = append(p.store, metric)
 			return nil
+		}
+
+		// if source is not us and destHost is set, it must be an update from another responder
+		if len(destHost) != 0 {
+			continue
 		}
 
 		p.pingCh <- ping{source: source, ts: ts.Unix()}
@@ -210,8 +186,46 @@ func (p *plugin) handleUpdate(peer corebgp.PeerConfig, u []byte) *corebgp.Notifi
 	return nil
 }
 
-func main() {
+func (p *plugin) buildWithdraw() ([]byte, error) {
+	myNLRI := bgp.NewIPAddrPrefix(32, p.probe.String())
+	withdrawnRoutes := []*bgp.IPAddrPrefix{myNLRI}
+	msg := bgp.NewBGPUpdateMessage(
+		withdrawnRoutes,
+		[]bgp.PathAttributeInterface{},
+		nil,
+	)
+	return msg.Body.Serialize()
+}
 
+func (p *plugin) buildUpdate(type42 *bgp.PathAttributeUnknown) ([]byte, error) {
+	withdrawnRoutes := []*bgp.IPAddrPrefix{}
+	nexthop := bgp.NewPathAttributeNextHop(
+		p.localAddr.String(),
+	)
+	asPath := bgp.NewPathAttributeAsPath(
+		[]bgp.AsPathParamInterface{
+			bgp.NewAs4PathParam(
+				bgp.BGP_ASPATH_ATTR_TYPE_SEQ,
+				[]uint32{p.localAS},
+			),
+		},
+	)
+	origin := bgp.NewPathAttributeOrigin(2) // origin incomplete
+	myNLRI := bgp.NewIPAddrPrefix(32, p.probe.String())
+	msg := bgp.NewBGPUpdateMessage(
+		withdrawnRoutes,
+		[]bgp.PathAttributeInterface{
+			type42,
+			nexthop,
+			asPath,
+			origin,
+		},
+		[]*bgp.IPAddrPrefix{myNLRI},
+	)
+	return msg.Body.Serialize()
+}
+
+func main() {
 	flag.Parse()
 
 	if *cloudprober && *passive {
@@ -262,7 +276,10 @@ func main() {
 
 	if *cloudprober {
 		go func() {
-			serverutils.Serve(func(request *epb.ProbeRequest, reply *epb.ProbeReply) {
+			serverutils.Serve(func(
+				request *epb.ProbeRequest,
+				reply *epb.ProbeReply,
+			) {
 				probeCh <- struct{}{}
 				reply.Payload = proto.String(<-resultsCh)
 				if err != nil {
@@ -305,7 +322,6 @@ func newMPCap(afi uint16, safi uint8) corebgp.Capability {
 }
 
 func parseType42(attr bgp.PathAttributeInterface) (from []byte, to []byte, ts time.Time, err error) {
-
 	type42 := attr.(*bgp.PathAttributeUnknown)
 	if len(type42.Value) < type42Len {
 		return nil, nil, time.Now(), fmt.Errorf("incorrect type42 len %d", len(type42.Value))
@@ -313,17 +329,13 @@ func parseType42(attr bgp.PathAttributeInterface) (from []byte, to []byte, ts ti
 
 	decoded := binary.BigEndian.Uint64(type42.Value[30:47])
 	ts = time.Unix(int64(decoded), 0)
-
 	return type42.Value[:15], type42.Value[15:30], ts, nil
 }
 
 func buildPayload(pingReq ping) []byte {
-
 	result := make([]byte, type42Len)
 	copy(result[:15], pingReq.source[:])
 	copy(result[15:30], pingReq.dest)
-
 	binary.BigEndian.PutUint64(result[30:], uint64(pingReq.ts))
-
 	return result
 }

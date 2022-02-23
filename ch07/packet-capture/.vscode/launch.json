@@ -1,0 +1,15 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+        {
+            "name": "Connect to server",
+            "type": "go",
+            "request": "attach",
+            "mode": "remote",
+            "remotePath": "/workdir/packet-capture",
+            "port": 2345,
+            "host": "clab-netgo-host-2",  
+
+        },
+	]
+}
