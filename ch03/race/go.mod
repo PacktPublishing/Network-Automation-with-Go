@@ -1,4 +1,4 @@
-module github.com/PacktPublishing/Network-Automation-with-Go/ch03/race
+module race
 
 go 1.17
 

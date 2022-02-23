@@ -1,4 +1,4 @@
-module github.com/PacktPublishing/Network-Automation-with-Go/ch05/closed-loop
+module closed-loop
 
 go 1.17
 

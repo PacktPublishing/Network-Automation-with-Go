@@ -1,4 +1,4 @@
-module github.com/PacktPublishing/Network-Automation-with-Go/ch03/concurrency4
+module concurrency4
 
 go 1.17
 

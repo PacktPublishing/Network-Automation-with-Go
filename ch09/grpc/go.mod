@@ -1,4 +1,4 @@
-module github.com/PacktPublishing/Network-Automation-with-Go/ch09/grpc
+module grpc
 
 go 1.17
 

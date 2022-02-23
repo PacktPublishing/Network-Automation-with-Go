@@ -1,4 +1,4 @@
-module github.com/PacktPublishing/Network-Automation-with-Go/ch03/interfaces
+module interfaces
 
 go 1.17
 

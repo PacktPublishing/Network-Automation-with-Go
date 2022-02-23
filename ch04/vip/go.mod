@@ -1,4 +1,4 @@
-module github.com/PacktPublishing/Network-Automation-with-Go/ch06/vip
+module vip
 
 go 1.17
 

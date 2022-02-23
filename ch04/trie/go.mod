@@ -1,4 +1,4 @@
-module github.com/PacktPublishing/Network-Automation-with-Go/ch04/trie
+module trie
 
 go 1.17
 
