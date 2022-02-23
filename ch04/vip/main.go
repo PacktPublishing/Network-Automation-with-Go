@@ -23,7 +23,7 @@ type vip struct {
 	IP      string
 	netlink *rtnl.Conn
 	intf    *net.Interface
-	l2Sock  *raw.Conn
+	l2Sock  *packet.Conn
 }
 
 func setupSigHandlers(cancel context.CancelFunc) {
@@ -60,7 +60,7 @@ func (c *vip) emitFrame(frame *ethernet.Frame) error {
 		return fmt.Errorf("error serializing frame: %s", err)
 	}
 
-	addr := &raw.Addr{HardwareAddr: ethernet.Broadcast}
+	addr := &packet.Addr{HardwareAddr: ethernet.Broadcast}
 	if _, err := c.l2Sock.WriteTo(b, addr); err != nil {
 		return fmt.Errorf("emitFrame failed: %s", err)
 	}
@@ -120,7 +120,7 @@ func main() {
 	}
 	defer rtnl.Close()
 
-	ethSocket, err := packet.Listen(netIntf, uint16(ethernet.EtherTypeARP), nil)
+	ethSocket, err := packet.Listen(netIntf, packet.Raw, 0, nil)
 	if err != nil {
 		log.Printf("failed to ListenPacket: %v", err)
 	}
@@ -141,6 +141,8 @@ func main() {
 		log.Fatalf("failed to add VIP: %s", err)
 	}
 
+	timer := time.NewTicker(3 * time.Second)
+
 	for {
 		select {
 		case <-ctx.Done():
@@ -150,13 +152,11 @@ func main() {
 
 			log.Printf("Cleanup complete")
 			return
-		default:
+		case <-timer.C:
 			if err := v.sendGARP(); err != nil {
 				log.Printf("failed to send GARP: %s", err)
 				cancel()
 			}
-
-			time.Sleep(3 * time.Second)
 		}
 	}
 
