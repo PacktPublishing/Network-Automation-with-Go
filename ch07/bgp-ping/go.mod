@@ -1,4 +1,4 @@
-module bgp-ping
+module github.com/PacktPublishing/Network-Automation-with-Go/ch07/bgp-ping
 
 go 1.17
 

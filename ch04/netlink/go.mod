@@ -1,4 +1,4 @@
-module netlink
+module github.com/PacktPublishing/Network-Automation-with-Go/ch04/netlink
 
 go 1.17
 
