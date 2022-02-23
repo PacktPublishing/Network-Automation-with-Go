@@ -409,27 +409,25 @@ func main() {
 	check(err)
 
 	////////////////////////////////
-	// Define new device parameters
+	// Read new device parameters
 	////////////////////////////////
-	nam := "ceos01.my-dc.nyc"
-	typ := "ceos"
-	rol := "Router"
-	sit := "dm-nyc"
+	dev, err := os.Open("device.json")
+	check(err)
+	defer dev.Close()
 
-	m := models.Device{
-		Name:       &nam,
-		DeviceRole: &models.NestedDeviceRole{Slug: &rol},
-		DeviceType: &models.NestedDeviceType{Slug: &typ},
-		Site:       &models.NestedSite{Slug: &sit},
-	}
+	d := json.NewDecoder(dev)
 
-	found, mid, err := getDeviceIDs(nb, m)
+	var device models.Device
+	err = d.Decode(&device)
+	check(err)
+
+	found, devWithIDs, err := getDeviceIDs(nb, device)
 	check(err)
 
 	ctx := context.Background()
 	if found {
 		res, err := nb.Dcim.DcimDevicesRead(&dcim.DcimDevicesReadParams{
-			ID:      mid.ID,
+			ID:      devWithIDs.ID,
 			Context: ctx,
 		}, nil)
 		check(err)
@@ -439,7 +437,7 @@ func main() {
 
 	created, err := nb.Dcim.DcimDevicesCreate(&dcim.DcimDevicesCreateParams{
 		Context: ctx,
-		Data:    mid,
+		Data:    devWithIDs,
 	}, nil)
 	check(err)
 

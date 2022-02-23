@@ -1,0 +1,12 @@
+{
+    "name": "ceos01.my-dc.nyc",
+    "device_type": {
+        "slug":  "ceos"
+    },
+    "device_role": {
+        "slug":  "router"
+    },
+    "site": {
+        "slug":  "dm-nyc"
+    }
+}
