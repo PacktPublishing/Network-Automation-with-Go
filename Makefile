@@ -16,14 +16,20 @@ lab:
 clone:
 	docker import cEOS64-lab-4.26.4M.tar ceos:4.26.4M
 
-## ########## Build labs ##########
 build-env: check-aws-key check-aws-secret ## Build test enviroment on AWS. Make sure you export your API credentials
 	@docker run -it \
 	--env AWS_ACCESS_KEY_ID \
 	--env AWS_SECRET_ACCESS_KEY \
-	ghcr.io/packtpublishing/builder:1.0.0 \
+	ghcr.io/packtpublishing/builder:1.0.1 \
 	ansible-playbook create-EC2-testbed.yml \
 	--extra-vars "instance_type=t2.medium" -v
+
+delete-env: check-aws-key check-aws-secret ## Build test enviroment on AWS. Make sure you export your API credentials
+	@docker run -it \
+	--env AWS_ACCESS_KEY_ID \
+	--env AWS_SECRET_ACCESS_KEY \
+	ghcr.io/packtpublishing/builder:1.0.1 \
+	ansible-playbook delete-EC2-testbed.yml -v
 
 tag: check-tag ## Build and tag. Make sure you TAG correctly (Example: export TAG=v0.1.4)
 	git add .

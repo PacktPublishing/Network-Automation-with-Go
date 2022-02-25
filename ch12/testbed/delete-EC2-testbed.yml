@@ -16,7 +16,7 @@
       include_vars: "./vars/aws_{{ ec2_distro }}.yml"
 
     - name: Delete EC2 instance
-      community.aws.ec2_instance:
+      amazon.aws.ec2_instance:
         region: "{{ ec2_region }}"
         state: absent
         filters:
