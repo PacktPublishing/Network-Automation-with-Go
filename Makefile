@@ -24,7 +24,7 @@ build-env: check-aws-key check-aws-secret ## Build test enviroment on AWS. Make 
 	ansible-playbook create-EC2-testbed.yml \
 	--extra-vars "instance_type=t2.medium" -v
 
-delete-env: check-aws-key check-aws-secret ## Build test enviroment on AWS. Make sure you export your API credentials
+delete-env: check-aws-key check-aws-secret ## Delete test enviroment on AWS. Make sure you export your API credentials
 	@docker run -it \
 	--env AWS_ACCESS_KEY_ID \
 	--env AWS_SECRET_ACCESS_KEY \
