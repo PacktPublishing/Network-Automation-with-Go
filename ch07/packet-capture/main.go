@@ -48,7 +48,6 @@ func main() {
 		}
 
 		if sflowLayer := packet.Layer(layers.LayerTypeSFlow); sflowLayer != nil {
-			log.Printf("captured sflow packet from %s", packet.NetworkLayer().NetworkFlow().Src())
 			sflow, ok := sflowLayer.(*layers.SFlowDatagram)
 			if !ok {
 				log.Println("failed decoding sflow")
