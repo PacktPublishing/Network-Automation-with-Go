@@ -119,21 +119,23 @@ func getCEOSRoutes(hostname, username, password string, out chan string) {
 }
 
 func checkRoutes(device string, in chan string) {
-	expectedRoutes := map[string]struct{}{
-		"198.51.100.0/32": struct{}{},
-		"198.51.100.1/32": struct{}{},
-		"198.51.100.2/32": struct{}{},
+	expectedRoutes := map[string]bool{
+		"198.51.100.0/32": false,
+		"198.51.100.1/32": false,
+		"198.51.100.2/32": false,
 	}
 
 	for route := range in {
 		if _, ok := expectedRoutes[route]; ok {
 			log.Print("Route ", route, " found on ", device)
-			delete(expectedRoutes, route)
+			expectedRoutes[route] = true
 		}
 	}
 
-	for left := range expectedRoutes {
-		log.Print("! Route ", left, " NOT found on ", device)
+	for route, found := range expectedRoutes {
+		if !found {
+			log.Print("! Route ", route, " NOT found on ", device)
+		}
 	}
 }
 
@@ -159,8 +161,8 @@ func main() {
 	go getCVXRoutes(*cvxHost, *cvxUser, *cvxPass, cvxRouteCh)
 	go getSRLRoutes(*srlHost, *srlUser, *srlPass, srlRouteCh)
 
-	checkRoutes("ceos", ceosRouteCh)
-	checkRoutes("cvx", cvxRouteCh)
+	go checkRoutes("ceos", ceosRouteCh)
+	go checkRoutes("cvx", cvxRouteCh)
 	checkRoutes("srl", srlRouteCh)
 
 }
