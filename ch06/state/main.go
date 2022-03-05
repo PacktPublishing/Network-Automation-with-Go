@@ -2,18 +2,42 @@ package main
 
 import (
 	"crypto/tls"
-	"flag"
 	"fmt"
 	"log"
 	"net/http"
 	"regexp"
+	"sync"
 
 	resty "github.com/go-resty/resty/v2"
 	"github.com/scrapli/scrapligo/driver/base"
 	"github.com/scrapli/scrapligo/driver/core"
 )
 
-func getCVXRoutes(hostname, username, password string, out chan string) {
+type Authentication struct {
+	Username string
+	Password string
+}
+
+type CVX struct {
+	Hostname string
+	Authentication
+}
+
+type SRL struct {
+	Hostname string
+	Authentication
+}
+
+type CEOS struct {
+	Hostname string
+	Authentication
+}
+
+type Router interface {
+	GetRoutes(wg *sync.WaitGroup)
+}
+
+func (r CVX) GetRoutes(wg *sync.WaitGroup) {
 	log.Print("Collecting CVX routes")
 
 	client := resty.NewWithClient(&http.Client{
@@ -21,8 +45,8 @@ func getCVXRoutes(hostname, username, password string, out chan string) {
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		},
 	})
-	client.SetBaseURL(fmt.Sprintf("https://%s:8765", hostname))
-	client.SetBasicAuth(username, password)
+	client.SetBaseURL(fmt.Sprintf("https://%s:8765", r.Hostname))
+	client.SetBasicAuth(r.Username, r.Password)
 
 	var routes map[string]interface{}
 	_, err := client.R().
@@ -33,52 +57,56 @@ func getCVXRoutes(hostname, username, password string, out chan string) {
 		Get("/nvue_v1/vrf/default/router/rib/ipv4/route")
 
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("failed to send request for %s: %s", r.Hostname, err.Error())
+		return
 	}
 
+	out := []string{}
 	for route := range routes {
-		out <- route
+		out = append(out, route)
 	}
-
-	close(out)
+	go checkRoutes(r.Hostname, out, wg)
 }
 
-func getSRLRoutes(hostname, username, password string, out chan string) {
+func (r SRL) GetRoutes(wg *sync.WaitGroup) {
 	log.Print("Collecting SRL routes")
 
 	lookupCmd := "show network-instance default route-table ipv4-unicast summary"
 
 	conn, err := core.NewSROSClassicDriver(
-		hostname,
+		r.Hostname,
 		base.WithAuthStrictKey(false),
-		base.WithAuthUsername(username),
-		base.WithAuthPassword(password),
+		base.WithAuthUsername(r.Username),
+		base.WithAuthPassword(r.Password),
 	)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("failed to create driver for %s: %s", r.Hostname, err.Error())
+		return
 	}
 
 	err = conn.Open()
 	if err != nil {
-		log.Fatal(err)
-	}
+		log.Printf("failed to open driver for %s: %s", r.Hostname, err.Error())
+		return
+	}	
 	defer conn.Close()
 
 	resp, err := conn.SendCommand(lookupCmd)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("failed to send command for %s: %s", r.Hostname, err.Error())
+		return
 	}
 
 	ipv4Prefix := regexp.MustCompile(`(\d{1,3}\.){3}\d{1,3}\/\d{1,2}`)
 
+	out := []string{}
 	for _, match := range ipv4Prefix.FindAll(resp.RawResult, -1) {
-		out <- string(match)
+		out = append(out, string(match))
 	}
-
-	close(out)
+	go checkRoutes(r.Hostname, out, wg)
 }
 
-func getCEOSRoutes(hostname, username, password string, out chan string) {
+func (r CEOS) GetRoutes(wg *sync.WaitGroup) {
 	log.Print("Collecting CEOS routes")
 
 	template := "https://raw.githubusercontent.com/networktocode/ntc-templates/master/ntc_templates/templates/arista_eos_show_ip_route.textfsm"
@@ -86,81 +114,104 @@ func getCEOSRoutes(hostname, username, password string, out chan string) {
 	lookupCmd := "sh ip route"
 
 	conn, err := core.NewEOSDriver(
-		hostname,
+		r.Hostname,
 		base.WithAuthStrictKey(false),
-		base.WithAuthUsername(username),
-		base.WithAuthPassword(password),
+		base.WithAuthUsername(r.Username),
+		base.WithAuthPassword(r.Password),
 	)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("failed to create driver for %s: %s", r.Hostname, err.Error())
+		return
 	}
 
 	err = conn.Open()
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("failed to open driver for %s: %s", r.Hostname, err.Error())
+		return
 	}
 	defer conn.Close()
 
 	resp, err := conn.SendCommand(lookupCmd)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("failed to send command for %s: %s", r.Hostname, err.Error())
+		return
 	}
 
 	parsed, err := resp.TextFsmParse(template)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("failed to parse command for %s: %s", r.Hostname, err.Error())
+		return
 	}
 
+	out := []string{}
 	for _, match := range parsed {
-		out <- fmt.Sprintf("%s/%s", match["NETWORK"], match["MASK"])
+		out = append(out, fmt.Sprintf("%s/%s", match["NETWORK"], match["MASK"]))
 	}
-
-	close(out)
+	go checkRoutes(r.Hostname, out, wg)
 }
 
-func checkRoutes(device string, in chan string) {
-	expectedRoutes := map[string]struct{}{
-		"198.51.100.0/32": struct{}{},
-		"198.51.100.1/32": struct{}{},
-		"198.51.100.2/32": struct{}{},
+func checkRoutes(device string, in []string, wg *sync.WaitGroup) {
+	defer wg.Done()
+	log.Printf("Checking %s routes", device)
+
+	expectedRoutes := map[string]bool{
+		"198.51.100.0/32": false,
+		"198.51.100.1/32": false,
+		"198.51.100.2/32": false,
 	}
 
-	for route := range in {
+	for _, route := range in {
 		if _, ok := expectedRoutes[route]; ok {
 			log.Print("Route ", route, " found on ", device)
-			delete(expectedRoutes, route)
+			expectedRoutes[route] = true
 		}
 	}
 
-	for left := range expectedRoutes {
-		log.Print("! Route ", left, " NOT found on ", device)
+	for route, found := range expectedRoutes {
+		if !found {
+			log.Print("! Route ", route, " NOT found on ", device)
+		}
 	}
 }
 
 func main() {
-	cvxHost := flag.String("cvx-host", "clab-netgo-cvx", "CVX Hostname")
-	cvxUser := flag.String("cvx-user", "cumulus", "CVX Username")
-	cvxPass := flag.String("cvx-pass", "cumulus", "CVX password")
-	srlHost := flag.String("srl-host", "clab-netgo-srl", "SRL Hostname")
-	srlUser := flag.String("srl-user", "admin", "SRL Username")
-	srlPass := flag.String("srl-pass", "admin", "SRL password")
-	ceosHost := flag.String("ceos-host", "clab-netgo-ceos", "CEOS Hostname")
-	ceosUser := flag.String("ceos-user", "admin", "CEOS Username")
-	ceosPass := flag.String("ceos-pass", "admin", "CEOS password")
-	flag.Parse()
-
-	ceosRouteCh := make(chan string)
-	cvxRouteCh := make(chan string)
-	srlRouteCh := make(chan string)
+	////////////////////////////////
+	// Devices
+	////////////////////////////////
+	cvx := CVX{
+		Hostname: "clab-netgo-cvx",
+		Authentication: Authentication{
+			Username: "cumulus",
+			Password: "cumulus",
+		},
+	}
+	srl := SRL{
+		Hostname: "clab-netgo-srl",
+		Authentication: Authentication{
+			Username: "admin",
+			Password: "admin",
+		},
+	}
+	ceos := CEOS{
+		Hostname: "clab-netgo-ceos",
+		Authentication: Authentication{
+			Username: "admin",
+			Password: "admin",
+		},
+	}
 
 	log.Printf("Checking reachability...")
 
-	go getCEOSRoutes(*ceosHost, *ceosUser, *ceosPass, ceosRouteCh)
-	go getCVXRoutes(*cvxHost, *cvxUser, *cvxPass, cvxRouteCh)
-	go getSRLRoutes(*srlHost, *srlUser, *srlPass, srlRouteCh)
+	////////////////////////////////
+	// Get routes & validate them
+	////////////////////////////////
 
-	checkRoutes("ceos", ceosRouteCh)
-	checkRoutes("cvx", cvxRouteCh)
-	checkRoutes("srl", srlRouteCh)
+	devices := []Router{cvx, srl, ceos}
 
+	var wg sync.WaitGroup
+	for _, router := range devices {
+		wg.Add(1)
+		go router.GetRoutes(&wg)
+	}
+	wg.Wait()
 }

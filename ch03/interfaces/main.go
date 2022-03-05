@@ -51,7 +51,6 @@ func getUptime(r NetworkDevice) (string, error) {
 		return "", fmt.Errorf("failed to parse command for %s: %w", r.Hostname, err)
 	}
 
-
 	symbol := "s"
 
 	switch r.Platform {
@@ -64,7 +63,7 @@ func getUptime(r NetworkDevice) (string, error) {
 
 	// Split uptime string in Hour, Day, Minute, etc. on a slice
 	slc := strings.Split(parsedOut[0]["UPTIME"].(string), ",")
-	
+
 	m := make(map[string]string)
 	for _, item := range slc {
 		// Divide the number from the item
@@ -79,11 +78,11 @@ func getUptime(r NetworkDevice) (string, error) {
 	// day, _ := strconv.Atoi(m["day"])
 	// hour, _ := strconv.Atoi(m["hour"])
 	// min, _ := strconv.Atoi(m["minute"])
-    // un := 24 * 60 * day + 60 * hour + min 
+	// un := 24 * 60 * day + 60 * hour + min
 	// fmt.Printf("INT: %v\n", un)
 
 	uptime := fmt.Sprintf("Day: %v, Hour: %v, Minute: %v\n",
-	m["day"], m["hour"], m["minute"])
+		m["day"], m["hour"], m["minute"])
 
 	return fmt.Sprintf("Hostname: %s\nUptime: %s\n", r.Hostname, uptime), nil
 }
