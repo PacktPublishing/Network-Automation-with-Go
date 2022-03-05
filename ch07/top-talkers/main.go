@@ -27,7 +27,7 @@ const listenAddress = "sflow://:6343"
 
 var flowMapKey = `%s:%d<->%s:%d`
 
-type MyPacket struct {
+type MyFlow struct {
 	Key         string
 	SrcAddr     string `json:"SrcAddr,omitempty"`
 	DstAddr     string `json:"DstAddr,omitempty"`
@@ -36,16 +36,16 @@ type MyPacket struct {
 	DstPort     int    `json:"DstPort,omitempty"`
 	ProtoName   string `json:"ProtoName,omitempty"`
 	Bytes       int    `json:"Bytes,omitempty"`
-	Count       int    // how many times we;ve received flow sample
+	Count       int    // how many times we've received flow sample
 	index       int    // The index of the item in the heap (required for update)
 }
 
 type topTalker struct {
-	flowMap map[string]*MyPacket
+	flowMap map[string]*MyFlow
 	heap    Heap
 }
 
-type Heap []*MyPacket
+type Heap []*MyFlow
 
 func (h Heap) Len() int           { return len(h) }
 func (h Heap) Less(i, j int) bool { return h[i].Count > h[j].Count }
@@ -55,7 +55,7 @@ func (h Heap) Swap(i, j int) {
 	h[j].index = j
 }
 
-func (h *Heap) update(p *MyPacket) {
+func (h *Heap) update(p *MyFlow) {
 	p.Count++
 	heap.Fix(h, p.index)
 }
@@ -63,7 +63,7 @@ func (h *Heap) update(p *MyPacket) {
 func (h *Heap) Push(x interface{}) {
 	// Push and Pop use pointer receivers because they modify the slice's length,
 	n := len(*h)
-	item := x.(*MyPacket)
+	item := x.(*MyFlow)
 	item.index = n
 	*h = append(*h, item)
 
@@ -82,33 +82,33 @@ func (h *Heap) Pop() interface{} {
 func (c *topTalker) Send(key, data []byte) error {
 	//log.Printf("transport.Send : Key %s, data %+v\n", key, string(data))
 
-	var myPacket MyPacket
-	json.Unmarshal(data, &myPacket)
+	var myFlow MyFlow
+	json.Unmarshal(data, &myFlow)
 
-	if myPacket.ProtoName == "" {
+	if myFlow.ProtoName == "" {
 		return nil
 	}
 
-	ips := []string{myPacket.SrcAddr, myPacket.DstAddr}
+	ips := []string{myFlow.SrcAddr, myFlow.DstAddr}
 	sort.Strings(ips)
 
 	var mapKey string
-	if ips[0] != myPacket.SrcAddr {
-		mapKey = fmt.Sprintf(flowMapKey, myPacket.SrcAddr, myPacket.SrcPort, myPacket.DstAddr, myPacket.DstPort)
+	if ips[0] != myFlow.SrcAddr {
+		mapKey = fmt.Sprintf(flowMapKey, myFlow.SrcAddr, myFlow.SrcPort, myFlow.DstAddr, myFlow.DstPort)
 	} else {
-		mapKey = fmt.Sprintf(flowMapKey, myPacket.DstAddr, myPacket.DstPort, myPacket.SrcAddr, myPacket.SrcPort)
+		mapKey = fmt.Sprintf(flowMapKey, myFlow.DstAddr, myFlow.DstPort, myFlow.SrcAddr, myFlow.SrcPort)
 	}
 
-	myPacket.Key = mapKey
-	i, ok := c.flowMap[mapKey]
+	myFlow.Key = mapKey
+	foundFlow, ok := c.flowMap[mapKey]
 	if !ok {
-		myPacket.Count = 1
-		c.flowMap[mapKey] = &myPacket
-		heap.Push(&c.heap, &myPacket)
+		myFlow.Count = 1
+		c.flowMap[mapKey] = &myFlow
+		heap.Push(&c.heap, &myFlow)
 		return nil
 	}
 
-	c.heap.update(i)
+	c.heap.update(foundFlow)
 
 	return nil
 }
@@ -120,7 +120,7 @@ func main() {
 	ctx := context.Background()
 
 	tt := topTalker{
-		flowMap: make(map[string]*MyPacket),
+		flowMap: make(map[string]*MyFlow),
 		heap:    make(Heap, 0),
 	}
 

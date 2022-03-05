@@ -40,5 +40,5 @@ capture-start: traffic-start
 	docker exec -it clab-netgo-host-2 /workdir/packet-capture/packet-capture
 
 capture-debug:
-	echo "docker exec -it clab-netgo-host-2 bash -c 'cd /workdir/packet-capture/; /root/go/bin/dlv debug main.go --listen=:2345 --headless --api-version=2'"
+	echo "docker exec -it clab-netgo-host-2 bash -c 'cd /workdir/packet-capture/; dlv debug main.go --listen=:2345 --headless --api-version=2'"
 
