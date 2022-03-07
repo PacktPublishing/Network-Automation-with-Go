@@ -5,90 +5,173 @@ import (
 	"testing"
 )
 
+type testFlow struct {
+	flow         *MyFlow
+	timesSeen    int
+	wantPosition int
+	wantCount    int
+}
 type testCase struct {
-	name    string
-	packets []*MyFlow
-	updates []int
+	name  string
+	flows map[string]testFlow
 }
 
 func TestHeap(t *testing.T) {
 
-	for _, test := range testData {
+	for _, test := range testCases {
 
 		h := make(Heap, 0)
-		// pushing packets on the heap
-		for _, p := range test.packets {
-			heap.Push(&h, p)
-		}
+		// pushing flow on the heap
+		for key, f := range test.flows {
+			f.flow.Key = key
+			heap.Push(&h, f.flow)
 
-		// updating packet counts
-		for i, update := range test.updates {
-			if i > len(test.packets) {
-				t.Errorf("%s: updates slice too long", test.name)
-			}
-			p := test.packets[i]
-			for j := 0; j < update; j++ {
-				h.update(p)
+			// updating packet counts
+			for j := 0; j < f.timesSeen; j++ {
+				h.update(f.flow)
 			}
 		}
 
 		// checking the results
 		for i := 0; h.Len() > 0; i++ {
-			p := heap.Pop(&h).(*MyFlow)
+			f := heap.Pop(&h).(*MyFlow)
 
-			// assuming position (i) == p.SrcPort
-			if i != p.SrcPort {
-				t.Errorf("%s: unexpected position for packet key %s: %d, expected %d", test.name, p.Key, i, p.SrcPort)
+			tf := test.flows[f.Key]
+			if tf.wantPosition != i {
+				t.Errorf("%s: unexpected position for packet key %s: got %d, want %d", test.name, f.Key, i, tf.wantPosition)
 			}
 
-			// assuming count == p.DstPort
-			if p.Count != p.DstPort {
-				t.Errorf("%s: unexpected count for packet key %s: %d, expected %d", test.name, p.Key, p.Count, p.DstPort)
+			if tf.wantCount != f.Count {
+				t.Errorf("%s: unexpected count for packet key %s: got %d, want %d", test.name, f.Key, f.Count, tf.wantCount)
 			}
 		}
 	}
 }
 
-var testData = []testCase{
+var testCases = []testCase{
 	{
-		name:    "single packet",
-		packets: []*MyFlow{testPacket("1-1", 1, 0, 1)},
-		updates: []int{},
+		name: "single packet",
+		flows: map[string]testFlow{
+			"1-1": {
+				flow:         &MyFlow{Count: 1},
+				timesSeen:    0,
+				wantPosition: 0,
+				wantCount:    1,
+			},
+		},
 	},
 	{
-		name:    "last packet wins",
-		packets: []*MyFlow{testPacket("2-1", 1, 1, 2), testPacket("2-2", 2, 0, 3)},
-		updates: []int{1, 1},
+		name: "last packet wins",
+		flows: map[string]testFlow{
+			"2-1": {
+				flow:         &MyFlow{Count: 1},
+				timesSeen:    1,
+				wantPosition: 1,
+				wantCount:    2,
+			},
+			"2-2": {
+				flow:         &MyFlow{Count: 2},
+				timesSeen:    1,
+				wantPosition: 0,
+				wantCount:    3,
+			},
+		},
 	},
 	{
-		name:    "first packet wins",
-		packets: []*MyFlow{testPacket("3-1", 5, 0, 5), testPacket("3-2", 2, 1, 2)},
-		updates: []int{},
+		name: "first packet wins",
+		flows: map[string]testFlow{
+			"3-1": {
+				flow:         &MyFlow{Count: 5},
+				timesSeen:    0,
+				wantPosition: 0,
+				wantCount:    5,
+			},
+			"3-2": {
+				flow:         &MyFlow{Count: 2},
+				timesSeen:    0,
+				wantPosition: 1,
+				wantCount:    2,
+			},
+		},
 	},
 	{
-		name:    "last packet wins after update",
-		packets: []*MyFlow{testPacket("4-1", 3, 1, 3), testPacket("4-2", 2, 0, 4)},
-		updates: []int{0, 2},
+		name: "last packet wins after update",
+		flows: map[string]testFlow{
+			"4-1": {
+				flow:         &MyFlow{Count: 3},
+				timesSeen:    0,
+				wantPosition: 1,
+				wantCount:    3,
+			},
+			"4-2": {
+				flow:         &MyFlow{Count: 2},
+				timesSeen:    2,
+				wantPosition: 0,
+				wantCount:    4,
+			},
+		},
 	},
 	{
-		name:    "first packet wins after update",
-		packets: []*MyFlow{testPacket("5-1", 1, 0, 4), testPacket("5-2", 2, 1, 2)},
-		updates: []int{3, 0},
+		name: "first packet wins after update",
+		flows: map[string]testFlow{
+			"5-1": {
+				flow:         &MyFlow{Count: 1},
+				timesSeen:    3,
+				wantPosition: 0,
+				wantCount:    4,
+			},
+			"5-2": {
+				flow:         &MyFlow{Count: 2},
+				timesSeen:    0,
+				wantPosition: 1,
+				wantCount:    2,
+			},
+		},
 	},
 	{
-		name:    "tie use case/first packet wins",
-		packets: []*MyFlow{testPacket("6-1", 2, 0, 4), testPacket("6-2", 3, 1, 4)},
-		updates: []int{2, 1},
+		name: "tie use case/first packet wins",
+		flows: map[string]testFlow{
+			"6-1": {
+				flow:         &MyFlow{Count: 2},
+				timesSeen:    2,
+				wantPosition: 0,
+				wantCount:    4,
+			},
+			"6-2": {
+				flow:         &MyFlow{Count: 3},
+				timesSeen:    1,
+				wantPosition: 1,
+				wantCount:    4,
+			},
+		},
 	},
 	{
-		name:    "odd number of packets",
-		packets: []*MyFlow{testPacket("7-1", 1, 2, 2), testPacket("7-2", 2, 0, 4), testPacket("7-3", 3, 1, 3)},
-		updates: []int{1, 2, 0},
+		name: "odd number of packets",
+		flows: map[string]testFlow{
+			"7-1": {
+				flow:         &MyFlow{Count: 1},
+				timesSeen:    1,
+				wantPosition: 2,
+				wantCount:    2,
+			},
+			"7-2": {
+				flow:         &MyFlow{Count: 2},
+				timesSeen:    2,
+				wantPosition: 0,
+				wantCount:    4,
+			},
+			"7-3": {
+				flow:         &MyFlow{Count: 3},
+				timesSeen:    0,
+				wantPosition: 1,
+				wantCount:    3,
+			},
+		},
 	},
 }
 
 // re-using Src/DstPort field as the expected position and count values in the sorted heap
-// c is current count, s is expected position in the heap, d is the expected count (after updates)
-func testPacket(k string, c, s, d int) *MyFlow {
-	return &MyFlow{Key: k, Count: c, SrcPort: s, DstPort: d}
+// c is current count, ep is expected position in the heap, ec is the expected count (after updates)
+func testPacket(k string, c, ep, ec int) *MyFlow {
+	return &MyFlow{Key: k, Count: c, SrcPort: ep, DstPort: ec}
 }
