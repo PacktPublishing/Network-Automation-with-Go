@@ -6,7 +6,7 @@ import (
 )
 
 type testFlow struct {
-	flow         *MyFlow
+	startCount   int
 	timesSeen    int
 	wantPosition int
 	wantCount    int
@@ -23,12 +23,15 @@ func TestHeap(t *testing.T) {
 		h := make(Heap, 0)
 		// pushing flow on the heap
 		for key, f := range test.flows {
-			f.flow.Key = key
-			heap.Push(&h, f.flow)
+			flow := &MyFlow{
+				Count: f.startCount,
+				Key:   key,
+			}
+			heap.Push(&h, flow)
 
 			// updating packet counts
 			for j := 0; j < f.timesSeen; j++ {
-				h.update(f.flow)
+				h.update(flow)
 			}
 		}
 
@@ -53,7 +56,7 @@ var testCases = []testCase{
 		name: "single packet",
 		flows: map[string]testFlow{
 			"1-1": {
-				flow:         &MyFlow{Count: 1},
+				startCount:   1,
 				timesSeen:    0,
 				wantPosition: 0,
 				wantCount:    1,
@@ -64,13 +67,13 @@ var testCases = []testCase{
 		name: "last packet wins",
 		flows: map[string]testFlow{
 			"2-1": {
-				flow:         &MyFlow{Count: 1},
+				startCount:   1,
 				timesSeen:    1,
 				wantPosition: 1,
 				wantCount:    2,
 			},
 			"2-2": {
-				flow:         &MyFlow{Count: 2},
+				startCount:   2,
 				timesSeen:    1,
 				wantPosition: 0,
 				wantCount:    3,
@@ -81,13 +84,13 @@ var testCases = []testCase{
 		name: "first packet wins",
 		flows: map[string]testFlow{
 			"3-1": {
-				flow:         &MyFlow{Count: 5},
+				startCount:   5,
 				timesSeen:    0,
 				wantPosition: 0,
 				wantCount:    5,
 			},
 			"3-2": {
-				flow:         &MyFlow{Count: 2},
+				startCount:   2,
 				timesSeen:    0,
 				wantPosition: 1,
 				wantCount:    2,
@@ -98,13 +101,13 @@ var testCases = []testCase{
 		name: "last packet wins after update",
 		flows: map[string]testFlow{
 			"4-1": {
-				flow:         &MyFlow{Count: 3},
+				startCount:   3,
 				timesSeen:    0,
 				wantPosition: 1,
 				wantCount:    3,
 			},
 			"4-2": {
-				flow:         &MyFlow{Count: 2},
+				startCount:   2,
 				timesSeen:    2,
 				wantPosition: 0,
 				wantCount:    4,
@@ -115,13 +118,13 @@ var testCases = []testCase{
 		name: "first packet wins after update",
 		flows: map[string]testFlow{
 			"5-1": {
-				flow:         &MyFlow{Count: 1},
+				startCount:   1,
 				timesSeen:    3,
 				wantPosition: 0,
 				wantCount:    4,
 			},
 			"5-2": {
-				flow:         &MyFlow{Count: 2},
+				startCount:   2,
 				timesSeen:    0,
 				wantPosition: 1,
 				wantCount:    2,
@@ -132,13 +135,13 @@ var testCases = []testCase{
 		name: "tie use case/first packet wins",
 		flows: map[string]testFlow{
 			"6-1": {
-				flow:         &MyFlow{Count: 2},
+				startCount:   2,
 				timesSeen:    2,
 				wantPosition: 0,
 				wantCount:    4,
 			},
 			"6-2": {
-				flow:         &MyFlow{Count: 3},
+				startCount:   3,
 				timesSeen:    1,
 				wantPosition: 1,
 				wantCount:    4,
@@ -149,19 +152,19 @@ var testCases = []testCase{
 		name: "odd number of packets",
 		flows: map[string]testFlow{
 			"7-1": {
-				flow:         &MyFlow{Count: 1},
+				startCount:   1,
 				timesSeen:    1,
 				wantPosition: 2,
 				wantCount:    2,
 			},
 			"7-2": {
-				flow:         &MyFlow{Count: 2},
+				startCount:   2,
 				timesSeen:    2,
 				wantPosition: 0,
 				wantCount:    4,
 			},
 			"7-3": {
-				flow:         &MyFlow{Count: 3},
+				startCount:   3,
 				timesSeen:    0,
 				wantPosition: 1,
 				wantCount:    3,
