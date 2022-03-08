@@ -56,3 +56,12 @@ export PS2;
 PS1="\[${userStyle}\]\u"; # username
 PS1+="\[${reset}\]@\h \[${cyan}\]\W ⇨ \[${reset}\] ";
 export PS1;
+
+# Case-insensitive globbing (used in pathname expansion)
+shopt -s nocaseglob;
+
+# Append to the Bash history file, rather than overwriting it
+shopt -s histappend;
+
+# Autocorrect typos in path names when using `cd`
+shopt -s cdspell;
