@@ -18,9 +18,23 @@
 
     - name: Generate an OpenSSH keypair with the default values (4096 bits, rsa)
       community.crypto.openssh_keypair:
-        path: "{{ temp_dir }}/{{ ssh_key_filename }}"
+        path: "{{ ssh_key_filename }}"
       register: ssh
       when: key.stat.exists is false
+
+    - name: Copy public key to mount folder
+      ansible.builtin.copy:
+        src: "{{ ssh_key_filename }}.pub"
+        dest: "{{ temp_dir }}"
+        unsafe_writes: true
+        mode: '0644'
+
+    - name: Copy private key to mount folder
+      ansible.builtin.copy:
+        src: "{{ ssh_key_filename }}"
+        dest: "{{ temp_dir }}"
+        unsafe_writes: true
+        mode: '0400'
 
     - name: Store SSH pub Key in a fact
       ansible.builtin.set_fact:

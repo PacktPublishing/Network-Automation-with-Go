@@ -20,15 +20,16 @@ build-env: check-aws-key check-aws-secret ## Build test enviroment on AWS. Make 
 	@docker run -it \
 	--env AWS_ACCESS_KEY_ID \
 	--env AWS_SECRET_ACCESS_KEY \
-	ghcr.io/packtpublishing/builder:1.0.1 \
+	--volume $(pwd)/cert:/mnt/cert:Z \
+	ghcr.io/packtpublishing/builder:0.1.8 \
 	ansible-playbook create-EC2-testbed.yml \
-	--extra-vars "instance_type=t2.medium" -v
+	--extra-vars "instance_type=m5.large" -v
 
 delete-env: check-aws-key check-aws-secret ## Delete test enviroment on AWS. Make sure you export your API credentials
 	@docker run -it \
 	--env AWS_ACCESS_KEY_ID \
 	--env AWS_SECRET_ACCESS_KEY \
-	ghcr.io/packtpublishing/builder:1.0.1 \
+	ghcr.io/packtpublishing/builder:0.1.8 \
 	ansible-playbook delete-EC2-testbed.yml -v
 
 tag: check-tag ## Build and tag. Make sure you TAG correctly (Example: export TAG=v0.1.4)
