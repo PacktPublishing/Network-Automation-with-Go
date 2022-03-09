@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+    tags:
+      - 'v*.*.*'
     paths:
       - 'ch12/**'
 
@@ -15,14 +17,12 @@ env:
   IMAGE: builder
 
 jobs:
-  push:
+  docker:
     runs-on: ubuntu-latest
-    permissions:
-      packages: write
-      contents: read
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v2
 
       - name: Login to GitHub Container Registry
         if: github.event_name != 'pull_request'
