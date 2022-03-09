@@ -45,7 +45,7 @@ func (r CVX) GetRoutes(wg *sync.WaitGroup) {
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		},
 	})
-	client.SetBaseURL(fmt.Sprintf("https://%s:8765", r.Hostname))
+	client.SetBaseURL("https://" + r.Hostname + ":8765" )
 	client.SetBasicAuth(r.Username, r.Password)
 
 	var routes map[string]interface{}
