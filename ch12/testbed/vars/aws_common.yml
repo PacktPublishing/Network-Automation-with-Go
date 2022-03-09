@@ -1,6 +1,6 @@
 skip_check: false
 ssh_key_filename: my_key
-temp_dir: "{{ playbook_dir }}"
+temp_dir: /mnt/cert
 ec2_distro: "{{ aws_distro | default('fedora') }}"
 supported_distros: ['fedora', 'ubuntu']
 ec2_resource_prefix: "{{ aws_prefix | default('testbed') }}"
