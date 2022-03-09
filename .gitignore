@@ -6,3 +6,5 @@ settings.json
 /ch02/hello/hello
 /ch02/pong/pong
 my_key
+.topo.yaml
+clab-netgo

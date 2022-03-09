@@ -39,9 +39,7 @@ var (
 )
 
 type plugin struct {
-	localAddr net.IP
 	probe     net.IP
-	localAS   uint32
 	host      []byte
 	pingCh    chan ping
 	probeCh   chan struct{}
@@ -79,7 +77,7 @@ func (p *plugin) OnEstablished(peer corebgp.PeerConfig, writer corebgp.UpdateMes
 				src := string(bytes.Trim(pingReq.source, "\x00"))
 				pingReq.dest = p.host
 				type42PathAttr := bgp.NewPathAttributeUnknown(type42Flags, bgpType42, buildPayload(pingReq))
-				bytes, err := p.buildUpdate(type42PathAttr)
+				bytes, err := p.buildUpdate(type42PathAttr, peer.LocalAddress, peer.LocalAS)
 				if err != nil {
 					log.Fatal(err)
 				}
@@ -99,7 +97,7 @@ func (p *plugin) OnEstablished(peer corebgp.PeerConfig, writer corebgp.UpdateMes
 					ts:     time.Now().Unix(),
 				}
 				type42PathAttr := bgp.NewPathAttributeUnknown(type42Flags, bgpType42, buildPayload(pingReq))
-				bytes, err := p.buildUpdate(type42PathAttr)
+				bytes, err := p.buildUpdate(type42PathAttr, peer.LocalAddress, peer.LocalAS)
 				if err != nil {
 					log.Fatal(err)
 				}
@@ -169,7 +167,12 @@ func (p *plugin) handleUpdate(peer corebgp.PeerConfig, u []byte) *corebgp.Notifi
 			}
 
 			// destHost is always set on a response
-			metric := fmt.Sprintf("bgp_ping_rtt_ms{device=%s} %f\n", destHost, float64(time.Since(ts).Nanoseconds())/1e6)
+			rtt := time.Since(ts).Nanoseconds()
+			metric := fmt.Sprintf(
+				"bgp_ping_rtt_ms{device=%s} %f\n",
+				destHost,
+				float64(rtt)/1e6,
+			)
 			log.Println(metric)
 			p.store = append(p.store, metric)
 			return nil
@@ -181,6 +184,7 @@ func (p *plugin) handleUpdate(peer corebgp.PeerConfig, u []byte) *corebgp.Notifi
 		}
 
 		p.pingCh <- ping{source: source, ts: ts.Unix()}
+		return nil
 	}
 
 	return nil
@@ -197,16 +201,16 @@ func (p *plugin) buildWithdraw() ([]byte, error) {
 	return msg.Body.Serialize()
 }
 
-func (p *plugin) buildUpdate(type42 *bgp.PathAttributeUnknown) ([]byte, error) {
+func (p *plugin) buildUpdate(type42 *bgp.PathAttributeUnknown, localAddr net.IP, localAS uint32) ([]byte, error) {
 	withdrawnRoutes := []*bgp.IPAddrPrefix{}
 	nexthop := bgp.NewPathAttributeNextHop(
-		p.localAddr.String(),
+		localAddr.String(),
 	)
 	asPath := bgp.NewPathAttributeAsPath(
 		[]bgp.AsPathParamInterface{
 			bgp.NewAs4PathParam(
 				bgp.BGP_ASPATH_ATTR_TYPE_SEQ,
-				[]uint32{p.localAS},
+				[]uint32{localAS},
 			),
 		},
 	)
@@ -246,10 +250,8 @@ func main() {
 	probeCh := make(chan struct{})
 	resultsCh := make(chan string)
 
-	p := &plugin{
-		localAddr: net.ParseIP(*localAddress),
+	peerPlugin := &plugin{
 		probe:     net.ParseIP(*nlri),
-		localAS:   uint32(*localAS),
 		host:      []byte(*id),
 		pingCh:    make(chan ping),
 		probeCh:   probeCh,
@@ -262,7 +264,7 @@ func main() {
 		RemoteAddress: net.ParseIP(*remoteAddress),
 		LocalAS:       uint32(*localAS),
 		RemoteAS:      uint32(*remoteAS),
-	}, p)
+	}, peerPlugin)
 
 	if err != nil {
 		log.Fatalf("error adding peer: %v", err)
