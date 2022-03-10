@@ -14,6 +14,8 @@ The playbooks in the book are:
 - [create-EC2-testbed.yml](create-EC2-testbed.yml):  Creates the testbed. It takes around 10 minutes to run.
 - [delete-EC2-testbed.yml](delete-EC2-testbed.yml): Deletes the resources you create when you no longer need them.
 
+If you have Docker installed, you can trigger the AWS test setup from a container with `make build-env`, without having to install the dependencies we cover next.
+
 ## What You Need Create a Testing Environment
 
 Before you run the playbook in your computer to create a Linux testing environment in AWS, you need to make sure you meet the following requirements:
@@ -84,7 +86,7 @@ ok: [testbed] => {}
 
 MSG:
 
-ssh -i my_key fedora@ec2-3-94-8-154.compute-1.amazonaws.com
+ssh -i cert/my_key fedora@ec2-3-94-8-154.compute-1.amazonaws.com
 
 RUNNING HANDLER [configure_instance : Reboot machine] ****************************************************************
 changed: [testbed] => {
@@ -98,7 +100,7 @@ localhost                  : ok=25   changed=1    unreachable=0    failed=0    s
 testbed                    : ok=31   changed=20   unreachable=0    failed=0    skipped=5    rescued=0    ignored=0      
 ```
 
-You can find the VM access details in the logs, as the preceding output shows. Look for something similar to: `ssh -i my_key fedora@ec2-3-94-8-154.compute-1.amazonaws.com` or `ssh -i my_key ubuntu@ec2-3-88-180-178.compute-1.amazonaws.com`.
+You can find the VM access details in the logs, as the preceding output shows. Look for something similar to: `ssh -i cert/my_key fedora@ec2-3-94-8-154.compute-1.amazonaws.com` or `ssh -i cert/my_key ubuntu@ec2-3-88-180-178.compute-1.amazonaws.com`.
 
 ## Virtual Machine Options
 
@@ -162,7 +164,7 @@ ok: [testbed] => {}
 
 MSG:
 
-ssh -i my_key ubuntu@ec2-3-142-51-83.us-east-2.compute.amazonaws.com
+ssh -i cert/my_key ubuntu@ec2-3-142-51-83.us-east-2.compute.amazonaws.com
 
 PLAY RECAP **********************************************************************************************************************************************************************************
 localhost                  : ok=28   changed=10   unreachable=0    failed=0    skipped=4    rescued=0    ignored=0   
@@ -186,14 +188,14 @@ Some networking vendors make it simpler than others to access their container-ba
 Let's pretend you downloaded a cEOS image (`cEOS-lab-4.26.1F.tar`) to your Downloads folder. You can copy the image to the test VM with the `scp` command using the generated SSH private key. See an example next or check [Get Arista cEOS](get_arista_ceos.md)
 
 ```bash
-$ scp -i my_key ~/Downloads/cEOS64-lab-4.26.4M.tar fedora@ec2-3-94-8-154.compute-1.amazonaws.com:.
+$ scp -i cert/my_key ~/Downloads/cEOS64-lab-4.26.4M.tar fedora@ec2-3-94-8-154.compute-1.amazonaws.com:.
 cEOS64-lab-4.26.4M.tar                                                                 100%  405MB  22.2MB/s   00:18
 ```
 
 or
 
 ```bash
-scp -i my_key ~/Downloads/cEOS64-lab-4.26.4M.tar ubuntu@ec2-3-88-180-178.compute-1.amazonaws.com:.
+scp -i cert/my_key ~/Downloads/cEOS64-lab-4.26.4M.tar ubuntu@ec2-3-88-180-178.compute-1.amazonaws.com:.
 ```
 
 Then, SSH to the instance and import the image with the `docker` command.
