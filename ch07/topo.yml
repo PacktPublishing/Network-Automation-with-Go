@@ -21,7 +21,7 @@ topology:
       runtime: docker
     host-1:
       kind: linux
-      image: ghcr.io/packtpublishing/host:0.1.5
+      image: ghcr.io/packtpublishing/host:0.1.12
       binds:
       - ./:/workdir
       exec:
@@ -29,7 +29,7 @@ topology:
       - ip route add 203.0.113.0/24 via 203.0.113.1
     host-2:
       kind: linux
-      image: ghcr.io/packtpublishing/host:0.1.5
+      image: ghcr.io/packtpublishing/host:0.1.12
       binds:
       - ./:/workdir
       exec:
@@ -37,7 +37,7 @@ topology:
       - ip route add 203.0.113.0/24 via 203.0.113.3
     host-3:
       kind: linux
-      image: ghcr.io/packtpublishing/host:0.1.5
+      image: ghcr.io/packtpublishing/host:0.1.12
       binds:
       - ./:/workdir
       exec:
