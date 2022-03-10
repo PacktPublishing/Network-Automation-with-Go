@@ -42,15 +42,15 @@ func TestHeap(t *testing.T) {
 			tf := test.flows[f.Key]
 			if tf.wantPosition != i {
 				t.Errorf(
-					"%s: unexpected position for packet key %s: got %d, want %d", 
-					test.name, f.Key, i, tf.wantPosition
+					"%s: unexpected position for packet key %s: got %d, want %d",
+					test.name, f.Key, i, tf.wantPosition,
 				)
 			}
 
 			if tf.wantCount != f.Count {
 				t.Errorf(
-					"%s: unexpected count for packet key %s: got %d, want %d", 
-					test.name, f.Key, f.Count, tf.wantCount
+					"%s: unexpected count for packet key %s: got %d, want %d",
+					test.name, f.Key, f.Count, tf.wantCount,
 				)
 			}
 		}

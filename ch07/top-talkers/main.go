@@ -47,8 +47,10 @@ type topTalker struct {
 
 type Heap []*MyFlow
 
-func (h Heap) Len() int           { return len(h) }
-func (h Heap) Less(i, j int) bool { return h[i].Count > h[j].Count }
+func (h Heap) Len() int { return len(h) }
+func (h Heap) Less(i, j int) bool {
+	return h[i].Count > h[j].Count
+}
 func (h Heap) Swap(i, j int) {
 	h[i], h[j] = h[j], h[i]
 	h[i].index = i
@@ -94,9 +96,21 @@ func (c *topTalker) Send(key, data []byte) error {
 
 	var mapKey string
 	if ips[0] != myFlow.SrcAddr {
-		mapKey = fmt.Sprintf(flowMapKey, myFlow.SrcAddr, myFlow.SrcPort, myFlow.DstAddr, myFlow.DstPort)
+		mapKey = fmt.Sprintf(
+			flowMapKey,
+			myFlow.SrcAddr,
+			myFlow.SrcPort,
+			myFlow.DstAddr,
+			myFlow.DstPort,
+		)
 	} else {
-		mapKey = fmt.Sprintf(flowMapKey, myFlow.DstAddr, myFlow.DstPort, myFlow.SrcAddr, myFlow.SrcPort)
+		mapKey = fmt.Sprintf(
+			flowMapKey,
+			myFlow.DstAddr,
+			myFlow.DstPort,
+			myFlow.SrcAddr,
+			myFlow.SrcPort,
+		)
 	}
 
 	myFlow.Key = mapKey

@@ -64,7 +64,10 @@ func (p *plugin) OnOpenMessage(peer corebgp.PeerConfig, routerID net.IP, capabil
 	return nil
 }
 
-func (p *plugin) OnEstablished(peer corebgp.PeerConfig, writer corebgp.UpdateMessageWriter) corebgp.UpdateMessageHandler {
+func (p *plugin) OnEstablished(
+	peer corebgp.PeerConfig,
+	writer corebgp.UpdateMessageWriter,
+) corebgp.UpdateMessageHandler {
 	log.Println("peer established, starting main loop")
 	go func() {
 		// prepare withdraw timer
@@ -76,8 +79,16 @@ func (p *plugin) OnEstablished(peer corebgp.PeerConfig, writer corebgp.UpdateMes
 			case pingReq := <-p.pingCh:
 				src := string(bytes.Trim(pingReq.source, "\x00"))
 				pingReq.dest = p.host
-				type42PathAttr := bgp.NewPathAttributeUnknown(type42Flags, bgpType42, buildPayload(pingReq))
-				bytes, err := p.buildUpdate(type42PathAttr, peer.LocalAddress, peer.LocalAS)
+				type42PathAttr := bgp.NewPathAttributeUnknown(
+					type42Flags,
+					bgpType42,
+					buildPayload(pingReq),
+				)
+				bytes, err := p.buildUpdate(
+					type42PathAttr,
+					peer.LocalAddress,
+					peer.LocalAS,
+				)
 				if err != nil {
 					log.Fatal(err)
 				}
@@ -96,8 +107,16 @@ func (p *plugin) OnEstablished(peer corebgp.PeerConfig, writer corebgp.UpdateMes
 					source: p.host,
 					ts:     time.Now().Unix(),
 				}
-				type42PathAttr := bgp.NewPathAttributeUnknown(type42Flags, bgpType42, buildPayload(pingReq))
-				bytes, err := p.buildUpdate(type42PathAttr, peer.LocalAddress, peer.LocalAS)
+				type42PathAttr := bgp.NewPathAttributeUnknown(
+					type42Flags,
+					bgpType42,
+					buildPayload(pingReq),
+				)
+				bytes, err := p.buildUpdate(
+					type42PathAttr,
+					peer.LocalAddress,
+					peer.LocalAS,
+				)
 				if err != nil {
 					log.Fatal(err)
 				}
@@ -134,8 +153,14 @@ func (p *plugin) OnClose(peer corebgp.PeerConfig) {
 	log.Println("peer closed")
 }
 
-func (p *plugin) handleUpdate(peer corebgp.PeerConfig, u []byte) *corebgp.Notification {
-	msg, err := bgp.ParseBGPBody(&bgp.BGPHeader{Type: bgp.BGP_MSG_UPDATE}, u)
+func (p *plugin) handleUpdate(
+	peer corebgp.PeerConfig,
+	update []byte,
+) *corebgp.Notification {
+	msg, err := bgp.ParseBGPBody(
+		&bgp.BGPHeader{Type: bgp.BGP_MSG_UPDATE},
+		update,
+	)
 	if err != nil {
 		log.Fatal("failed to parse bgp message ", err)
 	}
@@ -201,7 +226,11 @@ func (p *plugin) buildWithdraw() ([]byte, error) {
 	return msg.Body.Serialize()
 }
 
-func (p *plugin) buildUpdate(type42 *bgp.PathAttributeUnknown, localAddr net.IP, localAS uint32) ([]byte, error) {
+func (p *plugin) buildUpdate(
+	type42 *bgp.PathAttributeUnknown,
+	localAddr net.IP,
+	localAS uint32,
+) ([]byte, error) {
 	withdrawnRoutes := []*bgp.IPAddrPrefix{}
 	nexthop := bgp.NewPathAttributeNextHop(
 		localAddr.String(),
