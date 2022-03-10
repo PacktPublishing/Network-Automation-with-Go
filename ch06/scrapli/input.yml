@@ -6,12 +6,8 @@ uplinks:
     prefix: "192.0.2.1/31"
   - name: "Ethernet2"
     prefix: "192.0.2.2/31"
-  - name: "Ethernet3"
-    prefix: "203.0.113.3/31"
 peers:
   - ip: "192.0.2.0"
     asn: 65000
   - ip: "192.0.2.3"
     asn: 65002
-  - ip: "203.0.113.2"
-    asn: 65004

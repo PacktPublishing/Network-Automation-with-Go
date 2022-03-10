@@ -6,12 +6,8 @@ loopback:
 uplinks:
   - name: "ethernet-1/1"
     prefix: "192.0.2.0/31"
-  - name: "ethernet-1/2"
-    prefix: "203.0.113.1/31"
 
 peers:
   - ip: "192.0.2.1"
     asn: 65001
-  - ip: "203.0.113.0"
-    asn: 65003
   
