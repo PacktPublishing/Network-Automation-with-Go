@@ -73,6 +73,7 @@
         instance_name: "{{ ec2_resource_prefix }}"
         ansible_ssh_private_key_file: "{{ temp_dir }}/{{ ssh_key_filename }}"
         instance_ssh: "{{ ssh_info }}"
+        instance_sch: "{{ scp_info }}"
         groups:
           - my_instances
       with_items: "{{ ansible_node_facts.instances }}"
@@ -95,11 +96,11 @@
       - { role: configure_instance, become: true }
 
   tasks:
-    - name: Temporary until we figurate a way to write the key out of the container
-      ansible.builtin.debug: 
-        msg: "my_key is: {{ lookup('file', ansible_ssh_private_key_file) }}"
-
-    - name: Print out SSH access details
+    - name: Print out instance information for the user
       ansible.builtin.debug:
-        msg: "{{ hostvars[inventory_hostname]['instance_ssh'] }}"
-      when: hostvars[inventory_hostname]['instance_ssh'] is defined
+        msg: 
+        - "SSH: {{ hostvars[inventory_hostname]['instance_ssh'] }}"
+        - "To upload cEOS image: {{ hostvars[inventory_hostname]['instance_scp'] }}"
+      when: 
+      - hostvars[inventory_hostname]['instance_ssh'] is defined
+      - hostvars[inventory_hostname]['instance_scp'] is defined

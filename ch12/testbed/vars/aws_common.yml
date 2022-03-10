@@ -1,4 +1,6 @@
 skip_check: false
+ceos_image: cEOS64-lab-4.26.4M.tar
+path_to_image: ~/Downloads
 ssh_key_filename: my_key
 temp_dir: /mnt/cert
 ec2_distro: "{{ aws_distro | default('fedora') }}"

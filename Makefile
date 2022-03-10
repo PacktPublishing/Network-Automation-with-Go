@@ -23,7 +23,7 @@ build-env: check-aws-key check-aws-secret ## Build test enviroment on AWS. Make 
 	--volume $(pwd)/cert:/mnt/cert:Z \
 	ghcr.io/packtpublishing/builder:0.1.9 \
 	ansible-playbook create-EC2-testbed.yml \
-	--extra-vars "instance_type=m5.large" -v
+	--extra-vars "instance_type=t2.large" -v
 
 delete-env: check-aws-key check-aws-secret ## Delete test enviroment on AWS. Make sure you export your API credentials
 	@docker run -it \
