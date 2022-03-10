@@ -1,0 +1,4 @@
+linters-settings:
+  lll:
+    line-length: 55
+    tab-width: 1
