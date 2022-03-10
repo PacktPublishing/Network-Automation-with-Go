@@ -336,7 +336,7 @@ ceos#
 You can destroy the network topology using the `clab destroy` command.
 
 ```bash
-$  sudo clab destroy --topo topology.yml
+$  sudo clab destroy --topo topo.yml
 ```
 
 ## Delete All Resources
