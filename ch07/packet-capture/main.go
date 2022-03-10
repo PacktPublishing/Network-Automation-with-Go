@@ -41,13 +41,17 @@ func main() {
 		log.Panic(err)
 	}
 
-	packetSource := gopacket.NewPacketSource(handle, layers.LayerTypeEthernet)
+	packetSource := gopacket.NewPacketSource(
+		handle,
+		layers.LayerTypeEthernet,
+	)
 	for packet := range packetSource.Packets() {
 		if l4 := packet.TransportLayer(); l4 == nil {
 			continue
 		}
 
-		if sflowLayer := packet.Layer(layers.LayerTypeSFlow); sflowLayer != nil {
+		sflowLayer := packet.Layer(layers.LayerTypeSFlow)
+		if sflowLayer != nil {
 			sflow, ok := sflowLayer.(*layers.SFlowDatagram)
 			if !ok {
 				log.Println("failed decoding sflow")
@@ -62,9 +66,20 @@ func main() {
 						continue
 					}
 
-					srcIP, dstIP := p.Header.NetworkLayer().NetworkFlow().Endpoints()
-					sPort, dPort := p.Header.TransportLayer().TransportFlow().Endpoints()
-					log.Printf(" flow record: %s:%s <-> %s:%s\n", srcIP, sPort, dstIP, dPort)
+					srcIP, dstIP := p.Header.
+						NetworkLayer().
+						NetworkFlow().
+						Endpoints()
+					sPort, dPort := p.Header.
+						TransportLayer().
+						TransportFlow().
+						Endpoints()
+					log.Printf("flow record: %s:%s <-> %s:%s\n",
+						srcIP,
+						sPort,
+						dstIP,
+						dPort,
+					)
 				}
 
 			}
