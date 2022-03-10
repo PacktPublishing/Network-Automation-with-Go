@@ -12,21 +12,6 @@ topology:
       kind: cvx
       image: networkop/cx:5.0.0
       runtime: docker
-    host-1:
-      kind: linux
-      image: ghcr.io/packtpublishing/thegobook:latest
-      exec:
-      - ip addr add 203.0.113.0/31 dev eth1
-    host-2:
-      kind: linux
-      image: ghcr.io/packtpublishing/thegobook:latest
-      exec:
-      - ip addr add 203.0.113.2/31 dev eth1
-    host-3:
-      kind: linux
-      image: ghcr.io/packtpublishing/thegobook:latest
-      exec:
-      - ip addr add 203.0.113.4/31 dev eth1
 
   links:
     - endpoints: ["srl:e1-1", "ceos:eth1"]

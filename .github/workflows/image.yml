@@ -24,7 +24,7 @@ jobs:
         with:
           # list of Docker images to use as base name for tags
           images: |
-            ghcr.io/packtpublishing/thegobook
+            ghcr.io/packtpublishing/host
           # generate Docker tags based on the following events/attributes
           tags: |
             type=schedule
