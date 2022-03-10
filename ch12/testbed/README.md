@@ -6,7 +6,7 @@ You can run the Go code snippets in the first part of this book in the [Go Playg
 
 A test environment is the hardware and software that meets the minimum requirements to execute test cases.
 
-For the hardware, we rely on a cloud provider to have a common denominator. In this case, we leverage Amazon Web Services (AWS) to provision a virtual machine (VM), where we can install all the software we need to run the code examples of the book. We call this virtual machine an EC2 instance, or just an instance (we use these terms interchangeably). By default, the instance type we run in AWS is a `t2.micro`, which you can run for free as part of the [AWS Free Tier][], but we recommend you run at least a `t2.medium`, ideally a `m5.large` size instance that has more CPU and memory, to support all the virtual network devices we need to run.
+For the hardware, we rely on a cloud provider to have a common denominator. In this case, we leverage Amazon Web Services (AWS) to provision a virtual machine (VM), where we can install all the software we need to run the code examples of the book. We call this virtual machine an EC2 instance, or just an instance (we use these terms interchangeably). By default, the instance type we run in AWS is a `t2.micro`, which you can run for free as part of the [AWS Free Tier][], but we recommend you run at least a `t2.medium`, ideally a `t2.large` size instance that has more CPU and memory, to support all the virtual network devices we need to run.
 
 An Ansible playbook describes and automates all the tasks required to create this VM in AWS, as well as the tasks that prescribe the software—such as Docker—that needs to be present in the VM and it defines how to configure the software as well. You can find this playbook in the [book's GitHub repository]. Another playbook is also available to delete the resources you create when you no longer need them.
 
@@ -77,7 +77,7 @@ export AWS_SECRET_ACCESS_KEY=’…’
 The next step is to execute the playbook with the `ansible-playbook` command.
 
 ```bash
-ch012/testbed$ ansible-playbook create-EC2-testbed.yml --extra-vars "instance_type=m5.large" -v 
+ch012/testbed$ ansible-playbook create-EC2-testbed.yml --extra-vars "instance_type=t2.large" -v 
 
 <snip>
 
@@ -86,7 +86,8 @@ ok: [testbed] => {}
 
 MSG:
 
-ssh -i cert/my_key fedora@ec2-3-94-8-154.compute-1.amazonaws.com
+SSH: ssh -i cert/my_key fedora@ec2-3-94-8-154.compute-1.amazonaws.com
+To upload cEOS image: scp -i cert/my_key ~/Downloads/cEOS64-lab-4.26.4M.tar fedora@ec2-3-94-8-154.compute-1.amazonaws.com:.
 
 RUNNING HANDLER [configure_instance : Reboot machine] ****************************************************************
 changed: [testbed] => {
@@ -95,9 +96,9 @@ changed: [testbed] => {
     "rebooted": true
 }
 
-PLAY RECAP ***********************************************************************************************************
-localhost                  : ok=25   changed=1    unreachable=0    failed=0    skipped=4    rescued=0    ignored=0   
-testbed                    : ok=31   changed=20   unreachable=0    failed=0    skipped=5    rescued=0    ignored=0      
+PLAY RECAP **********************************************************************************************************************
+localhost                  : ok=26   changed=1    unreachable=0    failed=0    skipped=6    rescued=0    ignored=0   
+testbed                    : ok=30   changed=20   unreachable=0    failed=0    skipped=6    rescued=0    ignored=0      
 ```
 
 You can find the VM access details in the logs, as the preceding output shows. Look for something similar to: `ssh -i cert/my_key fedora@ec2-3-94-8-154.compute-1.amazonaws.com` or `ssh -i cert/my_key ubuntu@ec2-3-88-180-178.compute-1.amazonaws.com`.
@@ -167,11 +168,12 @@ ok: [testbed] => {}
 
 MSG:
 
-ssh -i cert/my_key ubuntu@ec2-3-142-51-83.us-east-2.compute.amazonaws.com
+SSH: ssh -i cert/my_key ubuntu@ec2-3-142-51-83.us-east-2.compute.amazonaws.com
+To upload cEOS image: scp -i cert/my_key ~/Downloads/cEOS64-lab-4.26.4M.tar ubuntu@ec2-3-142-51-83.us-east-2.compute:.
 
-PLAY RECAP **********************************************************************************************************************************************************************************
-localhost                  : ok=28   changed=10   unreachable=0    failed=0    skipped=4    rescued=0    ignored=0   
-testbed                    : ok=31   changed=20   unreachable=0    failed=0    skipped=3    rescued=0    ignored=0
+PLAY RECAP **********************************************************************************************************************
+localhost                  : ok=26   changed=1    unreachable=0    failed=0    skipped=6    rescued=0    ignored=0   
+testbed                    : ok=30   changed=20   unreachable=0    failed=0    skipped=6    rescued=0    ignored=0
 ```
 
 
@@ -259,31 +261,31 @@ To launch the virtual topology file, run the command `make` from the home folder
 ```bash
 fedora@testbed ~ ⇨  make
 sudo containerlab deploy -t ~/Network-Automation-with-Go/topo/topo.yml --reconfigure
-INFO[0000] Containerlab v0.23.0 started                 
+INFO[0000] Containerlab v0.24.1 started                 
 INFO[0000] Parsing & checking topology file: topo.yml   
-INFO[0000] Removing /home/fedora/Network-Automation-with-Go/topo/clab-netgo directory... 
+INFO[0000] Removing /home/fedora/Network-Automation-with-Go/clab-netgo directory... 
+INFO[0000] Could not read docker config: open /root/.docker/config.json: no such file or directory 
 INFO[0000] Pulling docker.io/networkop/cx:5.0.0 Docker image 
-INFO[0022] Done pulling docker.io/networkop/cx:5.0.0    
-INFO[0022] Pulling ghcr.io/nokia/srlinux:21.6.4 Docker image 
-INFO[0045] Done pulling ghcr.io/nokia/srlinux:21.6.4    
-INFO[0045] Creating lab directory: /home/fedora/Network-Automation-with-Go/topo/clab-netgo 
-INFO[0046] Creating docker network: Name='clab', IPv4Subnet='172.20.20.0/24', IPv6Subnet='2001:172:20:20::/64', MTU='1500' 
-INFO[0046] Creating container: cvx                      
-INFO[0046] Creating container: ceos                     
-INFO[0046] Creating container: srl                      
-INFO[0048] Creating virtual wire: cvx:swp1 <--> ceos:eth2 
-INFO[0048] Creating virtual wire: srl:e1-1 <--> ceos:eth1 
-INFO[0048] Running postdeploy actions for Nokia SR Linux 'srl' node 
-INFO[0048] Running postdeploy actions for Arista cEOS 'ceos' node 
-INFO[0103] Adding containerlab host entries to /etc/hosts file 
-INFO[0103] 🎉 New containerlab version 0.24.1 is available! Release notes: https://containerlab.srlinux.dev/rn/0.24/#0241
-Run 'containerlab version upgrade' to upgrade or go check other installation options at https://containerlab.srlinux.dev/install/ 
+INFO[0027] Done pulling docker.io/networkop/cx:5.0.0    
+INFO[0027] Could not read docker config: open /root/.docker/config.json: no such file or directory 
+INFO[0027] Pulling ghcr.io/nokia/srlinux:21.6.4 Docker image 
+INFO[0052] Done pulling ghcr.io/nokia/srlinux:21.6.4    
+INFO[0052] Creating lab directory: /home/fedora/Network-Automation-with-Go/clab-netgo 
+INFO[0053] Creating docker network: Name="clab", IPv4Subnet="172.20.20.0/24", IPv6Subnet="2001:172:20:20::/64", MTU="1500" 
+INFO[0053] Creating container: "ceos"                   
+INFO[0053] Creating container: "cvx"                    
+INFO[0053] Creating container: "srl"                    
+INFO[0056] Creating virtual wire: cvx:swp1 <--> ceos:eth2 
+INFO[0056] Creating virtual wire: srl:e1-1 <--> ceos:eth1 
+INFO[0056] Running postdeploy actions for Nokia SR Linux 'srl' node 
+INFO[0056] Running postdeploy actions for Arista cEOS 'ceos' node 
+INFO[0112] Adding containerlab host entries to /etc/hosts file 
 +---+-----------------+--------------+------------------------------+------+---------+----------------+----------------------+
 | # |      Name       | Container ID |            Image             | Kind |  State  |  IPv4 Address  |     IPv6 Address     |
 +---+-----------------+--------------+------------------------------+------+---------+----------------+----------------------+
-| 1 | clab-netgo-ceos | 736de2eb1336 | ceos:4.26.4M                 | ceos | running | 172.20.20.2/24 | 2001:172:20:20::2/64 |
-| 2 | clab-netgo-cvx  | 7afb25406e69 | networkop/cx:5.0.0           | cvx  | running | 172.20.20.3/24 | 2001:172:20:20::3/64 |
-| 3 | clab-netgo-srl  | 85549d9a1a39 | ghcr.io/nokia/srlinux:21.6.4 | srl  | running | 172.20.20.4/24 | 2001:172:20:20::4/64 |
+| 1 | clab-netgo-ceos | 761ab932e3f1 | ceos:4.26.4M                 | ceos | running | 172.20.20.3/24 | 2001:172:20:20::3/64 |
+| 2 | clab-netgo-cvx  | 1903b058747e | networkop/cx:5.0.0           | cvx  | running | 172.20.20.2/24 | 2001:172:20:20::2/64 |
+| 3 | clab-netgo-srl  | ec8b4357f5dd | ghcr.io/nokia/srlinux:21.6.4 | srl  | running | 172.20.20.4/24 | 2001:172:20:20::4/64 |
 +---+-----------------+--------------+------------------------------+------+---------+----------------+----------------------+
 ```
 

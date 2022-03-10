@@ -73,7 +73,7 @@
         instance_name: "{{ ec2_resource_prefix }}"
         ansible_ssh_private_key_file: "{{ temp_dir }}/{{ ssh_key_filename }}"
         instance_ssh: "{{ ssh_info }}"
-        instance_sch: "{{ scp_info }}"
+        instance_scp: "{{ scp_info }}"
         groups:
           - my_instances
       with_items: "{{ ansible_node_facts.instances }}"
