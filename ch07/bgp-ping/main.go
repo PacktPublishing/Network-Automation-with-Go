@@ -21,7 +21,7 @@ import (
 )
 
 const (
-	bgpType42   = 42
+	bgpPingType = 42
 	type42Len   = 46
 	type42Flags = bgp.BGP_ATTR_FLAG_TRANSITIVE | bgp.BGP_ATTR_FLAG_OPTIONAL
 )
