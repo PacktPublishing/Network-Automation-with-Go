@@ -14,7 +14,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE: ${{ github.repository }}/builder
+  IMAGE_NAME: ${{ github.repository }}/builder
 
 jobs:
   docker:
