@@ -1,11 +1,11 @@
 DEFAULT: lab
 
-include ch07/targets.mk
+include ch10/targets.mk
 
 .DEFAULT_GOAL := help
 
 ## Cleanup the lab environment
-cleanup: topo-down 07-down
+cleanup: topo-down 10-down
 		
 ## Build the lab with Containerlab in VM
 lab:

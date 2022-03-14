@@ -1,22 +1,22 @@
-## Chapter 07 lab
-07-up:
+## Chapter 10 lab
+10-up:
 	cd topo-full; sudo containerlab deploy -t ./topo.yml --reconfigure
 
-## Chapter 07 cleanup
-07-down:
+## Chapter 10 cleanup
+10-down:
 	cd topo-full; sudo containerlab destroy -t ./topo.yml --cleanup	
 
 bgp-ping-build:
-	cd ch07/bgp-ping; go build -o bgp-ping main.go
+	cd ch10/bgp-ping; go build -o bgp-ping main.go
 
 bgp-ping-stop:
-	cd ch07/bgp-ping; docker-compose down; cd ../../
+	cd ch10/bgp-ping; docker-compose down; cd ../../
 
 bgp-ping-start: bgp-ping-build
 	docker exec -d clab-netgo-host-3 /workdir/bgp-ping/bgp-ping -id host-3 -nlri 100.64.0.2 -laddr 203.0.113.254 -raddr 203.0.113.129 -las 65005 -ras 65002 -p
 	docker exec -d clab-netgo-host-1 /workdir/bgp-ping/bgp-ping -id host-1 -nlri 100.64.0.0 -laddr 203.0.113.0 -raddr 203.0.113.1 -las 65003 -ras 65000 -p
 	docker exec -d clab-netgo-host-2 /cloudprober -config_file /workdir/workdir/cloudprober.cfg
-	cd ch07/bgp-ping; docker-compose up -d; cd ../../
+	cd ch10/bgp-ping; docker-compose up -d; cd ../../
 	@echo 'http://localhost:3000'
 
 traffic-start:
@@ -27,16 +27,16 @@ traffic-start:
 	docker exec -d clab-netgo-host-1 ./ethr -c 203.0.113.251 -b 400K -d 60s -p udp -l 1KB
 
 top-talkers-start: traffic-start
-	@echo "run 'cd ch07/top-talkers; sudo ip netns exec clab-netgo-host-2 go run main.go; cd ../../'"
+	@echo "run 'cd ch10/top-talkers; sudo ip netns exec clab-netgo-host-2 go run main.go; cd ../../'"
 	
-07-stop: bgp-ping-stop
+10-stop: bgp-ping-stop
 	sudo pkill -f bgp-ping
 	sudo pkill -f cloudprober
 	sudo pkill -f ethr
 
 
 capture-start: traffic-start
-	cd ch07/packet-capture; go build -o packet-capture main.go
+	cd ch10/packet-capture; go build -o packet-capture main.go
 	docker exec -it clab-netgo-host-2 /workdir/packet-capture/packet-capture
 
 capture-debug:
