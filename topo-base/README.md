@@ -6,7 +6,7 @@
 
 ## Launching a Virtual Network Topology
 
-To launch the virtual topology file, run the command `make` from the home folder to access the `Network-Automation-with-Go/topo/` folder and run `clab deploy` with root privilege, as the next output shows.
+To launch the virtual topology file, run the command `make` from the home folder to access the `Network-Automation-with-Go/topo-base/` folder and run `clab deploy` with root privilege, as the next output shows.
 
 ```bash
 sudo containerlab deploy -t topo.yml --reconfigure

@@ -1,6 +1,5 @@
 DEFAULT: lab
 
-include topo/targets.mk
 include ch07/targets.mk
 
 .DEFAULT_GOAL := help
@@ -10,7 +9,7 @@ cleanup: topo-down 07-down
 		
 ## Build the lab with Containerlab in VM
 lab:
-	sudo containerlab deploy -t ~/Network-Automation-with-Go/topo/topo.yml --reconfigure
+	sudo containerlab deploy -t ~/Network-Automation-with-Go/topo-base/topo.yml --reconfigure
 
 ## Clone Arista's cEOS image after uploading it
 clone:
