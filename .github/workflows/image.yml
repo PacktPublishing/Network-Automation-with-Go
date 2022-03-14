@@ -11,6 +11,9 @@ on:
   # Allows you to run this workflow manually from the Actions tab    
   workflow_dispatch:
 
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}/host
 
 jobs:
   docker:
@@ -26,7 +29,7 @@ jobs:
         with:
           # list of Docker images to use as base name for tags
           images: |
-            ghcr.io/packtpublishing/host
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           # generate Docker tags based on the following events/attributes
           tags: |
             type=schedule
