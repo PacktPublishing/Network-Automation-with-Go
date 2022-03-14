@@ -8,6 +8,7 @@ on:
       - 'v*.*.*'
     paths:
       - 'topo/host/**'
+
   # Allows you to run this workflow manually from the Actions tab    
   workflow_dispatch:
 
@@ -47,7 +48,7 @@ jobs:
         name: Build and push
         uses: docker/build-push-action@v2
         with:
-          context: topo/host/.
+          context: topo-base/host/.
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
