@@ -1,0 +1,11 @@
+- name: Configure Interface
+  hosts: routers
+  gather_facts: false
+  vars_files: l3_interface.cfg
+
+  tasks:
+    - name: Use L3 Interfaces resource module [Arista EOS]
+      arista.eos.eos_l3_interfaces:
+        state: merged
+        config: "{{ cfg_eos }}"
+      when: ('eos' in group_names)

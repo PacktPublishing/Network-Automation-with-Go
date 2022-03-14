@@ -1,0 +1,5 @@
+collections:
+  - name: community.network
+    version: 3.1.0
+  - name: arista.eos
+    version: 4.1.1

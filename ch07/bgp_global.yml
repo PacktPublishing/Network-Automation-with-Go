@@ -1,0 +1,11 @@
+- name: Configure BGP
+  hosts: eos
+  gather_facts: false
+  vars_files: bgp_global.cfg
+
+  tasks:
+    - name: Use BGP Global resource module [Arista EOS]
+      arista.eos.eos_bgp_global:
+        state: merged
+        config: "{{ cfg_eos }}"
+      when: ('eos' in group_names)
