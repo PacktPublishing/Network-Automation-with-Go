@@ -14,14 +14,14 @@ topology:
       - iptables --policy INPUT ACCEPT
     cvx:
       kind: cvx
-      image: networkop/cx:5.0.0
+      image: networkop/cx:5.0.2-netq
       binds:
       - ./workdir/cvx.yaml:/etc/nvue.d/startup.yaml
       - ./workdir/hsflowd.conf:/etc/hsflowd.conf
       runtime: docker
     host-1:
       kind: linux
-      image: ghcr.io/packtpublishing/network-automation-with-go/host:0.1.15
+      image: ghcr.io/networkop/network-automation-with-go/host:sha-5cede17
       binds:
       - ./:/workdir
       exec:
@@ -29,7 +29,7 @@ topology:
       - ip route add 203.0.113.0/24 via 203.0.113.1
     host-2:
       kind: linux
-      image: ghcr.io/packtpublishing/network-automation-with-go/host:0.1.15
+      image: ghcr.io/networkop/network-automation-with-go/host:sha-5cede17
       binds:
       - ./:/workdir
       exec:
@@ -37,7 +37,7 @@ topology:
       - ip route add 203.0.113.0/24 via 203.0.113.3
     host-3:
       kind: linux
-      image: ghcr.io/packtpublishing/network-automation-with-go/host:0.1.15
+      image: ghcr.io/networkop/network-automation-with-go/host:sha-5cede17
       binds:
       - ./:/workdir
       exec:

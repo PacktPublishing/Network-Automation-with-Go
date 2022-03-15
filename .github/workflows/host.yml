@@ -48,7 +48,7 @@ jobs:
         name: Build and push
         uses: docker/build-push-action@v2
         with:
-          context: topo-base/host/.
+          context: topo-full/host/.
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
