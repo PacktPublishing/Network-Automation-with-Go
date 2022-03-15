@@ -8,3 +8,4 @@ settings.json
 my_key
 .topo.yaml
 clab-netgo
+!/ch07/*.cfg
