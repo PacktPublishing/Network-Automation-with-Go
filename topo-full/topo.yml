@@ -21,25 +21,25 @@ topology:
       runtime: docker
     host-1:
       kind: linux
-      image: ghcr.io/networkop/network-automation-with-go/host:sha-5cede17
+      image: ghcr.io/networkop/network-automation-with-go/host:sha-72a9483
       binds:
-      - ./:/workdir
+      - ../:/workdir
       exec:
       - ip addr add 203.0.113.0/31 dev eth1
       - ip route add 203.0.113.0/24 via 203.0.113.1
     host-2:
       kind: linux
-      image: ghcr.io/networkop/network-automation-with-go/host:sha-5cede17
+      image: ghcr.io/networkop/network-automation-with-go/host:sha-72a9483
       binds:
-      - ./:/workdir
+      - ../:/workdir
       exec:
       - ip addr add 203.0.113.2/31 dev eth1
       - ip route add 203.0.113.0/24 via 203.0.113.3
     host-3:
       kind: linux
-      image: ghcr.io/networkop/network-automation-with-go/host:sha-5cede17
+      image: ghcr.io/networkop/network-automation-with-go/host:sha-72a9483
       binds:
-      - ./:/workdir
+      - ../:/workdir
       exec:
       - ip addr add 203.0.113.254/25 dev eth1
       - ip addr add 203.0.113.253/25 dev eth1

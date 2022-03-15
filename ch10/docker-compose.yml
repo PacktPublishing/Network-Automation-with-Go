@@ -5,7 +5,7 @@ services:
     image: prom/prometheus:v2.32.1
     container_name: prometheus
     volumes:
-      - ./workdir/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ../topo-full/workdir/prometheus.yml:/etc/prometheus/prometheus.yml
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
@@ -19,8 +19,8 @@ services:
     image: grafana/grafana:8.3.3
     container_name: grafana
     volumes:
-      - ./workdir/dashboards:/etc/grafana/provisioning/dashboards
-      - ./workdir/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
+      - ../topo-full/workdir/dashboards:/etc/grafana/provisioning/dashboards
+      - ../topo-full/workdir/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
     environment:
       - GF_SECURITY_ADMIN_USER=${ADMIN_USER:-admin}
       - GF_SECURITY_ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
