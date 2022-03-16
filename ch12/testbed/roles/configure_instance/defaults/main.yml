@@ -21,6 +21,10 @@ base_software:
 python_libraries:
 - ipaddress
 
+ansible_collections:
+- arista.eos:4.1.1
+- community.network:3.1.0
+
 software_additional: []
 
 docker_repo_url: https://download.docker.com/linux

@@ -13,10 +13,11 @@ RUN microdnf --nodocs install git python38 \
     && ansible-galaxy collection install amazon.aws:==3.0.0 -p $COLLECTIONS_DIR \
     && ansible-galaxy collection install community.crypto:==2.1.0 -p $COLLECTIONS_DIR \
     && ansible-galaxy collection install ansible.posix:==1.3.0 -p $COLLECTIONS_DIR \
+    && ansible-galaxy collection install community.general:==4.6.1 -p $COLLECTIONS_DIR \
     && microdnf clean all \
     && rm -rf /tmp/*
 
-RUN mkdir -p ~/.ssh
+RUN mkdir -p ~/.ssh 
 
 RUN cp $TESTBED_DIR/config ~/.ssh/config
 

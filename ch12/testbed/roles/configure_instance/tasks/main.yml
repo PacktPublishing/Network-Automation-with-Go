@@ -13,6 +13,9 @@
 - name: Install Containerlab
   include_tasks: install_clab.yml
 
+- name: Install Ansible Collections
+  include_tasks: install_collections.yml
+
 - name: Reverse Systemd configuration to use cgroup v1
   include_tasks: cgroup.yml
   when:

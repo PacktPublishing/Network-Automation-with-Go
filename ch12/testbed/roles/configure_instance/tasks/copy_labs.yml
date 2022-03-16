@@ -9,5 +9,5 @@
 - name: Clone the book's repo
   ansible.builtin.git:
     repo: https://github.com/PacktPublishing/Network-Automation-with-Go.git
-    dest: "/home/{{ ansible_user }}/Network-Automation-with-Go"
+    dest: "/home/{{ ansible_user }}/network-automation-with-go"
   become: false

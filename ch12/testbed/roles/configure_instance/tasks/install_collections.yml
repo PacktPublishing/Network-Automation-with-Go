@@ -1,0 +1,5 @@
+- name: Install Ansible Collections
+  community.general.ansible_galaxy_install:
+    type: collection
+    name: "{{ item }}"
+  loop: "{{ ansible_collections }}"

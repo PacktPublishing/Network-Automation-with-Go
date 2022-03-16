@@ -305,7 +305,7 @@ func main() {
 	}
 
 	revisionID, err := createRevision(device)
-	r.check(err, "Couldn't create a new candidate configuration revision: "+moduleArgs.Input)
+	r.check(err, "Couldn't create a new candidate configuration revision: ")
 
 	log.Print("Created revisionID: ", revisionID)
 

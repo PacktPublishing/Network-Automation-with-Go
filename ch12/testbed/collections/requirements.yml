@@ -1,10 +1,9 @@
 collections:
   - name: amazon.aws
-    source: https://galaxy.ansible.com
     version: 3.0.0
   - name: community.crypto
-    source: https://galaxy.ansible.com
     version: 2.1.0
   - name: ansible.posix
-    source: https://galaxy.ansible.com
     version: 1.3.0
+  - name: community.general
+    version: 4.6.1
