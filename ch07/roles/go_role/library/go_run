@@ -1,0 +1,38 @@
+#!/bin/bash
+
+file=temp.json
+
+# Ansible will run your module and pass it one argument: 
+# the name of a file containing the module arguments you specified in your playbook
+# https://github.com/pmarkham/writing-ansible-modules-in-bash/blob/master/ansible_bash_modules.md
+source $1
+
+if [ -z "$host" ]; then
+     printf '{"busy": false, "changed": false, "failed": true, "msg": "missing required arguments: host"}'
+     exit 1
+fi
+
+if [ -z "$user" ]; then
+     printf '{"busy": false, "changed": false, "failed": true, "msg": "missing required arguments: user"}'
+     exit 1
+fi
+
+if [ -z "$password" ]; then
+     printf '{"busy": false, "changed": false, "failed": true, "msg": "missing required arguments: password"}'
+     exit 1
+fi
+
+if [ -z "$file" ]; then
+     printf '{"busy": false, "changed": false, "failed": true, "msg": "missing required arguments: file"}'
+     exit 1
+fi
+
+# Create temp arguments file
+printf '{"Host": "%s", "User": "%s", "Password": "%s", "File": "%s"}' \
+ "$host" "$user" "$password" "$file" > $file
+
+# Run Go code with this file as an argument
+go run main.go $file
+
+# Remove temp arguments file
+rm $file

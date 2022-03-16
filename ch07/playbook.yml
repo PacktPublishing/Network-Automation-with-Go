@@ -1,0 +1,26 @@
+- name: Configure Interface
+  hosts: routers
+  gather_facts: false
+  vars_files: 
+   - eos.cfg
+
+  tasks:
+  - name: Use Resource modules to configure Arista EOS
+    block:
+    - name: Configure interfaces
+      arista.eos.eos_l3_interfaces:
+        state: merged
+        config: "{{ interface }}"
+        
+    - name: Configure BGP
+      arista.eos.eos_bgp_global:
+        state: purged
+        config: "{{ bgp }}" 
+    when: ('eos' in group_names)
+
+  - name: Use a Go module to configure NVIDIA Cumulus Linux
+    ansible.builtin.include_role:
+      name: go_role
+    when: ('cvx' in group_names)
+    vars:
+     ansible_file: input.yml
