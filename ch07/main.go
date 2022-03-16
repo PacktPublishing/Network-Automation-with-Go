@@ -280,7 +280,7 @@ func main() {
 
 	var moduleArgs ModuleArgs
 	err = json.Unmarshal(text, &moduleArgs)
-	r.check(err, "Configuration file not valid JSON: "+argsFile)
+	r.check(err, "Ansible inputs are not valid (JSON): "+argsFile)
 
 	src, err := os.Open(moduleArgs.File)
 	r.check(err, "Couldn't read the configuration inputs file: "+moduleArgs.File)

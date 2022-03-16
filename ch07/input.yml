@@ -1,5 +1,5 @@
 asn: 65002
-loopback: 
+loopback:
   ip: "198.51.100.2"
 uplinks:
   - name: "swp1"

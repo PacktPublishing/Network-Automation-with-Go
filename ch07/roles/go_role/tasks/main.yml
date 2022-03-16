@@ -1,7 +1,15 @@
-- name: Run NVIDIA Go module
+- name: Run NVIDIA Go module on Systems without Go installed
+  include_tasks: "{{ ansible_system }}.yml"
+  when:
+    - ansible_architecture == "x86_64"
+    - not go|bool
+
+- name: Run NVIDIA Go module on Systems with Go installed
   go_run:
     host: "{{ ansible_host }}"
     user: "{{ ansible_user }}"
     password: "{{ ansible_password }}"
     file: "{{ ansible_file }}"
   register: output
+  when:
+    - go|bool
