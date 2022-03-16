@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 
 	"gopkg.in/yaml.v2"
 )
@@ -221,7 +222,7 @@ type ModuleArgs struct {
 	Host     string
 	User     string
 	Password string
-	File     string
+	Input     string
 }
 
 // Response are the values returned from the module
@@ -282,18 +283,15 @@ func main() {
 	err = json.Unmarshal(text, &moduleArgs)
 	r.check(err, "Ansible inputs are not valid (JSON): "+argsFile)
 
-	src, err := os.Open(moduleArgs.File)
-	r.check(err, "Couldn't read the configuration inputs file: "+moduleArgs.File)
-	defer src.Close()
-
+	src := strings.NewReader(moduleArgs.Input)
 	d := yaml.NewDecoder(src)
 
 	var input Model
 	err = d.Decode(&input)
-	r.check(err, "Couldn't decode configuration inputs file: "+moduleArgs.File)
+	r.check(err, "Couldn't decode configuration inputs: "+moduleArgs.Input)
 
 	cfg, err := devConfig(input)
-	r.check(err, "Couldn't create device specific configuration: "+moduleArgs.File)
+	r.check(err, "Couldn't create device specific configuration: "+moduleArgs.Input)
 
 	// Store all HTTP device-related parameters
 	device := cvx{
@@ -307,7 +305,7 @@ func main() {
 	}
 
 	revisionID, err := createRevision(device)
-	r.check(err, "Couldn't create a new candidate configuration revision: "+moduleArgs.File)
+	r.check(err, "Couldn't create a new candidate configuration revision: "+moduleArgs.Input)
 
 	log.Print("Created revisionID: ", revisionID)
 

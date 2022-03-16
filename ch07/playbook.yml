@@ -24,4 +24,4 @@
     when: ('cvx' in group_names)
     vars:
      go: false
-     ansible_file: input.yml
+     config_inputs: "{{ lookup('file', 'input.yml') }}"

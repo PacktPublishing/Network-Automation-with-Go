@@ -26,4 +26,6 @@ ansible_password=cumulus
 [srl:vars]
 ansible_user=admin
 ansible_password=admin
-#ansible_connection=ansible.netcommon.network_cli
+ansible_connection=ansible.netcommon.network_cli
+ansible_network_os=community.network.sros
+ansible_become=yes

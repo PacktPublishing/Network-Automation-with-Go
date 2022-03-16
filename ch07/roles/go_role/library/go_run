@@ -22,19 +22,19 @@ if [ -z "$password" ]; then
      exit 1
 fi
 
-if [ -z "$file" ]; then
-     printf '{"busy": false, "changed": false, "failed": true, "msg": "missing required arguments: file"}'
+if [ -z "$input" ]; then
+     printf '{"busy": false, "changed": false, "failed": true, "msg": "missing required arguments: input"}'
      exit 1
 fi
 
-# args=$(printf '{"Host": "%s", "User": "%s", "Password": "%s", "File": "%s"}' \
-#  "$host" "$user" "$password" "$file")
+# args=$(printf '{"Host": "%s", "User": "%s", "Password": "%s", "Input": "%s"}' \
+#  "$host" "$user" "$password" "$input")
 
 # go run main.go "${args}"
 
 # Create temp arguments file
-printf '{"Host": "%s", "User": "%s", "Password": "%s", "File": "%s"}' \
- "$host" "$user" "$password" "$file" > $f
+printf '{"Host": "%s", "User": "%s", "Password": "%s", "Input": "%s"}' \
+ "$host" "$user" "$password" "$input" > $f
 
 # Run Go code with this file as an argument
 go run main.go $f

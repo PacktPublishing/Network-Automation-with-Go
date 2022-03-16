@@ -3,5 +3,5 @@
     host: "{{ ansible_host }}"
     user: "{{ ansible_user }}"
     password: "{{ ansible_password }}"
-    file: "{{ ansible_file }}"
+    input: "{{ config_inputs }}"
   register: output
