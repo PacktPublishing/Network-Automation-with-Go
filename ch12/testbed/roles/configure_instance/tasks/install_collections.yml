@@ -2,4 +2,6 @@
   community.general.ansible_galaxy_install:
     type: collection
     name: "{{ item }}"
+    dest: "/home/{{ ansible_user }}/.ansible/collections/ansible_collections"
   loop: "{{ ansible_collections }}"
+  become: false

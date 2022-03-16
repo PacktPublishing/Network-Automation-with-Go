@@ -256,21 +256,21 @@ This topology file defines a three node topology as the next figure shows. One n
 
 ## Launching a Virtual Network Topology
 
-To launch the virtual topology file, run the command `make` from the home folder to access the `Network-Automation-with-Go/topo/` folder and run `clab deploy` with root privilege, as the next output shows.
+To launch the virtual topology file, run the command `make` from the home folder to access the `network-automation-with-go/topo/` folder and run `clab deploy` with root privilege, as the next output shows.
 
 ```bash
 fedora@testbed ~ ⇨  make
-sudo containerlab deploy -t ~/Network-Automation-with-Go/topo-base/topo.yml --reconfigure
+sudo containerlab deploy -t ~/network-automation-with-go/topo-base/topo.yml --reconfigure
 INFO[0000] Containerlab v0.24.1 started                 
 INFO[0000] Parsing & checking topology file: topo.yml   
-INFO[0000] Removing /home/fedora/Network-Automation-with-Go/clab-netgo directory... 
+INFO[0000] Removing /home/fedora/network-automation-with-go/clab-netgo directory... 
 INFO[0000] Could not read docker config: open /root/.docker/config.json: no such file or directory 
 INFO[0000] Pulling docker.io/networkop/cx:5.0.0 Docker image 
 INFO[0027] Done pulling docker.io/networkop/cx:5.0.0    
 INFO[0027] Could not read docker config: open /root/.docker/config.json: no such file or directory 
 INFO[0027] Pulling ghcr.io/nokia/srlinux:21.6.4 Docker image 
 INFO[0052] Done pulling ghcr.io/nokia/srlinux:21.6.4    
-INFO[0052] Creating lab directory: /home/fedora/Network-Automation-with-Go/clab-netgo 
+INFO[0052] Creating lab directory: /home/fedora/network-automation-with-go/clab-netgo 
 INFO[0053] Creating docker network: Name="clab", IPv4Subnet="172.20.20.0/24", IPv6Subnet="2001:172:20:20::/64", MTU="1500" 
 INFO[0053] Creating container: "ceos"                   
 INFO[0053] Creating container: "cvx"                    

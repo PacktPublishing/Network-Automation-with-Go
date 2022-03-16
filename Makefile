@@ -17,7 +17,7 @@ build-env: check-aws-key check-aws-secret ## Build test enviroment on AWS. Make 
 	--env AWS_ACCESS_KEY_ID \
 	--env AWS_SECRET_ACCESS_KEY \
 	--volume $(pwd)/cert:/mnt/cert:Z \
-	ghcr.io/packtpublishing/builder:0.1.21 \
+	ghcr.io/packtpublishing/builder:0.1.22 \
 	ansible-playbook create-EC2-testbed.yml \
 	--extra-vars "instance_type=t2.large" -v
 
@@ -25,10 +25,10 @@ delete-env: check-aws-key check-aws-secret ## Delete test enviroment on AWS. Mak
 	@docker run -it \
 	--env AWS_ACCESS_KEY_ID \
 	--env AWS_SECRET_ACCESS_KEY \
-	ghcr.io/packtpublishing/builder:0.1.21 \
+	ghcr.io/packtpublishing/builder:0.1.22 \
 	ansible-playbook delete-EC2-testbed.yml -v
 
-tag: check-tag ## Build and tag. Make sure you TAG correctly (Example: export TAG=v0.1.22)
+tag: check-tag ## Build and tag. Make sure you TAG correctly (Example: export TAG=v0.1.23)
 	git add .
 	git commit -m "Bump to version ${TAG}"
 	git tag -a -m "Bump to version ${TAG}" ${TAG}

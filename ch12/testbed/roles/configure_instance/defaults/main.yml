@@ -5,7 +5,7 @@ common_software:
   - tree
   - tar
   - python3-pip
-  - ansible
+  - ansible-core
 
 # ansible_distribution_file_variety
 base_software:
@@ -24,6 +24,7 @@ python_libraries:
 ansible_collections:
 - arista.eos:4.1.1
 - community.network:3.1.0
+- ansible.posix:1.3.0
 
 software_additional: []
 
