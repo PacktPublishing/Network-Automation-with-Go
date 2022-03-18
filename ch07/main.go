@@ -6,12 +6,10 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
 	"net/url"
 	"os"
-	"strings"
 
 	"gopkg.in/yaml.v2"
 )
@@ -187,6 +185,7 @@ func createRevision(c cvx) (string, error) {
 
 	json.NewDecoder(res.Body).Decode(&response)
 
+	// Check this out, is this the intended behavior?
 	for key := range response {
 		return key, nil
 	}
@@ -210,11 +209,8 @@ func applyRevision(c cvx, id string) error {
 	if err != nil {
 		return err
 	}
-	defer res.Body.Close()
 
-	io.Copy(os.Stdout, res.Body)
-
-	return nil
+	return res.Body.Close()
 }
 
 // ModuleArgs are the module inputs
@@ -244,24 +240,23 @@ func FailJSON(responseBody Response) {
 	returnResponse(responseBody)
 }
 
-func returnResponse(responseBody Response) {
+func returnResponse(r Response) {
 	var response []byte
 	var err error
-	response, err = json.Marshal(responseBody)
+	response, err = json.Marshal(r)
 	if err != nil {
 		response, _ = json.Marshal(Response{Msg: "Invalid response object"})
 	}
 	fmt.Println(string(response))
-	if responseBody.Failed {
+	if r.Failed {
 		os.Exit(1)
-	} else {
-		os.Exit(0)
 	}
+	os.Exit(0)
 }
 
 func (r Response) check(err error, msg string) {
 	if err != nil {
-		r.Msg = msg + err.Error()
+		r.Msg = msg + ": " + err.Error()
 		FailJSON(r)
 	}
 }
@@ -283,8 +278,11 @@ func main() {
 	err = json.Unmarshal(text, &moduleArgs)
 	r.check(err, "Ansible inputs are not valid (JSON): "+argsFile)
 
-	src := strings.NewReader(moduleArgs.Input)
-	d := yaml.NewDecoder(src)
+	src, err := base64.StdEncoding.DecodeString(moduleArgs.Input)
+	r.check(err, "Couldn't decode the configuration inputs file: "+moduleArgs.Input)
+    reader := bytes.NewReader(src)
+
+	d := yaml.NewDecoder(reader)
 
 	var input Model
 	err = d.Decode(&input)
@@ -307,8 +305,6 @@ func main() {
 	revisionID, err := createRevision(device)
 	r.check(err, "Couldn't create a new candidate configuration revision: ")
 
-	log.Print("Created revisionID: ", revisionID)
-
 	addr, err := url.Parse(device.url + "/nvue_v1/")
 	r.check(err, "Couldn't parse the device API URL: "+device.url+"/nvue_v1/")
 	params := url.Values{}
@@ -322,10 +318,19 @@ func main() {
 
 	res, err := device.httpC.Do(req)
 	r.check(err, "Couldn't make the request to the device")
-	defer res.Body.Close()
 
 	if err := applyRevision(device, revisionID); err != nil {
 		r.Msg = "Couldn't apply candidate revision"
 		FailJSON(r)
 	}
+	err = res.Body.Close()
+	if err != nil{
+		fmt.Println(err.Error())
+	}
+
+	r.Msg = "Config applied with revisionID: " + revisionID
+	r.Changed = true
+	r.Failed = false
+    returnResponse(r)
+
 }

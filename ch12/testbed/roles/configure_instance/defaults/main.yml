@@ -6,6 +6,7 @@ common_software:
   - tar
   - python3-pip
   - ansible-core
+  - sshpass
 
 # ansible_distribution_file_variety
 base_software:

@@ -3,6 +3,8 @@
   gather_facts: true
   vars_files:
    - eos.cfg
+  vars:
+   data: "{{ lookup('file', 'input.yml') }}"
 
   tasks:
   - name: Use Resource modules to configure Arista EOS
@@ -18,10 +20,10 @@
           config: "{{ bgp }}"
     when: ('eos' in group_names)
 
-  - name: Use a Go module to configure NVIDIA Cumulus Linux
-    ansible.builtin.include_role:
-      name: go_role
+  - name: Run NVIDIA Go module on Systems without Go installed
+    go_cumulus:
+      host: localhost
+      user: "{{ ansible_user }}"
+      password: "{{ ansible_password }}"
+      input: "{{ data | string | b64encode }}"
     when: ('cvx' in group_names)
-    vars:
-     go: false
-     config_inputs: "{{ lookup('file', 'input.yml') }}"
