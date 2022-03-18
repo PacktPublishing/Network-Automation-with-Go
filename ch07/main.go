@@ -218,7 +218,7 @@ type ModuleArgs struct {
 	Host     string
 	User     string
 	Password string
-	Input     string
+	Input    string
 }
 
 // Response are the values returned from the module
@@ -280,7 +280,7 @@ func main() {
 
 	src, err := base64.StdEncoding.DecodeString(moduleArgs.Input)
 	r.check(err, "Couldn't decode the configuration inputs file: "+moduleArgs.Input)
-    reader := bytes.NewReader(src)
+	reader := bytes.NewReader(src)
 
 	d := yaml.NewDecoder(reader)
 
@@ -324,13 +324,13 @@ func main() {
 		FailJSON(r)
 	}
 	err = res.Body.Close()
-	if err != nil{
+	if err != nil {
 		fmt.Println(err.Error())
 	}
 
 	r.Msg = "Config applied with revisionID: " + revisionID
 	r.Changed = true
 	r.Failed = false
-    returnResponse(r)
+	returnResponse(r)
 
 }
