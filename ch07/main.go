@@ -286,7 +286,7 @@ func main() {
 
 	var input Model
 	err = d.Decode(&input)
-	r.check(err, "Couldn't decode configuration inputs: "+moduleArgs.Input)
+	r.check(err, "Couldn't decode configuration inputs: "+string(src))
 
 	cfg, err := devConfig(input)
 	r.check(err, "Couldn't create device specific configuration: "+moduleArgs.Input)

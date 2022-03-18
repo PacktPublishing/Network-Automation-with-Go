@@ -27,3 +27,12 @@
       password: "{{ ansible_password }}"
       input: "{{ data | string | b64encode }}"
     when: ('cvx' in group_names)
+
+  - name: Run NVIDIA Go module on Systems with Go installed
+    go_run:
+      host: "{{ inventory_hostname }}"
+      user: "{{ ansible_user }}"
+      password: "{{ ansible_password }}"
+      input: "{{ data | string | b64encode }}"
+    delegate_to: localhost
+    when: ('cvx' in group_names)
