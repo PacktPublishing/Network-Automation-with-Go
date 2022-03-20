@@ -9,6 +9,7 @@ include ch10/targets.mk
 .EXPORT_ALL_VARIABLES:
 # AWS Options
 AWS_REGION?=us-east-1
+AWS_DISTRO?=fedora
 VM_SIZE?=t2.large
 
 # Helper variables
@@ -30,7 +31,8 @@ env-build: generate-ssh-key check-aws-key check-aws-secret ## Build test envirom
 	ghcr.io/packtpublishing/builder:0.1.25 \
 	ansible-playbook create-EC2-testbed.yml \
 	--extra-vars "instance_type=$(VM_SIZE) \
-	aws_region=$(AWS_REGION)" -v
+	aws_region=$(AWS_REGION) \
+	aws_distro=$(AWS_DISTRO)" -v
 
 env-delete: check-aws-key check-aws-secret ## Delete test enviroment on AWS. Make sure you export your API credentials
 	@docker run -it \
@@ -41,7 +43,7 @@ env-delete: check-aws-key check-aws-secret ## Delete test enviroment on AWS. Mak
 	ansible-playbook delete-EC2-testbed.yml
 
 env-show:  ## Show test environment details
-	cat lab-state/.state || echo 'state file not found'
+	@cat lab-state/.vm || echo 'VM state file not found'
 
 tag: check-tag ## Build and tag. Make sure you TAG correctly (Example: export TAG=v0.1.26)
 	git add .

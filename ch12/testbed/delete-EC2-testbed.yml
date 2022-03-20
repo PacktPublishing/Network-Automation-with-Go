@@ -16,11 +16,11 @@
       include_vars: "./vars/aws_{{ ec2_distro }}.yml"
 
     - name: Include State Variables (AWS_REGION)
-      include_vars: "{{ temp_dir }}/.state"
+      include_vars: "{{ temp_dir }}/.region"
 
     - name: Delete EC2 instance
       amazon.aws.ec2_instance:
-        region: "{{ AWS_REGION }}"
+        region: "{{ aws_region }}"
         state: absent
         filters:
           instance-state-name: running
@@ -45,6 +45,9 @@
 
     - name: Cleanup state files
       ansible.builtin.file:
-        path: "{{ temp_dir }}/.state"
+        path: "{{ temp_dir }}/{{ item }}"
         state: absent
       delegate_to: localhost
+      with_items:
+      - .region
+      - .vm

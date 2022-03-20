@@ -90,8 +90,3 @@
       - hostvars[inventory_hostname]['instance_ssh'] is defined
       - hostvars[inventory_hostname]['instance_scp'] is defined
 
-    - name: Save instance information
-      ansible.builtin.template:
-        src: state.j2
-        dest: "{{ temp_dir }}/.state"
-      delegate_to: localhost

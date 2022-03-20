@@ -19,6 +19,12 @@
 - name: Provision EC2 Instance
   ansible.builtin.include_tasks: create_ec2_instance.yml
 
+- name: Save region information
+  ansible.builtin.template:
+    src: region.j2
+    dest: "{{ temp_dir }}/.region"
+  delegate_to: localhost
+
 - name: Get EC2 info (and retry to give it time to get the public IP address)
   amazon.aws.ec2_instance_info:
     region: "{{ ec2_region }}"
@@ -31,6 +37,12 @@
   until: ec2.instances[0].public_ip_address is defined
   retries: 30
   delay: 10
+
+- name: Save VM URL
+  ansible.builtin.template:
+    src: vm.j2
+    dest: "{{ temp_dir }}/.vm"
+  delegate_to: localhost
 
 - name: Save access details
   ansible.builtin.set_fact:
