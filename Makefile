@@ -11,6 +11,10 @@ include ch10/targets.mk
 AWS_REGION?=us-east-1
 VM_SIZE?=t2.large
 
+# Helper variables
+CWD=$(shell pwd)
+SHELL=/bin/bash
+
 ## Cleanup the lab environment
 cleanup: 10-down lab-down
 
@@ -18,28 +22,33 @@ cleanup: 10-down lab-down
 clone:
 	docker import cEOS64-lab-4.26.4M.tar ceos:4.26.4M
 
-build-env: check-aws-key check-aws-secret ## Build test enviroment on AWS. Make sure you export your API credentials
+env-build: generate-ssh-key check-aws-key check-aws-secret ## Build test enviroment on AWS. Make sure you export your API credentials
 	@docker run -it \
 	--env AWS_ACCESS_KEY_ID \
 	--env AWS_SECRET_ACCESS_KEY \
-	--volume cert:/mnt/cert:Z \
+	--volume ${CWD}:/Network-Automation-with-Go \
 	ghcr.io/packtpublishing/builder:0.1.25 \
 	ansible-playbook create-EC2-testbed.yml \
 	--extra-vars "instance_type=$(VM_SIZE) \
 	aws_region=$(AWS_REGION)" -v
 
-delete-env: check-aws-key check-aws-secret ## Delete test enviroment on AWS. Make sure you export your API credentials
+env-delete: check-aws-key check-aws-secret ## Delete test enviroment on AWS. Make sure you export your API credentials
 	@docker run -it \
 	--env AWS_ACCESS_KEY_ID \
 	--env AWS_SECRET_ACCESS_KEY \
 	ghcr.io/packtpublishing/builder:0.1.25 \
-	ansible-playbook delete-EC2-testbed.yml -v
+	ansible-playbook delete-EC2-testbed.yml \
+	--extra-vars "instance_type=$(VM_SIZE) \
+	aws_region=$(AWS_REGION)" -v
 
 tag: check-tag ## Build and tag. Make sure you TAG correctly (Example: export TAG=v0.1.26)
 	git add .
 	git commit -m "Bump to version ${TAG}"
 	git tag -a -m "Bump to version ${TAG}" ${TAG}
 	git push --follow-tags
+
+generate-ssh-key: ## Generate ssh keys if don't exist
+	ssh-keygen -b 2048 -t rsa -f ./lab-state/id_rsa -q -N "" <<<n 
 
 check-aws-key: ## Check if AWS_ACCESS_KEY_ID variable is set. Brought to you by https://stackoverflow.com/a/4731504
 ifndef AWS_ACCESS_KEY_ID

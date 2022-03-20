@@ -1,8 +1,8 @@
 skip_check: false
 ceos_image: cEOS64-lab-4.26.4M.tar
 path_to_image: ~/Downloads
-ssh_key_filename: my_key
-temp_dir: /mnt/cert
+ssh_key_filename: id_rsa
+temp_dir: /Network-Automation-with-Go/lab-state
 ec2_distro: "{{ aws_distro | default('fedora') }}"
 supported_distros: ['fedora', 'ubuntu']
 ec2_resource_prefix: "{{ aws_prefix | default('testbed') }}"
