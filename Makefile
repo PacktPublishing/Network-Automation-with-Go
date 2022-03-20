@@ -36,10 +36,14 @@ env-delete: check-aws-key check-aws-secret ## Delete test enviroment on AWS. Mak
 	@docker run -it \
 	--env AWS_ACCESS_KEY_ID \
 	--env AWS_SECRET_ACCESS_KEY \
+	--volume ${CWD}:/Network-Automation-with-Go \
 	ghcr.io/packtpublishing/builder:0.1.25 \
 	ansible-playbook delete-EC2-testbed.yml \
 	--extra-vars "instance_type=$(VM_SIZE) \
 	aws_region=$(AWS_REGION)" -v
+
+env-show:  ## Show test environment details
+	cat lab-state/.state || echo 'state file not found'
 
 tag: check-tag ## Build and tag. Make sure you TAG correctly (Example: export TAG=v0.1.26)
 	git add .
@@ -48,7 +52,7 @@ tag: check-tag ## Build and tag. Make sure you TAG correctly (Example: export TA
 	git push --follow-tags
 
 generate-ssh-key: ## Generate ssh keys if don't exist
-	ssh-keygen -b 2048 -t rsa -f ./lab-state/id_rsa -q -N "" <<<n 
+	-ssh-keygen -b 2048 -t rsa -f ./lab-state/id_rsa -q -N "" <<<n 
 
 check-aws-key: ## Check if AWS_ACCESS_KEY_ID variable is set. Brought to you by https://stackoverflow.com/a/4731504
 ifndef AWS_ACCESS_KEY_ID

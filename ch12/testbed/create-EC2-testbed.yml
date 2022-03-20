@@ -55,6 +55,7 @@
         private_ip: "{{ item.private_ip_address }}"
         instance_name: "{{ ec2_resource_prefix }}"
         ansible_ssh_private_key_file: "{{ temp_dir }}/{{ ssh_key_filename }}"
+        instance_region: "{{ ec2_region }}"
         instance_ssh: "{{ ssh_info }}"
         instance_scp: "{{ scp_info }}"
         groups:
@@ -69,6 +70,7 @@
   vars_files:
     - ./vars/go_inputs.yml
     - ./vars/clab_inputs.yml
+    - ./vars/aws_common.yml
 
   pre_tasks:
     - name: Display variables/facts known for instance
@@ -87,3 +89,9 @@
       when: 
       - hostvars[inventory_hostname]['instance_ssh'] is defined
       - hostvars[inventory_hostname]['instance_scp'] is defined
+
+    - name: Save instance information
+      ansible.builtin.template:
+        src: state.j2
+        dest: "{{ temp_dir }}/.state"
+      delegate_to: localhost

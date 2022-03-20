@@ -39,3 +39,9 @@
           path: "{{ temp_dir }}/{{ ssh_key_filename }}.pub"
           state: absent
       when: delete | bool
+
+    - name: Cleanup state files
+      ansible.builtin.file:
+        path: "{{ temp_dir }}/.state"
+        state: absent
+      delegate_to: localhost
