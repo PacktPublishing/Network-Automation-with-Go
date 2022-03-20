@@ -6,6 +6,11 @@ include ch10/targets.mk
 
 .DEFAULT_GOAL := help
 
+.EXPORT_ALL_VARIABLES:
+# AWS Options
+AWS_REGION?=us-east-1
+VM_SIZE?=t2.large
+
 ## Cleanup the lab environment
 cleanup: 10-down lab-down
 
@@ -17,19 +22,20 @@ build-env: check-aws-key check-aws-secret ## Build test enviroment on AWS. Make 
 	@docker run -it \
 	--env AWS_ACCESS_KEY_ID \
 	--env AWS_SECRET_ACCESS_KEY \
-	--volume $(pwd)/cert:/mnt/cert:Z \
-	ghcr.io/packtpublishing/builder:0.1.24 \
+	--volume cert:/mnt/cert:Z \
+	ghcr.io/packtpublishing/builder:0.1.25 \
 	ansible-playbook create-EC2-testbed.yml \
-	--extra-vars "instance_type=t2.large" -v
+	--extra-vars "instance_type=$(VM_SIZE) \
+	aws_region=$(AWS_REGION)" -v
 
 delete-env: check-aws-key check-aws-secret ## Delete test enviroment on AWS. Make sure you export your API credentials
 	@docker run -it \
 	--env AWS_ACCESS_KEY_ID \
 	--env AWS_SECRET_ACCESS_KEY \
-	ghcr.io/packtpublishing/builder:0.1.24 \
+	ghcr.io/packtpublishing/builder:0.1.25 \
 	ansible-playbook delete-EC2-testbed.yml -v
 
-tag: check-tag ## Build and tag. Make sure you TAG correctly (Example: export TAG=v0.1.25)
+tag: check-tag ## Build and tag. Make sure you TAG correctly (Example: export TAG=v0.1.26)
 	git add .
 	git commit -m "Bump to version ${TAG}"
 	git tag -a -m "Bump to version ${TAG}" ${TAG}

@@ -36,7 +36,7 @@
           dest: "{{ temp_dir }}"
           unsafe_writes: true
           mode: '0400'
-      when: key.stat.exists is false
+      when: not key.stat.exists
 
     - name: Store SSH pub Key in a fact
       ansible.builtin.set_fact:
