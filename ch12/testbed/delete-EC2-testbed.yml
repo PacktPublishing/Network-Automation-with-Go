@@ -15,9 +15,12 @@
     - name: Include Linux distribution variables
       include_vars: "./vars/aws_{{ ec2_distro }}.yml"
 
+    - name: Include State Variables (AWS_REGION)
+      include_vars: "{{ temp_dir }}/.state"
+
     - name: Delete EC2 instance
       amazon.aws.ec2_instance:
-        region: "{{ ec2_region }}"
+        region: "{{ AWS_REGION }}"
         state: absent
         filters:
           instance-state-name: running

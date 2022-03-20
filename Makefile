@@ -38,9 +38,7 @@ env-delete: check-aws-key check-aws-secret ## Delete test enviroment on AWS. Mak
 	--env AWS_SECRET_ACCESS_KEY \
 	--volume ${CWD}:/Network-Automation-with-Go \
 	ghcr.io/packtpublishing/builder:0.1.25 \
-	ansible-playbook delete-EC2-testbed.yml \
-	--extra-vars "instance_type=$(VM_SIZE) \
-	aws_region=$(AWS_REGION)" -v
+	ansible-playbook delete-EC2-testbed.yml
 
 env-show:  ## Show test environment details
 	cat lab-state/.state || echo 'state file not found'
