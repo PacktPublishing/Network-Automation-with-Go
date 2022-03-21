@@ -30,7 +30,7 @@ From there, you can download cEOS.
 Upload container image from your computer to EC2 instance.
 
 ```bash
-scp -i /tmp/id_rsa_testbed cEOS64-lab-4.26.4M.tar fedora@ec2-3-86-163-31.compute-1.amazonaws.com:.
+scp -i lab-state/id_rsa cEOS64-lab-4.26.4M.tar fedora@ec2-3-86-163-31.compute-1.amazonaws.com:.
 ```
 
 ```bash

@@ -8,34 +8,16 @@
 
   roles:
       - { role: check_vars, when: not skip_check }
-      - { role: install_dependencies, when: dependencies_check }
 
   tasks:
-    - name: Check if we created the SSH key already
+    - name: Check we SSH key exists
       ansible.builtin.stat:
-        path: "{{ temp_dir }}/{{ ssh_key_filename }}"
+        path: "{{ temp_dir }}/{{ ssh_key_filename }}.pub"
       register: key
 
-    - name: Create SSH KeyPair if not present
-      block:
-      - name: Generate an OpenSSH 4096-bit RSA SSH KeyPair
-        community.crypto.openssh_keypair:
-          path: "{{ ssh_key_filename }}"
-        register: ssh
-
-      - name: Copy public key to mount folder
-        ansible.builtin.copy:
-          src: "{{ ssh_key_filename }}.pub"
-          dest: "{{ temp_dir }}"
-          unsafe_writes: true
-          mode: '0644'
-
-      - name: Copy private key to mount folder
-        ansible.builtin.copy:
-          src: "{{ ssh_key_filename }}"
-          dest: "{{ temp_dir }}"
-          unsafe_writes: true
-          mode: '0400'
+    - name: Fail if SSH key not found
+      fail:
+        msg: "SSH key is not found in {{ temp_dir }}. Make sure that `make generate-ssh-key` completes successfully."
       when: not key.stat.exists
 
     - name: Store SSH pub Key in a fact
@@ -72,6 +54,7 @@
         private_ip: "{{ item.private_ip_address }}"
         instance_name: "{{ ec2_resource_prefix }}"
         ansible_ssh_private_key_file: "{{ temp_dir }}/{{ ssh_key_filename }}"
+        instance_region: "{{ ec2_region }}"
         instance_ssh: "{{ ssh_info }}"
         instance_scp: "{{ scp_info }}"
         groups:
@@ -86,6 +69,7 @@
   vars_files:
     - ./vars/go_inputs.yml
     - ./vars/clab_inputs.yml
+    - ./vars/aws_common.yml
 
   pre_tasks:
     - name: Display variables/facts known for instance
@@ -104,3 +88,4 @@
       when: 
       - hostvars[inventory_hostname]['instance_ssh'] is defined
       - hostvars[inventory_hostname]['instance_scp'] is defined
+

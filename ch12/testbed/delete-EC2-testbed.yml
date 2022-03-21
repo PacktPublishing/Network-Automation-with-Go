@@ -9,15 +9,17 @@
 
   roles:
       - { role: check_vars }
-      - { role: install_dependencies, when: dependencies_check }
 
   tasks:
     - name: Include Linux distribution variables
       include_vars: "./vars/aws_{{ ec2_distro }}.yml"
 
+    - name: Include State Variables (AWS_REGION)
+      include_vars: "{{ temp_dir }}/.region"
+
     - name: Delete EC2 instance
       amazon.aws.ec2_instance:
-        region: "{{ ec2_region }}"
+        region: "{{ aws_region }}"
         state: absent
         filters:
           instance-state-name: running
@@ -39,3 +41,12 @@
           path: "{{ temp_dir }}/{{ ssh_key_filename }}.pub"
           state: absent
       when: delete | bool
+
+    - name: Cleanup state files
+      ansible.builtin.file:
+        path: "{{ temp_dir }}/{{ item }}"
+        state: absent
+      delegate_to: localhost
+      with_items:
+      - .region
+      - .vm
