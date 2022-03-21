@@ -8,7 +8,6 @@
 
   roles:
       - { role: check_vars, when: not skip_check }
-      - { role: install_dependencies, when: dependencies_check }
 
   tasks:
     - name: Check we SSH key exists

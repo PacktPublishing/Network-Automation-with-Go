@@ -7,8 +7,8 @@
 - name: Install Docker
   include_tasks: install_docker.yml
 
-# - name: Copy Labs folder
-#   include_tasks: copy_labs.yml
+- name: Copy Labs folder
+  include_tasks: copy_labs.yml
 
 - name: Install Containerlab
   include_tasks: install_clab.yml
