@@ -1,6 +1,6 @@
 FROM docker.io/redhat/ubi8-minimal:8.5
 
-ARG TESTBED_DIR=/Network-Automation-with-Go/ch12/testbed
+ARG TESTBED_DIR=/network-automation-with-go/ch12/testbed
 ARG COLLECTIONS_DIR=$TESTBED_DIR/collections
 ARG BOOK_REPO=https://github.com/PacktPublishing/Network-Automation-with-Go
 
