@@ -23,6 +23,7 @@
   ansible.builtin.template:
     src: region.j2
     dest: "{{ temp_dir }}/.region"
+    unsafe_writes: true
   delegate_to: localhost
 
 - name: Get EC2 info (and retry to give it time to get the public IP address)
@@ -42,6 +43,7 @@
   ansible.builtin.template:
     src: vm.j2
     dest: "{{ temp_dir }}/.vm"
+    unsafe_writes: true
   delegate_to: localhost
 
 - name: Save access details
