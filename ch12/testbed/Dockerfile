@@ -16,4 +16,4 @@ RUN microdnf --nodocs install git python38 \
     && microdnf clean all \
     && rm -rf /tmp/*
 
-COPY ch12/testbed/config /etc/ssh/ssh_config.d/testbed.conf
+COPY ssh_config /etc/ssh/ssh_config.d/testbed.conf
