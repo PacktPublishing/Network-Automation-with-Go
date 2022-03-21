@@ -27,7 +27,7 @@ env-build: generate-ssh-key check-aws-key check-aws-secret ## Build test envirom
 	@docker run -it \
 	--env AWS_ACCESS_KEY_ID \
 	--env AWS_SECRET_ACCESS_KEY \
-	--volume ${CWD}:/Network-Automation-with-Go \
+	--volume ${CWD}:/network-automation-with-go \
 	ghcr.io/packtpublishing/builder:0.1.25 \
 	ansible-playbook create-EC2-testbed.yml \
 	--extra-vars "instance_type=$(VM_SIZE) \
@@ -38,7 +38,7 @@ env-delete: check-aws-key check-aws-secret ## Delete test enviroment on AWS. Mak
 	@docker run -it \
 	--env AWS_ACCESS_KEY_ID \
 	--env AWS_SECRET_ACCESS_KEY \
-	--volume ${CWD}:/Network-Automation-with-Go \
+	--volume ${CWD}:/network-automation-with-go \
 	ghcr.io/packtpublishing/builder:0.1.25 \
 	ansible-playbook delete-EC2-testbed.yml
 
