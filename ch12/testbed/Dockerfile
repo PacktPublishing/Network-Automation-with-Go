@@ -1,11 +1,10 @@
 FROM docker.io/redhat/ubi8-minimal:8.5
 
-ARG TESTBED_DIR=/network-automation-with-go/ch12/testbed
 ARG COLLECTIONS_DIR=/usr/share/ansible/collections
 
 ENV PATH=/root/.local/bin:$PATH
 
-RUN mkdir -p /usr/share/ansible/collections
+RUN mkdir -p $COLLECTIONS_DIR
 
 RUN microdnf --nodocs install git python38 \
     && alternatives --set python /usr/bin/python3 \
@@ -17,8 +16,4 @@ RUN microdnf --nodocs install git python38 \
     && microdnf clean all \
     && rm -rf /tmp/*
 
-RUN mkdir -p ~/.ssh 
-
-RUN cp $TESTBED_DIR/config ~/.ssh/config
-
-WORKDIR $TESTBED_DIR
+COPY ch12/testbed/config /etc/ssh/ssh_config.d/testbed.conf
