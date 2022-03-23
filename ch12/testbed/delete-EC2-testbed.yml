@@ -12,6 +12,16 @@
       - { role: install_dependencies, when: dependencies_check }
 
   tasks:
+    - name: Check if region state file exists
+      ansible.builtin.stat:
+        path: "{{ temp_dir }}/.region"
+      register: region
+
+    - name: Fail if state file doesn't exist
+      fail:
+        msg: "Region state file '{{ temp_dir }}/.region' is not found. The 'make env-delete' command has already run."
+      when: not region.stat.exists
+
     - name: Include Linux distribution variables
       include_vars: "./vars/aws_{{ ec2_distro }}.yml"
 
