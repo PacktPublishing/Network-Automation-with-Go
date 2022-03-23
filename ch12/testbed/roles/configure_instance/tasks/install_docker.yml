@@ -19,11 +19,11 @@
     - name: Ensure dependencies are installed
       ansible.builtin.package:
         name:
-        - apt-transport-https
-        - ca-certificates
-        - gnupg
-        - curl
-        - lsb-release
+          - apt-transport-https
+          - ca-certificates
+          - gnupg
+          - curl
+          - lsb-release
         state: present
 
     - name: Add Docker apt key
@@ -43,9 +43,9 @@
 - name: Install Docker
   ansible.builtin.package:
     name:
-    - docker-ce
-    - docker-ce-cli
-    - containerd.io
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
     state: present
 
 - name: Ensure group "docker" exists
@@ -57,7 +57,7 @@
   ansible.builtin.user:
     name: "{{ ansible_user }}"
     groups: docker
-    append: yes
+    append: true
 
 - name: Ensure Docker is started and enabled at boot
   ansible.builtin.service:

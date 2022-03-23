@@ -3,7 +3,7 @@ ansible-navigator:
   ansible:
     config: ansible.cfg
     inventories:
-    - ./hosts
+      - ./hosts
 
   editor:
     command: code -g {filename}:{line_number}
@@ -23,6 +23,6 @@ ansible-navigator:
         - AWS_SECRET_ACCESS_KEY
 
   playbook-artifact:
-    enable: False
+    enable: false
 
   mode: stdout

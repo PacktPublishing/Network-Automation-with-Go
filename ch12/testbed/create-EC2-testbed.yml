@@ -7,7 +7,7 @@
     - ./vars/aws_common.yml
 
   roles:
-      - { role: check_vars, when: not skip_check }
+    - {role: check_vars, when: not skip_check}
 
   tasks:
     - name: Check we SSH key exists
@@ -77,15 +77,14 @@
         msg: "Running {{ ansible_distribution }} {{ ansible_distribution_version }} ({{ ansible_os_family }}), IP address: {{ ansible_host }}"
 
   roles:
-      - { role: configure_instance, become: true }
+    - {role: configure_instance, become: true}
 
   tasks:
     - name: Print out instance information for the user
       ansible.builtin.debug:
-        msg: 
-        - "SSH: {{ hostvars[inventory_hostname]['instance_ssh'] }}"
-        - "To upload cEOS image: {{ hostvars[inventory_hostname]['instance_scp'] }}"
-      when: 
-      - hostvars[inventory_hostname]['instance_ssh'] is defined
-      - hostvars[inventory_hostname]['instance_scp'] is defined
-
+        msg:
+          - "SSH: {{ hostvars[inventory_hostname]['instance_ssh'] }}"
+          - "To upload cEOS image: {{ hostvars[inventory_hostname]['instance_scp'] }}"
+      when:
+        - hostvars[inventory_hostname]['instance_ssh'] is defined
+        - hostvars[inventory_hostname]['instance_scp'] is defined

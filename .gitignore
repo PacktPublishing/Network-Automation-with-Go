@@ -1,11 +1,10 @@
-file.txt
+file*
 *.cfg
 !ansible.cfg
 settings.json
 /ch02/hello/go.mod
 /ch02/hello/hello
 /ch02/pong/pong
-my_key*
 .topo.yaml
 clab-netgo
 !/ch07/*.cfg
