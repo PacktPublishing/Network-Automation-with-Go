@@ -4,23 +4,23 @@
     dest: "/tmp/go{{ go_version }}.tar.gz"
     mode: '0644'
 
-- name: Remove a previous installation at /usr/local/go, if any, prior to extracting
+- name: Remove a previous installation at {{ go_root }}, if any, prior to extracting
   ansible.builtin.file:
     state: absent
-    path: /usr/local/go
+    path: "{{ go_root }}"
 
 - name: Unarchive Go
   ansible.builtin.unarchive:
     src: "/tmp/go{{ go_version }}.tar.gz"
-    dest: "/usr/local"
-    remote_src: yes
+    dest: "{{ go_dest }}"
+    remote_src: true
     mode: '0755'
 
 - name: Recursively change ownership of Go's local directory
   ansible.builtin.file:
     path: "/home/{{ ansible_user }}/go"
     state: directory
-    recurse: yes
+    recurse: true
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
 
@@ -28,4 +28,4 @@
 - name: Update PATH environment variable
   ansible.builtin.lineinfile:
     path: "/home/{{ ansible_user }}/.bashrc"
-    line: export PATH=$PATH:/usr/local/go/bin:$HOME/go/bin
+    line: "export PATH=$PATH:{{ go_root }}/bin:$HOME/go/bin"

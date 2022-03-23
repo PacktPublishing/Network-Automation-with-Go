@@ -13,4 +13,4 @@
     check: "{{ lookup('env', 'AWS_SECRET_ACCESS_KEY') | default('secret_key', True) }}"
 
 - name: Check that Linux distribution selected is supported
-  assert: { that: "ec2_distro in supported_distros" }
+  ansible.builtin.assert: {that: "ec2_distro in supported_distros"}

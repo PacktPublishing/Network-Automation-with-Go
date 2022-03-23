@@ -4,8 +4,8 @@
   when: hostvars[inventory_hostname]['instance_name'] is defined
 
 - name: Run the equivalent of "apt-get update" as a separate step for Ubuntu
-  apt:
-    update_cache: yes
+  ansible.builtin.apt:
+    update_cache: true
   when: ansible_distribution == 'Ubuntu'
 
 - name: Install base packages

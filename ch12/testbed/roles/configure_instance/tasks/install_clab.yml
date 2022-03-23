@@ -8,14 +8,14 @@
   ansible.builtin.unarchive:
     src: "/tmp/clab.tar.gz"
     dest: "/tmp"
-    remote_src: yes
+    remote_src: true
     mode: '0755'
 
 - name: Copy Containerlab binary
   ansible.builtin.copy:
     src: "/tmp/containerlab"
     dest: "{{ clab_dir }}/containerlab"
-    remote_src: yes
+    remote_src: true
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
     mode: a+x

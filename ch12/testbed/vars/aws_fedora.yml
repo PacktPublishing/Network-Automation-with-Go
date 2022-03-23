@@ -1,4 +1,4 @@
-# Fedora 35 x86_64 Cloud Base AMIs 
+# Fedora 35 x86_64 Cloud Base AMIs
 # From: https://alt.fedoraproject.org/cloud/
 fedora_ami:
   us_east_1: ami-08b4ee602f76bff79 # US East (N. Virginia)

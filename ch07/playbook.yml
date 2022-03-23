@@ -7,32 +7,31 @@
    data: "{{ lookup('file', 'input.yml') }}"
 
   tasks:
-  - name: Use Resource modules to configure Arista EOS
-    block:
+   - name: Use Resource modules to configure Arista EOS
+     block:
       - name: Configure interfaces
         arista.eos.eos_l3_interfaces:
-          state: merged
-          config: "{{ interface }}"
-
+         state: merged
+         config: "{{ interface }}"
       - name: Configure BGP
         arista.eos.eos_bgp_global:
-          state: purged
-          config: "{{ bgp }}"
-    when: ('eos' in group_names)
+         state: purged
+         config: "{{ bgp }}"
+     when: ('eos' in group_names)
 
-  - name: Run NVIDIA Go module on Systems without Go installed
-    go_cumulus:
+   - name: Run NVIDIA Go module on Systems without Go installed
+     go_cumulus:
       host: localhost
       user: "{{ ansible_user }}"
       password: "{{ ansible_password }}"
       input: "{{ data | string | b64encode }}"
-    when: ('cvx' in group_names)
+     when: ('cvx' in group_names)
 
-  - name: Run NVIDIA Go module on Systems with Go installed
-    go_run:
+   - name: Run NVIDIA Go module on Systems with Go installed
+     go_run:
       host: "{{ inventory_hostname }}"
       user: "{{ ansible_user }}"
       password: "{{ ansible_password }}"
       input: "{{ data | string | b64encode }}"
-    delegate_to: localhost
-    when: ('cvx' in group_names)
+     delegate_to: localhost
+     when: ('cvx' in group_names)
