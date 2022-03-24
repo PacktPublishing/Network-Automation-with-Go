@@ -1,28 +1,6 @@
 package cvx
 
-import (
-	"net"
-)
-
-_input: _Input
-
-_Input: {
-	ASN:        <=65535 & >=64512
-	RouterID:   net.IPv4 & string
-	LoopbackIP: "\(RouterID)/32"
-	Uplinks: [...{
-		name:      string
-		ip:        net.IPv4 & string
-		prefixLen: <=31 & >=1
-	}]
-	Peers: [...{
-		ip: net.IPv4 & string
-	}]
-	VRFs: [{name: "default"}]
-	PeerGroup: ""
-}
-
-_nvue: {
+set: {
 	interface: _interfaces
 	router: bgp: {
 		_global_bgp
@@ -62,7 +40,6 @@ _vrf: {
 
 _vrf_bgp: {
 	"address-family": "ipv4-unicast": {
-		enable: "on"
 		redistribute: connected: enable: "on"
 	}
 	enable: "on"
@@ -71,8 +48,8 @@ _vrf_bgp: {
 _neighbor: {
 	for intf in _input.Peers {
 		"\(intf.ip)": {
-			type:        string | *"numbered"
-			"remote-as": "\(intf.asn)"
+			type:        "numbered"
+			"remote-as": intf.asn
 		}
 	}
 }

@@ -1,6 +1,6 @@
 package cvx
 
-_input: {
+_input: _Input & {
 	ASN:      65002
 	RouterID: "198.51.100.2"
 	Uplinks: [{
@@ -14,4 +14,3 @@ _input: {
 	}]
 }
 
-set: _nvue
