@@ -1,5 +1,5 @@
 generate-ssh-key: ## Generate ssh keys if don't exist
-	@(if [ ! -f lab-state/id_rsa ]; then ssh-keygen -b 2048 -t rsa -f ./lab-state/id_rsa -q -N "" <<<n; fi)
+	@(if [ ! -f lab-state/id_rsa ]; then ssh-keygen -b 2048 -t rsa -f ./lab-state/id_rsa -q -N ""; fi)
 
 check-aws-key: ## Check if AWS_ACCESS_KEY_ID variable is set. Brought to you by https://stackoverflow.com/a/4731504
 ifndef AWS_ACCESS_KEY_ID
