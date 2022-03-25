@@ -1,0 +1,23 @@
+{
+  "name": "Loopback0",
+  "config": {
+    "name": "Loopback0",
+    "enabled": true
+  },
+  "subinterfaces": {
+    "subinterface": {
+      "index": 0,
+      "openconfig-if-ip:ipv4": {
+        "addresses": {
+          "address": {
+            "ip": "198.51.100.0",
+            "config": {
+              "ip": "198.51.100.0",
+              "prefix-length": 32
+            }
+          }
+        }
+      }
+    }
+  }
+}

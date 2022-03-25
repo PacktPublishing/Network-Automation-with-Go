@@ -1,0 +1,7 @@
+prefix: ''
+#path: "/interfaces/interface[name=\"Loopback0\"]"
+# https://yangcatalog.org/yang-search/yang_tree/openconfig-system@2021-07-20
+path: "/system/config/hostname"
+encoding: "json_ietf"
+#value: 'json_ietf_val: {"name":"Loopback0","config":{"name":"Loopback0","enabled":true},"subinterfaces":{"subinterface":{"index":0,"openconfig-if-ip:ipv4":{"addresses":{"address":{"ip":"198.51.100.0","config":{"ip":"198.51.100.0","prefix-length":32}}}}}}}'
+value: "net-go"
