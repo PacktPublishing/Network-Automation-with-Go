@@ -1,0 +1,23 @@
+[
+    {
+      "index": 0,
+      "openconfig-if-ip:ipv4": {
+        "addresses": {
+          "address": [
+            {
+              "ip": "192.168.255.1",
+              "config": {
+                "ip": "192.168.255.1",
+                "prefix-length": 32
+              },
+              "state": {
+                "ip": "192.168.255.1",
+                "prefix-length": 32,
+                "origin": "STATIC"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]

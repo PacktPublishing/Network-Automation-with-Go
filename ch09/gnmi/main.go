@@ -78,10 +78,10 @@ func main() {
 		////////////////////////////////
 		// Send a gNMI capabilities request to the created target
 		////////////////////////////////
-		capResp, err := tg.Capabilities(ctx)
-		check(err)
+		// capResp, err := tg.Capabilities(ctx)
+		// check(err)
 
-		fmt.Println(prototext.Format(capResp))
+		// fmt.Println(prototext.Format(capResp))
 
 		////////////////////////////////
 		// Read input data for gNMI request
@@ -100,7 +100,7 @@ func main() {
 		// Create a GetRequest
 		////////////////////////////////
 		getReq, err := api.NewGetRequest(
-			api.Path(data.Prefix + data.Path),
+			api.Path(data.Prefix+data.Path),
 			api.Encoding(data.Encoding))
 		check(err)
 
@@ -124,7 +124,7 @@ func main() {
 				api.Path(data.Prefix+data.Path),
 				api.Value(data.Value, data.Encoding)),
 		)
-		// strings.ReplaceAll(data.Value, "\"", "\\\"")
+
 		check(err)
 		fmt.Println(prototext.Format(setReq))
 
@@ -135,6 +135,5 @@ func main() {
 		check(err)
 
 		fmt.Println(prototext.Format(setResp))
-
 	}
 }
