@@ -25,6 +25,13 @@ type Router struct {
 	SkipVerify bool   `yaml:"skipverify"`
 }
 
+type Data struct {
+	Prefix   string `yaml:"prefix,omitempty"`
+	Path     string `yaml:"path"`
+	Encoding string `yaml:"encoding,omitempty"`
+	Value    string `yaml:"value,omitempty"`
+}
+
 type Inventory struct {
 	Routers []Router `yaml:"router"`
 }
@@ -71,9 +78,62 @@ func main() {
 		////////////////////////////////
 		// Send a gNMI capabilities request to the created target
 		////////////////////////////////
-		capResp, err := tg.Capabilities(ctx)
+		// capResp, err := tg.Capabilities(ctx)
+		// check(err)
+
+		// fmt.Println(prototext.Format(capResp))
+
+		////////////////////////////////
+		// Read input data for gNMI request
+		////////////////////////////////
+		gdata, err := os.Open("api.yml")
+		check(err)
+		defer gdata.Close()
+
+		d = yaml.NewDecoder(gdata)
+
+		var data Data
+		err = d.Decode(&data)
 		check(err)
 
-		fmt.Println(prototext.Format(capResp))
+		////////////////////////////////
+		// Create a GetRequest
+		////////////////////////////////
+		getReq, err := api.NewGetRequest(
+			api.Path(data.Prefix+data.Path),
+			api.Encoding(data.Encoding))
+		check(err)
+
+		fmt.Println(prototext.Format(getReq))
+
+		////////////////////////////////
+		// Send the created gNMI GetRequest to the created target
+		////////////////////////////////
+		getResp, err := tg.Get(ctx, getReq)
+		check(err)
+
+		fmt.Println(prototext.Format(getResp))
+
+		fmt.Println(data.Value)
+
+		////////////////////////////////
+		// Create a gNMI SetRequest
+		////////////////////////////////
+		setReq, err := api.NewSetRequest(
+			api.Update(
+				api.Path(data.Prefix+data.Path),
+				api.Value(data.Value, data.Encoding)),
+		)
+
+		check(err)
+		fmt.Println(prototext.Format(setReq))
+
+		////////////////////////////////
+		// Send the created gNMI SetRequest to the created target
+		////////////////////////////////
+		setResp, err := tg.Set(ctx, setReq)
+		check(err)
+
+		fmt.Println(prototext.Format(setResp))
 	}
 }
