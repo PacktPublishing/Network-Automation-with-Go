@@ -39,20 +39,25 @@ type Command struct {
 	Value  interface{} `json:"value"`
 }
 
-func buildL3Interface(name, prefix string) (Command, error) {
+func buildL3Interface(name, prefix string) (*Command, error) {
 	intf := srl.SrlNokiaInterfaces_Interface{}
-	subintf, _ := intf.NewSubinterface(0)
+	subintf, err := intf.NewSubinterface(0)
+	if err != nil {
+		return nil, err
+	}
 
 	subintf.Ipv4 = &srl.SrlNokiaInterfaces_Interface_Subinterface_Ipv4{}
 	subintf.Ipv4.NewAddress(prefix)
 
 	if err := intf.Validate(); err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
-	ietf, _ := ygot.ConstructIETFJSON(&intf, nil)
-
-	return Command{
+	ietf, err := ygot.ConstructIETFJSON(&intf, nil)
+	if err != nil {
+		return nil, err
+	}
+	return &Command{
 		Action: "replace",
 		Path:   fmt.Sprintf("/interface[name=%s]", name),
 		Value:  ietf,
@@ -78,13 +83,13 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	cmds = append(cmds, eth1)
+	cmds = append(cmds, *eth1)
 
 	lo0, err := buildL3Interface("system0", "198.51.100.0/32")
 	if err != nil {
 		log.Fatal(err)
 	}
-	cmds = append(cmds, lo0)
+	cmds = append(cmds, *lo0)
 
 	value, _ := json.Marshal(buildSetRPC(cmds))
 
