@@ -1,0 +1,203 @@
+module srl_nokia-maintenance-mode {
+  yang-version 1.1;
+
+    // namespace
+    namespace "urn:srl_nokia/maintenance-mode";
+
+    prefix "srl-m-mode";
+
+    import srl_nokia-system { prefix srl-system; }
+    import srl_nokia-network-instance { prefix srl-netinst; }
+    import srl_nokia-bgp { prefix srl-bgp; }
+    // import some basic types
+    import srl_nokia-common { prefix srl_nokia-comm; }
+    import srl_nokia-features { prefix srl-feat; }
+    import srl_nokia-routing-policy { prefix srl-rpol; }
+                                 
+    description
+            "This module defines configuration and operational state data
+    for Maintenance Mode.";
+
+  revision 2021-06-30 {
+    description
+      "SRLinux 21.6.1";
+  }
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+    grouping group-members-top {
+      container members {
+      description
+        "Container for specifying the members of the maintenance group - i.e. the components that will eventually be taken out of service for repair or replacement.";
+      container bgp {
+        description
+          "Container for specifying the BGP members of the maintenance group";
+        list network-instance {
+          description
+              "List of network instances with one or more peers to be placed in maintenance mode";
+
+          key name;
+          leaf name {
+            type leafref {
+              path "/srl-netinst:network-instance/srl-netinst:name";
+            }
+            must '(/srl-netinst:network-instance[srl-netinst:name = current()]/srl-netinst:type = "srl-netinst:ip-vrf" or 
+                     /srl-netinst:network-instance[srl-netinst:name = current()]/srl-netinst:type = "srl-netinst:default" )' {
+                error-message "Network-instances of type ip-vrf or default are allowed.";
+            }
+            
+            description
+              "A unique name identifying the network instance";
+          }
+          leaf-list peer-group {
+            description
+              "List of BGP peer groups that belong to the network instance and that should be part of the maintenance group
+
+              If this list is empty and so is the neighbor list, then the system interprets the meaning as ALL static and dynamic sessions belonging to the specified network-instance.";
+            type leafref {
+              path "/srl-netinst:network-instance/srl-netinst:protocols/srl-bgp:bgp/srl-bgp:group/srl-bgp:group-name";
+            }
+          }
+          leaf-list neighbor {
+            description
+              "List of BGP neighbors that belong to the network instance and that should be part of the maintenance group
+
+              It is not necessary to list neighbors that are members of peer-groups that are already listed.
+
+              If this list is empty and so is the group list, then the system interprets the meaning as ALL static and dynamic sessions belonging to the specified network-instance.";
+            type leafref {
+              path "/srl-netinst:network-instance/srl-netinst:protocols/srl-bgp:bgp/srl-bgp:neighbor/srl-bgp:peer-address";
+            }
+          }
+        }
+      }
+      container isis {
+        if-feature srl-feat:isis-maint-mode;
+        description
+          "Container for specifying the ISIS members of the maintenance group";
+        leaf-list network-instances {
+          description
+            "List of network instances that should be part of the maintenance group.";
+          type leafref {
+            path "/srl-netinst:network-instance/srl-netinst:name";
+          }
+        }
+      }
+    }
+  }
+    
+    grouping group-top {
+        description
+            "Top-level grouping for Maintenance Mode Group";
+        list group {
+            description
+                "List of user-configured and built-in maintenance groups";
+            
+            key "name";
+            leaf name {
+                type string;
+                description
+                    "Name of the maintenance group. 
+                     The name \"system\" is reserved";
+            }
+            container maintenance-mode {
+                description
+                    "Container for activating maintenance mode";
+                leaf admin-state {
+                    type srl_nokia-comm:admin-state;
+                    default "disable";
+                    description
+                        "Enable or disable maintenance mode group";
+                }
+            }
+            
+            leaf maintenance-profile {
+                description
+                    "Leaf reference to /system/maintenance/profile/name";
+                type leafref {
+                    path "/srl-system:system/srl-m-mode:maintenance/srl-m-mode:profile/name";
+                }
+            }
+            uses group-members-top;            
+        } // list group
+        
+    }
+
+    grouping profile-top {
+        description
+            "List of user-configured maintenance profiles";
+        list profile  {
+            key "name";
+            leaf name {
+                type string;
+                description
+                    "Name of the maintenance profile"; 
+            }
+            container bgp {
+                description
+                    "Container for BGP policies used to 
+                     achieve traffic draining";
+                leaf import-policy {
+                    type leafref {
+                        path "/srl-rpol:routing-policy/srl-rpol:policy/srl-rpol:name";
+                    }
+                }
+                leaf export-policy {
+                    type leafref {
+                        path "/srl-rpol:routing-policy/srl-rpol:policy/srl-rpol:name";
+                    }
+                }
+            }
+            container isis {
+                if-feature srl-feat:isis-maint-mode;
+                description
+                  "Container for ISIS configurations.";
+                container overload { 
+                    description
+                      "Container for ISIS overload configurations.";
+                    leaf set-bit {
+                        description
+                          "When set to true, the Overload bit is set";
+                        type boolean;
+                        default false;
+                    }
+                    leaf max-metric {
+                        description
+                          "When set to true transit links are advertised with a wide metric of 0xffffffe and a narrow metric of 0x3f";
+                        type boolean;
+                        default false;
+                        must "not(../set-bit = false() and . = true())" {
+                            error-message "max-metric can be set only if set-bit to true.";
+                        }
+                    }
+                }
+            }
+        } // list profile
+    } // profile-top
+
+    grouping maintenance-top {
+        description
+            "Top-level grouping for Maintenance mode";
+        container maintenance {
+            presence "Configure Maintenance Mode";
+            description
+                "Top-level container for Maintenance Mode configuration";
+            uses group-top;
+            uses profile-top;
+        }
+    }
+
+    augment "/srl-system:system" {
+        uses maintenance-top;
+    }
+}

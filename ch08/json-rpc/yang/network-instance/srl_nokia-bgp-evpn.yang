@@ -1,0 +1,178 @@
+module srl_nokia-bgp-evpn {
+
+  yang-version 1.1;
+
+  namespace "urn:srl_nokia/network-instance/protocols/bgp-evpn";
+
+  prefix "srl_nokia-bgp-evpn";
+
+    import srl_nokia-common { prefix srl_nokia-comm; }
+    import srl_nokia-network-instance { prefix srl_nokia-netinst; }
+    import srl_nokia-extensions { prefix srl_nokia-ext; }
+    import srl_nokia-bgp-vpn { prefix srl_bgp-vpn; }
+    import srl_nokia-policy-types { prefix srl_nokia-pol-types; }
+    import srl_nokia-features { prefix srl-feat; }
+
+    description
+      "This yang file models configuration and state of the bgp-evpn protocol";
+
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+
+  typedef evi {
+    description 
+      "The supported range of EVPN Instances.";
+    type uint32 {
+      range "1..65535";
+    }
+  }
+
+  grouping bgp-evpn-routes {
+    description "Grouping containing bgp-evpn route configuration and state.";
+    container routes {
+      container bridge-table {
+        presence "Configure evpn routes advertised for the bridge-table";
+        must '(/srl_nokia-netinst:network-instance[srl_nokia-netinst:name = current()/../../../../../srl_nokia-netinst:name]/srl_nokia-netinst:type = "srl_nokia-netinst:mac-vrf")' {
+          error-message "The bridge-table configuration is possible only on network-instances of type mac-vrf.";
+        }
+        container mac-ip {
+          leaf advertise {
+            type boolean;
+            default true;
+            description
+              "If set to true then local mac's and local mac-ip pairs will be advertised in this evpn instance";
+          }
+        }
+        container inclusive-mcast {
+          leaf advertise {
+            type boolean;
+            default true;
+            description
+              "If set to true an inclusive multicast route will be advertised in this evpn instance.";
+          }
+          leaf originating-ip {
+            type srl_nokia-comm:ip-address;
+            description
+              "The originating ip-address that the inclusive multicast route will be advertised with in this evpn instance";
+          }       
+        }
+        leaf next-hop {
+          type srl_nokia-comm:next-hop-type;
+          default "use-system-ipv4-address";
+          description
+            "The ip-address that will be used as the bgp next-hop for all routes advertised in this evpn instance.";
+        } 
+      }
+      container route-table {
+        presence "Configure evpn routes advertised for the route-table";
+        must '(/srl_nokia-netinst:network-instance[srl_nokia-netinst:name = current()/../../../../../srl_nokia-netinst:name]/srl_nokia-netinst:type = "srl_nokia-netinst:ip-vrf")' {
+          error-message "The route-table configuration is possible only on network-instances of type ip-vrf.";
+        }
+        container mac-ip {
+          leaf advertise-gateway-mac {
+            type boolean;
+            default false;
+            description
+              "If set to true in an ip-vrf where bgp-evpn is enabled, a MAC/IP route containing the gateway-MAC 
+               is advertised.
+             
+               This gateway-MAC matches the MAC advertised along with the EVPN IFL routes type 5 for the ip-vrf
+               network-instance. This advertisement is needed so that the EVPN IFL (Interface-Less) model in the 
+               ip-vrf can interoperate with a remote system working in EVPN IFF (Interface-ful) Unnumbered mode.";
+          }
+        }
+      }
+    }
+  }
+
+  grouping bgp-evpn-top {
+    description
+      "Top-level grouping containing the bgp-evpn configuration and state.";
+    list bgp-instance {
+      key "id";
+      max-elements 1;
+      description "bgp evpn instances configured in net-instance";
+      leaf id {
+        type leafref {
+          path "/srl_nokia-netinst:network-instance/srl_nokia-netinst:protocols/srl_bgp-vpn:bgp-vpn/srl_bgp-vpn:bgp-instance/srl_bgp-vpn:id";
+        }
+      }
+      leaf admin-state {
+        type srl_nokia-comm:admin-state;
+        default "enable";
+        description
+          "Configurable state of the bgp evpn instance.";
+      }
+      leaf encapsulation-type {
+        type srl_nokia-comm:encap-type;
+        default "vxlan";
+        description
+          "encap type of the bgp evpn instance.";
+      }
+      leaf vxlan-interface {
+        if-feature "srl-feat:vxlan"; 
+        type leafref {
+          path "../../../../srl_nokia-netinst:vxlan-interface/srl_nokia-netinst:name"; 
+        }
+        description
+          "Identifier of vxlan-interface used in this bgp-instance.";
+      }
+      leaf evi {
+        type evi;
+        description 
+          "EVPN Instance identifier associated to the bgp-evpn instance. Used for auto-derivation of: 
+           - the bgp-instance route distinguisher in the format <ip-address>:evi (where 'ip-address' is the ipv4 address 
+             associated to the subinterface lo0.1.
+           - the bgp-instance route target in the format <asn>:<evi>, where 'asn' is the autonomous-system configured in 
+             the network-instance default (under /protocols/bgp/autonomous-system).
+           In addition, the evi value is used for the EVPN Multi-Homing Designated Forwarder (DF) Election.";
+        mandatory "true";
+      }
+      leaf ecmp {
+        type uint8 {
+          range "1..8";
+        }
+        default 1;
+        description 
+          "The supported range of ECMP values for layer-2 aliasing (in mac-vrf instances) or layer-3 ecmp (in routed 
+           instances).";
+      }
+      leaf oper-state {
+        config false;
+        srl_nokia-ext:show-importance "high";
+        type srl_nokia-comm:oper-state;
+        description
+          "This leaf contains the operational state of bgp-instance.";
+      }
+      leaf oper-down-reason {
+        config false;
+        srl_nokia-ext:show-importance "high";
+        type enumeration {
+          enum "admin-disabled";
+          enum "no-nexthop-address";
+          enum "no-evi";
+          enum "network-instance-oper-down";
+          enum "no-vxlan-interface";
+          enum "ethernet-segment-multiple-subinterfaces";
+          enum "vxlan_interface_no_source_ip_address";
+          enum "bgp-vpn-instance-oper-down";
+        }
+        description
+          "The reason for the bgp-instance being down";
+      }
+      leaf default-admin-tag {
+        type srl_nokia-pol-types:bgp-admin-tag;
+        description
+          "The admin-tag that can be used by an export policy to match all the bgp-evpn routes for the bgp-instance.";
+        default 0;
+      }
+      uses bgp-evpn-routes;
+    } 
+  }
+
+  augment "/srl_nokia-netinst:network-instance/srl_nokia-netinst:protocols/srl_nokia-netinst:bgp-evpn" {
+    uses bgp-evpn-top;
+  }
+}

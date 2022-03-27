@@ -1,0 +1,179 @@
+module srl_nokia-platform-disk {
+  yang-version 1.1;
+
+  // namespace
+
+  namespace "urn:srl_nokia/platform-disk";
+  prefix srl_nokia-platform-disk;
+
+  import srl_nokia-common {
+    prefix srl-comm;
+  }
+  import srl_nokia-platform {
+    prefix srl-platform;
+  }
+  import srl_nokia-platform-control {
+    prefix srl-platform-control;
+  }
+
+  description
+    "This module defines configuration and operational state data related to disks.";
+
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+  grouping partition-state-top {
+    description
+      "Grouping for partition state";
+    list partition {
+      description
+        "List of partitions available on this disk";
+      key name;
+      leaf name {
+        type string;
+        description
+          "Name of the partition";        
+      }
+      leaf uuid {
+        type string;
+        description
+          "UUID of the partition";
+      }
+      leaf mount-point {
+        type string;
+        description
+          "Path to where this partition is mounted";
+      }
+      leaf mount-status {
+        description
+          "Current mount status of this partition";
+        type enumeration {
+          enum ro {
+            description
+              "Partition is currently mounted read-only";
+          }
+          enum rw {
+            description
+              "Partition is currently mounted read-write";
+          }
+        }
+      }
+      leaf size {
+        type uint64;
+        description
+          "Size of the partition";
+        units bytes;
+      }
+      leaf used {
+        type uint64;
+        description
+          "Space used on the partition";
+        units bytes;
+      }
+      leaf free {
+        type uint64;
+        description
+          "Space free on the partition";
+        units bytes;
+      }
+      leaf percent-used {
+        type srl-comm:percentage;
+        description
+          "Percentage of the partition in use";
+      }
+    }
+  }
+
+  grouping disk-statistics-top {
+    description
+      "Grouping for disk statistics";
+    container statistics {
+      description
+        "Top-level container for disk statistics";
+      leaf utilization {
+        type srl-comm:percentage;
+        description
+          "The current tps utilization of the disk, expressed as a percentage";
+      }
+      leaf transfers-per-second {
+        type decimal64 {
+          fraction-digits 2;
+        }
+        description
+          "Indicates the number of transfers per second that were issued to the device
+          A transfer is an I/O request to the device. Multiple logical requests can be combined into a single I/O request to the device. A transfer is of indeterminate size.";
+      }
+      leaf read-per-second {
+        type decimal64 {
+          fraction-digits 2;
+        }
+        description
+          "Indicates the amount of data read from the device per second";
+        units "bytes";
+      }
+      leaf written-per-second {
+        type decimal64 {
+          fraction-digits 2;
+        }
+        description
+          "Indicates the amount of data written to the device per second";
+        units "bytes";
+      }
+    }      
+  }
+
+  grouping disk-state-top {
+    description
+      "Grouping for disk state";
+      leaf name {
+        type string;
+        description
+          "Name of the disk, as defined by its physical location in the system";
+      }
+      leaf model-number {
+        type string;
+        description
+          "Model name of the disk";
+      }
+      leaf serial-number {
+        type string;
+        description
+          "Serial number of the disk";
+      }
+      leaf size {
+        type uint64;
+        description
+          "Total size of the disk";
+      }
+      leaf type {
+        description
+          "Type of disk";
+        type enumeration {
+          enum compactflash;
+          enum ssd;
+          enum hdd;
+          enum usb;
+        }
+      }
+      uses partition-state-top;
+      uses disk-statistics-top;
+  }
+
+  grouping disk-top {
+    description
+      "Grouping for disk configuration and state";
+    list disk {
+      description
+        "List of disks present in the system";
+      key name;
+      config false;
+      uses disk-state-top;
+    }
+  }
+
+  augment "/srl-platform:platform/srl-platform-control:control" {
+    uses disk-top;
+  }
+}

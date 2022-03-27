@@ -1,0 +1,129 @@
+module srl_nokia-tools-bgp {
+  yang-version 1.1;
+  namespace "urn:srl_nokia/tools-bgp";
+  prefix srl_nokia-tools-bgp;
+
+  import srl_nokia-common {
+    prefix srl_nokia-comm;
+  }
+  import srl_nokia-tools-network-instance { 
+    prefix srl_nokia-tools-netinst; 
+  }
+
+  description
+    "Model for BGP operational commands";
+
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+  typedef autonomous-system-number {
+      type uint32 {
+          range "1..4294967295";
+      }
+  }
+  grouping bgp-tools-top {
+      container bgp {
+          presence "Enable the BGP protocol";
+          container reset-peer {
+              presence "Hard reset peers";
+              leaf peer-as {
+                  type autonomous-system-number;
+                  description
+                      "Hard reset only BGP peers that have the specified peer-AS number, whether they are configured peers or dynamic peers";
+              }
+          }
+          container soft-clear {
+              presence "Soft reset peers by sending them ROUTE_REFRESH messages";
+              leaf route-refresh {
+                  type enumeration {
+                      enum "ipv4-unicast";
+                      enum "ipv6-unicast";
+                      enum "evpn";
+                  }
+                  description
+                      "The address family to refresh
+
+                      This is encoded in the ROUTE_REFRESH message. By default all families are refreshed.";
+              }
+              leaf peer-as {
+                  type autonomous-system-number;
+                  description
+                      "Soft reset only BGP peers that have the specified peer-AS number, whether they are configured peers or dynamic peers";
+              }
+          }
+          list group {
+              key "group-name";
+              leaf group-name {
+                  type srl_nokia-comm:name;
+                  description
+                      "The configured name of the peer group";
+              }
+              container reset-peer {
+                  presence "Hard reset group peers";
+                  leaf peer-as {
+                      type autonomous-system-number;
+                      description
+                          "Hard reset only BGP peers in the peer-group that have the specified peer-AS number, whether they are configured peers or dynamic peers";
+                  }
+              }
+              container soft-clear {
+                  presence "Soft reset group peers by sending them ROUTE_REFRESH messages";
+                  leaf route-refresh {
+                      type enumeration {
+                          enum "ipv4-unicast";
+                          enum "ipv6-unicast";
+                          enum "evpn";
+                      }
+                      description
+                          "The address family to refresh
+
+                          This is encoded in the ROUTE_REFRESH message. By default all families are refreshed.";
+                  }
+                  leaf peer-as {
+                      type autonomous-system-number;
+                      description
+                          "Soft reset only BGP peers in the peer-group that have the specified peer-AS number, whether they are configured peers or dynamic peers";
+                  }
+              }
+          }
+          list neighbor {
+              key "peer-address";
+              leaf peer-address {
+                  type srl_nokia-comm:ip-address-with-zone;
+                  description
+                      "The transport address of the BGP peer
+
+                      The peer-address must be a valid IPv4 unicast address or a valid IPv6 global unicast address. Sessions to a link-local IPv6 address are not supported.";
+              }
+              leaf reset-peer {
+                  type empty;
+                  description
+                      "Hard reset the peer";
+              }
+              container soft-clear {
+                  presence "Soft reset the peer by sending it ROUTE_REFRESH messages";
+                  leaf route-refresh {
+                      type enumeration {
+                          enum "ipv4-unicast";
+                          enum "ipv6-unicast";
+                          enum "evpn";
+                      }
+                      description
+                          "The address family to refresh
+
+                          This is encoded in the ROUTE_REFRESH message. By default all families are refreshed.";
+                  }
+              }
+          }
+      }
+  }
+  augment "/srl_nokia-tools-netinst:network-instance/srl_nokia-tools-netinst:protocols" {
+      uses bgp-tools-top;
+  }
+}

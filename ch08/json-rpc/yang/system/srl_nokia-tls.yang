@@ -1,0 +1,478 @@
+module srl_nokia-tls {
+  yang-version 1.1;
+  namespace "urn:srl_nokia/tls";
+  prefix srl_nokia-tls;
+
+  import srl_nokia-system {
+    prefix srl-system;
+  }
+  import srl_nokia-common {
+    prefix srl-comm;
+  }
+  import srl_nokia-extensions {
+    prefix srl-ext;
+  }
+
+  description
+    "This module defines TLS configuration";
+
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+  identity cipher-type {
+    description
+      "Base identity for cipher types";
+  }
+
+  identity ecdhe-rsa-aes256-gcm-sha384 {
+    base cipher-type;
+  }
+
+  identity ecdhe-ecdsa-aes256-gcm-sha384 {
+    base cipher-type;
+  }
+
+  identity ecdhe-rsa-aes256-sha384 {
+    base cipher-type;
+  }
+
+  identity ecdhe-ecdsa-aes256-sha384 {
+    base cipher-type;
+  }
+
+  identity ecdhe-rsa-aes256-sha {
+    base cipher-type;
+  }
+
+  identity ecdhe-ecdsa-aes256-sha {
+    base cipher-type;
+  }
+
+  identity dh-dss-aes256-gcm-sha384 {
+    base cipher-type;
+  }
+
+  identity dhe-dss-aes256-gcm-sha384 {
+    base cipher-type;
+  }
+
+  identity dh-rsa-aes256-gcm-sha384 {
+    base cipher-type;
+  }
+
+  identity dhe-rsa-aes256-gcm-sha384 {
+    base cipher-type;
+  }
+
+  identity dhe-rsa-aes256-sha256 {
+    base cipher-type;
+  }
+
+  identity dhe-dss-aes256-sha256 {
+    base cipher-type;
+  }
+
+  identity dh-rsa-aes256-sha256 {
+    base cipher-type;
+  }
+
+  identity dh-dss-aes256-sha256 {
+    base cipher-type;
+  }
+
+  identity dhe-rsa-aes256-sha {
+    base cipher-type;
+  }
+
+  identity dhe-dss-aes256-sha {
+    base cipher-type;
+  }
+
+  identity dh-rsa-aes256-sha {
+    base cipher-type;
+  }
+
+  identity dh-dss-aes256-sha {
+    base cipher-type;
+  }
+
+  identity dhe-rsa-camellia256-sha {
+    base cipher-type;
+  }
+
+  identity dhe-dss-camellia256-sha {
+    base cipher-type;
+  }
+
+  identity dh-rsa-camellia256-sha {
+    base cipher-type;
+  }
+
+  identity dh-dss-camellia256-sha {
+    base cipher-type;
+  }
+
+  identity ecdh-rsa-aes256-gcm-sha384 {
+    base cipher-type;
+  }
+
+  identity ecdh-ecdsa-aes256-gcm-sha384 {
+    base cipher-type;
+  }
+
+  identity ecdh-rsa-aes256-sha384 {
+    base cipher-type;
+  }
+
+  identity ecdh-ecdsa-aes256-sha384 {
+    base cipher-type;
+  }
+
+  identity ecdh-rsa-aes256-sha {
+    base cipher-type;
+  }
+
+  identity ecdh-ecdsa-aes256-sha {
+    base cipher-type;
+  }
+
+  identity aes256-gcm-sha384 {
+    base cipher-type;
+  }
+
+  identity aes256-sha256 {
+    base cipher-type;
+  }
+
+  identity aes256-sha {
+    base cipher-type;
+  }
+
+  identity camellia256-sha {
+    base cipher-type;
+  }
+
+  identity psk-aes256-cbc-sha {
+    base cipher-type;
+  }
+
+  identity ecdhe-rsa-aes128-gcm-sha256 {
+    base cipher-type;
+  }
+
+  identity ecdhe-ecdsa-aes128-gcm-sha256 {
+    base cipher-type;
+  }
+
+  identity ecdhe-rsa-aes128-sha256 {
+    base cipher-type;
+  }
+
+  identity ecdhe-ecdsa-aes128-sha256 {
+    base cipher-type;
+  }
+
+  identity ecdhe-rsa-aes128-sha {
+    base cipher-type;
+  }
+
+  identity ecdhe-ecdsa-aes128-sha {
+    base cipher-type;
+  }
+
+  identity dh-dss-aes128-gcm-sha256 {
+    base cipher-type;
+  }
+
+  identity dhe-dss-aes128-gcm-sha256 {
+    base cipher-type;
+  }
+
+  identity dh-rsa-aes128-gcm-sha256 {
+    base cipher-type;
+  }
+
+  identity dhe-rsa-aes128-gcm-sha256 {
+    base cipher-type;
+  }
+
+  identity dhe-rsa-aes128-sha256 {
+    base cipher-type;
+  }
+
+  identity dhe-dss-aes128-sha256 {
+    base cipher-type;
+  }
+
+  identity dh-rsa-aes128-sha256 {
+    base cipher-type;
+  }
+
+  identity dh-dss-aes128-sha256 {
+    base cipher-type;
+  }
+
+  identity dhe-rsa-aes128-sha {
+    base cipher-type;
+  }
+
+  identity dhe-dss-aes128-sha {
+    base cipher-type;
+  }
+
+  identity dh-rsa-aes128-sha {
+    base cipher-type;
+  }
+
+  identity dh-dss-aes128-sha {
+    base cipher-type;
+  }
+
+  identity dhe-rsa-seed-sha {
+    base cipher-type;
+  }
+
+  identity dhe-dss-seed-sha {
+    base cipher-type;
+  }
+
+  identity dh-rsa-seed-sha {
+    base cipher-type;
+  }
+
+  identity dh-dss-seed-sha {
+    base cipher-type;
+  }
+
+  identity dhe-rsa-camellia128-sha {
+    base cipher-type;
+  }
+
+  identity dhe-dss-camellia128-sha {
+    base cipher-type;
+  }
+
+  identity dh-rsa-camellia128-sha {
+    base cipher-type;
+  }
+
+  identity dh-dss-camellia128-sha {
+    base cipher-type;
+  }
+
+  identity ecdh-rsa-aes128-gcm-sha256 {
+    base cipher-type;
+  }
+
+  identity ecdh-ecdsa-aes128-gcm-sha256 {
+    base cipher-type;
+  }
+
+  identity ecdh-rsa-aes128-sha256 {
+    base cipher-type;
+  }
+
+  identity ecdh-ecdsa-aes128-sha256 {
+    base cipher-type;
+  }
+
+  identity ecdh-rsa-aes128-sha {
+    base cipher-type;
+  }
+
+  identity ecdh-ecdsa-aes128-sha {
+    base cipher-type;
+  }
+
+  identity aes128-gcm-sha256 {
+    base cipher-type;
+  }
+
+  identity aes128-sha256 {
+    base cipher-type;
+  }
+
+  identity aes128-sha {
+    base cipher-type;
+  }
+
+  identity seed-sha {
+    base cipher-type;
+  }
+
+  identity camellia128-sha {
+    base cipher-type;
+  }
+
+  identity psk-aes128-cbc-sha {
+    base cipher-type;
+  }
+
+  identity ecdhe-rsa-des-cbc3-sha {
+    base cipher-type;
+  }
+
+  identity ecdhe-ecdsa-des-cbc3-sha {
+    base cipher-type;
+  }
+
+  identity edh-rsa-des-cbc3-sha {
+    base cipher-type;
+  }
+
+  identity edh-dss-des-cbc3-sha {
+    base cipher-type;
+  }
+
+  identity dh-rsa-des-cbc3-sha {
+    base cipher-type;
+  }
+
+  identity dh-dss-des-cbc3-sha {
+    base cipher-type;
+  }
+
+  identity ecdh-rsa-des-cbc3-sha {
+    base cipher-type;
+  }
+
+  identity ecdh-ecdsa-des-cbc3-sha {
+    base cipher-type;
+  }
+
+  identity des-cbc3-sha {
+    base cipher-type;
+  }
+
+  identity idea-cbc-sha {
+    base cipher-type;
+  }
+
+  identity psk-3des-ede-cbc-sha {
+    base cipher-type;
+  }
+
+  identity krb5-idea-cbc-sha {
+    base cipher-type;
+  }
+
+  identity krb5-des-cbc3-sha {
+    base cipher-type;
+  }
+
+  identity krb5-idea-cbc-md5 {
+    base cipher-type;
+  }
+
+  identity krb5-des-cbc3-md5 {
+    base cipher-type;
+  }
+
+  identity ecdhe-rsa-rc4-sha {
+    base cipher-type;
+  }
+
+  identity ecdhe-ecdsa-rc4-sha {
+    base cipher-type;
+  }
+
+  identity ecdh-rsa-rc4-sha {
+    base cipher-type;
+  }
+
+  identity ecdh-ecdsa-rc4-sha {
+    base cipher-type;
+  }
+
+  identity rc4-sha {
+    base cipher-type;
+  }
+
+  identity rc4-md5 {
+    base cipher-type;
+  }
+
+  identity psk-rc4-sha {
+    base cipher-type;
+  }
+
+  identity krb5-rc4-sha {
+    base cipher-type;
+  }
+
+  identity krb5-rc4-md5 {
+    base cipher-type;
+  }
+
+  grouping server-profile-interface {
+    list server-profile {
+      description
+        "List of configured TLS server profiles";
+      key "name";
+      leaf name {
+        srl-ext:show-importance "high";
+        type srl-comm:name;
+        description
+          "Name of the TLS server-profile";
+      }
+      leaf key {
+        mandatory true;
+        srl-ext:show-importance "low";
+        type string {
+          srl-ext:generated-class-name "SecretKey";
+        }
+        description
+          "Base64 encoded key to use with the server certificate
+
+           This includes the '-----BEGIN PRIVATE KEY-----', and '-----END PRIVATE KEY-----' header and footer
+           The value is hashed, and only the hashed value is kept";
+      }
+      leaf certificate {
+        mandatory true;
+        srl-ext:show-importance "low";
+        type string;
+        description
+          "Base64 encoded certificate to use with the private key
+           this includes the '-----BEGIN CERTIFICATE-----' and '-----END CERTIFICATE-----' header and footer";
+      }
+      leaf authenticate-client {
+        default "false";
+        srl-ext:show-importance "high";
+        type boolean;
+        description
+          "Defines if the server should authenticate the identity of connecting clients
+           using the trust anchor";
+      }
+      leaf trust-anchor {
+        type string;
+        srl-ext:show-importance "low";
+        description
+          "Base64 encoded certificate to use as a trust anchor
+           This includes the '-----BEGIN CERTIFICATE-----' and '-----END CERTIFICATE-----' header and footer";
+      }
+      leaf-list cipher-list {
+        ordered-by user;
+        srl-ext:show-importance "low";
+        type identityref {
+          base cipher-type;
+        }
+        description
+          "List of ciphers to use when negotiating TLS with clients";
+      }
+    }
+  }
+
+  grouping tls-top {
+    container tls {
+      description
+        "Top-level container for TLS configuration and state";
+      uses server-profile-interface;
+    }
+  }
+
+  augment "/srl-system:system" {
+    uses tls-top;
+  }
+}

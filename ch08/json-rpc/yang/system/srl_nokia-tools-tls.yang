@@ -1,0 +1,124 @@
+module srl_nokia-tools-tls {
+  yang-version 1.1;
+  namespace "urn:srl_nokia/tools-tls";
+  prefix srl-tools-tls;
+
+  import srl_nokia-tools-system {
+    prefix srl-tools-system;
+  }
+  import srl_nokia-common {
+    prefix srl-comm;
+  }
+  import srl_nokia-extensions {
+    prefix srl-ext;
+  }
+
+  description
+    "This module defines operational commands related to TLS.";
+
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+  grouping tls-request-common {
+    description
+      "Top-level grouping for common TLS request options";
+    leaf common-name {
+      type srl-comm:domain-name {
+        length "1..64";
+      }
+      description
+        "The common name to use for the certificate signing request
+
+         By default the common name is set to the system host name and domain name combination.";
+    }
+    leaf email {
+      type srl-comm:name;
+      description
+        "The email address to use for the certificate signing request";
+    }
+    leaf country {
+      description
+        "The country name to use for the certificate signing request
+
+         The expected format is two characters long, e.g. 'US'.";
+      type string {
+        pattern '[a-zA-Z]+';
+        length "2";
+      }
+      default "US";
+    }
+    leaf state {
+      description
+        "The state or province to use for the certificate signing request";
+      type srl-comm:name;
+    }
+    leaf locality {
+      description
+        "The city or locality to use for the certificate signing request";
+      type srl-comm:name;
+    }
+    leaf organization {
+      description
+        "The organization to use for the certificate signing request";
+      type srl-comm:name;
+    }
+    leaf organization-unit {
+      description
+        "The organization unit to use for the certificate signing request";
+      type srl-comm:name;
+    }
+  }
+
+  grouping tls-tools-top {
+    container generate-self-signed {
+      presence "Generate a self signed certificate and private key";
+      uses tls-request-common;
+      description
+        "Generates a self signed certificate and key pair
+
+         Fields for the self signed certificate are taken from OpenSSL defaults, with the exception of the common name, which is taken from the system host name and domain name combination.";
+      leaf duration {
+        description
+          "The time in which the certificate is valid";
+        units "days";
+        type uint16 {
+          range "1..3650";
+        }
+        default "365";
+      }
+    }
+    container generate-csr {
+      presence "Generate certificate signing request and private key";
+      srl-ext:first-released "20.4.1";
+      uses tls-request-common;
+      description
+        "Generates a certificate signing request and key pair
+
+         Fields for the certificate are taken from OpenSSL defaults, with the exception of the common name, which is taken from the system host name and domain name combination.";
+    }
+  }
+
+  grouping tls-top {
+    container tls {
+      presence "Configure tools system tls";
+      srl-ext:first-released "19.11.1";
+      description
+        "Top-level container for operational commands related to TLS";
+      uses tls-tools-top;
+    }
+  }
+
+  augment "/srl-tools-system:system" {
+    uses tls-top;
+  }
+}

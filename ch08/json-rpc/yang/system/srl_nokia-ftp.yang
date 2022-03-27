@@ -1,0 +1,102 @@
+module srl_nokia-ftp {
+  yang-version 1.1;
+
+  // namespace
+
+  namespace "urn:srl_nokia/ftp";
+  prefix srl_nokia-ftp;
+
+  import srl_nokia-system {
+    prefix srl-system;
+  }
+  import srl_nokia-network-instance {
+    prefix srl_nokia-netinst;
+  }
+  import srl_nokia-common {
+    prefix srl_nokia-comm;
+  }
+
+  description
+    "This module defines ftp configurations.";
+
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+  grouping network-instance-entry-config {
+    leaf admin-state {
+      type srl_nokia-comm:admin-state;
+      default "disable";
+      description
+        "Enables or disables the FTP server in this network-instance";
+    }
+    leaf source-address {
+      type srl_nokia-comm:ip-address;
+      default "::";
+      description
+        "IPv4 or IPv6 address for the FTP server to listen on within the network-instance
+
+         Default behavior is to listen on '::', which will listen on all addresses for both IPv4 and IPv6. In order to listen on IPv4 only, this field should be set to '0.0.0.0'.";
+    }
+    leaf timeout {
+      type uint16;
+      units "seconds";
+      default "300";
+      description
+        "Set the idle timeout in seconds on FTP connections";
+    }
+    leaf session-limit {
+      type uint8;
+      default "20";
+      description
+        "Set a limit on the number of simultaneous active FTP sessions";
+    }
+    leaf oper-state {
+      type srl_nokia-comm:oper-state;
+      config false;
+      description
+        "Details the operational state of the FTP server";
+    }
+  }
+
+  grouping network-instance-entry {
+    leaf name {
+      type leafref {
+        path "/srl_nokia-netinst:network-instance/srl_nokia-netinst:name";
+      }
+      must 'not(/srl_nokia-netinst:network-instance[srl_nokia-netinst:name=current()]/srl_nokia-netinst:type = "srl_nokia-netinst:mac-vrf")' {
+        error-message "FTP server cannot be started in a network-instance of type 'mac-vrf'";
+      }
+      description
+        "Reference to a configured network-instance";
+    }
+    uses network-instance-entry-config;
+  }
+
+  grouping network-instance-interface {
+    list network-instance {
+      description
+        "List of network-instances to run an FTP server in";
+      key "name";
+      uses network-instance-entry;
+    }
+  }
+
+  grouping ftp-top {
+    container ftp-server {
+      description
+        "Top-level container for FTP server configuration and state";
+      presence "Configure FTP";
+      uses network-instance-interface;
+    }
+  }
+
+  augment "/srl-system:system" {
+    uses ftp-top;
+  }
+}

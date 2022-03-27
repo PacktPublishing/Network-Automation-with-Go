@@ -1,0 +1,484 @@
+module srl_nokia-if-ip {
+  yang-version 1.1;
+
+  // namespace
+
+  namespace "urn:srl_nokia/interfaces/ip";
+  prefix srl_nokia-if-ip;
+
+  // import some basic types
+
+  import srl_nokia-common {
+        prefix srl_nokia-comm;
+  }
+  import srl_nokia-features {
+      prefix srl_feat;
+  }
+  import srl_nokia-extensions {
+      prefix srl_nokia-ext;
+  }
+
+  description
+    "Model for managing IP subinterfaces";
+
+  // typedef statements
+
+  revision 2021-06-30 {
+    description
+      "SRLinux 21.6.1";
+  }
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+  typedef address-origin {
+    type enumeration {
+      enum other {
+        value 1;
+      }
+      enum static {
+        value 2;
+      }
+      enum dhcp {
+        value 3;
+      }
+      enum link-layer {
+        value 4;
+      }
+      enum random {
+        value 5;
+      }
+    }
+    description
+      "The origin of the IP address";
+    // see RFC 7277.
+  }
+
+  typedef ipv6-address-status {
+    type enumeration {
+      enum preferred {
+        value 1;
+      }
+      enum deprecated {
+        value 2;
+      }
+      enum invalid {
+        value 3;
+      }
+      enum inaccessible {
+        value 4;
+      }
+      enum unknown {
+        value 5;
+      }
+      enum tentative {
+        value 6;
+      }
+      enum duplicate {
+        value 7;
+      }
+      enum optimistic {
+        value 8;
+      }
+    }
+    description
+      "The IPv6 address status";
+    // see RFC 7277.
+  }
+
+  typedef ipv4-address-status {
+    type enumeration {
+      enum preferred {
+        value 1;
+      }
+      enum inaccessible {
+        value 2;
+      }
+      enum tentative {
+        value 3;
+      }
+      enum duplicate {
+        value 4;
+      }
+    }
+    description
+      "The IPv4 address status";
+    // see RFC 5227.
+  }
+
+  typedef anycast-gw-mac-origin {
+    type enumeration {
+      enum configured {
+        value 1;
+      }
+      enum vrid-auto-derived {
+        value 2;
+      }
+    }
+    description
+      "The origin of the anycast-gw MAC address.";
+  }
+
+  grouping ipv4-top {
+    description
+      "Top-level configuration and state for IPv4 interfaces";
+    container ipv4 {
+      must "(../type != 'bridged') and (../type != 'local-mirror-dest')" {
+        error-message "ipv4 configuration not allowed on bridged or local-mirror-dest subinterfaces";
+      }
+      presence "Enable IPv4 on the subinterface";
+      description
+        "Enable IPv4 on the subinterface and configure associated parameters
+
+        When this is present in the running configuration, and even before an IPv4 address is configured, the subinterface starts to accept incoming packets with dest-ip 255.255.255.255, which is necessary to support dhcp-client functionality.";
+      list address {
+        max-elements 64;
+        key "ip-prefix";
+        description
+          "The list of  IPv4 addresses assigned to the subinterface.";
+        leaf ip-prefix {
+          type srl_nokia-comm:ipv4-prefix-with-host-bits;
+          description
+            "The IPv4 address and prefix length in CIDR notation
+            
+            Subnets on the same subinterface are allowed to overlap as long as the host bits are different. When a locally originated unicast packet is destined to a host covered by multiple subnets associated with a subinterface, the source address is chosen to be the numerically lowest IP address among all these subnets. For example, if the addresses 172.16.1.1/12, 172.16.1.2/12, and 172.16.1.3/12 are configured on the same interface, 172.16.1.1 would be used as a local address when you issue a ping 172.16.1.5 command";
+          must "not(starts-with(.,'0.') or starts-with(.,'127.') or starts-with(.,'169.254.') or re-match(.,'22[4-9]\\..*') or re-match(.,'2[3-5][0-9]\\..*'))" {
+            error-message "Not a valid IPv4 unicast address prefix";
+          }
+          //[adapted from IETF IP model RFC 7277]
+        }
+        leaf anycast-gw {
+          if-feature "srl_feat:anycast-gw";
+          srl_nokia-ext:first-released "20.12.1";
+          must "starts-with(../../../../name,'irb')" {
+            error-message "Only supported on IRB subinterfaces";
+          }
+          // The extra check on the name not being irb ensures we don't throw this error on non-irb interfaces
+          // as the above error is sufficient in that case
+          must ". = false() or (. = true() and ../../../anycast-gw) or not(starts-with(../../../../name,'irb'))" {
+            error-message "Only supported if anycast-gw container is configured";
+          }
+          type boolean;
+          // default false; 
+          description
+            "This designates the associated IPv4 address as an anycast-gateway IPv4 address of the subinterface. 
+             
+             When this parameter is set to true: 
+             - The IPv4 address is associated with the anycast-gw MAC address in the same subinterface. ARP Requests received for the anycast-gw IPv4 address
+               will be replied using this anycast-gw MAC address.
+             - The IPv4 address can have duplicate IPv4 addresses in other IRB subinterfaces of routers attached to the same broadcast domain. 
+               Because of that ARP duplicate-address-detection procedures do not apply to anycast-gw IP addresses.";
+        }
+        leaf origin {
+          config false;
+          type address-origin;
+          description
+            "The origin of the IPv4 address.";
+        }
+        leaf primary {
+          srl_nokia-ext:first-released "20.12.1";
+          type empty;
+          must "not (starts-with(../../../../name, 'mgmt') or (starts-with(../../../../name, 'system')))" {
+              error-message "primary not supported on mgmt or system subinterfaces";
+          }
+          // no default since state will populate the value if needed and not configured
+          description
+            "One of the IPv4 prefixes assigned to the subinterface can be explicitly configured as primary by setting this leaf to true. This designates the associated IPv4 address as a primary IPv4 address of the subinterface. By default, the numerically lowest value IPv4 address is selected as the primary address.
+            
+            The primary address is used as the source address for locally originated broadcast and multicast packets sent out the subinterface.";
+        }
+        leaf status {
+          config false;
+          type ipv4-address-status;
+          description
+            "The status of an IPv4 address";
+          // Refer to RFC 5227.
+        }
+      }
+
+      leaf allow-directed-broadcast {
+          type boolean;
+          default false;
+          description
+            "When this is set to true the software is allowed to re-broadcast targeted broadcast IPv4 packets on this subinterface
+
+            Detailed handling of subnet broadcast is as follows:
+
+            If a targeted broadcast packet is received on subinterface X that has the matching subnet then it is delivered to the CPM and CPM will reply to an ICMP echo.
+
+            If a targeted broadcast packet is received on subinterface X but the matching subnet is associated with subinterface Y, and subinterface Y is configured with allow-directed-broadcasts=false then it is delivered to the CPM and CPM replies to an ICMP echo per above, but it does not re-broadcast the packet on subinterface Y.
+
+            If a targeted broadcast packet is received on subinterface X but the matching subnet is associated with subinterface Y, and subinterface Y is configured with allow-directed-broadcasts=true then it is delivered to the CPM and CPM replies to an ICMP echo per above, and CPM also re-broadcasts the packet on subinterface Y.";
+      }
+    }
+  }
+
+  grouping ipv6-top {
+    description
+      "Top-level configuration and state for IPv6 interfaces";
+    container ipv6 {
+      must "(../type != 'bridged') and (../type != 'local-mirror-dest')" {
+        error-message "ipv6 configuration not allowed on bridged or local-mirror-dest subinterfaces";
+      }
+      presence "Enable IPv6 on the subinterface";
+      description
+        "Enable IPv6 on the subinterface and configure associated parameters
+
+        When this is present in the running configuration, and even before a global unicast IPv6 address is configured, chassis manager assigns an IPv6 link-local address to the subinterface, which will appear as a read-only entry in the address list. At this stage, the subinterface can receive IPv6 packets with any of the following destinations:
+        -	IPv6 link-local address
+        -	solicited-node multicast address for the link-local address
+        -	ff02::1 (all IPv6 devices)
+        -	ff02::2 (all IPv6 routers)";
+      list address {
+        max-elements 18;
+        key "ip-prefix";
+        description
+          "The list of IPv6 addresses assigned to the subinterface.";
+        leaf ip-prefix {
+          type srl_nokia-comm:ipv6-prefix-with-host-bits;
+          description
+            "The IPv6 address and prefix-length in CIDR notation
+
+            Up to 16 global unicast IPv6 addresses can be assigned to each subinterface. Global unicast IPv6 address subnets on the same subinterface are allowed to overlap as long as the host bits are different. When a locally originated unicast packet is destined to a host covered by multiple subnets associated with a subinterface, the source address is chosen to be the numerically lowest IP address among all these subnets.";
+          // [adapted from IETF IP model RFC 7277]
+          must "not(.='::/128' or .='::1/128' or starts-with(.,'ff') or starts-with(.,'fe80'))" {
+              error-message "Not a global unicast IPv6 address prefix";
+          }
+        }
+        leaf anycast-gw {
+          if-feature "srl_feat:anycast-gw";
+          must "starts-with(../../../../name,'irb')" {
+            error-message "Only supported on IRB subinterfaces";
+          }
+          // The extra check on the name not being irb ensures we don't throw this error on non-irb interfaces
+          // as the above error is sufficient in that case
+          must ". = false() or (. = true() and ../../../anycast-gw) or not(starts-with(../../../../name,'irb'))" {
+            error-message "Only supported if anycast-gw container is configured";
+          }
+          type boolean;
+          // default false;
+          description
+            "This designates the associated IPv6 address as an anycast-gateway IPv6 address of the subinterface. 
+             
+             When this parameter is set to true: 
+             - The IPv6 address is associated with the anycast-gw MAC address in the same subinterface. Neighbor Solicitations received for the anycast-gw IPv6 address
+               will be replied using this anycast-gw MAC address.
+             - The IPv6 address can have duplicate IPv6 addresses in other IRB subinterfaces of routers attached to the same broadcast domain. 
+               Because of that, ND duplicate-address-detection procedures do not apply to anycast-gw IP addresses.";
+        }
+        leaf origin {
+          config false;
+          type address-origin;
+          description
+            "The origin of the IPv6 address";
+          // In phase 1 it will always be STATIC. Refer to RFC 7277.
+        }
+        leaf primary {
+          srl_nokia-ext:first-released "20.12.1";
+          type empty;
+          must "not (starts-with(../../../../name, 'mgmt') or (starts-with(../../../../name, 'system')))" {
+              error-message "primary not supported on mgmt or system subinterfaces";
+          }
+          // no default since state will populate the value if needed and not configured
+          description
+            "One of the IPv6 prefixes assigned to the subinterface can be explicitly configured as primary by setting this leaf to true. This designates the associated IPv6 address as a primary IPv6 address of the subinterface. By default, the numerically lowest value IPv6 address is selected as the primary address.
+            
+            The primary address is used as the source address for locally originated broadcast and multicast packets sent out the subinterface.";
+        }
+        leaf status {
+          config false;
+          type ipv6-address-status;
+          description
+            "The status of an IPv6 address";
+          // States related to stateless address autoconfiguration (SLAAC) should not appear in phase 1.
+          // Refer to RFC 7277.
+        }
+      }
+    }
+  }
+
+  grouping anycast-gw-top {
+    description
+      "Top-level configuration and state for the anycast-gw context";
+    container anycast-gw {
+      if-feature "srl_feat:anycast-gw";
+      must "starts-with(../../name,'irb')" {
+        error-message "Only supported on IRB subinterfaces";
+      }
+      presence "Enable the anycast-gw functionality in the subinterface.";
+      leaf virtual-router-id {
+        type uint8 {
+          range "1..255";
+        }
+        default "1";
+        description
+          "The Virtual Router Identifier (VRID) value used to auto-derive the anycast-gw-mac in the format 00:00:5E:00:01:VRID.";
+        reference "draft-ietf-bess-evpn-inter-subnet-forwarding";
+      }
+      leaf anycast-gw-mac {
+        type srl_nokia-comm:mac-address;
+        description
+           "The MAC address of associated to the anycast-gw IP address.
+
+            If the anycast-gw MAC address is not configured, it will be auto-derived from the virtual-router-id value 
+            as per draft-ietf-bess-evpn-inter-subnet-forwarding following the format 00:00:5E:00:01:VRID.";
+      } 
+      leaf anycast-gw-mac-origin {
+        config false;
+        type anycast-gw-mac-origin;
+        description
+          "Origin of the active anycast-gateway MAC address. 
+         
+           If not configured, the anycast-gateway-mac will be auto-derived out of 00:00:5E:00:01:VRID, where VRID is the 
+           Virtual Router Identifier of the subinterface anycast-gw.";
+      }
+    }
+  }
+
+  grouping subinterface-statistics {
+    container statistics {
+      config false;
+      description
+        "Container for subinterface statistics, counting IPv4 packets and IPv6 packets in aggregate";
+      leaf in-packets {
+        type srl_nokia-comm:zero-based-counter64;
+        description
+          "The total number of input IPv4+IPv6 packets received, counting transit and terminating traffic
+
+          This equals the sum of:
+          in-error-packets
+          in-discarded-packets
+          in-terminated-packets
+          in-forwarded-packets";
+      }
+      leaf in-octets {
+        type srl_nokia-comm:zero-based-counter64;
+        description
+          "The total number of octets received in input IPv4+IPv6 packets, counting transit and terminating traffic";
+      }
+      leaf in-error-packets {
+        if-feature "srl_feat:jericho2";
+        type srl_nokia-comm:zero-based-counter64;
+        description
+          "The total number of input IPv4+IPv6 packets discarded due to errors, counting transit and terminating traffic
+
+          The sum of the following RFC 4293 counters:
+          ipIfStatsInHdrErrors
+          ipIfStatsInNoRoutes
+          ipIfStatsInAddrErrors
+          ipIfStatsInUnknownProtos
+          ipIfStatsInTruncatedPkts";
+      }
+      leaf in-discarded-packets {
+        type srl_nokia-comm:zero-based-counter64;
+        description
+            "The total number of input IPv4+IPv6 packets (transit and terminating traffic) that were dropped for any of the following reasons:
+            - ingress interface ACL drop action
+            - CPM filter drop action
+            - VOQ congestion discards (7250 IXR only)
+            - unicast destination MAC address is not the MAC address of the subinterface
+            - packet matched a route with a blackhole next-hop
+            - packet was non-terminating and its TTL expired
+            - packet matched a route with a next-hop via another subinterface but the next-hop address was not resolvable by ARP/ND
+            - packet is a host address on another subinterface but the host address was not resolvable by ARP/ND";
+      }
+      leaf in-terminated-packets {
+        if-feature "srl_feat:jericho2";
+        type srl_nokia-comm:zero-based-counter64;
+        description
+          "The total number of input IPv4+IPv6 packets that were received on this subinterface and that have a destination IP address matching a local interface address or an IPv6 multicast address to which the interface belongs. The count includes packets eventually discarded by the CPM. Such discards include:
+          - packets with unsupported IP protocol numbers
+          - packets destined to TCP/UDP ports that are not open/listening
+          - IPv4 packets with any IP options
+          - IPv6 packets with any extension headers";
+      }
+      leaf in-terminated-octets {
+        if-feature "srl_feat:jericho2";
+        type srl_nokia-comm:zero-based-counter64;
+        description
+          "The total number of octets in input IPv4+IPv6 packets that were received on this subinterface and counted in in-terminated-packets";
+      }
+      leaf in-forwarded-packets {
+        type srl_nokia-comm:zero-based-counter64;
+        description
+          "The number of input IPv4+IPv6 packets received on this subinterface for which the router was not the final destination and for which the router attempted to find a route to forward them to that final destination.
+
+          Note that non-terminating IPv4 packets with options and non-terminating IPv6 packets with extension headers are included in this count (and not dropped) as are packets that trigger ICMP/ICMPv6 redirect messages.
+          
+          On 7220 IXR systems this also counts received traffic that is terminating.";
+      }
+      leaf in-forwarded-octets {
+        type srl_nokia-comm:zero-based-counter64;
+        description
+          "The number of octets received in input IPv4+IPv6 packets received on this subinterface and counted in in-forwarded-packets";
+      }
+      leaf in-matched-ra-packets {
+        type srl_nokia-comm:zero-based-counter64;
+        description
+          "The total number of packets matched with applied RA-Guard policy";
+      }
+      leaf out-forwarded-packets {
+        type srl_nokia-comm:zero-based-counter64;
+        description
+          "The number of transit IPv4+IPv6 packets which the router attempted to route out this subinterface";
+      }
+      leaf out-forwarded-octets {
+        type srl_nokia-comm:zero-based-counter64;
+        description
+          "The number of octets in transit IPv4+IPv6 packets which the router attempted to route out this subinterface";
+      }
+      leaf out-originated-packets {
+        type srl_nokia-comm:zero-based-counter64;
+        description
+          "The number of IPv4+IPv6 packets which originated on the CPM and which the router attempted to route out this subinterface
+
+          This includes all originated ICMP/ICMPv6 messages.";
+      }
+      leaf out-originated-octets {
+        type srl_nokia-comm:zero-based-counter64;
+        description
+          "The number of octets in IPv4+IPv6 packets which originated on the CPM and which the router attempted to route out this subinterface";
+      }
+      leaf out-error-packets {
+        if-feature "srl_feat:jericho2";
+        type srl_nokia-comm:zero-based-counter64;
+        description
+          "The number of IPv4+IPv6 packets, originating and transit, for which this router was successful in finding a path to their final destination through this subinterface but an error prevented their transmission.
+
+          On 7250 IXR systems this is incremented when the IPv4 packet size exceeds the IP MTU and fragmentation was not allowed or not supported";
+      }
+      leaf out-discarded-packets {
+        type srl_nokia-comm:zero-based-counter64;
+        description
+          "The total number of IPv4+IPv6 packets, originating and transit, sent towards this subinterface that were dropped.";
+      }
+      leaf out-packets {
+        type srl_nokia-comm:zero-based-counter64;
+        description
+          "The total number of IPv4+IPv6 packets that this router supplied to the lower layers for transmission
+
+          This includes packets generated locally and those forwarded by this router. If there are no queue drops it is equal to:
+          <out-forwarded-packets> + <out-originated-packets> - <out-error-packets> - <out-discarded-packets>";
+      }
+      leaf out-octets {
+        type srl_nokia-comm:zero-based-counter64;
+        description
+          "The total number of octets in IPv4+IPv6 packets delivered to the lower layers for transmission";
+      }
+      leaf last-clear {
+        type srl_nokia-comm:date-and-time-delta;
+        description
+          "Timestamp of the last time the subinterface counters were cleared.";
+      }
+    }
+  }
+}

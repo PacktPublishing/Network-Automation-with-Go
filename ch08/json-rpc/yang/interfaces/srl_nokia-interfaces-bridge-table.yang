@@ -1,0 +1,121 @@
+module srl_nokia-interfaces-bridge-table {
+  yang-version 1.1;
+
+  // namespace
+
+  namespace "urn:srl_nokia/interfaces/bridge-table";
+  prefix srl_nokia-if-bt;
+
+  // import some basic types
+  import srl_nokia-common {
+    prefix srl_nokia-comm;
+  }
+  import srl_nokia-features {
+    prefix srl_nokia-feat;
+  }
+
+  description
+    "Model for managing aspects related to the bridge-table on the subinterface";
+
+  // typedef statements
+
+  // groupings
+
+  revision 2021-06-30 {
+    description
+      "SRLinux 21.6.1";
+  }
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+
+  grouping bridge-table-top {
+    description
+      "Top-level configuration and state for bridge-table subinterfaces";
+    container bridge-table {
+      presence "Enable Bridge Table configuration and state for subinterfaces";
+      description
+        "Enable the Bridge Table on the subinterface and configure associated parameters";
+      if-feature srl_nokia-feat:bridged;
+      leaf discard-unknown-src-mac {
+          type boolean;
+          default "false";
+          description 
+            "Discard frames with unknown source mac addresses. The source mac address of 
+             the discarded frame is never learned when this command is enabled.";
+      }
+      container mac-limit {
+        description "Bridge Table size and thresholds.";
+        leaf maximum-entries {
+          type int32 {
+            range "1..8192";
+          }
+          default "250";
+          description "Maximum number of mac addresses allowed in the bridge-table.";
+        }
+        leaf warning-threshold-pct {
+          type int32 {
+            range "6..100";
+          }
+          default "95";
+          description 
+            "Percentage of the configured max-number-macs over which a warning is triggered.
+             The warning message is cleared when the percentage drops below the configured 
+             percentage minus 5%";
+        }
+      }
+      container mac-learning {
+        leaf admin-state {
+          type srl_nokia-comm:admin-state;
+          default "enable";
+          description
+          "Configurable state of the learning procedures for dynamic mac addresses.
+           If disabled, the existing macs in the bridge-table will be kept (and refreshed 
+           if new frames arrive for them) but no new mac addresses will be learned. Frames
+           with unknown mac addresses are not dropped, unless discard-unknown-src-mac is
+           configured.";
+        }
+        container aging {
+          leaf admin-state {
+            type srl_nokia-comm:admin-state;
+            default "enable";
+            description
+              "Configurable state of the aging for the dynamic mac entries in the bridge table.
+               If disabled, dynamically learned mac entries will be programmed in the bridge table
+               until the network instance is disabled.";
+          }
+        }
+      }
+      container mac-duplication {
+        leaf action {
+          type enumeration {
+            enum "use-net-instance-action"   { value 0; }
+            enum "stop-learning"   { value 1; }
+            enum "blackhole"   { value 2; }
+            enum "oper-down"   { value 3; }
+          }
+          default "use-net-instance-action";
+          description 
+            "Action to take on the subinterface upon detecting at least one mac addresses as duplicate
+             on the subinterface. In particular:
+             - use-net-instance-action: upon detecting a duplicate mac on the subinterface, the action on the subinterface will be
+               inherited from the action configured under network-instance/bridge-table/mac-duplication/action.
+             - oper-down: if configured, upon detecting a duplicate mac on the subinterface, the subinterface
+               will be brought oper-down, with oper-down-reason mac-dup-detected. The duplicate macs on the interface will be kept
+               in CPM though, and shown in the duplicate-entries state. In this case, arriving frames on a different subinterface with 
+               the duplicate mac as source mac are dropped. Arriving frames on a different subinterface with a destination mac 
+               matching the duplicate mac are dropped.
+             - blackhole: upon detecting a duplicate mac on the subinterface, the mac will be blackholed. Any
+               frame received on this or any other subinterface with source mac matching a blackhole mac will be discarded. Any frame
+               received with destination mac matching the blackhole mac will be discarded, although still processed for source mac
+               learning.
+             - stop-learning: upon detecting a duplicate mac on the subinterface, existing macs are kept (and refreshed) but new macs
+               are no longer learned on this subinterface. The duplicate mac will stay learned on the subinterface. Frames arriving to
+               a different subinterface with a source mac matching the duplicate mac will be dropped. Frames arriving to a different
+               subinterface with a destination mac matching the duplicate mac will be forwarded normally.";
+        }
+      }
+    }
+  }
+}

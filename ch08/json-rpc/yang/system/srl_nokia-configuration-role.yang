@@ -1,0 +1,95 @@
+module srl_nokia-configuration-role {
+  yang-version 1.1;
+
+  namespace "urn:srl_nokia/configuration-role";
+  prefix srl_nokia-configuration-role;
+
+  import srl_nokia-system {
+    prefix srl-system;
+  }
+  import srl_nokia-configuration {
+    prefix srl-configuration;
+  }
+  import srl_nokia-extensions {
+    prefix srl-ext;
+  }
+  import srl_nokia-common {
+    prefix srl-comm;
+  }
+  import srl_nokia-aaa {
+    prefix srl-aaa;
+  }
+
+  description
+    "This module defines configuration and state related to AAA roles.";
+
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+
+  typedef path-action {
+    type enumeration {
+      enum read {
+        description
+          "This path may be read by the role";
+      }
+      enum write {
+        description
+          "This path may be written and read by the role";
+      }
+      enum deny {
+        description
+          "This path may not be read or written to by the role";
+      }
+    }
+  }
+
+  grouping system-roles-top {
+    list role {
+      description
+        "List of roles configured in the system";
+      srl-ext:first-released "21.3.1";
+      max-elements 32;
+      key "name";
+      leaf name {
+        type leafref {
+            path "/srl-system:system/srl-aaa:aaa/srl-aaa:authorization/srl-aaa:role/srl-aaa:rolename";
+        }
+      }
+
+      list rule {
+        max-elements 256;
+        description
+          "List of paths to perform access control against";
+        key "path-reference";
+        leaf path-reference {
+          srl-ext:no-globbing;
+          type string {
+            pattern '[A-Za-z0-9 !@#$%^&()|+=`~.,/_:;?\-{}*\\\\"\[\]]+';
+          }
+          description
+            "Reference to a valid YANG path, in CLI notation
+
+            This path may include keys, wildcards, ranges, and other management server supported constructs. Ranges will be expanded.
+            The root path can be specified with '/'.
+
+            E.g. 
+                 /
+                 \"/interface\"
+                 \"/acl ipv4-filter foo* description\"";
+        }
+        leaf action {
+          mandatory true;
+          type path-action;
+          description
+            "Action to allow for this path";
+        }
+      }
+    }
+  }
+
+  augment "/srl-system:system/srl-configuration:configuration" {
+    uses system-roles-top;
+  }
+}

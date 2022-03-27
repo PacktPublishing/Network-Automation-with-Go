@@ -1,0 +1,252 @@
+module srl_nokia-interfaces-lag {
+  yang-version 1.1;
+
+  // namespace
+  namespace "urn:srl_nokia/interfaces/lags";
+
+  prefix "srl_nokia-if-lag";
+
+  import srl_nokia-interfaces { prefix srl_nokia-if; }
+  import srl_nokia-extensions { prefix srl_nokia-ext; }
+  import srl_nokia-common { prefix srl_nokia-comm; }
+  import srl_nokia-features { prefix srl_nokia-feat; }
+
+  description
+    "Model for managing LAGs
+
+     This model describes management of LAG parameters under SRL Interfaces";
+     
+  // identity statements
+
+  // typedef statements
+
+  revision 2021-06-30 {
+    description
+      "SRLinux 21.6.1";
+  }
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+  revision 2020-12-31 {
+    description
+      "SRLinux 20.12.1";
+  }
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+
+  typedef member-speed-type {
+    description
+      "Enumeration for LAG member-link speeds";
+    type enumeration {
+      enum 10M {
+        if-feature "srl_nokia-feat:platform-7220-d1";
+        value 1;
+        description
+          "Indicates the the LAG member-links must be 10M to be active";
+      }
+      enum 100M {
+        if-feature "srl_nokia-feat:platform-7220-d1";
+        value 2 ;
+        description
+          "Indicates the the LAG member-links must be 100M to be active";
+      }
+      enum 1G {
+        if-feature "srl_nokia-feat:platform-7220-d1 or srl_nokia-feat:platform-7220-d2 or srl_nokia-feat:platform-7220-d3 or srl_nokia-feat:platform-7220-h3";
+        value 3;
+        description
+          "Indicates the the LAG member-links must be 1G to be active";
+      }
+      enum 10G {
+        if-feature "srl_nokia-feat:platform-7250-j2 or srl_nokia-feat:platform-7220-d1 or srl_nokia-feat:platform-7220-d2 or srl_nokia-feat:platform-7220-d3 or srl_nokia-feat:platform-7220-h3";
+        value 4;
+        description
+          "Indicates the the LAG member-links must be 10G to be active";
+      }
+      enum 25G {
+        if-feature "srl_nokia-feat:platform-7220-d2 or (srl_nokia-feat:port-breakout and srl_nokia-feat:platform-7220-d3)";
+        value 5;
+        description
+          "Indicates the the LAG member-links must be 25G to be active";
+      }
+      enum 40G {
+        if-feature "srl_nokia-feat:platform-7250-ixr or srl_nokia-feat:platform-7220-d2 or srl_nokia-feat:platform-7220-d3 or srl_nokia-feat:platform-7220-h3";
+        value 6;
+        description
+          "Indicates the the LAG member-links must be 40G to be active";
+      }
+      enum 100G {
+        if-feature "srl_nokia-feat:platform-7250-ixr or srl_nokia-feat:platform-7220-d2 or srl_nokia-feat:platform-7220-d3 or srl_nokia-feat:platform-7220-h2 or srl_nokia-feat:platform-7220-h3";
+        value 7;
+        description
+          "Indicates the the LAG member-links must be 100G to be active";
+      }
+      enum 400G {
+        if-feature "srl_nokia-feat:platform-7250-ixr or srl_nokia-feat:platform-7250-j2 or srl_nokia-feat:platform-7220-h3";
+        value 8;
+        description
+          "Indicates the the LAG member-links must be 400G to be active";
+      }
+
+    }
+  }
+  //Future Add 50G/mixed/etc.
+
+  typedef lag-type {
+    type enumeration {
+      enum lacp {
+        description "LAG managed by LACP";
+      }
+      enum static {
+        description "Statically configured bundle / LAG";
+      }
+    }
+    description
+      "Type to define the lag-type, i.e., how the LAG is
+      defined and managed";
+  }
+
+  typedef lacp-fallback-type {
+    type enumeration {
+        enum static {
+            description "Set the LACP-fallback mode as static";
+        }
+    }
+ }
+
+  typedef member-link-oper-down-reason {
+    type enumeration {
+      enum "port-disabled";
+      enum "port-oper-disabled";
+      enum "lag-admin-disabled";
+      enum "lacp-down";
+      enum "microBFD-down";
+      enum "lag-min-link-threshold";
+      enum "lag-speed-mismatch";
+      enum "other";
+    }
+  }
+  
+    // Groupings
+    
+    grouping lag-ethernet-id-config {
+        leaf lag-id {
+            description
+            "Reference ID for associated LAG interface
+            Example: lag2 ";
+            type leafref {
+                path "/srl_nokia-if:interface/srl_nokia-if:name";
+            }
+        }
+    }
+
+    grouping lag-logical-config {
+    description
+      "Configuration data for aggregate interfaces";
+        container lag {
+            presence "Enable LAG configuration";
+            if-feature srl_nokia-feat:lag;
+            description
+            "Container for options related to LAG";
+            must "starts-with(../srl_nokia-if:name,'lag')" {
+                error-message "lag container can only be configured on LAG interfaces";
+            }
+            leaf lag-type {
+                must ".='static' or (.='lacp' and ../lacp)" {
+                    error-message "lacp container must be configured when lag-type is lacp";
+                }
+                srl_nokia-ext:show-importance high;
+                type lag-type;
+                default static;
+                description
+                    "Sets the type of LAG, i.e., how it is
+                    configured / maintained";
+            }
+            leaf min-links {
+                srl_nokia-ext:show-importance high;
+                type uint16 {
+                    range 1..64;
+                }
+                default 1;
+                description
+                    "Specifies the mininum number of member
+                    interfaces that must be active for the aggregate interface
+                    to be available";
+            }
+            leaf member-speed {
+                description "Specifies the link speed of allowed member-links";
+                srl_nokia-ext:show-importance high;
+                type member-speed-type;
+            }
+            leaf lacp-fallback-mode {
+                must " (../srl_nokia-if-lag:lag-type = 'lacp' and ../lacp/lacp-mode = 'ACTIVE')" {
+                    error-message " precondition failed: lag type should be lacp and lacp type should be active to set lacp fallback mode";
+                }
+                srl_nokia-ext:show-importance high;
+                type lacp-fallback-type;
+                description
+                    "Specifies lacp-fallback mode if enabled";
+            }
+            leaf lacp-fallback-timeout {
+                must " (../srl_nokia-if-lag:lag-type = 'lacp' and ../lacp/lacp-mode = 'ACTIVE')" {
+                    error-message " precondition failed: lag type should be lacp and lacp type should be active to set lacp fallback timeout";
+                }
+                must "not((../lacp/interval = 'SLOW') and (. < 90))" {
+                    error-message " precondition failed: for lacp interval slow, lacp fallback timeout can not be less than 90 sec";
+                }
+                type uint16 {
+                  range 4..3600;
+                }
+                description
+                    "Specifies the LACP-fallback timeout interval in seconds";
+            }
+            leaf lag-speed {
+                srl_nokia-ext:show-importance high;
+                config false;
+                type uint32;
+                units Mbps;
+                description "reports current aggregate bandwidth speed of the associated LAG";
+            }
+            list members {
+                key "name";
+                config false;
+                description "Reports the list of interfaces associated with the LAG instance";
+                leaf name {
+                    srl_nokia-ext:show-importance high;
+                    type leafref {
+                        path "/srl_nokia-if:interface/srl_nokia-if:name";
+                    }
+                }
+                leaf oper-state {
+                    config false;
+                    description "Operational state for the associated LAG";
+                    type srl_nokia-comm:oper-state;
+                }
+                leaf oper-down-reason {
+                    config false;
+                    description "Reason for operational down state for the associated LAG";
+                    type member-link-oper-down-reason;
+                }
+                leaf microbfd-enabled {
+                    config false;
+                    type boolean;
+                    description
+                    "Indicates if microBFD is currently used in the determination of the member-link oper-status";
+                }
+                leaf last-change {
+                    config false;
+                    type srl_nokia-comm:date-and-time-delta;
+                    description "The date and time of the most recent change to the LAG member-link state";
+                }
+                
+            }  //end member list
+            
+        }
+  }
+
+  augment "/srl_nokia-if:interface" {
+    uses lag-logical-config;
+  }
+}

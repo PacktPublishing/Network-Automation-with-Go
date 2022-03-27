@@ -1,0 +1,2421 @@
+module srl_nokia-bgp {
+
+    yang-version 1.1;
+
+    namespace "urn:srl_nokia/bgp";
+
+    prefix "srl_nokia-bgp";
+
+    import srl_nokia-common {
+        prefix srl_nokia-comm;
+    }
+    import srl_nokia-network-instance {
+        prefix srl_nokia-netinst;
+    }
+    import srl_nokia-extensions {
+        prefix srl_nokia-ext;
+    }
+    import srl_nokia-routing-policy {
+        prefix srl-rpol;
+    }
+    import srl_nokia-system {
+        prefix srl_nokia-system;
+    }
+    import srl_nokia-keychains {
+        prefix srl-keychain;
+    }
+    import srl_nokia-features {
+        prefix srl_nokia-feat;
+    }
+    import srl_nokia-system-reboot {
+        prefix srl_nokia-system-reboot;
+    }
+
+    description
+        "This yang file models configuration and state of the BGP protocol";
+
+  revision 2021-06-30 {
+    description
+      "SRLinux 21.6.1";
+  }
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+    typedef autonomous-system-number {
+        type uint32 {
+            range "1..4294967295";
+        }
+    }
+
+    typedef ip-ecmp {
+        description
+            "The supported range of ECMP values for IP routes.";
+        type uint32 {
+            range "1..64";
+        }
+    }
+
+    typedef percentage {
+        type uint8 {
+            range "0..100";
+        }
+        description
+            "Integer indicating a percentage value";
+    }
+
+    grouping bgp-policy {
+        leaf export-policy {
+            description
+                "Apply an export policy to advertised BGP routes";
+            type leafref {
+                path "/srl-rpol:routing-policy/srl-rpol:policy/srl-rpol:name";
+            }
+        }
+        leaf import-policy {
+            description
+                "Apply an import policy to received BGP routes";
+            type leafref {
+                path "/srl-rpol:routing-policy/srl-rpol:policy/srl-rpol:name";
+            }
+        }
+    }
+
+    grouping traceoptions {
+        container trace-options {
+            description "Debug traceoptions for BGP";
+
+            list flag {
+                key name;
+                description "Tracing parameters";
+                leaf name {
+                    type enumeration {
+                        enum "events" {
+                            value 0;
+                            description "Trace all BGP events.";
+                        }
+                        enum "packets" {
+                            value 1;
+                            description "Trace all BGP protocol packets.";
+                        }
+                        enum "open" {
+                            value 2;
+                            description "Trace BGP open packets.";
+                        }
+                        enum "keepalive" {
+                            value 3;
+                            description "Trace BGP keepalive packets.";
+                        }
+                        enum "graceful-restart" {
+                            value 4;
+                            description "Trace Graceful Restart events.";
+                        }
+                        enum "timers" {
+                            value 5;
+                            description "Trace routing protocol timer processing.";
+                        }
+                        enum "route" {
+                            description "Trace BGP route table manager.";
+                            value 6;
+                        }
+                        enum "notification" {
+                            description "Trace Bgp notification.";
+                            value 7;
+                        }
+                        enum "socket" {
+                            description "Trace socket info.";
+                            value 8;
+                        }
+                        enum "update" {
+                            description "Trace update info.";
+                            value 9;
+                        }
+                    }
+                }
+                leaf modifier {
+                    type enumeration {
+                        enum "detail" {
+                            value 0;
+                            description "To enable detailed tracing. Includes both received and sent packets.";
+                        }
+                        enum "receive" {
+                            value 1;
+                            description "To enable tracing for the packets which are received.";
+                        }
+                        enum "send" {
+                            value 2;
+                            description "To enable tracing for the sent packets.";
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    grouping bgp-group {
+        list group {
+            key "group-name";
+            description
+                "Peer group templates";
+            leaf group-name {
+                type srl_nokia-comm:name {
+                    length "1..64";
+                }
+                description
+                    "The configured name of the peer group";
+            }
+            leaf admin-state {
+                type srl_nokia-comm:admin-state;
+                default "enable";
+                must ". = 'disable' or
+                  (((not(../ipv4-unicast/admin-state) and ../../ipv4-unicast/admin-state = 'enable') or (../ipv4-unicast/admin-state = 'enable')) or
+                      ((not(../ipv6-unicast/admin-state) and ../../ipv6-unicast/admin-state = 'enable') or (../ipv6-unicast/admin-state = 'enable')) or
+                      ((not(../evpn/admin-state) and ../../evpn/admin-state = 'enable') or (../evpn/admin-state = 'enable')))"
+               {
+                  error-message "One of the address families must be enabled.";
+               }
+                description
+                    "Administratively enable or disable the peer group
+
+                    Disable will tear down all the BGP sessions in the group, even if they are administratively enabled at the neighbor level.";
+            }
+            leaf description {
+                type srl_nokia-comm:description;
+                description
+                    "A user provided description string for the peer group";
+            }
+            leaf under-maintenance {
+                config false;
+                type boolean;
+                description
+                     "State field to determine if this bgp group is in maintenance mode.";
+            }
+            leaf maintenance-group {
+                config false;
+                type string;
+                description
+                    "State field to display the maintenance group to which this group belongs to.";
+            }
+            uses bgp-policy;
+            leaf local-preference {
+                type uint32;
+                description
+                    "The value of the local-preference attribute that is added to received routes from EBGP peers in the group
+
+                    It is also used to encode the local preference attribute for locally generated BGP routes.";
+            }
+            leaf next-hop-self {
+              type boolean;
+              description
+                "When set to true, the next-hop in all IPv4-unicast, IPv6-unicast and EVPN BGP routes advertised to all IBGP peers in the peer-group is set equal to the local-address used on each session (or to the router ID if the NLRI is IPv6 and there is no IPv6 local address to use). This is independent of the route origin (EBGP, IBGP-client, IBGP-non-client or redistributed direct/static/aggregate route). 
+                
+                When set to false, normal BGP rules from RFC 4271 apply.";
+                default false;
+            }
+            leaf peer-as {
+                srl_nokia-ext:show-importance high;
+                type autonomous-system-number;
+                description
+                    "The autonomous system number expected from each peer in the group
+
+                    A configured session with a peer does not come up if this value does not match the AS value reported by the peer in its OPEN message.";
+            }
+            container as-path-options {
+                description
+                    "Options for handling the AS_PATH in received BGP routes";
+                leaf allow-own-as {
+                    type uint8;
+                    description
+                        "The maximum number of times the global AS number or a local AS number of the BGP instance can appear in any received AS_PATH before it is considered a loop and considered invalid
+
+                        When this value is changed the new value applies only to the routes received after the change is committed.";
+                }
+                container remove-private-as {
+                    presence "Configure remove-private-as";
+
+                    description
+                        "Container with options for removing private AS numbers (2-byte and 4-byte) from the advertised AS path towards all peers";
+                    leaf mode {
+                        description
+                            "The method by which private AS numbers are removed from the advertised AS_PATH attribute";
+                        type enumeration {
+                            enum "disabled" {
+                                description
+                                    "Do not strip or replace any private AS numbers";
+                            }
+                            enum "delete" {
+                                description
+                                    "Delete private AS numbers, shortening the AS path";
+                            }
+                            enum "replace" {
+                                description
+                                    "Replace private AS numbers with the local AS number used towards the peer, maintaining the AS path length";
+                            }
+                        }
+                        mandatory "true";
+                    }
+                    leaf leading-only {
+                        description
+                            "If set to true then only delete or replace private AS numbers that appear before the first occurrence of a non-private ASN in the sequence of most recent ASNs in the AS path";
+                        type boolean;
+                        default false;
+                        must "not(../mode = 'disabled' and . = true())" {
+                            error-message "mode should not be disabled to set leading-only to true.";
+                        }
+                    }
+                    leaf ignore-peer-as {
+                        description
+                            "If set to true then do not delete or replace a private AS number that is the same as the peer AS number";
+                        type boolean;
+                        default false;
+                        must "not(../mode = 'disabled' and . = true())" {
+                            error-message "mode should not be disabled to set ignore-peer-as to true.";
+                        }
+                    }
+                }
+                leaf replace-peer-as {
+                    description
+                        "If set to true then replace every occurrence of the peer AS number that is present in the advertised AS path with the local AS number used towards the peer";
+                    type boolean;
+                }
+            }
+            container authentication {
+                description
+                  "Container with authentication options that apply to all peers in this peer-group";
+                leaf keychain {
+                    description
+                      "Reference to a keychain. The keychain type must be tcp-md5.";
+                    type leafref {
+                        path "/srl_nokia-system:system/srl-keychain:authentication/srl-keychain:keychain/srl-keychain:name";
+                    }
+                    must '/srl_nokia-system:system/srl-keychain:authentication/srl-keychain:keychain[srl-keychain:name = current()]' + '/srl-keychain:type = "tcp-md5"'
+                    {
+                        error-message "Only keychain of type tcp-md5 can be assigned";
+                    }
+                }
+            }
+            container failure-detection {
+                description
+                    "Options related to methods of detecting BGP session failure";
+                leaf enable-bfd {
+                    type boolean;
+                    description
+                        "The true setting enables Bi-directional Forwarding Detection on BGP sessions belonging to the peer group";
+                }
+                leaf fast-failover {
+                    type boolean;
+                    description
+                        "The true setting causes EBGP and IBGP sessions in the peer group to drop immediately (and not wait for hold timer expiry) when the local interface that they depend upon for neighbor reachability goes down";
+                }
+            }
+            container graceful-restart {
+                description
+                    "Options related to router behavior as a graceful restart helper";
+                leaf admin-state {
+                    type srl_nokia-comm:admin-state;
+                    description
+                        "Administratively enable or disable graceful restart helper for all address families";
+                }
+                leaf stale-routes-time {
+                    type uint16 {
+                        range "1..3600";
+                    }
+                    units "seconds";
+                    description
+                        "The maximum number of seconds that routes received from a helped peer remain stale until they are deleted
+
+                        Routes of AFI/SAFI X received from peer Y are marked stale when peer Y goes down and its previous GR capability included AFI/SAFI X.";
+                }
+            }
+            container ipv4-unicast {
+                description
+                    "Options related to the IPv4-unicast address family";
+                leaf admin-state {
+                    type srl_nokia-comm:admin-state;
+                    description
+                        "Administratively enable or disable the IPv4 unicast address family on all sessions belonging to the group";
+                }
+                leaf advertise-ipv6-next-hops {
+                    type boolean;
+                    description
+                        "Enables advertisement of IPv4 routes with IPv6 next-hops to peers in the group
+
+                        When set to true, BGP advertises IPv4-unicast routes to its peers using MP-BGP. If the local-address towards a peer is an IPv6 address and BGP is supposed to apply next-hop-self the MP_REACH_NLRI will encode the IPv6 local-address as the BGP next-hop. When set to false, BGP is required to advertise an IPv4 next-hop with every IPv4 route (and to encode that in the NEXT_HOP attribute).";
+                }
+                leaf receive-ipv6-next-hops {
+                    type boolean;
+                    description
+                        "Enables the advertisement of the RFC 5549 capability to receive IPv4 routes with IPv6 next-hops
+
+                        When set to true, BGP advertises an extended NH encoding (RFC 5549) capability to its peers. This capability indicates that local router is prepared to accept BGP routes for IPv4 NLRI with IPv6 next-hops from  peers in the scope of the command. When set to false, BGP handles received IPV4 routes with IPv6 next-hops as an error and applies treat-as-withdraw.";
+                }
+                container prefix-limit {
+                    description
+                        "Options for configuring the maximum number of IPv4 routes allowed to be received from each peer in the group";
+                    leaf max-received-routes {
+                        type uint32 {
+                            range "1..4294967295";
+                        }
+                        default 4294967295;
+                        description
+                            "Maximum number of IPv4 routes that will be accepted from each neighbor, counting routes accepted and rejected by import policies";
+                    }
+                    leaf warning-threshold-pct {
+                        type percentage;
+                        default 90;
+                        description
+                            "When the number of IPv4 routes received from any group peer (counting routes accepted and rejected by import policy) reaches this percentage of the max-received-routes limit, BGP raises a warning log event";
+                    }
+                }
+            }
+            container ipv6-unicast {
+                description
+                    "Options related to the IPv6-unicast address family";
+                leaf admin-state {
+                    type srl_nokia-comm:admin-state;
+                    description
+                        "Administratively enable or disable the IPv6 unicast address family on all sessions belonging to the group";
+                }
+                container prefix-limit {
+                    description
+                        "Options for configuring the maximum number of IPv6 routes allowed to be received from each peer in the group";
+                    leaf max-received-routes {
+                        type uint32 {
+                            range "1..4294967295";
+                        }
+                        default 4294967295;
+                        description
+                            "Maximum number of IPv6 routes that will be accepted from each neighbor, counting routes accepted and rejected by import policies";
+                    }
+                    leaf warning-threshold-pct {
+                        type percentage;
+                        default 90;
+                        description
+                            "When the number of IPv6 routes received from any group peer (counting routes accepted and rejected by import policy) reaches this percentage of the max-received-routes limit, BGP raises a warning log event";
+                    }
+                }
+            }
+
+            container evpn {
+                description
+                  "Options related to the EVPN address family";
+                leaf admin-state {
+                    type srl_nokia-comm:admin-state;
+                    must ". = 'disable' or (/srl_nokia-netinst:network-instance[srl_nokia-netinst:name = current()/../../../../../srl_nokia-netinst:name]/srl_nokia-netinst:type = 'srl_nokia-netinst:default')" {
+                        error-message "EVPN is not supported in network instances other than default";
+                    }
+                    description
+                      "Administratively enable or disable the EVPN address family on the BGP sessions of the peer-group";
+                }
+                leaf advertise-ipv6-next-hops {
+                    type boolean;
+                     must "/srl_nokia-netinst:network-instance[srl_nokia-netinst:name = current()/../../../../../srl_nokia-netinst:name]/srl_nokia-netinst:type = 'srl_nokia-netinst:default'" {
+                        error-message "EVPN is not supported in network instances other than default";
+                    }
+
+                    description
+                      "Enables advertisement of EVPN routes with IPv6 next-hops to peers in the peer-group
+                       
+                       If this is set to true and the local-address used towards the peer is an IPv6 address and BGP is supposed to apply next-hop-self then the route is advertised with the IPv6 local-address as the BGP next-hop. If this is set to false, then the EVPN route is advertised with an IPv4 next-hop.";
+                }
+                container prefix-limit {
+                    description
+                      "Options for configuring the maximum number of EVPN routes allowed to be received from each peer in the peer-group";
+                    leaf max-received-routes {
+                        type uint32 {
+                            range "1..4294967295";
+                        }
+                        default 4294967295;
+                        must ". = 4294967295 or (/srl_nokia-netinst:network-instance[srl_nokia-netinst:name = current()/../../../../../../srl_nokia-netinst:name]/srl_nokia-netinst:type = 'srl_nokia-netinst:default')" {
+                           error-message "EVPN is not supported in network instances other than default";
+                       }
+                        description
+                          "Maximum number of EVPN routes that will be accepted from each neighbor, counting routes accepted and rejected by import policies";
+                    }
+                    leaf warning-threshold-pct {
+                        type percentage;
+                        default 90;
+                        must ". = 90 or (/srl_nokia-netinst:network-instance[srl_nokia-netinst:name = current()/../../../../../../srl_nokia-netinst:name]/srl_nokia-netinst:type = 'srl_nokia-netinst:default')" {
+                           error-message "EVPN is not supported in network instances other than default";
+                        }
+
+                        description
+                          "When the number of EVPN routes received from the peer (counting routes accepted and rejected by import policy) reaches this percentage of the max-received-routes limit, BGP raises a warning log event";
+                    }
+                }
+            }
+
+            list local-as {
+                description
+                    "Options related to the local autonomous-system number advertised by this router to its peers";
+                key as-number;
+                max-elements 1;
+                leaf as-number {
+                    type autonomous-system-number;
+                    description
+                        "The local autonomous system number used to override the global ASN on this group of BGP sessions
+
+                        Sets the ASN value that this router sends in its OPEN message towards its peer in the group.";
+                }
+                leaf prepend-global-as {
+                    type boolean;
+                    default true;
+                    description
+                        "When set to true, the global ASN value is prepended to the AS path in outbound routes towards each BGP peer in the group
+
+                        If a session is EBGP (peer-as is not equal to the local-as) then the local-as is prepended as the final step, so that the local-as is the first element in the AS_PATH received by the peer.";
+                }
+                leaf prepend-local-as {
+                    type boolean;
+                    default true;
+                    description
+                        "When set to true, the local AS value is prepended to the AS path of inbound routes from each EBGP peer belonging to the group";
+                }
+            }
+            container route-reflector {
+                description
+                  "Container with route reflection configuration options.";
+                leaf client {
+                    description
+                      "When this is set to true all configured and dynamic BGP sessions that belong to the peer-group are considered RR clients.";
+                    type boolean;
+                }
+                leaf cluster-id {
+                    description
+                      "The cluster-id to insert into the CLUSTER_LIST attribute when reflecting routes received by or sent to each client in the peer-group. The default is inherited from instance level configuration.";
+                    type srl_nokia-comm:dotted-quad;
+                }
+            }
+            container send-community {
+                description
+                    "Options for controlling the sending of BGP communities to peers in the group";
+                leaf standard {
+                    type boolean;
+                    description
+                        "The false setting causes BGP to strip all standard (4 byte) communities from all outbound routes advertised to each peer in the group";
+                }
+                leaf large {
+                    type boolean;
+                    description
+                        "The false setting causes BGP to strip all large (12 byte) BGP communities from all outbound routes advertised to each peer in the group";
+                }
+            }
+            container send-default-route {
+                description
+                    "Options for controlling the generation of default routes towards group peers";
+                leaf ipv4-unicast {
+                    type boolean;
+                    default false;
+                    description
+                        "Enables the sending of a synthetically generated default IPv4 route [0/0] to each peer in the group";
+                }
+                leaf ipv6-unicast {
+                    type boolean;
+                    default false;
+                    description
+                        "Enables the sending of a synthetically generated default IPv6 route [::/0] to each peer in the group";
+                }
+                leaf export-policy {
+                    type leafref {
+                        path "/srl-rpol:routing-policy/srl-rpol:policy/srl-rpol:name";
+                    }
+                    description
+                        "The name of a policy that should be applied to the advertised default routes, in order to set their attributes to non-default values
+
+                        Only the default-action of this policy is parsed and applied.";
+                }
+            }
+            container timers {
+                leaf connect-retry {
+                    type uint16 {
+                        range "1..65535";
+                    }
+                    units "seconds";
+                    default 120;
+                    description
+                        "The time interval in seconds between successive attempts to establish a session with a peer";
+                }
+                leaf hold-time {
+                    type uint16 {
+                        range 0|3..65535;
+                    }
+                    units "seconds";
+                    default 90;
+                    description
+                        "The hold-time interval in seconds that the router proposes to the peer in its OPEN message
+
+                        The actual in-use hold-time is negotiated to the lowest value proposed by the two peers. A negotiated value of 0 suppresses the sending of keepalives by both peers.";
+                }
+                leaf keepalive-interval {
+                    type uint16 {
+                        range "0..21845";
+                    }
+                    units "seconds";
+                    description
+                        "The interval in seconds between successive keepalive messages sent to the peer
+
+                        The period between one keepalive message and the next is the minimum of this configured value and 1/3 of the negotiated hold-time duration. A value of 0 suppresses the sending of keepalives to the peer.";
+                }
+                leaf minimum-advertisement-interval {
+                    type uint16 {
+                        range "1..255";
+                    }
+                    units "seconds";
+                    default 5;
+                    description
+                        "The value assigned to the MinRouteAdvertisementIntervalTimer of RFC 4271, for both EBGP and IBGP sessions
+
+                        Each session runs its own independent timer and the timer affects both route advertisements and route withdrawals, regardless of address family. For route withdrawals only, this timer is bypassed if rapid-withdrawal is set to true.";
+                }
+            }
+            uses traceoptions;
+            container transport {
+                leaf tcp-mss {
+                    type uint16 {
+                        range "536..9446";
+                    }
+                    units "bytes";
+                    description
+                        "The maximum segment size for each BGP TCP session belonging to the group
+
+                        If the configured tcp-mss value is higher than the discovered path MTU it has no effect and the path MTU is used as the operational TCP MSS.";
+                }
+                leaf passive-mode {
+                    type boolean;
+                    default false;
+                    description
+                        "The true setting causes BGP to wait for the peer to initiate the TCP connection
+
+                        The false setting causes BGP to initiate a TCP connection whenever the BGP session is started or restarted.";
+                }
+                leaf local-address {
+                    type srl_nokia-comm:ip-address;
+                    /* revisit later once telemetry supports union of IpAddress and String
+                    type union {
+                        type srl_nokia-comm:ip-address;
+                        //type string;
+
+                        // to-do: change this to a leaf-ref
+                        }*/
+                    description
+                        "The local TCP endpoint of used for all BGP sessions in the group
+
+                        This also the source address for next-hop-self, if it applies. The local-address can be specified as an IP address that is resolvable to a local interface.
+
+                        This address must be the primary address of an interface, otherwise the session will not come up.";
+                }
+            }
+            container statistics {
+                description "Container for BGP statistics.";
+                config false;
+                leaf total-paths {
+                    type srl_nokia-comm:zero-based-counter64;
+                    description
+                        "The total number of path attribute objects used by received BGP routes associated with the peer-group";
+                }
+                leaf total-prefixes {
+                    config false;
+                    type uint64;
+                    description
+                        "The total number of unique NLRI contained in all received BGP routes associated with the BGP instance or the peer-group.";
+                }
+                leaf path-memory {
+                    type srl_nokia-comm:zero-based-counter64;
+                    description
+                        "The total number of bytes required to store the path attribute objects used by received BGP routes associated with the peer-group";
+                }
+                leaf total-received-routes {
+                    type srl_nokia-comm:zero-based-counter64;
+                    description
+                        "The total number of received BGP routes associated with the peer-group, summed across all address families";
+                }
+                leaf total-active-routes {
+                    type srl_nokia-comm:zero-based-counter64;
+                    description
+                        "The total number of received BGP routes that are active (installed for forwarding) and associated with the peer-group, summed across all address families";
+                }
+                leaf total-peers {
+                    type uint16;
+                    description
+                        "The total number of configured BGP peers associated with the peer-group";
+                }
+                leaf up-peers {
+                    type uint16;
+                    description
+                        "The number of configured BGP peers associated with the peer-group that are currently in the established state";
+                }
+                leaf disabled-peers {
+                    type uint16;
+                    description
+                        "The number of configured BGP peers associated with the peer-group that are administratively disabled";
+                }
+                leaf dynamic-peers {
+                    type uint16;
+                    description
+                        "The number of dynamic BGP peers associated with the peer-group that are currently in the established state, counting sessions resulting from accepted incoming TCP connections and outgoing TCP connections triggered by LLDP auto-discovery";
+                }
+            }
+        }
+    }
+
+    grouping neighbor-state {
+        leaf peer-router-id {
+            config false;
+            srl_nokia-ext:show-importance high;
+            description
+                "The BGP identifier advertised by the peer in its OPEN message";
+            type srl_nokia-comm:dotted-quad;
+        }
+        leaf session-state {
+            config false;
+            srl_nokia-ext:show-importance high;
+            type enumeration {
+                enum "idle" {
+                   value 0;
+                }
+                enum "connect" {
+                    value 1;
+                }
+                enum "active" {
+                    value 2;
+                }
+                enum "opensent" {
+                    value 3;
+                }
+                enum "openconfirm" {
+                    value 4;
+                }
+                enum "established" {
+                    value 5;
+                }
+            }
+            description "Current state of the session";
+        }
+        leaf last-state {
+            config false;
+            type enumeration {
+                enum "idle" {
+                   value 0;
+                }
+                enum "connect" {
+                    value 1;
+                }
+                enum "active" {
+                    value 2;
+                }
+                enum "opensent" {
+                    value 3;
+                }
+                enum "openconfirm" {
+                    value 4;
+                }
+                enum "established" {
+                    value 5;
+                }
+            }
+            description "Previous state of the session";
+        }
+        leaf last-event {
+            config false;
+            type enumeration {
+                enum "none" { }
+                enum "start" { }
+                enum "stop" { }
+                enum "open" { }
+                enum "close" { }
+                enum "openFail" { }
+                enum "error" { }
+                enum "connectRetry" { }
+                enum "holdTime" { }
+                enum "keepAlive" { }
+                enum "recvOpen" { }
+                enum "recvKeepAlive" { }
+                enum "recvUpdate" { }
+                enum "recvNotify" { }
+                enum "startPassive" { }
+                enum "parseError" { }
+                enum "outOfMemory" { }
+                enum "rtmLimitExceed" { }
+                enum "outOfProtNHIndex" { }
+                enum "outOfNHIndex" { }
+                enum "labelAllocFailed" { }
+                enum "lspIdAllocFailed" { }
+                enum "collisionResolution"{ }
+                enum "adminShutdown"{ }
+                enum "adminReset"{ }
+                enum "configChange"{ }
+                enum "maxPrefixExceed"{ }
+                enum "maxPfxExcdLog"{ }
+                enum "trackingPolMismatch"{ }
+                enum "receivedMalformedAttr"{ }
+                enum "adminResetHard"{ }
+                enum "peerDamping"{ }
+            }
+        }
+        leaf last-established {
+            config false;
+            type srl_nokia-comm:date-and-time-delta;
+            description
+                "The time when the session last transitioned into or out of the established state
+
+                Uptime or downtime of the session can be calculated from this state.";
+        }
+        leaf established-transitions {
+            config false;
+            type srl_nokia-comm:zero-based-counter64;
+            description
+                "The total number of times the BGP FSM transitioned into the established state for this peer";
+        }
+        leaf-list advertised-capabilities {
+            config false;
+            type enumeration {
+                enum "MP_BGP";
+                enum "ROUTE_REFRESH";
+                enum "EXT_NH_ENCODING";
+                enum "GRACEFUL_RESTART";
+                enum "4-OCTET_ASN";
+                enum "ORF_SEND_EXCOMM";
+                enum "ORF_RECEIVE_EXCOMM";
+            }
+            description
+                "List of BGP capabilities advertised by the local routing device to the peer";
+        }
+        leaf-list received-capabilities {
+            config false;
+            type enumeration {
+                enum "MP_BGP";
+                enum "ROUTE_REFRESH";
+                enum "EXT_NH_ENCODING";
+                enum "GRACEFUL_RESTART";
+                enum "4-OCTET_ASN";
+                enum "ORF_SEND_EXCOMM";
+                enum "ORF_RECEIVE_EXCOMM";
+                enum "ADD_PATH";
+                enum "LONG_LIVED_GR";
+            }
+            description
+                "List of BGP capabilities received by the local routing device from the peer";
+        }
+        leaf-list received-afi-safi {
+            config false;
+            type enumeration {
+                enum "ipv4-unicast";
+                enum "ipv6-unicast";
+            }
+            description
+                "List of multiprotocol BGP address families supported by the peer, derived from the AFI/SAFI list in the MP-BGP capability received by the local routing device from the peer";
+        }
+        leaf-list received-end-of-rib {
+            config false;
+            type enumeration {
+                enum "ipv4-unicast";
+                enum "ipv6-unicast";
+            }
+            description
+                "List of address families for which the peer has signaled the End of RIB marker";
+        }
+        leaf-list sent-end-of-rib {
+            config false;
+            type enumeration {
+                enum "ipv4-unicast";
+                enum "ipv6-unicast";
+            }
+            description
+                "List of address families for which this router sent the peer an End of RIB marker";
+        }
+        leaf slow-peer {
+            config false;
+            type enumeration {
+                enum "yes";
+                enum "no";
+                enum "unknown";
+            }
+            description
+                "Set to 'yes' if, after the last BGP restart, the session was in a lesser state than established when the min-wait-to-advertise timer expired
+
+                Set to unknown if the min-wait-to-advertise time has not yet elapsed.";
+        }
+        leaf dynamic-neighbor {
+            config false;
+            type boolean;
+            description
+                "Indicates true if the neighbor is a dynamic peer that resulted from an accepted incoming TCP connection or an outgoing TCP connection triggered by LLDP auto-discovery";
+        }
+        leaf discovered-by-lldp {
+            config false;
+            type boolean;
+            description
+                "Set to true if the peer IP address is known through LLDP (irrespective of whether the final TCP connection was originated by this router or not)";
+        }
+        leaf last-notification-error-code {
+            config false;
+            type enumeration {
+                enum "Message Header Error" {
+                    value 0;
+                }
+                enum "Open Message Error" {
+                    value 1;
+                }
+                enum "Update Message Error" {
+                    value 2;
+                }
+                enum "Hold Timer Error" {
+                    value 3;
+                }
+                enum "Finite State Machine Error" {
+                    value 4;
+                }
+                enum Cease {
+                    value 5;
+                }
+            }
+            description
+                "The error code in the last NOTIFICATION sent to this peer.";
+        }
+        leaf last-notification-error-subcode {
+            config false;
+            type enumeration {
+                enum "Connection Not Synchronized" {
+                    value 0;
+                }
+                enum "Bad Message Length" {
+                    value 1;
+                }
+                enum "Bad Message Type" {
+                    value 2;
+                }
+                enum "Unsupported Version Number" {
+                    value 3;
+                }
+                enum "Bad Peer As" {
+                    value 4;
+                }
+                enum "Bad BGP Identifier" {
+                    value 5;
+                }
+                enum "Unsupported Optional Parameter" {
+                }
+                enum "Unacceptable Hold Time" {
+                }
+                enum "UPDATE Message Error subcodes" {
+                }
+                enum "Malformed Attribute List" {
+                }
+                enum "Unrecognized Well-known Attribute" {
+                }
+                enum "Missing Well-known Attribute" {
+                }
+                enum "Attribute Flags Error" {
+                }
+                enum "Attribute Length Error" {
+                }
+                enum "Invalid ORIGIN Attribute" {
+                }
+                enum "Invalid NEXT_HOP Attribute" {
+                }
+                enum "Optional Attribute Error" {
+                }
+                enum "Invalid Network Field" {
+                }
+                enum "Malformed AS_PATH" {
+                }
+                enum "Maximum Number of Prefixes Reached" {
+                }
+                enum "Administrative Shutdown" {
+                }
+                enum "Peer De-configured" {
+                }
+                enum "Administrative Reset" {
+                }
+                enum "Connection Rejected" {
+                }
+                enum "Other Configuration Change" {
+                }
+                enum "Connection Collision Resolution" {
+                }
+                enum "Out of Resources" {
+                }
+            }
+            description "The error subcode in the last NOTIFICATION sent to this peer.";
+        }
+        container sent-messages {
+            config false;
+            description
+                "Container for state information about BGP messages sent to the peer.";
+            leaf queue-depth {
+                type uint32;
+                description
+                    "The number of messages queued to be sent to the peer.";
+            }
+            leaf total-updates {
+                type srl_nokia-comm:zero-based-counter64;
+                description
+                    "Number of BGP UPDATE messages sent to the peer over the lifetime of its configuration or since the last clear.";
+            }
+            leaf total-non-updates {
+                type uint64;
+                description
+                    "Number of BGP NON UPDATE messages sent to the peer over the lifetime of its configuration or since the last clear.";
+            }
+            leaf route-refresh {
+                type srl_nokia-comm:zero-based-counter64;
+                description
+                    "Number of BGP ROUTE_REFRESH messages sent to the peer over the lifetime of its configuration or since the last clear.";
+              }
+            leaf total-messages {
+                type srl_nokia-comm:zero-based-counter64;
+                description
+                    "Total number of BGP messages sent to the peer over the lifetime of its configuration or since the last clear.";
+              }
+        }
+        container received-messages {
+            config false;
+            description
+                "Container for state information about BGP messages received from the peer.";
+            leaf queue-depth {
+                type uint32;
+                description
+                    "The number of messages received from the peer currently queued.";
+            }
+            leaf total-updates {
+                type srl_nokia-comm:zero-based-counter64;
+                description
+                    "Number of BGP UPDATE messages received from the peer over the lifetime of its configuration or since the last clear.";
+            }
+            leaf total-non-updates {
+                type uint64;
+                description
+                    "Number of BGP NON UPDATE messages received from the peer over the lifetime of its configuration or since the last clear.";
+            }
+            leaf malformed-updates {
+                type srl_nokia-comm:zero-based-counter64;
+                description
+                    "Number of BGP UPDATE messages received from the peer that were malformed but recoverable through treat-as-withdraw or attribute-discard (i.e. without session reset)";
+            }
+            leaf route-refresh {
+                type srl_nokia-comm:zero-based-counter64;
+                description
+                    "Number of BGP ROUTE_REFRESH messages received from the peer over the lifetime of its configuration or since the last clear.";
+            }
+            leaf total-messages {
+                type srl_nokia-comm:zero-based-counter64;
+                description
+                    "Total number of BGP messages received from the peer over the lifetime of its configuration or since the last clear.";
+            }
+            leaf last-update-time {
+                type srl_nokia-comm:date-and-time-delta;
+                description
+                    "The timestamp when the last UPDATE was received from this peer.";
+            }
+        }
+    }
+
+    grouping bgp-neighbor {
+        list neighbor {
+            description "Create a configured BGP session";
+            key "peer-address";
+            leaf peer-address {
+                type srl_nokia-comm:ip-address-with-zone;
+                description
+                    "The transport address of the BGP peer
+
+                    The peer-address must be a valid IPv4 unicast address or a valid IPv6 global unicast address. Sessions to a link-local IPv6 address are not supported.";
+            }
+            leaf admin-state {
+                type srl_nokia-comm:admin-state;
+                default "enable";
+                description
+                    "Administratively enable or disable the peer
+
+                    Disable will tear down the BGP session (return it to IDLE state).";
+                must ". = 'disable' or ../ipv4-unicast/admin-state = 'enable' or ../ipv6-unicast/admin-state = 'enable' or ../evpn/admin-state = 'enable' or
+                  (not(../ipv4-unicast/admin-state) and (../../group[group-name = current()/../peer-group]/ipv4-unicast/admin-state = 'enable' or (not(../../group[group-name = current()/../peer-group]/ipv4-unicast/admin-state) and ../../ipv4-unicast/admin-state = 'enable')))  or
+                  (not(../ipv6-unicast/admin-state) and (../../group[group-name = current()/../peer-group]/ipv6-unicast/admin-state = 'enable' or (not(../../group[group-name = current()/../peer-group]/ipv6-unicast/admin-state) and ../../ipv6-unicast/admin-state = 'enable'))) or
+                  (not(../evpn/admin-state) and (../../group[group-name = current()/../peer-group]/evpn/admin-state = 'enable' or (not(../../group[group-name = current()/../peer-group]/evpn/admin-state) and ../../evpn/admin-state = 'enable')))"
+                  {
+                      error-message "One of the address families must be enabled.";
+                  }
+            }
+            leaf description {
+                type srl_nokia-comm:description;
+                description
+                    "A user provided description string for the peer";
+            }
+            leaf under-maintenance {
+                config false;
+                type boolean;
+                description
+                     "State field to determine if this bgp neighbor is in maintenance mode.";
+            }
+            leaf maintenance-group {
+                config false;
+                type string;
+                description
+                    "State field to display the maintenance group to which this neighbor belongs to.";
+            }
+            uses bgp-policy;
+            leaf local-preference {
+                type uint32;
+                description
+                    "The value of the local-preference attribute that is added to received routes from the peer, if it is EBGP
+
+                    It is also used to encode the local preference attribute for locally generated BGP routes.";
+            }
+            leaf next-hop-self {
+              type boolean;
+              description
+                "When set to true, the next-hop in all IPv4-unicast, IPv6-unicast and EVPN BGP routes advertised to the peer, if IBGP, is set equal to the local-address used on this session (or to the router ID if the NLRI is IPv6 and there is no IPv6 local address to use). This is independent of the route origin (EBGP, IBGP-client, IBGP-non-client or redistributed direct/static/aggregate route). 
+                
+                When set to false, normal BGP rules from RFC 4271 apply.";
+            }
+            leaf peer-as {
+                srl_nokia-ext:show-importance high;
+                type autonomous-system-number;
+                description
+                    "The autonomous system number expected from the peer
+
+                    A configured session with a peer does not come up if this value does not match the AS value reported by the peer in its OPEN message.";
+            }
+            leaf peer-group {
+                type leafref {
+                    path "../../group/group-name";
+                }
+                mandatory "true";
+                description
+                    "A reference to the peer-group template to use for this BGP session
+
+                    This is not immutable.";
+            }
+            container as-path-options {
+                description
+                    "Options for handling the AS_PATH in received BGP routes";
+                leaf allow-own-as {
+                    type uint8;
+                    description
+                        "The maximum number of times the global AS number or a local AS number of the BGP instance can appear in any received AS_PATH before it is considered a loop and considered invalid";
+                }
+                container remove-private-as {
+                    presence "configure remove-private-as";
+                    description
+                        "Container with options for removing private AS numbers (2-byte and 4-byte) from the advertised AS path towards all peers";
+                    leaf mode {
+                        description
+                            "The method by which private AS numbers are removed from the advertised AS_PATH attribute";
+                        type enumeration {
+                            enum "disabled" {
+                                description
+                                    "Do not strip or replace any private AS numbers";
+                            }
+                            enum "delete" {
+                                description
+                                    "Delete private AS numbers, shortening the AS path";
+                            }
+                            enum "replace" {
+                                description
+                                    "Replace private AS numbers with the local AS number used towards the peer, maintaining the AS path length";
+                            }
+                        }
+                        mandatory "true";
+                    }
+                    leaf leading-only {
+                        description
+                            "If set to true then only delete or replace private AS numbers that appear before the first occurrence of a non-private ASN in the sequence of most recent ASNs in the AS path";
+                        type boolean;
+                        default false;
+                        must "not(../mode = 'disabled' and . = true())" {
+                            error-message "mode should not be disabled to set leading-only to true.";
+                        }
+                    }
+                    leaf ignore-peer-as {
+                        description
+                            "If set to true then do not delete or replace a private AS number that is the same as the peer AS number";
+                        type boolean;
+                        default false;
+                        must "not(../mode = 'disabled' and . = true())" {
+                            error-message "mode should not be disabled to set ignore-peer-as to true.";
+                        }
+                    }
+                }
+                leaf replace-peer-as {
+                    description
+                        "If set to true then replace every occurrence of the peer AS number that is present in the advertised AS path with the local AS number used towards the peer";
+                    type boolean;
+                }
+            }
+            container authentication {
+                description
+                  "Container with authentication options that apply to this specific peer";
+                leaf keychain {
+                    description
+                      "Reference to a keychain. The keychain type must be tcp-md5.";
+                    type leafref {
+                        path "/srl_nokia-system:system/srl-keychain:authentication/srl-keychain:keychain/srl-keychain:name";
+                    }
+                    must '/srl_nokia-system:system/srl-keychain:authentication/srl-keychain:keychain[srl-keychain:name = current()]' + '/srl-keychain:type = "tcp-md5"'
+                    {
+                        error-message "Only keychain of type tcp-md5 can be assigned";
+                    }
+                }
+                leaf transmit-active {
+                    config false;
+                    description
+                      "Reads true when the TCP segments being sent to the peer have authentication data.";
+                    type boolean;
+                }
+            }
+            container failure-detection {
+                description
+                    "Options related to methods of detecting BGP session failure";
+                leaf enable-bfd {
+                    type boolean;
+                    description
+                        "The true setting enables Bi-directional Forwarding Detection on BGP sessions belonging to the peer group";
+                }
+                leaf fast-failover {
+                    type boolean;
+                    description
+                        "The true setting the EBGP or IBGP session to drop immediately (and not wait for hold timer expiry) when the local interface that it depends upon for neighbor reachability goes down";
+                }
+            }
+            container graceful-restart {
+                description
+                    "Options related to router behavior as a graceful restart helper";
+                leaf admin-state {
+                    type srl_nokia-comm:admin-state;
+                    description
+                        "Administratively enable or disable graceful restart helper for all address families";
+                }
+                leaf stale-routes-time {
+                    type uint16 {
+                        range "1..3600";
+                    }
+                    units "seconds";
+                    description
+                        "The maximum number of seconds that routes received from a helped peer remain stale until they are deleted
+
+                        Routes of AFI/SAFI X received from peer Y are marked stale when peer Y goes down and its previous GR capability included AFI/SAFI X.";
+                }
+                leaf number-of-restarts {
+                    config false;
+                    type uint16;
+                    description
+                        "The number of times the peer has restarted";
+                }
+                leaf last-restart-time {
+                    config false;
+                    type srl_nokia-comm:date-and-time-delta;
+                    description
+                        "The last time the peer restarted";
+                }
+                leaf helper-active {
+                    config false;
+                    type boolean;
+                    description
+                        "Set to true when the router is actively helping the neighbor for at least one address family – i.e. for that address family the peer restarted with F=1 in its capability and the stale-routes-time has not expired yet";
+                }
+                container neighbor-capability {
+                    config false;
+                    description
+                        "Container for information about the last GR capability received from the neighbor";
+                    leaf restart-time {
+                        type uint16;
+                        description
+                            "The value of the Restart Time in the neighbor's last GR capability";
+                    }
+                    list afi-safi {
+                        description
+                            "List of AFI/SAFI TLVs that were contained in the neighbor's last GR capability";
+                        key name;
+                        leaf name {
+                            type enumeration {
+                                enum "ipv4-unicast";
+                                enum "ipv6-unicast";
+                            }
+                        }
+                        leaf forwarding-preserved {
+                            type boolean;
+                            description
+                                "The F-bit setting in the AFI/SAFI TLV";
+                        }
+                    }
+                }
+            }
+            container ipv4-unicast {
+                description
+                    "Options related to the IPv4-unicast address family";
+                leaf admin-state {
+                    type srl_nokia-comm:admin-state;
+                    description
+                        "Administratively enable or disable the IPv4 unicast address family on the BGP session";
+                }
+                leaf oper-state {
+                    config false;
+                    type enumeration {
+                        enum "up" {
+                            description "Negotiated operational state of the IPv4 unicast address family is up";
+                        }
+                        enum "down" {
+                            description "Negotiated operational state of the IPv4 unicast address family is down";
+                        }
+                    }
+                }
+                leaf advertise-ipv6-next-hops {
+                    type boolean;
+                    description
+                        "Enables advertisement of IPv4 routes with IPv6 next-hops to the peer
+
+                        When set to true, BGP advertises IPv4-unicast routes using MP-BGP. If the local-address towards the peer is an IPv6 address and BGP is supposed to apply next-hop-self the MP_REACH_NLRI will encode the IPv6 local-address as the BGP next-hop. When set to false, BGP is required to advertise an IPv4 next-hop with every IPv4 route (and to encode that in the NEXT_HOP attribute).";
+                }
+                leaf receive-ipv6-next-hops {
+                    type boolean;
+                    description
+                        "Enables the advertisement of the RFC 5549 capability to receive IPv4 routes with IPv6 next-hops
+
+                        When set to true, BGP advertises an extended NH encoding (RFC 5549) capability to the peer. This capability indicates that local router is prepared to accept BGP routes for IPv4 NLRI with IPv6 next-hops from the peer. When set to false, BGP handles received IPV4 routes with IPv6 next-hops as an error and applies treat-as-withdraw.";
+                }
+                container prefix-limit {
+                    description
+                        "Options for configuring the maximum number of IPv4 routes allowed to be received from the peer";
+                    leaf max-received-routes {
+                        type uint32 {
+                            range "1..4294967295";
+                        }
+                        description
+                            "Maximum number of IPv4 routes that will be accepted from the neighbor, counting routes accepted and rejected by import policies";
+                    }
+                    leaf warning-threshold-pct {
+                        type percentage;
+                        description
+                            "When the number of IPv4 routes received from the peer (counting routes accepted and rejected by import policy) reaches this percentage of the max-received-routes limit, BGP raises a warning log event";
+                    }
+                }
+                leaf received-routes {
+                    config false;
+                    type uint32;
+                    description
+                        "The number of IPv4 unicast routes received from the peer, including routes rejected by import policy";
+                }
+                leaf sent-routes {
+                    config false;
+                    type uint32;
+                    description
+                        "The number of IPv4 unicast routes advertised as reachable to the peer";
+                }
+                leaf active-routes {
+                    config false;
+                    type uint32;
+                    description
+                        "The number of IPv4 unicast received from the peer that are currently used for forwarding";
+                }
+                leaf rejected-routes {
+                    config false;
+                    type uint32;
+                    description
+                        "The number of IPv4 unicast routes received from the peer that were rejected by import policy";
+                }
+            }
+            container ipv6-unicast {
+                description
+                    "Options related to the IPv6-unicast address family";
+                leaf admin-state {
+                    type srl_nokia-comm:admin-state;
+                    description
+                        "Administratively enable or disable the IPv6 unicast address family on the BGP session";
+                }
+                leaf oper-state {
+                    config false;
+                    type enumeration {
+                        enum "up" {
+                            description "Negotiated operational state of the IPv6 unicast address family is up";
+                        }
+                        enum "down" {
+                            description "Negotiated operational state of the IPv6 unicast address family is down";
+                        }
+                    }
+                }
+                container prefix-limit {
+                    description
+                        "Options for configuring the maximum number of IPv6 routes allowed to be received from the peer";
+                    leaf max-received-routes {
+                        type uint32 {
+                            range "1..4294967295";
+                        }
+                        description
+                            "Maximum number of IPv6 routes that will be accepted from the neighbor, counting routes accepted and rejected by import policies";
+                    }
+                    leaf warning-threshold-pct {
+                        type percentage;
+                        description
+                            "When the number of IPv6 routes received from the peer (counting routes accepted and rejected by import policy) reaches this percentage of the max-received-routes limit, BGP raises a warning log event";
+                    }
+                }
+                leaf received-routes {
+                    config false;
+                    type uint32;
+                    description
+                        "The number of IPv6 unicast routes received from the peer, including routes rejected by import policy";
+                }
+                leaf sent-routes {
+                    config false;
+                    type uint32;
+                    description
+                        "The number of IPv6 unicast routes advertised as reachable to the peer";
+                }
+                leaf active-routes {
+                    config false;
+                    type uint32;
+                    description
+                        "The number of IPv6 unicast received from the peer that are currently used for forwarding";
+                }
+                leaf rejected-routes {
+                    config false;
+                    type uint32;
+                    description
+                        "The number of IPv6 unicast routes received from the peer that were rejected by import policy";
+                }
+            }
+            container evpn {
+                description
+                  "Options related to the EVPN address family";
+                leaf admin-state {
+                    type srl_nokia-comm:admin-state;
+                    must ". = 'disable' or (/srl_nokia-netinst:network-instance[srl_nokia-netinst:name = current()/../../../../../srl_nokia-netinst:name]/srl_nokia-netinst:type = 'srl_nokia-netinst:default')" {
+                        error-message "EVPN is not supported in network instances other than default";
+                    }
+
+                    description
+                      "Administratively enable or disable the EVPN address family on the BGP session";
+                }
+                leaf oper-state {
+                    config false;
+                    type enumeration {
+                        enum "up" {
+                            description
+                              "Negotiated operational state of the EVPN address family is up";
+                        }
+                        enum "down" {
+                            description
+                              "Negotiated operational state of the EVPN address family is down";
+                        }
+                    }
+                }
+                leaf advertise-ipv6-next-hops {
+                    type boolean;
+                    must "/srl_nokia-netinst:network-instance[srl_nokia-netinst:name = current()/../../../../../srl_nokia-netinst:name]/srl_nokia-netinst:type = 'srl_nokia-netinst:default'" {
+                        error-message "EVPN is not supported in network instances other than default";
+                    }
+                    description
+                      "Enables advertisement of EVPN routes with IPv6 next-hops to peers
+                       
+                       If this is set to true and the local-address used towards the peer is an IPv6 address and BGP is supposed to apply next-hop-self then the route is advertised with the IPv6 local-address as the BGP next-hop. If this is set to false, then the EVPN route is advertised with an IPv4 next-hop.";
+                }
+                container prefix-limit {
+                    description
+                      "Options for configuring the maximum number of EVPN routes allowed to be received from the peer";
+                    leaf max-received-routes {
+                        type uint32 {
+                            range "1..4294967295";
+                        }
+                        must "/srl_nokia-netinst:network-instance[srl_nokia-netinst:name = current()/../../../../../../srl_nokia-netinst:name]/srl_nokia-netinst:type = 'srl_nokia-netinst:default'" {
+                            error-message "EVPN is not supported in network instances other than default";
+                        }
+                        description
+                          "Maximum number of EVPN routes that will be accepted from the neighbor, counting routes accepted and rejected by import policies";
+                    }
+                    leaf warning-threshold-pct {
+                        type percentage;
+                        must "/srl_nokia-netinst:network-instance[srl_nokia-netinst:name = current()/../../../../../../srl_nokia-netinst:name]/srl_nokia-netinst:type = 'srl_nokia-netinst:default'" {
+                            error-message "EVPN is not supported in network instances other than default";
+                        }
+                        description
+                          "When the number of EVPN routes received from the peer (counting routes accepted and rejected by import policy) reaches this percentage of the max-received-routes limit, BGP raises a warning log event";
+                    }
+                }
+                leaf received-routes {
+                    config false;
+                    type uint32;
+                    description
+                      "The number of EVPN routes received from the peer, including routes rejected by import policy";
+                }
+                leaf sent-routes {
+                    config false;
+                    type uint32;
+                    description
+                      "The number of EVPN routes advertised as reachable to the peer";
+                }
+                leaf active-routes {
+                    config false;
+                    type uint32;
+                    description
+                      "The number of EVPN routes received from the peer that are currently used for forwarding";
+                }
+                leaf rejected-routes {
+                    config false;
+                    type uint32;
+                    description
+                      "The number of EVPN routes received from the peer that were rejected by import policy";
+                }
+            }
+            list local-as {
+                description
+                    "Options related to the local autonomous-system number advertised by this router to the peer";
+                key as-number;
+                max-elements 1;
+                leaf as-number {
+                    type autonomous-system-number;
+                    description
+                        "The local autonomous system number used to override the global ASN on this session
+
+                        Sets the ASN value that this router sends in its OPEN message towards its peer.";
+                }
+                leaf prepend-global-as {
+                    type boolean;
+                    description
+                        "When set to true, the global ASN value is prepended to the AS path in outbound routes towards the peer
+
+                        If a session is EBGP (peer-as is not equal to the local-as) then the local-as is prepended as the final step, so that the local-as is the first element in the AS_PATH received by the peer.";
+                }
+                leaf prepend-local-as {
+                    type boolean;
+                    description
+                        "When set to true, the local AS value is prepended to the AS path of inbound routes from the peer";
+                }
+            }
+            container route-reflector {
+                description
+                  "Container with route reflection configuration options.";
+                leaf client {
+                    description
+                      "When this is set to true this BGP session is considered an RR client.";
+                    type boolean;
+                }
+                leaf cluster-id {
+                    description
+                      "The cluster-id to insert into the CLUSTER_LIST attribute when reflecting routes received by or sent to this client. The default is inherited from group or instance level configuration.";
+                    type srl_nokia-comm:dotted-quad;
+                }
+            }
+            container send-community {
+                description
+                    "Options for controlling the sending of BGP communities to the peer";
+                leaf standard {
+                    type boolean;
+                    description
+                        "The false setting causes BGP to strip all standard (4 byte) communities from all outbound routes advertised to the peer";
+                }
+                leaf large {
+                    type boolean;
+                    description
+                        "The false setting causes BGP to strip all large (12 byte) BGP communities from all outbound routes advertised to the peer";
+                }
+            }
+            container send-default-route {
+                description
+                    "Options for controlling the generation of default routes towards the peer";
+                leaf ipv4-unicast {
+                    type boolean;
+                    description
+                        "Enables the sending of a synthetically generated default IPv4 route [0/0] to the peer";
+                }
+                leaf ipv6-unicast {
+                    type boolean;
+                    description
+                        "Enables the sending of a synthetically generated default IPv6 route [::/0] to the peer";
+                }
+                leaf export-policy {
+                    type leafref {
+                        path "/srl-rpol:routing-policy/srl-rpol:policy/srl-rpol:name";
+                    }
+                    description
+                        "The name of a policy that should be applied to the advertised default routes, in order to set their attributes to non-default values
+
+                        Only the default-action of this policy is parsed and applied.";
+                }
+            }
+            container timers {
+                leaf connect-retry {
+                    type uint16 {
+                        range "1..65535";
+                    }
+                    units "seconds";
+                    description
+                        "The time interval in seconds between successive attempts to establish a session with a peer";
+                }
+                leaf hold-time {
+                    type uint16 {
+                        range 0|3..65535;
+                    }
+                    units "seconds";
+                    description
+                        "The hold-time interval in seconds that the router proposes to the peer in its OPEN message
+
+                        The actual in-use hold-time is negotiated to the lowest value proposed by the two peers. A negotiated value of 0 suppresses the sending of keepalives by both peers.";
+                }
+                leaf keepalive-interval {
+                    type uint16 {
+                        range "0..21845";
+                    }
+                    units "seconds";
+                    description
+                        "The interval in seconds between successive keepalive messages sent to the peer
+
+                        The period between one keepalive message and the next is the minimum of this configured (or inherited) value and 1/3 of the negotiated hold-time duration. A value of 0 suppresses the sending of keepalives to the peer.";
+                }
+                leaf minimum-advertisement-interval {
+                    type uint16 {
+                        range "1..255";
+                    }
+                    units "seconds";
+                    description
+                        "The value assigned to the MinRouteAdvertisementIntervalTimer of RFC 4271, for both EBGP and IBGP sessions
+
+                        Each session runs its own independent timer and the timer affects both route advertisements and route withdrawals, regardless of address family. For route withdrawals only, this timer is bypassed if rapid-withdrawal is set to true.";
+                }
+                leaf next-connect-retry-time {
+                    config false;
+                    type srl_nokia-comm:date-and-time-delta;
+                    description
+                        "The time when the next connect retry attempt will occur";
+                }
+                leaf negotiated-hold-time {
+                    config false;
+                    type uint16;
+                    description
+                        "The operational hold-time
+
+                        It is negotiated to the lowest value proposed by the two peers. A negotiated value of 0 suppresses the sending of keepalives by both peers.";
+                }
+                leaf negotiated-keepalive-interval {
+                    config false;
+                    description
+                        "The operational keepalive interval
+
+                        It is the minimum of the configured value and 1/3 of the negotiated-hold-time. A value of 0 suppresses the sending of keepalives to the peer.";
+                    type uint16;
+                }
+            }
+            uses traceoptions;
+            container transport {
+                leaf tcp-mss {
+                    type uint16 {
+                        range "536..9446";
+                    }
+                    units "bytes";
+                    description
+                        "The maximum segment size for the BGP TCP session
+
+                        If the configured tcp-mss value is higher than the discovered path MTU it has no effect and the path MTU is used as the operational TCP MSS.";
+                }
+                leaf passive-mode {
+                    type boolean;
+                    description
+                        "The true setting causes BGP to wait for the peer to initiate the TCP connection
+
+                        The false setting causes BGP to initiate a TCP connection whenever the BGP session is started or restarted.";
+                }
+                leaf local-address {
+                    type srl_nokia-comm:ip-address;
+                    /* revisit later once telemetry supports union of IpAddress and String
+                    type union {
+                        //type srl_nokia-comm:ip-address;
+                        // type string;
+
+                        // to-do: change this to a leaf-ref
+                        }*/
+                    description
+                        "The local TCP endpoint of used for the BGP session
+
+                         This also the source address for next-hop-self, if it applies. The local-address can be specified as an IP address that is resolvable to a local interface.
+
+                         This address must be the primary address of an interface, otherwise the session will not come up.";
+                }
+                leaf local-port {
+                    config false;
+                    type uint16;
+                    description
+                        "Local TCP port used for the TCP connection to the peer";
+                }
+                leaf remote-port {
+                    config false;
+                    type uint16;
+                    description
+                        "Remote TCP port used by the peer for its TCP connection to the local router";
+                }
+            }
+            uses neighbor-state;
+        }
+    }
+
+    grouping convergence-for-family {
+        container convergence {
+            description
+                "Options for controlling and monitoring routing convergence of the relevant address family";
+            leaf max-wait-to-advertise {
+                type uint16 {
+                    range "0..3600";
+                }
+                default 0;
+                description
+                    "The maximum amount of time, in seconds, measured from the time when the first session (configured or dynamic) that supports the address family comes up after a BGP restart, until BGP is allowed to advertise any routes in that address family to any peer
+
+                    The value of this leaf must always be greater than or equal to the operational value of min-wait-to-advertise. The default value is 3x the value of min-wait-to-advertise. A value of 0 means the feature is disabled and there is no additional delay before advertising routes of the address family.";
+            }
+            leaf oper-max-wait-to-advertise {
+                config false;
+                type uint16 {
+                    range "0..10800";
+                }
+                description
+                    "The operational value of the max-wait-to-advertise timer for the address family";
+            }
+
+            leaf up-peers-when-min-expired {
+                config false;
+                type uint16;
+                description
+                    "The number of BGP sessions (configured and dynamic) that support the address family and that were in established state when the win-wait-to-advertise timer expired";
+            }
+            leaf up-peers {
+                config false;
+                type uint16;
+                description
+                    "The number of BGP sessions (configured and dynamic) that support the address family and that are currently in the established state";
+            }
+            leaf converged-peers {
+                config false;
+                type uint16;
+                description
+                    "The number of peers that have sent an EOR marker for the address family since the last BGP restart";
+            }
+            leaf first-up-peer-time {
+                config false;
+                type srl_nokia-comm:timeticks64;
+                description
+                    "The time when the first session supporting the address family came up, measured from the time that the BGP instance restarted";
+            }
+            leaf last-up-peer-time {
+                config false;
+                type srl_nokia-comm:timeticks64;
+                description
+                    "The time when the last session supporting the address family came up, measured from the time that the BGP instance restarted";
+            }
+
+            leaf convergence-state {
+                config false;
+                type enumeration {
+                    enum "waiting" {
+                        description
+                            "BGP has recently restarted and no sessions have re-established yet";
+                    }
+                    enum "started" {
+                        description
+                            "BGP has recently restarted and at least one session has re-established with support of the address family";
+                    }
+                    enum "partial" {
+                        description
+                            "BGP has recently restarted and at least one session has advertised an End-of-RIB marker for the address family.";
+                    }
+                    enum "timeout" {
+                        description
+                            "BGP has recently restarted and not all non-slow peers advertised an End-of-RIB marker for the address family before the max-wait-to-advertise timer expired";
+                    }
+                    enum "converged" {
+                        description
+                            "All non-slow peers that support the address family have have advertised the End-of-RIB marker for the address family";
+                    }
+                }
+            }
+            leaf convergence-time {
+                config false;
+                type srl_nokia-comm:timeticks64;
+                description
+                    "The elapsed time in seconds, starting from the last BGP restart, to reach the converged state for the address family";
+            }
+        }
+    }
+
+    grouping multipath-family-config {
+        container multipath {
+            description
+                "Options related to BGP multipath";
+            leaf allow-multiple-as {
+                type boolean;
+                default true;
+                description
+                    "When set to true, BGP is allowed to build a multipath set using BGP routes with different neighbor AS (most recent AS in the AS_PATH)
+
+                    When set to false, BGP is only allowed to use non-best paths for ECMP if they meet the multipath criteria and they have the same neighbor AS as the best path";
+            }
+            leaf max-paths-level-1 {
+                type ip-ecmp;
+                default 1;
+                description
+                    "The maximum number of BGP ECMP next-hops for BGP routes with an NLRI belonging to the address family of this configuration context";
+            }
+            leaf max-paths-level-2 {
+                type ip-ecmp;
+                default 1;
+                description
+                    "The maximum number of resolving ECMP next-hops per BGP next-hop associated with BGP routes having an NLRI belonging to the address family of this configuration context";
+            }
+        }
+    }
+
+    grouping next-hop-resolution {
+      container next-hop-resolution {
+        if-feature srl_nokia-feat:future-21-6-3;  // supported from 21.6R3 release
+        description
+          "Options for controlling next-hop resolution procedures";
+        container ipv4-next-hops {
+          description
+            "Options related to the resolution of BGP next-hops that are IPv4 addresses";
+          container tunnel-resolution {
+            description
+              "Options related to resolution using tunnels in the tunnel table";
+            leaf mode {
+              description
+                "Mode to control the order of tunnel resolution compared to route resolution";
+              type enumeration {
+                enum "prefer";
+                enum "require";
+                enum "disabled";
+              }
+              default "disabled";
+            }
+            leaf-list allowed-tunnel-types {
+              description
+                "List of allowed tunnel types";
+              type identityref {
+                base srl_nokia-comm:tunnel-type;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    grouping bgp-top {
+        container bgp {
+            presence "Configure BGP";
+            must 'not(/srl_nokia-netinst:network-instance[srl_nokia-netinst:name = current()/../../srl_nokia-netinst:name]/srl_nokia-netinst:type = "srl_nokia-netinst:mac-vrf")' {
+                error-message "BGP configuration is not possible on network-instance of type mac-vrf ";
+            }
+            must "../../srl_nokia-netinst:type != 'srl_nokia-netinst:host'" {
+                error-message "BGP not supported with network-instance of type host";
+            }
+
+            leaf admin-state {
+                type srl_nokia-comm:admin-state;
+                default "enable";
+                must ". = 'disable' or (../ipv4-unicast/admin-state = 'enable' or ../ipv6-unicast/admin-state = 'enable' or ../evpn/admin-state = 'enable')"
+                {
+                  error-message "One of the address families must be enabled.";
+                }
+
+                description
+                    "Administratively enable or disable the entire BGP instance
+
+                    Disable causes all BGP sessions to be taken down immediately, even if admin-state at the group or neighbor level of some of these sessions is still set as enable.";
+            }
+            leaf oper-state {
+                config false;
+                type enumeration {
+                    enum "up" {
+                        description "Operational state of BGP is up.";
+                    }
+                    enum "down" {
+                        description "Operational state of BGP is down.";
+                    }
+                }
+            }
+            leaf under-maintenance {
+                config false;
+                type boolean;
+                description
+                     "State field to determine if the bgp instance is in maintenance mode.";
+            }
+            leaf maintenance-group {
+                config false;
+                type string;
+                description
+                    "State field to display the maintenance group to which this bgp instance belongs to.";
+            }
+            leaf autonomous-system {
+                type autonomous-system-number;
+                mandatory "true";
+                description
+                    "The global AS number of the BGP instance
+
+                    Values greater than 65535 must be entered in ASPLAIN format.";
+            }
+            uses bgp-policy;
+            leaf local-preference {
+                type uint32;
+                default 100;
+                description
+                    "The value of the local-preference attribute that is added to received routes from EBGP peers
+
+                    It is also used to encode the local preference attribute for locally generated BGP routes.";
+            }
+            leaf router-id {
+                //type srl_nokia-comm:dotted-quad;
+                type srl_nokia-comm:ip-address;
+                mandatory "true";
+                description
+                    "The BGP identifier used by this BGP instance in all of its OPEN messages
+
+                    Any non-zero value is supported.";
+            }
+            container as-path-options {
+                description
+                    "Options for handling the AS_PATH in received BGP routes";
+                leaf allow-own-as {
+                    type uint8;
+                    default 0;
+                    description
+                        "The maximum number of times the global AS number or a local AS number of the BGP instance can appear in any received AS_PATH before it is considered a loop and considered invalid";
+                }
+                container remove-private-as {
+                    description
+                        "Container with options for removing private AS numbers (2-byte and 4-byte) from the advertised AS path towards all peers";
+                    leaf mode {
+                        description
+                            "The method by which private AS numbers are removed from the advertised AS_PATH attribute";
+                        type enumeration {
+                            enum "disabled" {
+                                description
+                                    "Do not strip or replace any private AS numbers";
+                            }
+                            enum "delete" {
+                                description
+                                    "Delete private AS numbers, shortening the AS path";
+                            }
+                            enum "replace" {
+                                description
+                                    "Replace private AS numbers with the local AS number used towards the peer, maintaining the AS path length";
+                            }
+                        }
+                        default "disabled";
+                    }
+                    leaf leading-only {
+                        description
+                            "If set to true then only delete or replace private AS numbers that appear before the first occurrence of a non-private ASN in the sequence of most recent ASNs in the AS path";
+                        type boolean;
+                        must "not(../mode = 'disabled' and . = true())" {
+                            error-message "mode should not be disabled to set leading-only to true.";
+                        }
+                        default false;
+                    }
+                    leaf ignore-peer-as {
+                        description
+                            "If set to true then do not delete or replace a private AS number that is the same as the peer AS number";
+                        type boolean;
+                        must "not(../mode = 'disabled' and . = true())" {
+                            error-message "mode should not be disabled if ignore-peer-as has to be true.";
+                        }
+
+                        default false;
+                    }
+                }
+            }
+            container authentication {
+                description
+                  "Container with authentication options that apply to all peers of the BGP instance";
+                leaf keychain {
+                    description
+                      "Reference to a keychain. The keychain type must be tcp-md5.";
+                    type leafref {
+                        path "/srl_nokia-system:system/srl-keychain:authentication/srl-keychain:keychain/srl-keychain:name";
+                    }
+                    must '/srl_nokia-system:system/srl-keychain:authentication/srl-keychain:keychain[srl-keychain:name = current()]' + '/srl-keychain:type = "tcp-md5"'
+                    {
+                        error-message "Only keychain of type tcp-md5 can be assigned";
+                    }
+                }
+            } // authentication
+
+            container convergence {
+                description
+                    "Options for configuring address family independent BGP convergence parameters";
+                leaf min-wait-to-advertise {
+                    type uint16 {
+                        range "0..3600";
+                    }
+                    default 0;
+                    description
+                        "The minimum amount of time, in seconds, measured from the moment when the first session (configured or dynamic) comes up after a BGP restart, until BGP is allowed to advertise any routes to any peer
+
+                        The sessions that are established when this timer expires determines the set of peers from which EOR is expected in order to declare convergence for an address family. A value of 0 means the feature is disabled and all routes are advertised immediately.
+
+                        This timer and associated state machine are only restarted by one of the following triggers:
+                        - BGP instance admin disable/enable
+                        - tools clear network-instance protocols bgp reset-peer
+                        - bgp application restart
+                        - node reboot";
+                }
+            }
+            container dynamic-neighbors {
+                description
+                    "Options related to the acceptance and initiation of dynamic BGP sessions";
+                container accept {
+                    description
+                        "Options related to the acceptance of dynamic BGP sessions from remote peers";
+                    list match {
+                        description
+                            "List of prefix and group-id combinations from which incoming TCP connections to port 179 will be accepted
+
+                            An incoming TCP connection to port 179 is matched to a list entry if:
+                            (a)	the source IP does not match a configured BGP neighbor address
+                            (b)	the list entry prefix is the longest prefix match of the source IP.";
+                            /*(c)	the list entry group-id-range includes the LLDP Session Group-ID associated with the source IP.";*/
+
+                        key "prefix";
+                        //key "prefix group-id-range";
+                        leaf prefix {
+                            type srl_nokia-comm:ip-prefix;
+                            description
+                                "The IP prefix used to match an incoming dynamic BGP session to a group.";
+                        }
+                        /*leaf group-id-range {
+                            type string {
+                                pattern '(none)|[1-9][0-9]*\.\.[1-9][0-9]*';
+                            }
+                            description
+                                "A contiguous range of Session Group ID values associated with this match entry or the value 'none'.";
+                                "A value 'none' matches all available Session Group ID values.";
+                                }*/
+                        leaf-list allowed-peer-as {
+                            type string {
+                                pattern '([1-9][0-9]*)|([1-9][0-9]*)\.\.([1-9][0-9]*)';
+                            }
+                            ordered-by user;
+                            max-elements "32";
+                            description
+                                "The allowed AS numbers that can establish incoming BGP sessions from this prefix and group-id-range combination
+
+                                If the OPEN message from a peer matched to this prefix contains a MyAS number that is not in this allowed list then a NOTIFICATION is sent to the peer with the indication Bad Peer AS. Each entry in this list can be a single AS number or a range of AS numbers in the format as1..as2";
+                        }
+                        leaf peer-group {
+                            type leafref {
+                                path "../../../../group/group-name";                                
+//                                path "/srl_nokia-netinst:network-instance/srl_nokia-netinst:protocols/srl_nokia-bgp:bgp/srl_nokia-bgp:group/srl_nokia-bgp:group-name";
+                            }
+                            description
+                                "Reference to a peer-group
+
+                                When an incoming session is matched to this list entry it is associated with the peer-group referenced by this leaf. The peer-group provides all the parameters needed to complete the establishment of the dynamic session. If the referenced peer-group has a configured peer-as this is ignored by dynamic BGP sessions using the group as a template.";
+                            mandatory "true";
+                        }
+                    }
+                    leaf max-sessions {
+                        type uint16;
+                        default "0";
+                        description
+                            "The maximum number of incoming BGP sessions that will be accepted by the router
+
+                            A value of 0 means no limit.";
+                    }
+                }
+/*                container initiate {
+                    description
+                        "Options related to the initiation of dynamic BGP sessions towards remote peers based on LLDP auto-discovery";
+                    list match {
+                        description
+                            "List of prefix and group-id combinations learned from LLDP that will trigger BGP to initiate dynamic BGP sessions
+
+                            A dynamic session will be initiated according to a list entry if:
+                            (a)	the list entry prefix is the longest prefix match of the Peering Address learned from LLDP
+                            (b)	the list entry group-id-range includes the Session Group-ID learned from LLDP.";
+                        key "prefix group-id-range";
+                        leaf prefix {
+                            type srl_nokia-comm:ip-prefix;
+                            description
+                                "An IP prefix used to match LLDP Peering Address sub-TLV addresses and which represents a set of valid destinations for outgoing dynamic BGP sessions";
+                        }
+                        leaf group-id-range {
+                            type string {
+                                pattern '(none)|[1-9][0-9]*\.\.[1-9][0-9]*';
+                            }
+                            description
+                                "A contiguous range of Session Group ID values associated with this match entry or the value 'none'.";
+                        }
+                        leaf-list allowed-peer-as {
+                            type string {
+                                pattern '([1-9][0-9]*)|([1-9][0-9]*)\.\.([1-9][0-9]*)';
+                            }
+                            ordered-by user;
+                            max-elements "32";
+                            description
+                                "The allowed AS numbers associated with outgoing BGP sessions triggered by matching this entry
+
+                                If the router initiates a BGP connection to an LLDP-discovered Peering Address matched to this list entry, and the OPEN message received from the peer contains a MyAS number that is not in this allowed list then a NOTIFICATION is sent to the peer with the indication Bad Peer AS. Each entry in this list can be a single AS number or a range of AS numbers in the format as1..as2";
+                        }
+                        leaf peer-group {
+                            type leafref {
+                                path "../../../../group/group-name";
+                            }
+                            description
+                                "Reference to a peer-group
+
+                                When an outgoing dynamic session is matched to this list entry it is associated with the peer-group referenced by this leaf. The peer-group provides all the parameters needed to complete the establishment of the dynamic session. If the referenced peer-group has a configured peer-as this is ignored by dynamic BGP sessions using the group as a template.";
+                            mandatory "true";
+                        }
+                    }
+                    leaf max-sessions {
+                        type uint16;
+                        default "0";
+                        description
+                            "The maximum number of outgoing dynamic BGP sessions that will be initiated by the router, based on LLDP auto-discovery
+
+                            A value of 0 means no limit.";
+                    }
+                }*/
+            }
+            container ebgp-default-policy {
+                description
+                    "Options for controlling the default policies that apply to EBGP sessions";
+                leaf import-reject-all {
+                    type boolean;
+                    default true;
+                    description
+                        "When set to true, all inbound routes from any EBGP peer to which no explicit import policy is applied are treated as though they were rejected by policy";
+                }
+                leaf export-reject-all {
+                    type boolean;
+                    default true;
+                    description
+                        "When set to true, all outbound routes towards any EBGP peer to which no explicit export policy is applied are treated as though they were rejected by policy";
+                }
+            }
+            container failure-detection {
+                description
+                    "Options related to methods of detecting BGP session failure";
+                leaf enable-bfd {
+                    type boolean;
+                    default false;
+                    description
+                        "The true setting enables Bi-directional Forwarding Detection on BGP sessions belonging to the peer group";
+                }
+                leaf fast-failover {
+                    type boolean;
+                    default true;
+                    description
+                        "The true setting causes EBGP and IBGP sessions to drop immediately (and not wait for hold timer expiry) when the local interface that they depend upon for neighbor reachability goes down";
+                }
+            }
+            container graceful-restart {
+                description
+                    "Options for controlling the behavior of the router as a graceful restart helper";
+                leaf admin-state {
+                    type srl_nokia-comm:admin-state;
+                    default "disable";
+                    description
+                        "Administratively enable or disable graceful restart helper for all address families";
+                }
+                leaf stale-routes-time {
+                    type uint16 {
+                        range "1..3600";
+                    }
+                    units "seconds";
+                    default 360;
+                    description
+                        "The maximum number of seconds that routes received from a helped peer remain stale until they are deleted
+
+                        Routes of AFI/SAFI X received from peer Y are marked stale when peer Y goes down and its previous GR capability included AFI/SAFI X.";
+                }
+
+            }
+            uses bgp-group;
+            container ipv4-unicast {
+                description
+                    "Options related to the IPv4-unicast address family";
+                leaf admin-state {
+                    type srl_nokia-comm:admin-state;
+                    default "enable";
+                    description
+                        "Administratively enable or disable the IPv4 unicast address family on all sessions";
+                }
+                leaf advertise-ipv6-next-hops {
+                    type boolean;
+                    default false;
+                    description
+                        "Enables advertisement of IPv4 routes with IPv6 next-hops to peers
+
+                        When set to true, BGP advertises IPv4-unicast routes to its peers using MP-BGP. If the local-address towards a peer is an IPv6 address and BGP is supposed to apply next-hop-self the MP_REACH_NLRI will encode the IPv6 local-address as the BGP next-hop. When set to false, BGP is required to advertise an IPv4 next-hop with every IPv4 route (and to encode that in the NEXT_HOP attribute).";
+                }
+                leaf receive-ipv6-next-hops {
+                    type boolean;
+                    default false;
+                    description
+                        "Enables the advertisement of the RFC 5549 capability to receive IPv4 routes with IPv6 next-hops
+
+                        When set to true, BGP advertises an extended NH encoding (RFC 5549) capability to its peers. This capability indicates that local router is prepared to accept BGP routes for IPv4 NLRI with IPv6 next-hops from  peers in the scope of the command. When set to false, BGP handles received IPV4 routes with IPv6 next-hops as an error and applies treat-as-withdraw.";
+                }
+                uses convergence-for-family;
+                uses next-hop-resolution;
+                uses multipath-family-config;
+                leaf received-routes {
+                    config false;
+                    type srl_nokia-comm:zero-based-counter64;
+                    description
+                        "The total number of IPv4 unicast routes received from all peers of the BGP instance";
+                }
+                leaf active-routes {
+                    config false;
+                    type srl_nokia-comm:zero-based-counter64;
+                    description
+                        "The total number of received IPv4 unicast routes that are currently used for forwarding";
+                }
+            }
+            container ipv6-unicast {
+                description
+                    "Options related to the IPv6-unicast address family";
+                leaf admin-state {
+                    type srl_nokia-comm:admin-state;
+                    default "disable";
+                    description
+                        "Administratively enable or disable the IPv6 unicast address family on all sessions";
+                }
+                uses convergence-for-family;
+                uses next-hop-resolution;
+                uses multipath-family-config;
+                leaf received-routes {
+                    config false;
+                    type srl_nokia-comm:zero-based-counter64;
+                    description
+                        "The total number of IPv6 unicast routes received from all peers of the BGP instance";
+                }
+                leaf active-routes {
+                    config false;
+                    type srl_nokia-comm:zero-based-counter64;
+                    description
+                        "The total number of received IPv6 unicast routes that are currently used for forwarding";
+                }
+            }
+            container evpn {
+                description
+                  "Options related to the EVPN address family";
+                leaf admin-state {
+                    type srl_nokia-comm:admin-state;
+                    must ". = 'disable' or (/srl_nokia-netinst:network-instance[srl_nokia-netinst:name = current()/../../../../srl_nokia-netinst:name]/srl_nokia-netinst:type = 'srl_nokia-netinst:default')" {
+                        error-message "EVPN is not supported in network instances other than default";
+                    }
+
+                    default "disable";
+                    description
+                      "Administratively enable or disable the EVPN address family on all sessions";
+                }
+                leaf advertise-ipv6-next-hops {
+                    type boolean;
+                    default false;
+                    must ". = false() or (/srl_nokia-netinst:network-instance[srl_nokia-netinst:name = current()/../../../../srl_nokia-netinst:name]/srl_nokia-netinst:type = 'srl_nokia-netinst:default')" {
+                        error-message "EVPN is not supported in network instances other than default";
+                    }
+
+                    description
+                      "Enables advertisement of EVPN routes with IPv6 next-hops to peers
+                       
+                       If this is set to true and the local-address used towards the peer is an IPv6 address and BGP is supposed to apply next-hop-self then the route is advertised with the IPv6 local-address as the BGP next-hop. If this is set to false, then the EVPN route is advertised with an IPv4 next-hop.";
+                }
+                leaf keep-all-routes {
+                    description
+                      "When this is set to true all received EVPN routes are retained in the RIB-IN, even those rejected by import policies and those not imported by any mac-vrf network-instance. When this is false, EVPN routes that are not imported by any mac-vrf network-instance are dropped and all policy changes affecting received EVPN routes will trigger the sending of ROUTE_REFRESH messages towards all EVPN family peers.
+                       
+                       The value of this leaf is implicitly true when the BGP instance is configured as a route-reflector.";
+                    type boolean;
+                    must "/srl_nokia-netinst:network-instance[srl_nokia-netinst:name = current()/../../../../srl_nokia-netinst:name]/srl_nokia-netinst:type = 'srl_nokia-netinst:default'" {
+                        error-message "EVPN is not supported in network instances other than default";
+                    }
+                }
+                leaf rapid-update {
+                    description
+                      "When this is set to true, EVPN UPDATEs advertising reachability and withdrawals are advertised immediately, bypassing the session level min-route-advertisement-interval. When this is false, reachability updates and withdrawals are subject to the MRAI interval.";
+                    type boolean;
+                    default false;
+                    must ". = false() or (/srl_nokia-netinst:network-instance[srl_nokia-netinst:name = current()/../../../../srl_nokia-netinst:name]/srl_nokia-netinst:type = 'srl_nokia-netinst:default')" {
+                        error-message "EVPN is not supported in network instances other than default";
+                    }
+
+                }
+                leaf received-routes {
+                    config false;
+                    type srl_nokia-comm:zero-based-counter64;
+                    description
+                      "The total number of EVPN routes received from all peers of the BGP instance";
+                }
+                leaf active-routes {
+                    config false;
+                    type srl_nokia-comm:zero-based-counter64;
+                    description
+                      "The total number of received EVPN routes that are currently installed in a mac-vrf and used for forwarding";
+                }
+            }
+            uses bgp-neighbor;
+            container preference {
+                description
+                    "Options for controlling the route table preference of BGP routes";
+                leaf ebgp {
+                    type uint8;
+                    default 170;
+                    description
+                        "The default route table preference for all EBGP learned routes
+
+                        BGP import policies can override this preference value on a route by route basis.";
+                }
+                leaf ibgp {
+                    type uint8;
+                    default 170;
+                    description
+                        "The default route table preference for all IBGP learned routes
+
+                        BGP import policies can override this preference value on a route by route basis.";
+                }
+            }
+            container route-advertisement {
+                description
+                    "Options for controlling route advertisement behavior";
+                leaf rapid-withdrawal {
+                    type boolean;
+                    default false;
+                    description
+                        "The true setting enables rapid-withdraw towards BGP peers
+
+                        If there is only one BGP route for an NLRI in BGP RIB, and this route is withdrawn or becomes invalid, rapid-withdraw causes BGP to immediately send a withdrawal of the BGP route even if the min-route-advertisement timer has not expired.";
+
+                }
+                leaf wait-for-fib-install {
+                    type boolean;
+                    default true;
+                    description
+                        "The true setting causes BGP to NOT advertise initial reachability to a prefix, or a change of reachability to a prefix, until it receives acknowledgment from FIB manager that the route change has been applied
+
+                        Does not apply to route withdrawals.";
+                }
+            }
+            container route-reflector {
+                description
+                  "Container with route reflection configuration options.";
+                leaf client {
+                    description
+                      "When this is set to true all configured and dynamic sessions of the BGP instance are considered RR clients, subject to overrides at more specific levels of configuration.";
+                    type boolean;
+                    default false;
+                }
+                leaf cluster-id {
+                    description
+                      "The cluster-id to insert into the CLUSTER_LIST attribute when reflecting routes received by or sent to clients in this scope of this container. The default is the router-id.";
+                    type srl_nokia-comm:dotted-quad;
+                }
+            }
+            container send-community {
+                description
+                    "Options for controlling the sending of BGP communities to all peers";
+                leaf standard {
+                    type boolean;
+                    default true;
+                    description
+                        "The false setting causes BGP to strip all standard (4 byte) communities from all outbound routes advertised to peers";
+                }
+                leaf large {
+                    type boolean;
+                    default true;
+                    description
+                        "The false setting causes BGP to strip all large (12 byte) BGP communities from all outbound routes advertised to peers";
+                }
+            }
+            container transport {
+                description
+                    "Options related to the TCP transport of BGP sessions";
+                leaf tcp-mss {
+                    type uint16 {
+                        range "536..9446";
+                    }
+                    default 1024;
+                    description
+                        "The maximum segment size for all BGP TCP sessions
+
+                        If the configured tcp-mss value is higher than the discovered path MTU it has no effect and the path MTU is used as the operational TCP MSS";
+                }
+            }
+            uses traceoptions;
+            container statistics {
+                description "Container for BGP statistics.";
+                config false;
+                leaf total-paths {
+                    type srl_nokia-comm:zero-based-counter64;
+                    description
+                        "The total number of path attribute objects used by all received BGP routes";
+                }
+                leaf total-prefixes {
+                    config false;
+                    type uint64;
+                    description
+                        "The total number of unique NLRI contained in all received BGP routes associated with the BGP instance or the peer-group.";
+                }
+                leaf path-memory {
+                    type srl_nokia-comm:zero-based-counter64;
+                    description
+                        "The total number of bytes required to store the path attribute objects used by all received BGP routes";
+                }
+                leaf total-received-routes {
+                    type srl_nokia-comm:zero-based-counter64;
+                    description
+                        "The total number of received BGP routes, summed across all address families";
+                }
+                leaf total-active-routes {
+                    type srl_nokia-comm:zero-based-counter64;
+                    description
+                        "The total number of received BGP routes that are active (installed for forwarding), summed across all address families";
+                }
+                leaf total-peers {
+                    type uint16;
+                    description
+                        "The total number of configured BGP peers";
+                }
+                leaf up-peers {
+                    type uint16;
+                    description
+                        "The number of configured BGP peers that are currently in the established state";
+                }
+                leaf disabled-peers {
+                    type uint16;
+                    description
+                        "The number of configured BGP peers that are administratively disabled";
+                }
+                leaf dynamic-peers {
+                    type uint16;
+                    description
+                        "The number of dynamic BGP peers that are currently in the established state, counting sessions resulting from accepted incoming TCP connections and outgoing TCP connections triggered by LLDP auto-discovery";
+                }
+            }
+        }
+    }
+    
+    augment "/srl_nokia-netinst:network-instance/srl_nokia-netinst:protocols" {
+        uses bgp-top;
+    }
+
+    augment "/srl_nokia-system:system/srl_nokia-system-reboot:warm-reboot" {
+        if-feature srl_nokia-feat:warm-reboot;
+        leaf bgp-max-wait {
+            description
+                "The maximum amount of time that BGP will wait to receive End of RIB markers from all peers and for all address families that were up prior to warm reboot (in all network instances).
+
+                After this time elapses BGP declares that convergence has occurred and sends its own EOR markers to its peers.";
+            type uint16 {
+                range "0..3600";
+            }
+            units "seconds";
+            default 600;
+        }
+    }
+}

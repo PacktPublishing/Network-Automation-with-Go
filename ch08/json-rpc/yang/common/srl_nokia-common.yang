@@ -1,0 +1,1210 @@
+module srl_nokia-common {
+  yang-version 1.1;
+
+  namespace "urn:srl_nokia/common";
+
+  prefix "srl_nokia-comm";
+
+  import srl_nokia-extensions { prefix srl_nokia-ext; }
+
+  description
+    "This module contains a set of Internet address related
+     types for use in OpenConfig modules.";
+
+  revision 2021-06-30 {
+    description
+      "SRLinux 21.6.1";
+  }
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+  revision 2018-06-06 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+  typedef std-regexp {
+    type string;
+    description
+      "This type definition is a placeholder for a standard
+      definition of a regular expression that can be utilised in
+      OpenConfig models. Further discussion is required to
+      consider the type of regular expressions that are to be
+      supported. An initial proposal is POSIX compatible.";
+  }
+
+  // Address and prefix types
+  typedef as-number {
+    type uint32 {
+        range "1..4294967295";
+    }
+    description
+     "The as-number type represents autonomous system numbers
+      which identify an Autonomous System (AS).  An AS is a set
+      of routers under a single technical administration, using
+      an interior gateway protocol and common metrics to route
+      packets within the AS, and using an exterior gateway
+      protocol to route packets to other ASes.  IANA maintains
+      the AS number space and has delegated large parts to the
+      regional registries.
+
+      Autonomous system numbers were originally limited to 16
+      bits.  BGP extensions have enlarged the autonomous system
+      number space to 32 bits.  This type therefore uses an uint32
+      base type without a range restriction in order to support
+      a larger autonomous system number space.
+
+      In the value set and its semantics, this type is equivalent
+      to the InetAutonomousSystemNumber textual convention of
+      the SMIv2.";
+    reference
+     "RFC 1930: Guidelines for creation, selection, and registration
+                of an Autonomous System (AS)
+      RFC 4271: A Border Gateway Protocol 4 (BGP-4)
+      RFC 4001: Textual Conventions for Internet Network Addresses
+      RFC 6793: BGP Support for Four-Octet Autonomous System (AS)
+                Number Space";
+  }
+
+  typedef dotted-quad {
+    type string {
+      pattern
+        '(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.){3}'
+      + '([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])';
+    }
+    description
+      "An unsigned 32-bit number expressed in the dotted-quad
+       notation, i.e., four octets written as decimal numbers
+       and separated with the '.' (full stop) character.";
+  }
+
+  typedef ipv4-address {
+    // db-class IpAddress
+    srl_nokia-ext:generated-class-name IpAddress;
+    type string {
+      pattern '(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|'        +
+              '25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4]'  +
+              '[0-9]|25[0-5])';
+    }
+    description
+      "An IPv4 address in dotted quad notation.";
+  }
+
+  typedef ipv6-address {
+    // db-class IpAddress
+    srl_nokia-ext:generated-class-name IpAddress;
+    type string {
+        // Must support compression through different lengths
+        // therefore this regexp is complex.
+        pattern
+             '((:|[0-9a-fA-F]{0,4}):)([0-9a-fA-F]{0,4}:){0,5}'
+             +  '((([0-9a-fA-F]{0,4}:)?(:|[0-9a-fA-F]{0,4}))|'
+             +  '(((25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\.){3}'
+             +  '(25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])))';
+    }
+    description
+      "An IPv6 address represented as either a full address; shortened
+      or mixed-shortened formats.";
+  }
+
+  // typedef ipv4-address-with-zone {
+  //   // db-class IpAddressWithZone
+  //   srl_nokia-ext:generated-class-name IpAddressWithZone;
+  //   type string {
+  //     pattern '(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|'        +
+  //             '25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4]'  +
+  //             '[0-9]|25[0-5])';
+  //   }
+  //   description
+  //       "The ipv4-address-with-zone type represents an IPv4 address in dotted quad notation (added only for symmetry)";
+  // }
+
+  typedef ipv6-address-with-zone {
+    // db-class IpAddressWithZone
+    srl_nokia-ext:generated-class-name IpAddressWithZone;
+    type string {
+      pattern '((:|[0-9a-fA-F]{0,4}):)([0-9a-fA-F]{0,4}:){0,5}'
+            + '((([0-9a-fA-F]{0,4}:)?(:|[0-9a-fA-F]{0,4}))|'
+            + '(((25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\.){3}'
+            + '(25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])))'
+            + '(%.+)?';
+      pattern '(([^:]+:){6}(([^:]+:[^:]+)|(.*\..*)))|'
+            + '((([^:]+:)*[^:]+)?::(([^:]+:)*[^:]+)?)'
+            + '(%.+)?';
+      pattern '([^%]+)(%'
+            // subinterface-all pattern
+            + '(mgmt0\.0|'
+            + 'system0\.0|'
+            + 'lo(0|1[0-9][0-9]|2([0-4][0-9]|5[0-5])|[1-9][0-9]|[1-9])\.(0|[1-9](\d){0,3})|'
+            + 'ethernet-([1-9](\d){0,1}(/[abcd])?(/[1-9](\d){0,1})?/(([1-9](\d){0,1})|(1[0-1]\d)|(12[0-8])))\.([0]|[1-9](\d){0,3})|'
+            + 'irb(0|1[0-9][0-9]|2([0-4][0-9]|5[0-5])|[1-9][0-9]|[1-9])\.(0|[1-9](\d){0,3})|'
+            + 'lag(([1-9](\d){0,1})|(1[0-1]\d)|(12[0-8]))\.(0|[1-9](\d){0,3}))'
+            // subinterface-all pattern end
+            + ')?';
+    }
+    description
+        "The ipv6-address-with-zone type represents an IPv6 address in full, mixed, shortened, and
+         shortened-mixed notation.  The IPv6 address may include a zone index, separated by
+         a % sign. The zone index is used to disambiguate identical address values.  For link-local
+         addresses, the zone index is expected to be the name of a subinterface. An example of
+         a link-local address is:
+
+         fe80::1234%ethernet-1/1.1";
+    reference
+     "RFC 4291: IP Version 6 Addressing Architecture
+      RFC 4007: IPv6 Scoped Address Architecture
+      RFC 5952: A Recommendation for IPv6 Address Text Representation";
+  }
+
+  typedef ipv4-prefix {
+    // db-class IpPrefix
+    srl_nokia-ext:generated-class-name IpPrefix;
+    type string {
+      pattern '(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|'       +
+              '25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4]' +
+              '[0-9]|25[0-5])/(([0-9])|([1-2][0-9])|(3[0-2]))';
+    }
+    description
+      "An IPv4 prefix represented in dotted quad notation followed by
+      a slash and a CIDR mask (0 <= mask <= 32).";
+  }
+
+  typedef ipv6-prefix {
+    // db-class IpPrefix
+    srl_nokia-ext:generated-class-name IpPrefix;
+    type string {
+        pattern
+             '((:|[0-9a-fA-F]{0,4}):)([0-9a-fA-F]{0,4}:){0,5}'
+             +  '((([0-9a-fA-F]{0,4}:)?(:|[0-9a-fA-F]{0,4}))|'
+             +  '(((25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])\.){3}'
+             +  '(25[0-5]|2[0-4][0-9]|[01]?[0-9]?[0-9])))'
+             +  '(/(([0-9])|([0-9]{2})|(1[0-1][0-9])|(12[0-8])))';
+    }
+    description
+      "An IPv6 prefix represented in full, shortened, or mixed
+      shortened format followed by a slash and CIDR mask (0 <= mask <=
+      128).";
+  }
+
+  typedef ip-address {
+    // db-class IpAddress
+    srl_nokia-ext:generated-class-name IpAddress;
+    type union {
+      type ipv4-address;
+      type ipv6-address;
+    }
+    description
+      "An IPv4 or IPv6 address with no prefix specified.";
+  }
+
+  typedef ip-prefix {
+    // db-class IpPrefix
+    srl_nokia-ext:generated-class-name IpPrefix;
+    type union {
+      type ipv4-prefix;
+      type ipv6-prefix;
+    }
+    description
+      "An IPv4 or IPv6 prefix.";
+  }
+
+  // typedef ip-address-with-zone-union {
+  //   type union {
+  //     type ipv4-address;
+  //     type ipv6-address-with-zone;
+  //   }
+  //   description
+  //     "An IPv4 or IPv6 address with zone with no prefix specified.";
+  // }
+
+  typedef ip-address-with-zone {
+    // db-class IpAddressWithZone
+    srl_nokia-ext:generated-class-name IpAddressWithZone;
+    type union {
+      type ipv4-address;
+      type ipv6-address-with-zone;
+    }
+    description
+      "An IPv4 or IPv6 address with zone with no prefix specified.";
+  }
+
+  typedef ipv4-prefix-with-host-bits {
+    srl_nokia-ext:generated-class-name IpPrefix;
+    type ipv4-prefix;
+    description
+      "An IPv4 prefix with host bits.";
+  }
+
+  typedef ipv6-prefix-with-host-bits {
+    srl_nokia-ext:generated-class-name IpPrefix;
+    type ipv6-prefix;
+    description
+      "An IPv6 prefix with host bits.";
+  }
+
+  typedef ip-prefix-with-host-bits {
+    srl_nokia-ext:generated-class-name IpPrefix;
+    type ip-prefix;
+    description
+      "An IPv4 or IPv6 prefix with host bits.";
+  }
+
+  typedef mac-address {
+    // db-class MacAddress
+    srl_nokia-ext:generated-class-name MacAddress;
+    type string {
+      pattern '[0-9a-fA-F]{2}(:[0-9a-fA-F]{2}){5}';
+    }
+    description
+     "The mac-address type represents an IEEE 802 MAC address.
+      The canonical representation uses lowercase characters.
+
+      In the value set and its semantics, this type is equivalent
+      to the MacAddress textual convention of the SMIv2.";
+    reference
+     "IEEE 802: IEEE Standard for Local and Metropolitan Area
+                Networks: Overview and Architecture
+      RFC 2579: Textual Conventions for SMIv2";
+  }
+
+  // Name types
+  typedef domain-name {
+    type string {
+      length "1..253";
+      pattern
+        '((([a-zA-Z0-9_]([a-zA-Z0-9\-_]){0,61})?[a-zA-Z0-9]\.)*'
+      + '([a-zA-Z0-9_]([a-zA-Z0-9\-_]){0,61})?[a-zA-Z0-9]\.?)'
+      + '|\.';
+    }
+    description
+     "The domain-name type represents a DNS domain name.  The
+      name SHOULD be fully qualified whenever possible.
+
+      Internet domain names are only loosely specified.  Section
+      3.5 of RFC 1034 recommends a syntax (modified in Section
+      2.1 of RFC 1123).  The pattern above is intended to allow
+      for current practice in domain name use, and some possible
+      future expansion.  It is designed to hold various types of
+      domain names, including names used for A or AAAA records
+      (host names) and other records, such as SRV records.  Note
+      that Internet host names have a stricter syntax (described
+      in RFC 952) than the DNS recommendations in RFCs 1034 and
+      1123, and that systems that want to store host names in
+      schema nodes using the domain-name type are recommended to
+      adhere to this stricter standard to ensure interoperability.
+
+      The encoding of DNS names in the DNS protocol is limited
+      to 255 characters.  Since the encoding consists of labels
+      prefixed by a length bytes and there is a trailing NULL
+      byte, only 253 characters can appear in the textual dotted
+      notation.
+
+      The description clause of schema nodes using the domain-name
+      type MUST describe when and how these names are resolved to
+      IP addresses.  Note that the resolution of a domain-name value
+      may require to query multiple DNS records (e.g., A for IPv4
+      and AAAA for IPv6).  The order of the resolution process and
+      which DNS record takes precedence can either be defined
+      explicitly or may depend on the configuration of the
+      resolver.
+
+      Domain-name values use the US-ASCII encoding.  Their canonical
+      format uses lowercase US-ASCII characters.  Internationalized
+      domain names MUST be A-labels as per RFC 5890.";
+    reference
+     "RFC  952: DoD Internet Host Table Specification
+      RFC 1034: Domain Names - Concepts and Facilities
+      RFC 1123: Requirements for Internet Hosts -- Application
+                and Support
+      RFC 2782: A DNS RR for specifying the location of services
+                (DNS SRV)
+      RFC 5890: Internationalized Domain Names in Applications
+                (IDNA): Definitions and Document Framework";
+  }
+
+  typedef host {
+    type union {
+      type ip-address;
+      type domain-name;
+    }
+    description
+     "The host type represents either an IP address or a DNS domain name.";
+  }
+
+  typedef port-number {
+    type uint16 {
+      range "0..65535";
+    }
+    description
+     "The port-number type represents a 16-bit port number of an
+      Internet transport-layer protocol such as UDP, TCP, DCCP, or
+      SCTP.  Port numbers are assigned by IANA.  A current list of
+      all assignments is available from <http://www.iana.org/>.
+
+      Note that the port number value zero is reserved by IANA.  In
+      situations where the value zero does not make sense, it can
+      be excluded by subtyping the port-number type.
+      In the value set and its semantics, this type is equivalent
+      to the InetPortNumber textual convention of the SMIv2.";
+    reference
+     "RFC  768: User Datagram Protocol
+      RFC  793: Transmission Control Protocol
+      RFC 4960: Stream Control Transmission Protocol
+      RFC 4340: Datagram Congestion Control Protocol (DCCP)
+      RFC 4001: Textual Conventions for Internet Network Addresses";
+  }
+
+  typedef interface-name {
+      // db-class InterfaceName
+      srl_nokia-ext:generated-class-name InterfaceName;
+      type string;
+  }
+
+  typedef subinterface-name {
+      // db-class SubinterfaceName
+      srl_nokia-ext:generated-class-name SubinterfaceName;
+      type string;
+  }
+
+  // !!! NOTE !!! be sure to update the below subinterface types when updating the interface-all type
+  typedef interface-all {
+    // shortest interface is lo0
+    type interface-name {
+      length "3..20";  // based on the pattern below
+      pattern '(mgmt0|'
+            + 'mgmt0-standby|'
+            + 'system0|'
+            + 'lo(0|1[0-9][0-9]|2([0-4][0-9]|5[0-5])|[1-9][0-9]|[1-9])|'
+            + 'ethernet-([1-9](\d){0,1}(/[abcd])?(/[1-9](\d){0,1})?/(([1-9](\d){0,1})|(1[0-1]\d)|(12[0-8])))|'
+            + 'irb(0|1[0-9][0-9]|2([0-4][0-9]|5[0-5])|[1-9][0-9]|[1-9])|'
+            + 'lag(([1-9](\d){0,1})|(1[0-1]\d)|(12[0-8])))';
+    }
+  }
+
+  typedef interface-eth-lag {
+    type interface-name {
+      length "3..20";  // based on the pattern below
+      pattern '(ethernet-([1-9](\d){0,1}(/[abcd])?(/[1-9](\d){0,1})?/(([1-9](\d){0,1})|(1[0-1]\d)|(12[0-8])))|'
+            + 'lag(([1-9](\d){0,1})|(1[0-1]\d)|(12[0-8])))';
+    }
+  }
+
+  // mgmt0-standby not listed as mgmt0-standby does not support subinterfaces
+  typedef subinterface-all {
+    // shortest subinterface is lo0.0
+    type subinterface-name {
+      length "5..25";  // based on the pattern below
+      pattern '(mgmt0\.0|'
+            + 'system0\.0|'
+            + 'lo(0|1[0-9][0-9]|2([0-4][0-9]|5[0-5])|[1-9][0-9]|[1-9])\.(0|[1-9](\d){0,3})|'
+            + 'ethernet-([1-9](\d){0,1}(/[abcd])?(/[1-9](\d){0,1})?/(([1-9](\d){0,1})|(1[0-1]\d)|(12[0-8])))\.([0]|[1-9](\d){0,3})|'
+            + 'irb(0|1[0-9][0-9]|2([0-4][0-9]|5[0-5])|[1-9][0-9]|[1-9])\.(0|[1-9](\d){0,3})|'
+            + 'lag(([1-9](\d){0,1})|(1[0-1]\d)|(12[0-8]))\.(0|[1-9](\d){0,3}))';
+    }
+  }
+
+  typedef subinterface-eth-lag {
+    type subinterface-name {
+      length "5..25";  // based on the pattern below
+      pattern '(ethernet-([1-9](\d){0,1}(/[abcd])?(/[1-9](\d){0,1})?/(([1-9](\d){0,1})|(1[0-1]\d)|(12[0-8])))\.([0]|[1-9](\d){0,3})|'
+            + 'lag(([1-9](\d){0,1})|(1[0-1]\d)|(12[0-8]))\.(0|[1-9](\d){0,3}))';
+    }
+  }
+
+  typedef subinterface-no-mgmt {
+    // shortest subinterface is lo0.0
+    type subinterface-name {
+      length "5..25";  // based on the pattern below
+      pattern '(system0\.0|'
+            + 'lo(0|1[0-9][0-9]|2([0-4][0-9]|5[0-5])|[1-9][0-9]|[1-9])\.(0|[1-9](\d){0,3})|'
+            + 'ethernet-([1-9](\d){0,1}(/[abcd])?(/[1-9](\d){0,1})?/(([1-9](\d){0,1})|(1[0-1]\d)|(12[0-8])))\.([0]|[1-9](\d){0,3})|'
+            + 'irb(0|1[0-9][0-9]|2([0-4][0-9]|5[0-5])|[1-9][0-9]|[1-9])\.(0|[1-9](\d){0,3})|'
+            + 'lag(([1-9](\d){0,1})|(1[0-1]\d)|(12[0-8]))\.(0|[1-9](\d){0,3}))';
+    }
+  }
+
+  // Oper and admin state types
+  typedef admin-state {
+    type enumeration {
+      enum enable { value 1; }
+      enum disable { value 2; }
+    }
+    description
+      "general admin-state option.";
+  }
+
+  typedef oper-state {
+    type enumeration {
+      enum up {
+        value 1;
+        description
+          "Component or process is operational";
+      }
+      enum down {
+        value 2;
+        description
+          "Component or process is not operational";
+      }
+      enum empty {
+        value 3;
+        description
+          "Component slot is empty";
+      }
+      enum downloading {
+        value 4;
+        description
+          "Component is downloading image into memory";
+      }
+      enum booting {
+        value 5;
+        description
+          "Component is booting downloaded image";
+      }
+      enum starting {
+        value 6;
+        description
+          "Component image operational, application processes starting";
+      }
+      enum failed {
+        value 7;
+        description
+          "Component or process has failed";
+      }
+      enum synchronizing {
+        value 8;
+        description
+          "Component is currently being synchronized";
+      }
+      enum upgrading {
+        value 9;
+        description
+          "Component is currently being upgraded";
+      }
+      enum low-power {
+        value 10;
+        description
+          "Component is offline due to insufficient system power";
+      }
+      enum degraded {
+        value 11;
+        description
+          "Component or process is in a degraded state";
+      }
+      enum warm-reboot {
+        value 12;
+        description
+          "Component or process is currently warm rebooting
+
+          This state is set during a warm reboot immediately following initiation of the reboot, continuing after startup until the system has completed audit. In this state the system will not accept configuration changes.";
+      }
+    }
+    description
+      "General operational state";
+  }
+
+  typedef mpls-label {
+    type union {
+      type uint32 {
+        range 16..1048575;
+      }
+      type enumeration {
+        enum IMPLICIT_NULL {
+          value 3;
+          description
+            "assigned by local LSR but not carried in
+            packets";
+        }
+      }
+    }
+    description
+      "type for MPLS label value encoding";
+    reference "RFC 3032 - MPLS Label Stack Encoding";
+  }
+
+  // Counters, gauges, and date types
+  typedef counter32 {
+    type uint32;
+    description
+     "The counter32 type represents a non-negative integer
+      that monotonically increases until it reaches a
+      maximum value of 2^32-1 (4294967295 decimal), when it
+      wraps around and starts increasing again from zero.
+
+      Counters have no defined 'initial' value, and thus, a
+      single value of a counter has (in general) no information
+      content.  Discontinuities in the monotonically increasing
+      value normally occur at re-initialization of the
+      management system, and at other times as specified in the
+      description of a schema node using this type.  If such
+      other times can occur, for example, the creation of
+      a schema node of type counter32 at times other than
+      re-initialization, then a corresponding schema node
+      should be defined, with an appropriate type, to indicate
+      the last discontinuity.
+
+      The counter32 type should not be used for configuration
+      schema nodes.  A default statement SHOULD NOT be used in
+      combination with the type counter32.
+
+      In the value set and its semantics, this type is equivalent
+      to the Counter32 type of the SMIv2.";
+    reference
+     "RFC 2578: Structure of Management Information Version 2
+                (SMIv2)";
+  }
+
+  typedef zero-based-counter32 {
+    type counter32;
+    default "0";
+    description
+     "The zero-based-counter32 type represents a counter32
+      that has the defined 'initial' value zero.
+
+      A schema node of this type will be set to zero (0) on creation
+      and will thereafter increase monotonically until it reaches
+      a maximum value of 2^32-1 (4294967295 decimal), when it
+      wraps around and starts increasing again from zero.
+
+      Provided that an application discovers a new schema node
+      of this type within the minimum time to wrap, it can use the
+      'initial' value as a delta.  It is important for a management
+      station to be aware of this minimum time and the actual time
+      between polls, and to discard data if the actual time is too
+      long or there is no defined minimum time.
+
+      In the value set and its semantics, this type is equivalent
+      to the ZeroBasedCounter32 textual convention of the SMIv2.";
+    reference
+      "RFC 4502: Remote Network Monitoring Management Information
+                 Base Version 2";
+  }
+
+  typedef counter64 {
+    type uint64;
+    description
+     "The counter64 type represents a non-negative integer
+      that monotonically increases until it reaches a
+      maximum value of 2^64-1 (18446744073709551615 decimal),
+      when it wraps around and starts increasing again from zero.
+
+      Counters have no defined 'initial' value, and thus, a
+      single value of a counter has (in general) no information
+      content.  Discontinuities in the monotonically increasing
+      value normally occur at re-initialization of the
+      management system, and at other times as specified in the
+      description of a schema node using this type.  If such
+      other times can occur, for example, the creation of
+      a schema node of type counter64 at times other than
+      re-initialization, then a corresponding schema node
+      should be defined, with an appropriate type, to indicate
+      the last discontinuity.
+
+      The counter64 type should not be used for configuration
+      schema nodes.  A default statement SHOULD NOT be used in
+      combination with the type counter64.
+
+      In the value set and its semantics, this type is equivalent
+      to the Counter64 type of the SMIv2.";
+    reference
+     "RFC 2578: Structure of Management Information Version 2
+                (SMIv2)";
+  }
+
+  typedef zero-based-counter64 {
+    type counter64;
+    default "0";
+    description
+     "The zero-based-counter64 type represents a counter64 that
+      has the defined 'initial' value zero.
+
+      A schema node of this type will be set to zero (0) on creation
+      and will thereafter increase monotonically until it reaches
+      a maximum value of 2^64-1 (18446744073709551615 decimal),
+      when it wraps around and starts increasing again from zero.
+
+      Provided that an application discovers a new schema node
+      of this type within the minimum time to wrap, it can use the
+      'initial' value as a delta.  It is important for a management
+      station to be aware of this minimum time and the actual time
+      between polls, and to discard data if the actual time is too
+      long or there is no defined minimum time.
+
+      In the value set and its semantics, this type is equivalent
+      to the ZeroBasedCounter64 textual convention of the SMIv2.";
+    reference
+     "RFC 2856: Textual Conventions for Additional High Capacity
+                Data Types";
+  }
+
+  typedef timeticks64 {
+    type uint64;
+    description
+      "This type is based on the timeticks type defined in
+       RFC 6991, but with 64-bit width.  It represents the time,
+       modulo 2^64, in hundredths of a second between two epochs.";
+    reference
+      "RFC 6991: Common YANG Data Types.";
+  }
+
+  typedef gauge32 {
+    type uint32;
+    description
+     "The gauge32 type represents a non-negative integer, which
+      may increase or decrease, but shall never exceed a maximum
+      value, nor fall below a minimum value.  The maximum value
+      cannot be greater than 2^32-1 (4294967295 decimal), and
+      the minimum value cannot be smaller than 0.  The value of
+      a gauge32 has its maximum value whenever the information
+      being modeled is greater than or equal to its maximum
+      value, and has its minimum value whenever the information
+      being modeled is smaller than or equal to its minimum value.
+      If the information being modeled subsequently decreases
+      below (increases above) the maximum (minimum) value, the
+      gauge32 also decreases (increases).
+
+      In the value set and its semantics, this type is equivalent
+      to the Gauge32 type of the SMIv2.";
+    reference
+     "RFC 2578: Structure of Management Information Version 2
+                (SMIv2)";
+  }
+
+  typedef gauge64 {
+    type uint64;
+    description
+     "The gauge64 type represents a non-negative integer, which
+      may increase or decrease, but shall never exceed a maximum
+      value, nor fall below a minimum value.  The maximum value
+      cannot be greater than 2^64-1 (18446744073709551615), and
+      the minimum value cannot be smaller than 0.  The value of
+      a gauge64 has its maximum value whenever the information
+      being modeled is greater than or equal to its maximum
+      value, and has its minimum value whenever the information
+      being modeled is smaller than or equal to its minimum value.
+      If the information being modeled subsequently decreases
+      below (increases above) the maximum (minimum) value, the
+      gauge64 also decreases (increases).
+
+      In the value set and its semantics, this type is equivalent
+      to the CounterBasedGauge64 SMIv2 textual convention defined
+      in RFC 2856";
+    reference
+     "RFC 2856: Textual Conventions for Additional High Capacity
+                Data Types";
+  }
+
+  typedef percentage {
+    type uint8 {
+      range "0..100";
+    }
+    description
+      "Integer indicating a percentage value";
+  }
+
+  typedef temperature {
+    type int16;
+    units celsius;
+    description
+      "Integer indicating a temperature, displayed as degrees celsius";
+  }
+
+  typedef date-and-time {
+    type string {
+      pattern '\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?'
+            + '(Z|[\+\-]\d{2}:\d{2})';
+      length 20..32;
+    }
+    description
+     "The date-and-time type is a profile of the ISO 8601
+      standard for representation of dates and times using the
+      Gregorian calendar.  The profile is defined by the
+      date-time production in Section 5.6 of RFC 3339.
+
+      The date-and-time type is compatible with the dateTime XML
+      schema type with the following notable exceptions:
+
+      (a) The date-and-time type does not allow negative years.
+
+      (b) The date-and-time time-offset -00:00 indicates an unknown
+          time zone (see RFC 3339) while -00:00 and +00:00 and Z
+          all represent the same time zone in dateTime.
+
+      (c) The canonical format (see below) of data-and-time values
+          differs from the canonical format used by the dateTime XML
+          schema type, which requires all times to be in UTC using
+          the time-offset 'Z'.
+
+      This type is not equivalent to the DateAndTime textual
+      convention of the SMIv2 since RFC 3339 uses a different
+      separator between full-date and full-time and provides
+      higher resolution of time-secfrac.
+
+      The canonical format for date-and-time values with a known time
+      zone uses a numeric time zone offset that is calculated using
+      the device's configured known offset to UTC time.  A change of
+      the device's offset to UTC time will cause date-and-time values
+      to change accordingly.  Such changes might happen periodically
+      in case a server follows automatically daylight saving time
+      (DST) time zone offset changes.  The canonical format for
+      date-and-time values with an unknown time zone (usually
+      referring to the notion of local time) uses the time-offset
+      -00:00.";
+    reference
+     "RFC 3339: Date and Time on the Internet: Timestamps
+      RFC 2579: Textual Conventions for SMIv2
+      XSD-TYPES: XML Schema Part 2: Datatypes Second Edition";
+  }
+
+  typedef date-and-time-delta {
+    type date-and-time;
+    srl_nokia-ext:output-flavor natural-time-delta;
+    srl_nokia-ext:preferred-column-width 19;
+    description
+        "When this type is used to store a date and time, show routines should display it as a delta
+         with respect to the current date and time in the format 'dddd:hh:mm:ss ago' (for a past
+         event) or 'in dddd:hh:mm:ss' (future event), where dddd is the number of days, hh is the
+         number of  hours, mm is the number of  minutes and ss is the number of seconds.";
+  }
+
+  // String types
+  typedef alphanumeric {
+    type string {
+      // Add all accepted characters here
+      pattern "[A-Za-z0-9 !@#$%^&()|+=`~.,'/_:;?-]*";
+    }
+    description
+      "A simple, one-line string that does not contain any control characters";
+  }
+
+  typedef description {
+      type alphanumeric {
+          length "1..255";
+      }
+      description
+        "A user provided description string";
+  }
+
+  typedef name {
+      type alphanumeric {
+          length "1..255";
+      }
+      description
+        "A user provided name";
+  }
+
+  typedef username {
+      type name {
+          srl_nokia-ext:preferred-column-width 16;
+      }
+      description
+        "Username";
+  }
+
+  typedef checkpoint-name {
+    type string {
+      pattern '[^0-9].*' {
+        error-message "Name cannot start with number";
+      }
+    }
+  }
+
+  typedef uuid {
+    type string {
+      pattern '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-'
+            + '[0-9a-fA-F]{4}-[0-9a-fA-F]{12}';
+    }
+    description
+     "A Universally Unique IDentifier in the string representation
+      defined in RFC 4122.  The canonical representation uses
+      lowercase characters.
+
+      The following is an example of a UUID in string representation:
+      f81d4fae-7dec-11d0-a765-00a0c91e6bf6
+      ";
+    reference
+     "RFC 4122: A Universally Unique IDentifier (UUID) URN
+                Namespace";
+  }
+
+  typedef hex-string {
+    type string {
+      pattern '([0-9a-fA-F]{2}(:[0-9a-fA-F]{2})*)?';
+    }
+    description
+     "A hexadecimal string with octets represented as hex digits
+      separated by colons.  The canonical representation uses
+      lowercase characters.";
+  }
+
+  typedef hex-number {
+    type string {
+      pattern '0x[0-9a-fA-F]+';
+    }
+    description
+      "A hexadecimal string with leading 0x following by one or more digits with no separation by colons";
+  }
+
+  typedef local-file {
+    type string {
+      pattern '(/[0-9A-Za-z_\-\.]+)+';
+      // current pattern requires a path, e.g. at least one /, if path is not required, use:
+      // pattern '((/[0-9A-Za-z_\-\.]+)+)|([0-9A-Za-z_\-\.]+)';
+    }
+    description
+     "A regular expression matching a local file";
+  }
+
+  typedef local-file-no-path {
+    type string {
+      pattern '[0-9A-Za-z_\-\.]*';
+      length "1..255";
+    }
+    description
+     "A regular expression matching a local file without a path";
+  }
+
+  typedef route-distinguisher {
+    // db-class RouteDistinguisher
+    srl_nokia-ext:generated-class-name RouteDistinguisher;
+    type union {
+      // type 0: <2-byte administrator>:<4-byte assigned number>
+      type string {
+        pattern
+          '(6553[0-5]|655[0-2][0-9]|654[0-9]{2}|65[0-4][0-9]{2}|6[0-4][0-9]{3}|[1-5][0-9]{4}|[1-9][0-9]{1,3}|[0-9])' +
+           ':' +
+          '(429496729[0-5]|42949672[0-8][0-9]|4294967[0-1][0-9]{2}|429496[0-6][0-9]{3}|42949[0-5][0-9]{4}' +
+          '|4294[0-8][0-9]{5}|429[0-3][0-9]{6}|4[0-1][0-9]{7}|[1-3][0-9]{9}|[1-9][0-9]{1,8}|[0-9])';
+      }
+      // type 1: <ip-address>:<2-byte assigned number>
+      type string {
+        pattern
+          '(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])' +
+           ':' +
+          '(6553[0-5]|655[0-2][0-9]|654[0-9]{2}|65[0-4][0-9]{2}|6[0-4][0-9]{3}|[1-5][0-9]{4}|[1-9][0-9]{1,3}|[0-9])';
+      }
+      // type 2: <4-byte as-number>:<2-byte assigned number>
+      type string {
+        pattern
+          '(429496729[0-5]|42949672[0-8][0-9]|4294967[0-1][0-9]{2}|429496[0-6][0-9]{3}|42949[0-5][0-9]{4}' +
+          '|4294[0-8][0-9]{5}|429[0-3][0-9]{6}|4[0-1][0-9]{7}|[1-3][0-9]{9}|[1-9][0-9]{1,8}|[0-9])' +
+           ':' +
+          '(6553[0-5]|655[0-2][0-9]|654[0-9]{2}|65[0-4][0-9]{2}|6[0-4][0-9]{3}|[1-5][0-9]{4}|[1-9][0-9]{1,3}|[0-9])';
+      }
+
+      // type 2 variant: <4-byte as-number in x.y format>:<2-byte assigned number>
+      type string {
+        pattern
+          '(6553[0-5]|655[0-2][0-9]|654[0-9]{2}|65[0-4][0-9]{2}|6[0-4][0-9]{3}|[1-5][0-9]{4}|[1-9][0-9]{1,3}|[0-9])' +
+           '.' +
+          '(6553[0-5]|655[0-2][0-9]|654[0-9]{2}|65[0-4][0-9]{2}|6[0-4][0-9]{3}|[1-5][0-9]{4}|[1-9][0-9]{1,3}|[0-9])' +
+           ':' +
+          '(6553[0-5]|655[0-2][0-9]|654[0-9]{2}|65[0-4][0-9]{2}|6[0-4][0-9]{3}|[1-5][0-9]{4}|[1-9][0-9]{1,3}|[0-9])';
+      }
+    }
+    description "A route distinguisher value";
+    reference "RFC4364";
+  }
+
+  typedef next-hop-type {
+    type union {
+      type enumeration {
+        enum "use-system-ipv4-address" {
+          value 0;
+        }
+        /* enum "use-system-ipv6-address" {
+          value 1;
+        }
+        */
+      }
+      type srl_nokia-comm:ip-address;
+    }
+  }
+
+  identity ip-route-type {
+    description
+      "Base type for the types of entries that can be installed in the IP FIB.";
+  }
+
+  identity mpls-label-entry-type {
+    description
+      "Base type for the types of entries that can be installed in the MPLS label FIB.";
+  }
+
+  identity tunnel-type {
+    description
+      "Base type for the types of tunnels that can be installed in the tunnel table.";
+  }
+
+  identity aggregate {
+    base ip-route-type;
+    description
+      "Locally configured aggregate route";
+  }
+
+  identity arp-nd {
+    base ip-route-type;
+    description
+      "IP route added by ARP ND.";
+  }
+
+  identity bgp {
+    base ip-route-type;
+    // base mpls-label-entry-type;
+    // base tunnel-type;
+    description
+      "Border Gateway Protocol version 4";
+    reference "RFC 4271";
+  }
+
+  identity bgp-evpn {
+    base ip-route-type;
+    description
+      "BGP Ethernet VPN (EVPN)";
+  }
+
+  identity dhcp {
+    base ip-route-type;
+    description
+      "IP (default) route added by DHCP.";
+  }
+
+  identity host {
+    base ip-route-type;
+    description
+      "A host route";
+  }
+
+  identity isis {
+    base ip-route-type;
+    description
+      "IS-IS";
+    reference "ISO/IEC 10589";
+  }
+
+  identity local {
+    base ip-route-type;
+    description
+      "A directly connected route";
+  }
+
+  identity ldp {
+    base mpls-label-entry-type;
+    base tunnel-type;
+    // base ip-route-type;
+    description
+      "Label distribution protocol";
+  }
+
+  identity linux {
+    base ip-route-type;
+    description
+      "IP route added by the linux kernel.";
+  }
+
+  identity ndk1 {
+    base ip-route-type;
+    // base mpls-label-entry-type;
+    description
+      "Route added by an agent application using the NDK";
+  }
+
+  identity ndk2 {
+    base ip-route-type;
+    // base mpls-label-entry-type;
+    description
+      "Route added by an agent application using the NDK";
+  }
+
+  identity ospfv2 {
+    base ip-route-type;
+    description
+      "OSPFv2";
+    reference "RFC 2328";
+  }
+
+  identity ospfv3 {
+    base ip-route-type;
+    description
+      "OSPFv3";
+    reference "RFC 5340";
+  }
+
+  identity sr-isis {
+    base tunnel-type;
+    description
+      "Segment routing using MPLS dataplane, programmed by IS-IS";
+  }
+
+  identity sr-ospfv2 {
+    base tunnel-type;
+    description
+      "Segment routing using MPLS dataplane, programmed by OSPFv2";
+  }
+
+  identity sr-ospfv3 {
+    base tunnel-type;
+    description
+      "Segment routing using MPLS dataplane, programmed by OSPFv3";
+  }
+  
+  identity sr-mpls {
+    base tunnel-type;
+    description
+      "Segment routing using MPLS dataplane, programmed by segment routing manager.";
+  }
+
+  identity sr-policy-mpls {
+    base tunnel-type;
+    description
+      "Tunnels setup using SR-POLICY.";
+  }
+
+  identity static {
+    base ip-route-type;
+    description
+      "Locally configured static route";
+  }
+
+  identity static-mpls {
+    base mpls-label-entry-type;
+    // base tunnel-type;
+    description
+      "Locally configured static MPLS route.";
+  }
+
+  identity vxlan {
+    base tunnel-type;
+    description
+      "Tunnels based on VXLAN encapsulation";
+  }
+
+  identity bgp-address-family {
+    description
+      "Base type for BGP address families.";
+  }
+
+  identity ipv4-unicast {
+    base bgp-address-family;
+    description
+      "Unlabeled IPv4 unicast routes (AFI = 1, SAFI = 1)";
+  }
+
+  identity ipv6-unicast {
+    base bgp-address-family;
+    description
+      "Unlabeled IPv6 unicast routes (AFI = 2, SAFI = 1)";
+  }
+
+  identity evpn {
+    base bgp-address-family;
+    description
+      "EVPN routes (AFI = 25, SAFI = 70)";
+  }
+  
+  typedef queue-index {
+      type uint8 {
+        range "0..7";
+      }
+  }
+
+  typedef mac-type {
+    type enumeration {
+      enum static { value 1; }
+      enum duplicate { value 2; }
+      enum learnt { value 3; }
+      enum irb-interface { value 4; }
+      enum evpn { value 5; }
+      enum evpn-static { value 6; }
+      enum irb-interface-anycast { value 7; }
+    }
+    description
+      "type of mac addresses in the system";
+  }
+
+  typedef destination-type {
+    type enumeration {
+      enum sub-interface { value 1; }
+      enum blackhole { value 2; }
+      enum irb-interface { value 3; }
+      enum vxlan { value 4; }
+    }
+    description
+      "type of destination types in the system";
+  }
+
+  typedef esi {
+    type string {
+      pattern '[0-9a-fA-F]{2}(:[0-9a-fA-F]{2}){9}';
+    }
+    description
+      "Ethernet Segment Identifier that can be configured or autoderived.
+       Its length is always 10 bytes and it is used by BGP-EVPN to identify objects in the control plane that
+       belong to the same Ethernet Segment.";
+
+    reference "RFC7432";
+  }
+
+  typedef multicast-type {
+    type enumeration {
+      enum none { value 1; }
+      enum BUM { value 2; }
+      enum unknown-unicast { value 3; }
+      enum broadcast-mcast { value 4; }
+    }
+    description
+      "multicast type of destination in the system";
+  }
+
+  typedef encap-type {
+    type enumeration {
+      enum vxlan { value 1; }
+    }
+    description
+      "Encap type destination in the system";
+  }
+
+  typedef routing-password {
+    type string;
+    srl_nokia-ext:generated-class-name "SecretKey";
+    description
+      "This type is indicative of a password that is used within
+       a routing protocol which can be returned in plain text to the
+       NMS by the local system. Such passwords are typically stored
+       as encrypted strings. Since the encryption used is generally
+       well known, it is possible to extract the original value from
+       the string - and hence this format is not considered secure.
+       Leaves specified with this type should not be modified by
+       the system, and should be returned to the end-user in plain
+       text. This type exists to differentiate passwords, which
+       may be sensitive, from other string leaves. It could, for
+       example, be used by the NMS to censor this data when
+       viewed by particular users.";
+  }
+
+  typedef crypt-password-type {
+    type string;
+    description
+      "A password that is hashed based on the hash algorithm
+       indicated by the prefix in the string.  The string
+       takes the following form, based on the Unix crypt function:
+
+       $<id>[$<param>=<value>(,<param>=<value>)*][$<salt>[$<hash>]]
+
+       Common hash functions include:
+
+       id  | hash function
+        ---+---------------
+         1 | MD5
+         2a| Blowfish
+         2y| Blowfish (correct handling of 8-bit chars)
+         5 | SHA-256
+         6 | SHA-512
+
+       These may not all be supported by a target device.";
+  }
+}

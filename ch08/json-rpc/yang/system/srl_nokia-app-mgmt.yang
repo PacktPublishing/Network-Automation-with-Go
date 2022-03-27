@@ -1,0 +1,255 @@
+module srl_nokia-app-mgmt {
+  yang-version 1.1;
+
+  // namespace
+
+  namespace "urn:srl_nokia/app-mgmt";
+  prefix srl_nokia-app-mgmt;
+
+  import srl_nokia-system {
+    prefix srl-system;
+  }
+  import srl_nokia-extensions {
+    prefix srl-ext;
+  }
+  import srl_nokia-common {
+    prefix srl-comm;
+  }
+
+  description
+    "This module defines application management.";
+
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+  typedef restricted-operation-type {
+    type enumeration {
+      enum restart {
+        description
+          "This application may not be restarted manually";
+      }
+      enum stop {
+        description
+          "This application may not be stopped manually";
+      }
+      enum start {
+        description
+          "This application may not be started manually";
+      }
+      enum reload {
+        description
+          "This application may not be reloaded manually";
+      }
+      enum quit {
+        description
+          "This application may not be terminated manually";
+      }
+      enum kill {
+        description
+          "This application may not be terminated ungracefully manually";
+      }
+    }
+  }
+
+  typedef application-state-type {
+    type enumeration {
+      enum running {
+        description
+          "Application instance is running
+
+           This is the normal, active state of an application";
+      }
+      enum waiting-for-config {
+        description
+          "Application instance is loaded, but has no configuration
+
+           This state requires wait-for-config true within the applications YAML configuration. This results in the application being loaded into app-mgr, but not starting until the system receives configuration for it";
+      }
+      enum error {
+        description
+          "The application has not started successfully, or has failed
+
+           This state can be caused by an application hitting the restart backoff, or an application failing to start following triggering a system reboot";
+      }
+      enum starting {
+        description
+          "The application has been asked to start
+
+           All applications enter this state after initial execution, after which application manager will wait five seconds before checking their status. IDB connected applications may announce their state before this five second window has passed, resulting in them transitioning from this state faster than PID-monitored applications.";
+      }
+      enum stopped {
+        description
+          "The application is not running
+
+           This state is most likely caused by an operator action";
+      }
+    }
+  }
+
+  grouping app-mgmt-state-yang-top {
+    description
+      "YANG associated with a specific application instance";
+    container yang {
+      config false;
+      description
+        "Top-level container for application state related to YANG";
+      leaf-list modules {
+        type string;
+        description
+          "YANG module names used by this application instance";
+      }
+      leaf-list source-directories {
+        type string;
+        description
+          "Source directories searched for YANG modules to load
+
+           These directories are used to load modules indicated in the modules leaf, and any modules imported/included within them";
+      }
+    }
+  }
+
+  grouping app-mgmt-state-stats-top {
+    description
+      "Top-level container for application statistics";
+    container statistics {
+      description
+        "Top-level container for application statistics";
+      leaf restart-count {
+        type srl-comm:zero-based-counter32;
+        description
+          "The number of times this application instance has restarted";
+      }
+    }
+  }
+
+  grouping app-mgmt-state-top {
+    description
+      "State related to application management";
+    leaf pid {
+      srl-ext:show-importance "high";
+      type uint32;
+      description
+        "Process ID of this application instance";
+    }
+    leaf state {
+      srl-ext:show-importance "high";
+      type application-state-type;
+      description
+        "Current state of this application instance";
+    }
+    leaf last-change {
+      srl-ext:show-importance "high";
+      type srl-comm:date-and-time-delta;
+      description
+        "Date and time the application instance last changed state";
+    }
+    leaf author {
+      srl-ext:show-importance "high";
+      type string;
+      description
+        "The author of the application";
+    }
+    leaf failure-threshold {
+      srl-ext:show-importance "low";
+      type uint8 {
+        range "0..255";
+      }
+      description
+        "How many restarts within 'failure-window' are required to trigger the failure action
+
+         Setting this value to 0 will result in no action taking place on application restarts";
+    }
+    leaf failure-window {
+      srl-ext:show-importance "low";
+      type uint32 {
+        range "300..86400";
+      }
+      units seconds;
+      description
+        "Sliding window in seconds, over which to count restarts towards failure-threshold";
+    }
+    leaf failure-action {
+      srl-ext:show-importance "low";
+      type string {
+        pattern '(reboot|wait=(forever|\d*))';
+      }
+      description
+        "The action taken after 'failure-threshold' failures within 'failure-window'
+
+         This action can be to reboot the system, wait forever, or wait for a predefined number of seconds";
+    }
+    leaf path {
+      srl-ext:show-importance "low";
+      type string;
+      description
+        "The directory where the application can be found";
+    }
+    leaf launch-command {
+      srl-ext:show-importance "low";
+      type string;
+      description
+        "The command used to launch the application";
+    }
+    leaf search-command {
+      srl-ext:show-importance "low";
+      type string;
+      description
+        "The command used to search for the applications liveness";
+    }
+    leaf version {
+      srl-ext:show-importance "low";
+      type string;
+      description
+        "The version of the application";
+    }
+    leaf-list restricted-operations {
+      srl-ext:show-importance "low";
+      type restricted-operation-type;
+      description
+        "The operations that may not be manually performed on this application";
+    }
+    leaf oom-score-adj {
+      srl-ext:show-importance "low";
+      type int32;
+      description
+        "OOM score adj value set for this application";
+    }
+    leaf cgroup {
+      srl-ext:show-importance "low";
+      type string;
+      description
+        "Cgroup in with this application is started";
+    }
+    uses app-mgmt-state-stats-top;
+    uses app-mgmt-state-yang-top;
+  }
+
+  grouping app-mgmt-top {
+    container app-management {
+      description
+        "Top-level container for application configuration and state";
+      config false;
+      list application {
+        description
+          "List of all applications managed by the application manager";
+        key "name";
+        leaf name {
+          type string;
+          description
+            "Unique name of this application instance";
+        }
+        uses app-mgmt-state-top;
+      }
+    }
+  }
+
+  augment "/srl-system:system" {
+    uses app-mgmt-top;
+  }
+}

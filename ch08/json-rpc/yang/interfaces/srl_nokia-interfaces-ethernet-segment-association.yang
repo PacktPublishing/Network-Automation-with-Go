@@ -1,0 +1,59 @@
+module srl_nokia-interfaces-ethernet-segment-association {
+
+  yang-version "1.1";
+
+  // namespace
+  namespace "urn:srl_nokia/interfaces/ethernet-segment-association";
+
+  prefix "srl_nokia-interfaces-ethernet-segment-association";
+
+  import srl_nokia-common {
+    prefix srl_nokia-comm;
+  }
+  import srl_nokia-interfaces {
+    prefix srl_nokia-if;
+  }
+  import srl_nokia-extensions {
+    prefix srl_nokia-ext;
+  }
+
+  description
+    "This yang file gives a description of interface's ethernet-segment association";
+
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+
+  grouping ethernet-segment-association-top {
+    container ethernet-segment-association {
+      config false;
+      description
+        "ethernet-segment association information.";
+      leaf ethernet-segment {
+        type srl_nokia-comm:name;
+        description
+          "The value of this leaf indicates the ethernet-segment, the 
+          sub-interface is associated to.";
+      }
+      leaf es-managed {
+        type boolean;
+        default false;
+        description
+          "The value of this leaf indicates if the interface is managed 
+          by the ethernet-segment on the network-instance.";
+      }
+      leaf designated-forwarder {
+        type boolean;
+        default false;
+        description
+          "The value of this leaf indicates if the interface is the designated 
+          forwarder for the ethernet-segment on the network-instance.";
+      }
+    }
+  }
+
+  augment "/srl_nokia-if:interface/srl_nokia-if:subinterface" {
+    uses ethernet-segment-association-top;
+  }
+}

@@ -1,0 +1,146 @@
+module srl_nokia-extensions {
+  yang-version 1.1;
+  namespace "urn:srl_nokia/extensions";
+  prefix srl_nokia-ext;
+
+  description
+    "YANG module detailing SRLinux extensions";
+
+  revision 2021-06-30 {
+    description
+      "SRLinux 21.6.1";
+  }
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+  revision 2018-10-21 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+  extension generated-class-name {
+    description
+      "Takes as an argument a name string. Makes the telemetry code generator use the given name
+       as the name of the key or data class used for storing the content of this type
+
+       Currently the only class names supported are: IpAddress, IpPrefix, MacAddress, PasswordHash, SecretKey";
+    argument name;
+  }
+
+  extension delivery-node-override {
+    description
+        "Takes as an argument a boolean value. Makes the container behave as a delivery node if
+         true. If false, then behave as normal. Regular delivery nodes are the root, all direct
+         children of root, any lists (not leaf-lists), child containers where parent's owning
+         application is different than the child container's owning application.";
+    argument value;
+  }
+
+  extension output-flavor {
+    description
+      "Takes as an argument a string defining the special formatting of this type with respect to
+       the info from state output.  By default the output fields are formatted according to their
+       basic yang type.  This flavor specification makes it possible to transform the value as it
+       is printed as part of info from state output. Applies to any cli outputs (text/json/table).
+       Can be suppressed from cli by doing info detail from state.
+
+       Currently the only values supported are: time-delta, natural-time-delta, with-units
+
+       time-delta
+
+           When this flavor is used to display a date and time, info from state will display it as
+           a delta with respect to the current date and time in the format 'dddd:hh:mm:ss ago' (for
+           a past event) or 'in dddd:hh:mm:ss' (future event), where dddd is the number of days, hh is
+           the number of  hours, mm is the number of  minutes and ss is the number of seconds.
+
+       natural-time-delta
+
+           When this flavor is used to display a date and time, info from state will display it as
+           a delta with respect to the current date and time in the format 'X ago' (for a past event) or
+           'X from now' (future event). Where X is natural sounding description sentence like:
+           a moment ago, 15 seconds ago, an hour ago, 5 minutes ago, 3 days from now, 2 hours from now, ...
+
+       with-units
+
+           When this flavor is used to display a value then the units text is appended after it. For example
+           mtu \"9232 bytes\". Where mtu is a yang typedef of uint16 with units specified as bytes.
+       ";
+    argument flavor-name;
+  }
+
+  extension preferred-column-width {
+    description
+      "Takes as an argument a number defining the preferred width of this type for the tabular output in the cli.";
+    argument width;
+  }
+
+  extension show-importance {
+    description
+      "Takes as an argument a string describing the importance of this leaf (and leaves
+       underneath it if it is a node) with respect to the info/show outputs. This field makes
+       it possible to hide the field by default. Any config field is by default medium.  Any
+       state field is low by default. Info displays anything medium and above. Show as table
+       displays only high. Inheritance is supported for this extension.
+
+       Currently the only values supported are: low, medium, high";
+    argument level;
+  }
+
+  extension first-released {
+    description
+      "Takes as an argument a string describing the first release this leaf appeared in.
+       For example 19.11.1, 20.6.1.
+
+       This extension supports inheritance, where unless specified the field is populated with
+       the most recent ancestors first-released value.";
+    argument release;
+  }
+
+  extension stream-mode {
+    description
+      "Takes as an argument a string describing the default stream mode used when a gNMI client
+       specifies TARGET_DEFINED as the stream mode. This mode is inherited on all children of this
+       node, unless a more specific default-stream-mode is set on them (following normal YANG
+       inheritance).
+
+       Valid options are 'sample', 'sample=<n>', 'on_change'
+       
+       sample
+          Uses the sample stream mode, which sends updates every 1s
+
+       sample=n
+          Uses the sample stream mode, with the specified interval as the sample period
+
+       on_change
+          Uses the on_change stream mode, which sends updates immediately as they happen
+
+       The default if not specified is on_change.";
+    argument mode;
+  }
+
+  extension statistics-node {
+      description
+          "Takes as an argument a boolean value. Explicitely marks the list/container as
+           a statistics list/container or a non-statistics one. Without this extension statistics
+           nodes are nodes with stream-mode extension set to sampling.  Statitics nodes can be
+           omitted from state get responses/streaming when using no-statistics streaming options.";
+    argument value;
+  }
+
+  extension no-globbing {
+    description
+      "Disables globbing for this leaf (useful for fields defining regex patterns)";
+  }
+
+  extension if-feature {
+    description
+      "Takes as an argument a string defining the if-feature expression (same format as regular YANG if-feature),
+       allows using if-feature under must statements";
+    argument expression;
+  }
+}

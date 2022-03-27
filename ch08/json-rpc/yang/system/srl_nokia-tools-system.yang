@@ -1,0 +1,19 @@
+module srl_nokia-tools-system {
+  yang-version 1.1;
+  namespace "urn:srl_nokia/tools-system";
+  prefix srl_nokia-tools-system;
+
+  description
+    "Model for operational commands on system.";
+
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+  container system {
+    presence "Configure tools system";
+    description
+      "Enclosing container for system management.";
+  }
+}

@@ -1,0 +1,496 @@
+module srl_nokia-platform-datapath-resources {
+  yang-version 1.1;
+  namespace "urn:srl_nokia/platform-datapath-resources";
+  prefix srl_nokia-platform-datapath-resources;
+
+  import srl_nokia-common { prefix srl_nokia-comm; }
+  import srl_nokia-platform {prefix srl_nokia-platform; }
+  import srl_nokia-platform-lc {prefix srl_nokia-platform-lc; }
+  import srl_nokia-platform-resource-monitoring {prefix srl_nokia-platform-res-mon; }
+  import srl_nokia-features { prefix srl_nokia-feat; }
+  import srl_nokia-extensions { prefix srl_nokia-ext; }
+
+  description
+    "This module defines configuration and operational state related to datapath resources in the system";
+
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+
+  identity xdp-datapath-resources {
+    description
+      "Base type for datapath resources that are generic in concept and hence applicable across multiple platforms and chipsets";
+  }
+
+  identity arp-nd-entries {
+    base xdp-datapath-resources;
+    description
+      "IPv4 ARP and IPv6 neighbor discovery resources.
+      
+      On all chipsets this reports the number of entries, where 1 entry = 1 IPv4 ARP or 1 IPv6 neighbor entry. This is tracked by PI and does not consider actual resources used by PD";
+  }
+
+  identity ip-hosts {
+    base xdp-datapath-resources;
+    description
+      "IP host route resources.
+      
+      Jericho2:
+      Reports the number of half-wide entries used in the LEM table. An IPv4 address used as a host route, ARP entry or subnet broadcast address requires a half-wide entry. An IPv6 address used as a host route, ND entry or subnet broadcast address requires a single-wide entry (2 half-wide entries). Free entries is the remaining number of half-wide entries, and therefore represents the number of IPv4 hosts that can still be added; the number of IPv6 hosts that can still be added will be less.
+
+      Trident3:
+      Reports the number of entries used in the IP host table. An IPv4 address used as a host route, ARP entry or subnet broadcast address requires 1 entry. An IPv6 address used as a host route, ND entry or subnet broadcast address requires 2 entries. Free entries reflects the total number of entries remaining in shared + dedicated UFT banks.
+
+      Tomahawk3:
+      Reports the number of entries used in the IP host table. An IPv4 address used as a host route, ARP entry or subnet broadcast address requires 1 entry. An IPv6 address used as a host route, ND entry or subnet broadcast address requires 2 entries.";
+  }
+
+  identity ip-lpm-routes {
+    base xdp-datapath-resources;
+    description
+      "IP longest prefix match route resources.
+      
+      Jericho2:
+      Reports the percentage utilization of the KAPS1 or KAPS2 table, whichever is higher. These tables are used for storing longest-prefix-match IPv4 and IPv6 routes.
+      
+      Trident3 and Tomahawk3:
+      Reports the number of half-wide entries used in the L3_DEFIP table. An IPv4 route requires a half-wide entry. An IPv6 route that is /64 or less requires a single-wide entry (2 half-wide entries). An IPv6 route that is more than /64 requires a double-wide entry (4 half-wide entries). Free entries is the remaining number of half-wide entries, and therefore represents the number of IPv4 routes that can still be added; the number of IPv6 routes that can still be added will be less.";
+  }
+
+  identity mac-addresses {
+    base xdp-datapath-resources;
+    if-feature srl_nokia-feat:trident3;
+    description
+      "MAC address resources.
+      
+      Reports the used number of entries, where 1 entry = 1 MAC address. Free entries reflects the total number of entries remaining in shared + dedicated UFT banks";
+  }
+
+  identity direct-next-hops {
+    base xdp-datapath-resources;
+    description
+      "Direct next-hop resources.
+      
+      Reports the number of entries, where 1 entry is used for every next-hop of an IP or MPLS route that is resolved directly to a local interface. This is tracked by PI and does not consider actual resources used by PD.";
+  }
+
+  identity indirect-next-hops {
+    base xdp-datapath-resources;
+    description
+      "Indirect next-hop resources.
+      
+      Reports the number of entries, where 1 entry is used for every next-hop of an IP route that is resolved by a non-local route. This is tracked by PI and does not consider actual resources used by PD.";
+  }
+
+  identity tunnel-next-hops {
+    base xdp-datapath-resources;
+    if-feature srl_nokia-feat:trident3;
+    description
+      "Tunnel next-hop resources.
+      
+      Reports the number of entries, where 1 entry is used for every <vni, vtep> pair for VXLAN.This is tracked by PI and does not consider actual resources used by PD.";
+  }
+
+  identity ecmp-groups {
+    base xdp-datapath-resources;
+    description
+      "ECMP group resources.
+      
+      Jericho2:
+      Reports the used number of ECMP FECs, adding L1 ECMP FECs and L2 ECMP FECs.
+      
+      Trident3:
+      Reports the used number of ECMP groups, adding overlay and underlay ECMP groups.
+      
+      Tomahawk3:
+      Reports used number of ECMP groups.";
+  }
+
+  identity ecmp-members {
+    base xdp-datapath-resources;
+    description
+      "ECMP member resources.
+      
+      Jericho2:
+      Reports the used number of ECMP member FECs, adding L1 ECMP member FECs and L2 ECMP member FECs.
+      
+      Trident3:
+      Reports the used number of ECMP members, adding overlay and underlay ECMP members.
+      
+      Tomahawk3:
+      Reports used number of ECMP members.";
+  }
+
+  identity egress-next-hops {
+    base xdp-datapath-resources;
+    description
+      "Egress next-hop resources.
+      
+      Jericho2:
+      Reports the used number of EEDB entries. 1 EEDB entry provides egress link-layer encapsulation details for 1 LIF = 1 IPv4/IPv6 next-hop adjacency.
+      
+      Trident3:
+      Reports the number of entries used in the egress next-hop table, counting entries in the overlay partition and entries in the underlay partition. 1 entry = 1 IPv4 next-hop address or 1 IPv6 next-hop address.
+      
+      Tomahawk3:
+      Reports the number of entries used in the egress next-hop table. 1 entry = 1 IPv4 next-hop address or 1 IPv6 next-hop address.";
+  }
+
+  identity lag-groups {
+    base xdp-datapath-resources;
+    if-feature srl_nokia-feat:trident3;
+    description
+      "LAG group resources.
+      
+      Reports the number of LAG resources used, including DGPP LAGs.";
+  }
+
+  identity lag-members {
+    base xdp-datapath-resources;
+    if-feature srl_nokia-feat:trident3;
+    description
+      "LAG member resources.
+      
+      Reports the number of LAG member resources used, including DGPP LAG members.";
+  }
+
+  identity subinterfaces {
+    base xdp-datapath-resources;
+    if-feature srl_nokia-feat:tomahawk3;
+    description
+      "Subinterface resources.
+      
+      There are a maximum of 127 subinterfaces per TH3 pipeline (limited by VFP/EFP TCAM resources). This counts the utilization of those resources.";
+  }
+
+  identity asic-datapath-resources {
+    description
+      "Base type for datapath resources that are specific to one chipset";
+  }
+
+  identity underlay-ecmp-groups {
+    base asic-datapath-resources;
+    if-feature srl_nokia-feat:trident3;
+    description
+      "Underlay ECMP group resources.
+      
+      ECMP groups are partitioned into overlay and underlay groups. The underlay partition is further subdivided into groups used for underlay ECMP and groups used for VP LAGs (EVPN M-H). This counts the utilization of the sub-resource used for ECMP.";
+  }
+
+  identity vp-lag-groups {
+    base asic-datapath-resources;
+    if-feature srl_nokia-feat:trident3;
+    description
+      "VP LAG group resources.
+      
+      ECMP groups are partitioned into overlay and underlay groups. The underlay partition is further subdivided into groups used for underlay ECMP and groups used for VP LAGs (EVPN M-H). This counts the utilization of the sub-resource used for VP LAGs.";
+  }
+
+  identity dvp-tunnels {
+    base asic-datapath-resources;
+    if-feature srl_nokia-feat:trident3;
+    description
+      "DVP resources.
+      
+      One DVP resource is used per VXLAN tunnel endpoint. This counts the utilization of the DVP resources.";
+  }
+
+  identity overlay-ecmp-groups {
+    base asic-datapath-resources;
+    if-feature srl_nokia-feat:trident3;
+    description
+      "Overlay ECMP group resources.
+      
+      ECMP groups are partitioned into overlay and underlay groups. This counts the utilization of the overlay ECMP partition.";
+  }
+
+  identity underlay-ecmp-members {
+    base asic-datapath-resources;
+    if-feature srl_nokia-feat:trident3;
+    description
+      "Underlay ECMP member resources.
+      
+      ECMP members are partitioned into overlay and underlay. This counts the utilization of the partition used for underlay.";
+  }
+
+  identity overlay-ecmp-members {
+    base asic-datapath-resources;
+    if-feature srl_nokia-feat:trident3;
+    description
+      "Overlay ECMP member resources.
+      
+      ECMP members are partitioned into overlay and underlay. This counts the utilization of the partition used for overlay.";
+  }
+
+  identity underlay-egress-next-hops {
+    base asic-datapath-resources;
+    if-feature srl_nokia-feat:trident3;
+    description
+      "Underlay egress next-hop resources.
+      
+      Egress next-hops are partitioned into overlay and underlay. This counts the utilization of the partition used for underlay.";
+  }
+
+  identity overlay-egress-next-hops {
+    base asic-datapath-resources;
+    if-feature srl_nokia-feat:trident3;
+    description
+      "Overlay egress next-hop resources.
+      
+      Egress next-hops are partitioned into overlay and underlay. This counts the utilization of the partition used for overlay.";
+  }
+
+  identity dgpp-module-ids {
+    base asic-datapath-resources;
+    if-feature srl_nokia-feat:trident3;
+    description
+      "DGPP module ID resources.
+      
+      DGPPs are an aggregate id consisting of a module_id and a port_id.  There are 64 modules and 120 ports per module.  Each 'network' ARP entry (IP next-hop) needs a DGPP  - the module_id is allocated against the network interface (port) and a port_id is allocated from within the module.  A module_id will only be allocated when the first ArpEntry is added (freed when last is removed) but is owned exclusively by that network interface.  A network interface may require more than one module_id - i.e. if there are 245 ArpEntries on ethernet-1/1 (possibly spread across multiple network-instance interfaces) then 3 module_ids are required.";
+  }
+
+  identity egress-vlan-translate-egress-vnis {
+    base asic-datapath-resources;
+    if-feature srl_nokia-feat:trident3;
+    description
+      "EGR_VLAN_XLATE_1 resources.
+      
+      Corresponds to the ‘EGR_VLAN_XLATE_1’ HW table (8K entries). These entries are used for finding the egress VNI to be used for VXLAN packets.";
+  }
+
+  identity egress-vlan-translate-local-bias-pairs {
+    base asic-datapath-resources;
+    if-feature srl_nokia-feat:trident3;
+    description
+      "EGR_VLAN_XLATE_2 resources.
+      
+      Corresponds to the ‘EGR_VLAN_XLATE_2’ HW table (24K entries). These entries are used for local bias (ES pruning).";
+  }
+
+  identity level-1-ecmp-groups {
+    base asic-datapath-resources;
+    if-feature srl_nokia-feat:jericho2;
+    description
+      "L1 ECMP group resources.
+      
+      ECMP FEC resources are divided into L1 ECMP FEC resources and L2 ECMP FEC resources. This counts the number of entries used in the L1 partition.";
+  }
+
+  identity level-2-ecmp-groups {
+    base asic-datapath-resources;
+    if-feature srl_nokia-feat:jericho2;
+    description
+      "L2 ECMP group resources.
+      
+      ECMP FEC resources are divided into L1 ECMP FEC resources and L2 ECMP FEC resources. This counts the number of entries used in the L2 partition.";
+  }
+
+  identity level-1-ecmp-members {
+    base asic-datapath-resources;
+    if-feature srl_nokia-feat:jericho2;
+    description
+      "L1 ECMP member resources.
+      
+      ECMP FEC member resources are divided into L1 and L2 resources. This counts the number of entries used in the L1 partition.";
+  }
+
+  identity level-2-ecmp-members {
+    base asic-datapath-resources;
+    if-feature srl_nokia-feat:jericho2;
+    description
+      "L2 ECMP member resources.
+      
+      ECMP FEC member resources are divided into L1 and L2 resources. This counts the number of entries used in the L2 partition.";
+  }
+
+  identity level-1-non-ecmp-fecs {
+    base asic-datapath-resources;
+    if-feature srl_nokia-feat:jericho2;
+    description
+      "L1 non-ECMP FEC resources.
+      
+      Non-ECMP FEC resources are divided into L1 and L2 resources. This counts the number of entries used in the L1 partition.";
+  }
+
+  identity level-2-non-ecmp-fecs {
+    base asic-datapath-resources;
+    if-feature srl_nokia-feat:jericho2;
+    description
+      "L2 non-ECMP FEC resources.
+      
+      Non-ECMP FEC resources are divided into L1 and L2 resources. This counts the number of entries used in the L2 partition.";
+  }
+
+  grouping datapath-resource-monitoring {
+    container datapath {
+      description
+        "Container for monitoring datapath resources system-wide";
+      container xdp {
+        description
+          "Container for monitoring datapath resources that are generic in concept.";
+        list resource {
+          description
+            "List of generic datapath resources";
+          key name;
+          leaf name {
+            type identityref  {
+              base xdp-datapath-resources;
+            }
+            description
+              "The name of the XDP datapath resource.
+              
+              Some of these resources may be software only (i.e. no correspondence to a hardware table).
+              
+              Some of these resources may depend on multiple HW tables and when the utilization is reported it represents an aggregated or summarized view.";
+          }
+          leaf rising-threshold-log {
+            type srl_nokia-comm:percentage;
+            default "90";
+            description
+              "Sets the threshold that triggers the generation of a WARNING log whenever the utilization of the datapath resource in any linecard (if applicable) or forwarding complex or pipeline (if applicable) reaches this value in a rising direction";
+          }
+          leaf falling-threshold-log {
+            type srl_nokia-comm:percentage;
+            default "70";
+            description
+              "Sets the threshold that triggers the generation of a NOTICE log whenever the utilization of the datapath resource in any linecard (if applicable) or forwarding complex or pipeline (if applicable) reaches this value in a falling direction";
+          }
+        }
+      }
+      container asic {
+        description
+          "Container for monitoring datapath resources that are specific to a subset of the chipsets supported by SRLinux.";
+        list resource {
+          description
+            "List of ASIC-specific datapath resources";
+          key name;
+          leaf name {
+            type identityref  {
+              base asic-datapath-resources;
+            }
+            description
+              "The name of the ASIC-specific datapath resource.";
+          }
+          leaf rising-threshold-log {
+            type srl_nokia-comm:percentage;
+            default "90";
+            description
+              "Sets the threshold that triggers the generation of a WARNING log whenever the utilization of the datapath resource in any linecard (if applicable) or forwarding complex or pipeline (if applicable) reaches this value in a rising direction";
+          }
+          leaf falling-threshold-log {
+            type srl_nokia-comm:percentage;
+            default "70";
+            description
+              "Sets the threshold that triggers the generation of a NOTICE log whenever the utilization of the datapath resource in any linecard (if applicable) or forwarding complex or pipeline (if applicable) reaches this value in a falling direction";
+          }
+        }
+      }
+    }
+  }
+
+  grouping resource-reporting {
+    leaf used-percent {
+      type srl_nokia-comm:percentage;
+      description
+        "The percentage of the resource that is currently used";
+    }
+    leaf used-entries {
+      type uint32;
+      description
+        "The number of entries that are currently used";
+    }
+    leaf free-entries {
+      type uint32;
+      description
+        "The number of entries that are currently free";
+    }
+  }
+
+  grouping forwarding-complex-utilization {
+    container datapath {
+      description
+        "Container for monitoring datapath resources of a particular forwarding complex";
+      config false;
+      container xdp {
+        srl_nokia-ext:delivery-node-override true;
+        srl_nokia-ext:stream-mode sample=5;
+        description
+          "Container for monitoring datapath resources that are generic in concept.";
+        list resource {
+          description
+            "List of generic datapath resources.";
+          key name;
+          leaf name {
+            type identityref  {
+              base xdp-datapath-resources;
+            }
+            description
+              "The name of the XDP datapath resource";
+          }
+          uses resource-reporting;
+        }
+      }
+      container asic {
+        srl_nokia-ext:delivery-node-override true;
+        srl_nokia-ext:stream-mode sample=5;
+        description
+          "Container for monitoring ASIC-specific datapath resources";
+        list resource {
+          description
+            "List of ASIC-specific datapath resources.";
+          key name;
+          leaf name {
+            type identityref  {
+              base asic-datapath-resources;
+            }
+            description
+              "The name of the ASIC-specific datapath resource";
+          }
+          uses resource-reporting;
+        }
+      }
+    }
+  }
+
+  grouping pipeline-utilization {
+    container datapath {
+      description
+        "Container for monitoring datapath resources of a particular pipeline";
+      config false;
+      container xdp {
+        description
+          "Container for monitoring datapath resources that are generic in concept.
+          
+          At the pipeline level only one XDP resource is currently reported:
+          - subinterfaces";
+        list resource {
+          description
+            "List of generic datapath resources.";
+          key name;
+          leaf name {
+            type identityref  {
+              base xdp-datapath-resources;
+            }
+            description
+              "The name of the XDP datapath resource";
+          }
+          uses resource-reporting;
+        }
+      }
+    }
+  }
+
+  augment "/srl_nokia-platform:platform/srl_nokia-platform-res-mon:resource-monitoring" {
+    uses datapath-resource-monitoring;
+  }
+
+  augment "/srl_nokia-platform:platform/srl_nokia-platform-lc:linecard/srl_nokia-platform-lc:forwarding-complex" {
+    uses forwarding-complex-utilization;
+  }
+
+  augment "/srl_nokia-platform:platform/srl_nokia-platform-lc:linecard/srl_nokia-platform-lc:forwarding-complex/srl_nokia-platform-lc:pipeline" {
+    if-feature srl_nokia-feat:tomahawk3;
+    uses pipeline-utilization;
+  }
+}

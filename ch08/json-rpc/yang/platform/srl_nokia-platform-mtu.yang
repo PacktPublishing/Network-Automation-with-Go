@@ -1,0 +1,114 @@
+module srl_nokia-platform-mtu {
+  yang-version 1.1;
+  namespace "urn:srl_nokia/platform-mtu";
+  prefix srl_nokia-platform-mtu;
+
+  import srl_nokia-common { prefix srl_nokia-comm; }
+  import srl_nokia-platform {prefix srl_nokia-platform; }
+  import srl_nokia-platform-lc {prefix srl_nokia-platform-lc; }
+  import srl_nokia-platform-resource-monitoring {prefix srl_nokia-platform-res-mon; }
+  import srl_nokia-features {prefix srl_feat; }
+
+  description
+    "This module defines configuration and operational state related to MTU resources in the system";
+
+  revision 2021-06-30 {
+    description
+      "SRLinux 21.6.1";
+  }
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+  identity mtu-resources {
+    description
+      "Base type for MTU resources";
+  }
+
+  identity ip-mtu {
+    base mtu-resources;
+    description
+      "IP MTU resource pool. One resource from this pool is consumed by every different IP MTU value used by the subinterfaces on the linecard forwarding-complex.";
+  }
+
+  identity port-mtu {
+    base mtu-resources;
+    description
+      "Port MTU resource pool. One resource from this pool is consumed by every different port MTU value used by a port on the linecard forwarding-complex.";
+  }
+
+  identity mpls-mtu {
+    if-feature srl_feat:future-21-6-3;
+    base mtu-resources;
+    description
+      "MPLS MTU resource pool. One resource from this pool is consumed by every different MPLS MTU value used by the subinterfaces on the linecard forwarding-complex.";
+  }
+
+  grouping mtu-resource-monitoring {
+    container mtu {
+      list resource {
+        key name;
+        leaf name {
+          type identityref  {
+            base mtu-resources;
+          }
+          description
+            "The name of the MTU resource";
+        }
+        leaf rising-threshold-log {
+          type srl_nokia-comm:percentage;
+          default "90";
+          description
+            "Sets the threshold that triggers the generation of a WARNING log whenever the utilization of the MTU resource in any linecard/complex/core reaches this value in a rising direction and this is the first trigger since the last restart or since the last falling-threshold-log was triggered.";
+        }
+        leaf falling-threshold-log {
+          type srl_nokia-comm:percentage;
+          default "70";
+          description
+            "Sets the threshold that triggers the generation of a NOTICE log whenever the utilization of the MTU resource in any linecard/complex/core reaches this value in a falling direction and this is the first trigger since the last rising-threshold-log was triggered.";
+        }
+      }
+    }
+  }
+
+  grouping mtu-utilization {
+    container mtu {
+      config false;
+      list resource {
+        key name;
+        leaf name {
+          type identityref  {
+            base mtu-resources;
+          }
+          description
+            "The name of the MTU resource";
+        }
+        leaf used {
+          type uint8;
+          description
+            "The number of resources that are in use";
+        }
+        leaf free {
+          type uint8;
+          description
+            "The number of resources that are unused and available";
+        }
+      }
+    }
+  }
+
+  augment "/srl_nokia-platform:platform/srl_nokia-platform-res-mon:resource-monitoring" {
+    if-feature "srl_feat:jericho2";
+    uses mtu-resource-monitoring;
+  }
+
+  augment "/srl_nokia-platform:platform/srl_nokia-platform-lc:linecard/srl_nokia-platform-lc:forwarding-complex" {
+    if-feature "srl_feat:jericho2";
+    uses mtu-utilization;
+  }
+}

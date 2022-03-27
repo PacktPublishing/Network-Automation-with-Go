@@ -1,0 +1,66 @@
+module srl_nokia-interfaces-bridge-table-mac-learning-entries {
+
+  yang-version "1.1";
+
+  // namespace
+  namespace "urn:srl_nokia/interfaces/bridge-table/mac-duplication/mac-learning-entries";
+
+  prefix "srl_nokia-interfaces-bridge-table-mac-learning-entries";
+
+  import srl_nokia-common {
+    prefix srl_nokia-comm;
+  }
+  import srl_nokia-interfaces {
+    prefix srl_nokia-if;
+  }
+  import srl_nokia-extensions {
+    prefix srl_nokia-ext;
+  }
+
+  description
+    "This yang file gives a description of mac entries learned on this interface's bridge table.";
+
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+
+  grouping bridge-table-mac-learning-entries-top {
+    container learnt-entries {
+      config false;
+      list mac {
+        config false;
+        key "address";
+        description "macs learnt on the bridging instance";
+        leaf address {
+          type srl_nokia-comm:mac-address;
+          srl_nokia-ext:show-importance "high";
+        }
+
+        leaf last-update {
+          type srl_nokia-comm:date-and-time-delta;
+          srl_nokia-ext:show-importance "high";
+          description
+            "The date and time of the last update of this learnt mac";
+        }
+
+        leaf aging {
+          type union {
+            type uint64;
+            type enumeration {
+              enum "disabled"  { value -1; }
+            }
+          }
+          units "seconds";
+          srl_nokia-ext:show-importance "high";
+          description 
+            "remaining age time for learnt macs";
+        }     
+      }   
+    }
+  }
+
+  augment "/srl_nokia-if:interface/srl_nokia-if:subinterface/srl_nokia-if:bridge-table/srl_nokia-if:mac-learning" {
+    uses bridge-table-mac-learning-entries-top;
+  }
+}

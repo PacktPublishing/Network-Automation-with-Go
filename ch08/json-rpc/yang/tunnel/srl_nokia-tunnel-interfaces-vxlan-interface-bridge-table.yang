@@ -1,0 +1,91 @@
+module srl_nokia-tunnel-interfaces-vxlan-interface-bridge-table {
+  yang-version 1.1;
+
+  // namespace
+
+  namespace "urn:srl_nokia/tunnel-interface/vxlan-interface/bridge-table/statistics";
+  prefix srl_nokia-tunnel-if-vxlan-if-bt;
+
+  // import some basic types
+  import srl_nokia-common {
+    prefix srl_nokia-comm;
+  }
+  import srl_nokia-tunnel-interfaces {
+    prefix srl_nokia-tunnel-if;
+  }
+  import srl_nokia-extensions {
+    prefix srl_nokia-ext;
+  }
+
+  description
+    "Model for bridge-table-statistics on the vxlan-interface";
+
+  // typedef statements
+
+  // groupings
+
+  revision 2021-06-30 {
+    description
+      "SRLinux 21.6.1";
+  }
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+
+  grouping bridge-table-statistics-top {
+    description "Statistics related to the bridge-table.";
+    container statistics {
+      config false;
+      leaf active-entries {
+        type srl_nokia-comm:zero-based-counter64;
+        description
+          "The total number of entries that are active on the sub-interface.";
+        srl_nokia-ext:show-importance "high";
+      }
+      leaf total-entries {
+        type srl_nokia-comm:zero-based-counter64;
+        description
+          "The total number of macs, active and inactive, on the sub-interface.";
+        srl_nokia-ext:show-importance "high";
+      }
+      leaf failed-entries {
+        type srl_nokia-comm:zero-based-counter64;
+        description
+          "The total number of macs, which have not been programmed on at least one slot";
+        srl_nokia-ext:show-importance "high";
+      }
+      list mac-type {
+        key "type";
+        description
+          "The type of the mac on the sub-interface.";
+        leaf type {
+          type srl_nokia-comm:mac-type;
+          srl_nokia-ext:show-importance "high";
+        }
+        leaf active-entries {
+          type srl_nokia-comm:zero-based-counter64;
+          description
+            "The total number of entries of this type on the sub-interface";
+          srl_nokia-ext:show-importance "high";
+        }
+        leaf total-entries {
+          type srl_nokia-comm:zero-based-counter64;
+          description
+            "The total number of macs of this type, active and inactive, on the sub-interface.";
+          srl_nokia-ext:show-importance "high";
+        }
+        leaf failed-entries {
+          type srl_nokia-comm:zero-based-counter64;
+          description
+            "The total number of macs of this type, which have not been programmed on at least one slot";
+          srl_nokia-ext:show-importance "high";
+        }
+      }
+    }
+  }
+
+  augment "/srl_nokia-tunnel-if:tunnel-interface/srl_nokia-tunnel-if:vxlan-interface/srl_nokia-tunnel-if:bridge-table" {
+    uses bridge-table-statistics-top;
+  }
+}

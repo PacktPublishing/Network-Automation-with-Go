@@ -1,0 +1,70 @@
+module srl_nokia-interfaces-bridge-table-mac-duplication-entries {
+
+  yang-version "1.1";
+
+  // namespace
+  namespace "urn:srl_nokia/interfaces/bridge-table/mac-duplication/mac-duplication-entries";
+
+  prefix "srl_nokia-interfaces-bridge-table-mac-duplication-entries";
+
+  import srl_nokia-common {
+    prefix srl_nokia-comm;
+  }
+  import srl_nokia-interfaces {
+    prefix srl_nokia-if;
+  }
+  import srl_nokia-extensions {
+    prefix srl_nokia-ext;
+  }
+
+  description
+    "This yang file gives a description of duplicate mac entries installed in this interface's bridge table.";
+
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+
+  grouping bridge-table-mac-duplication-entries-top {
+    container duplicate-entries {
+      config false;
+      list mac {
+        config false;
+        key "address";
+        description "macs duplicate on the bridging instance";
+        leaf address {
+          type srl_nokia-comm:mac-address;
+        }
+        leaf dup-detect-time {
+          type srl_nokia-comm:date-and-time-delta;
+          srl_nokia-ext:show-importance "high";
+          description
+            "The date and time when the mac was declared duplicate";
+        }
+
+        leaf hold-down-time-remaining {
+          type union {
+            type enumeration {
+              enum "indefinite" {
+                value 1;
+              }
+            }
+            type uint64;
+          }     
+          units "seconds";
+          srl_nokia-ext:show-importance "high";
+          description 
+            "remaining hold down time for duplicate mac";
+        }     
+      }   
+    }
+  }
+
+  augment "/srl_nokia-if:interface/srl_nokia-if:subinterface/srl_nokia-if:bridge-table/srl_nokia-if:mac-duplication" {
+    uses bridge-table-mac-duplication-entries-top;
+  }
+}

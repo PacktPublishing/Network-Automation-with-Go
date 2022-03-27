@@ -1,0 +1,1315 @@
+module srl_nokia-acl {
+    yang-version 1.1;
+
+    // namespace
+    namespace "urn:srl_nokia/acl";
+
+    prefix "srl_nokia-acl";
+
+    import srl_nokia-packet-match-types { prefix srl_nokia-pkt-match-types; }
+    import srl_nokia-interfaces { prefix srl_nokia-if; }
+    import srl_nokia-common { prefix srl_nokia-comm; }
+    import srl_nokia-extensions { prefix srl_nokia-ext; }
+    import srl_nokia-features { prefix srl_nokia-feat; }
+    organization "Nokia";
+
+    // import srl_nokia-extensions { prefix srl_nokia-ext; }
+
+    description
+            "This module defines configuration and operational state data for access control lists (ACLs) and related objects.";
+
+    // grouping statements
+
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+    grouping cpm-filter-entry-statistics {
+        container statistics {
+            description
+                "Statistics container for packets matching the CPM-filter entry";
+            config false;
+            leaf matched-packets {
+                srl_nokia-ext:show-importance high;
+                description
+                    "The number of packets matching the entry since it was programmed or since the last clear, summed across all subinterfaces and all linecards";
+                type srl_nokia-comm:zero-based-counter64;
+            }
+            leaf last-match {
+                srl_nokia-ext:show-importance high;
+                description
+                    "The elapsed time since a packet last matched the entry, considering all subinterfaces and all linecards.";
+                type srl_nokia-comm:date-and-time-delta;
+            }
+            leaf last-clear {
+                config false;
+                type srl_nokia-comm:date-and-time-delta;
+                description
+                    "Time of the last clear command performed by the user at this level";
+            }
+            container distributed-policer {
+                if-feature "srl_nokia-feat:trident3 or srl_nokia-feat:jericho2";
+                description
+                    "Distributed policer stats for traffic matching the entry.";
+                uses policer-stats;
+            }
+            container system-cpu-policer {
+                description
+                    "System CPU policer stats for traffic matching the entry.";
+                uses policer-stats;
+            }
+        }
+    }
+
+       grouping system-filter-entry-statistics {
+        container statistics {
+            description
+                "Statistics container for packets matching the system-filter entry";
+            config false;
+            leaf matched-packets {
+                srl_nokia-ext:show-importance high;
+                description
+                    "The number of packets matching the entry since it was programmed or since the last clear, summed across all subinterfaces";
+                type srl_nokia-comm:zero-based-counter64;
+            }
+            leaf last-match {
+                srl_nokia-ext:show-importance high;
+                description
+                    "The elapsed time since a packet last matched the entry, considering all subinterfaces.";
+                type srl_nokia-comm:date-and-time-delta;
+            }
+            leaf last-clear {
+                config false;
+                type srl_nokia-comm:date-and-time-delta;
+                description
+                    "Time of the last clear command performed by the user at this level";
+            }
+        }
+    }
+
+    grouping interface-filter-entry-statistics {
+        description "ACL entry statistics";
+        container statistics {
+            description "Container for per-entry statistics";
+            config false;
+            leaf last-clear {
+                type srl_nokia-comm:date-and-time-delta;
+                description
+                    "Time of the last clear command performed by the user at this level or a higher level";
+            }
+            container aggregate {
+                description
+                    "Container for aggregated per-entry statistics. Not present if the entry is part of a filter with statistics-per-entry set to false.";
+                leaf in-matched-packets {
+                    srl_nokia-ext:show-importance high;
+                    description
+                            "The number of ingress packets matching the entry since it was programmed or since the last clear, considering the mgmt0 subinterface and all subinterfaces of all linecard ports that use the ACL as an input ACL";
+                    type srl_nokia-comm:zero-based-counter64;
+                }
+                leaf in-last-match {
+                    srl_nokia-ext:show-importance high;
+                    description
+                            "The elapsed time since an ingress packet last matched the entry, considering the mgmt0 subinterface and all subinterfaces of all linecard ports that use the ACL as an input ACL";
+                    type srl_nokia-comm:date-and-time-delta;
+                }
+                leaf out-matched-packets {
+                    srl_nokia-ext:show-importance high;
+                    description
+                            "The number of egress packets matching the entry since it was programmed or since the last clear, considering the mgmt0 subinterface and all subinterfaces of all linecard ports that use the ACL as an output ACL";
+                    type srl_nokia-comm:zero-based-counter64;
+                }
+                leaf out-last-match {
+                    srl_nokia-ext:show-importance high;
+                    description
+                            "The elapsed time since an egress packet last matched the entry, considering the mgmt0 subinterface and all subinterfaces of all linecard ports that use the ACL as an output ACL";
+                    type srl_nokia-comm:date-and-time-delta;
+                }
+            }
+            container per-interface {
+                description
+                    "Container for per-entry statistics on a per interface basis. Not present if the entry is part of a filter with statistics-per-entry set to false.";
+                list subinterface {
+                    description
+                        "If subinterface-specific=disabled then this list is empty.
+
+                        If subinterface-specific=input-only then this is the list of subinterfaces that apply the ACL as an input ACL
+
+                        If subinterface-specific=output-only then this is the list of subinterfaces that apply the ACL as an output ACL.
+
+                        If subinterface-specific=input-and-output then this is the list of subinterfaces that apply the ACL as an input ACL or an output ACL.";
+                    key name;
+                    leaf name {
+                        type string;
+                        /* leafref {
+                            path "srl_nokia-if:interface/srl_nokia-if:subinterface/srl_nokia-if:name";
+                        }
+                        */
+                        description
+                            "Reference to a subinterface.";
+                    }
+                    leaf in-matched-packets {
+                        description
+                            "The number of ingress packets matching the entry on this specific subinterface. Incremented only if subinterface-specific is set to input-only or input-and-output";
+                        type srl_nokia-comm:zero-based-counter64;
+                    }
+                    leaf in-last-match {
+                        description
+                            "The elapsed time since an ingress packet last matched the entry on this specific subinterface. Updated only if subinterface-specific is set to input-only or input-and-output";
+                        type srl_nokia-comm:date-and-time-delta;
+                    }
+                    leaf out-matched-packets {
+                        description
+                            "The number of egress packets matching the entry on this specific subinterface. Incremented only if subinterface-specific is set to output-only or input-and-output";
+                        type srl_nokia-comm:zero-based-counter64;
+                    }
+                    leaf out-last-match {
+                        description
+                            "The elapsed time since an egress packet last matched the entry on this specific subinterface. Updated only if subinterface-specific is set to output-only or input-and-output";
+                        type srl_nokia-comm:date-and-time-delta;
+                    }
+                    leaf last-clear {
+                        type srl_nokia-comm:date-and-time-delta;
+                        description
+                            "Time of the last clear command performed by the user at this level or a higher level";
+                    }
+                }
+            }
+        }
+    }
+
+    grouping interface-filter-entry-tcam {
+        container tcam-entries {
+            description
+                "Information about the TCAM entries used to implement the ACL entry";
+            config false;
+            list linecard {
+                description
+                    "List of linecards in the system";
+                key slot;
+                leaf slot {
+                    type uint8  {
+                        range "1..10";
+                    }
+                    description
+                        "Slot identifier";
+                }
+                leaf single-instance {
+                    type uint16;
+                    description
+                        "The number of TCAM entries required to implement this entry if it is applied to only one subinterface and one traffic direction specific to this slot.
+
+                        This is non-zero even if the filter is not applied to any subinterfaces of this slot. It captures the effect of TCAM entry expansion to deal with port ranges, for example.";
+                }
+                leaf input-total {
+                    type uint16;
+                    description
+                        "The number of TCAM entries required to implement this entry on all subinterfaces of this slot where the filter is applied to ingress traffic.
+
+                        For example, if a single-instance of the entry takes 2 TCAM entries and the filter is an output-only subinterface-specific filter and the filter is applied to 5 subinterfaces on output and to 5 subinterfaces on input then input-total=2. If the entry is not applied to ingress traffic on any subinterfaces of this slot then input-total=0.";
+                }
+                leaf output-total {
+                    type uint16;
+                    description
+                        "The number of TCAM entries required to implement this entry on all subinterfaces of this slot where the filter is applied to egress traffic.
+
+                        For example, if a single-instance of the entry takes 2 TCAM entries and the filter is an output-only subinterface-specific filter and the filter is applied to 5 subinterfaces on output and to 5 subinterfaces on input then output-total=10. If the entry is not applied to egress traffic on any subinterfaces of this slot then output-total=0.";
+                }
+            }
+        }
+    }
+
+    grouping policer-stats {
+        leaf conforming-packets {
+            srl_nokia-ext:show-importance high;
+            type srl_nokia-comm:zero-based-counter64;
+            description
+                "The number of packets (actually Ethernet frames) that were considered conforming by the policer";
+        }
+        leaf conforming-octets {
+            type srl_nokia-comm:zero-based-counter64;
+            description
+                "The number of bytes that were considered conforming by the policer. The byte count includes 18 bytes of Ethernet overhead for every IP packet.";
+        }
+        leaf exceeding-packets {
+            srl_nokia-ext:show-importance high;
+            type srl_nokia-comm:zero-based-counter64;
+            description
+                "The number of packets (actually Ethernet frames) that were considered exceeding by the policer";
+        }
+        leaf exceeding-octets {
+            type srl_nokia-comm:zero-based-counter64;
+            description
+                "The number of bytes that were considered exceeding by the policer. The byte count includes 18 bytes of Ethernet overhead for every IP packet.";
+        }
+    }
+
+    grouping acl-policers-top {
+        container policers {
+            description
+                "Container for policer definitions used by ACL entries";
+            list system-cpu-policer {
+                description
+                    "List of system CPU policer templates. For each policer in this list one or more policer instances are implemented in the XDP-CPM software and these policer instances process the aggregate of terminating traffic received from all linecards.";
+                key name;
+                leaf name {
+                    description "User-defined name of the policer";
+                    type srl_nokia-comm:name;
+                }
+                leaf entry-specific {
+                    description
+                        "If set to false, only one policer instance is created from this template and it is shared by all entries of all cpm-filter ACLs that refer to this policer.
+
+                        If set to true, multiple policer instances are created from this template, one for each cpm-filter entry that refers to the policer template.";
+                    type boolean;
+                    default false;
+                }
+                leaf peak-packet-rate {
+                    type uint32 {
+                        range "1.. 4000000";
+                    }
+                    description
+                        "The maximum number of packets per second (bucket empty/fill rate)";
+                }
+                leaf max-packet-burst {
+                    type uint32 {
+                        range "16.. 4000000";
+                    }
+                    default 16;
+                    description
+                        "The maximum depth of the policer bucket in number of packets";
+                }
+                /* container exceed-action {
+                    description
+                        "Container for actions to apply to packets that are determined exceeding by the policer.";
+
+                    leaf drop {
+                        type boolean;
+                        description
+                            "If set to true, this instructs the policer to drop packets that are determined to be exceeding";
+                    }
+                } */
+                container statistics {
+                    config false;
+                    description
+                        "Container for system CPU policer statistics
+
+                        None of these statistics are populated if the policer is configured as entry-specific=true.";
+                    uses policer-stats;
+                    leaf last-clear {
+                        type srl_nokia-comm:date-and-time-delta;
+                        description
+                            "Time of the last clear command that applied to these statistics";
+                    }
+                }
+            }
+            list policer {
+                if-feature "srl_nokia-feat:trident3 or srl_nokia-feat:jericho2";
+                description
+                    "List of hardware policer templates. For each policer in this list one or more policer instances are implemented in the linecards of the system.";
+                key name;
+                leaf name {
+                    type srl_nokia-comm:name;
+                    description "User-defined name of the policer";
+                }
+                leaf entry-specific {
+                    type boolean;
+                    description
+                        "If set to false, only one policer instance is created from this template and it is shared by all entries of all cpm-filter ACLs that refer to this policer.
+
+                        If set to true, multiple policer instances are created from this template, one for each cpm-filter entry that refers to the policer template.";
+                    default false;
+                }
+                leaf peak-rate {
+                    type uint32 {
+                        range "1..1000000";
+                    }
+                    units kbps;
+                    description
+                        "The PIR rate in kbps (bucket empty/fill rate).";
+                }
+                leaf max-burst {
+                    type uint32 {
+                        range "1..125000000";
+                    }
+                    units bytes;
+                    description "The MBS bucket depth in bytes";
+                }
+                /* container exceed-action {
+                    description
+                        "Container for actions to apply to packets that are determined exceeding by the policer";
+                    leaf drop {
+                        type boolean;
+                        description
+                            "If set to true, this instructs the policer to drop packets that are determined to be exceeding.";
+                    }
+                } */
+                container statistics {
+                    config false;
+                    description
+                        "Container for linecard policer statistics
+
+                        None of these statistics are populated if the policer is configured as entry-specific=true.";
+                    uses policer-stats;
+                    leaf last-clear {
+                        type srl_nokia-comm:date-and-time-delta;
+                        description
+                            "Time of the last clear command that applied to these statistics";
+                    }
+                }
+            }
+        }
+    }
+
+    grouping interface-filter-entry-action-config {
+        container action {
+            description
+                "Container for the actions to be applied to packets matching the filter entry.";
+            choice action {
+                container accept {
+                    presence "Accept matching packets and forward them towards their normal destination";
+                    description
+                        "Accept matching packets and forward them towards their normal destination";
+                    leaf log {
+                        if-feature srl_nokia-feat:jericho2;
+                        type boolean;
+                        default false;
+                        description
+                            "When this is true, a log is created for each packet matching the entry
+
+                            The log entry contains the following information:
+                            - timestamp
+                            - filter name
+                            - filter entry sequence-id
+                            - incoming interface
+                            - action: accept
+                            - IP protocol
+                            - packet-length
+                            - source-IP
+                            - source-port (TCP/UDP packets)
+                            - dest-IP
+                            - dest-port (TCP/UDP packets)
+                            - icmp-type (ICMP packets)
+                            - icmp-code (ICMP packets)";
+                    }
+                }
+                container drop {
+                    presence "Drop matching packets without sending any ICMP messages back to the source";
+                    description
+                        "Drop matching packets without sending any ICMP messages back to the source";
+                    leaf log {
+                        type boolean;
+                        default false;
+                        description
+                            "When this is true, a log is created for each packet matching the entry
+
+                            The log entry contains the following information:
+                            - timestamp
+                            - filter name
+                            - filter entry sequence-id
+                            - incoming interface
+                            - action: drop
+                            - IP protocol
+                            - packet-length
+                            - source-IP
+                            - source-port (TCP/UDP packets)
+                            - dest-IP
+                            - dest-port (TCP/UDP packets)
+                            - icmp-type (ICMP packets)
+                            - icmp-code (ICMP packets)
+                            
+                            This action combination is not supported on Trident3 platforms when the filter is applied as an output (egress traffic) filter; no logs will be generated.";
+                    }
+                }
+            } // choice
+        }
+    }
+
+    grouping cpm-filter-entry-action-config {
+        container action {
+            description
+                "Container for the actions to be applied to packets matching the CPM filter entry.";
+            choice action {
+                container accept {
+                    presence "Accept matching packets and forward them towards their normal destination";
+                    description
+                        "Accept matching packets and forward them towards their normal destination";
+                    leaf log {
+                        if-feature srl_nokia-feat:jericho2;
+                        type boolean;
+                        default false;
+                        description
+                            "When this is true, a log is created for each packet matching the entry
+
+                            The log entry contains the following information:
+                            - timestamp
+                            - filter name
+                            - filter entry sequence-id
+                            - incoming linecard
+                            - action: accept
+                            - IP protocol
+                            - packet-length
+                            - source-IP
+                            - source-port (TCP/UDP packets)
+                            - dest-IP
+                            - dest-port (TCP/UDP packets)
+                            - icmp-type (ICMP packets)
+                            - icmp-code (ICMP packets)";
+                    }
+                    container rate-limit {
+                        description "Rate-limit accepted packets";
+                        leaf system-cpu-policer {
+                            type leafref {
+                                path "../../../../../../../policers/system-cpu-policer/name";
+                            }
+                            description
+                                "Reference to a system-cpu-policer.";
+                        }
+                        leaf distributed-policer {
+                            if-feature "srl_nokia-feat:trident3 or srl_nokia-feat:jericho2";
+                            type leafref {
+                                path "../../../../../../../policers/policer/name";
+                            }
+                            description
+                                "Reference to a policer";
+                        }
+                    }
+                }
+                container drop {
+                    presence "Drop matching packets without sending any ICMP messages back to the source";
+                    description
+                        "Drop matching packets without sending any ICMP messages back to the source";
+                    leaf log {
+                        type boolean;
+                        default false;
+                        description
+                            "When this is true, a log is created for each packet matching the entry
+
+                            The log entry contains the following information:
+                            - timestamp
+                            - filter name
+                            - filter entry sequence-id
+                            - incoming linecard
+                            - action: drop
+                            - IP protocol
+                            - packet-length
+                            - source-IP
+                            - source-port (TCP/UDP packets)
+                            - dest-IP
+                            - dest-port (TCP/UDP packets)
+                            - icmp-type (ICMP packets)
+                            - icmp-code (ICMP packets)";
+                    }
+                }
+            } // choice
+        }
+    }
+
+    grouping capture-filter-entry-action-config {
+        container action {
+            description
+                "Container for the actions to be applied to packets matching the capture filter entry.";
+            choice action {
+                container accept {
+                    presence "Accept matching packets and forward them towards their normal destination";
+                    description
+                        "Accept matching packets and forward them towards their normal destination";
+                }
+                container copy {
+                    presence "Create a copy of matching packets extract them to the CPM and deliver them to the designated veth interface";
+                    description
+                        "Create a copy of matching packets extract them to the CPM and deliver them to the designated veth interface";
+                }
+            } // choice
+        }
+    }
+
+    grouping system-filter-entry-action-config {
+        container action {
+            description
+                "Container for the actions to be applied to packets matching the System filter entry.";
+            choice action {
+                container accept {
+                    presence "Accept matching packets";
+                    description
+                        "Accept matching packets";
+                }
+                container drop {
+                    presence "Drop matching packets without sending any ICMP messages back to the source";
+                    description
+                        "Drop matching packets without sending any ICMP messages back to the source";
+                    leaf log {
+                        type boolean;
+                        default false;
+                        description
+                            "When this is true, a log is created for each packet matching the entry
+
+                            The log entry contains the following information:
+                            - timestamp
+                            - filter name
+                            - filter entry sequence-id
+                            - action: drop
+                            - IP protocol
+                            - packet-length
+                            - source-IP
+                            - source-port (TCP/UDP packets)
+                            - dest-IP
+                            - dest-port (TCP/UDP packets)
+                            - icmp-type (ICMP packets)
+                            - icmp-code (ICMP packets)";
+                    }
+                }
+            } // choice
+        }
+    }
+
+    grouping common-ipv4-filter-entry-match-config {
+        container match {
+            description
+                "Container for the conditions that determine whether a packet matches this entry";
+            container destination-ip {
+                description
+                    "Packet matching criteria based on destination IPv4 address";
+                leaf prefix {
+                    description
+                        "Match a packet if its destination IP address is within the specified IPv4 prefix.";
+                    type srl_nokia-comm:ipv4-prefix;
+                }
+                // leaf prefix-list
+                leaf address {
+                    description
+                        "Match a packet if its destination IP address logically anded with the inverse of the mask equals this IP address.";
+                    type srl_nokia-comm:ipv4-address;
+                    must "../mask >= ''" {
+                        error-message "An inverse mask must be configured to use with the address";
+                    }
+                }
+                leaf mask {
+                    description
+                        "Match a packet if its destination IP address logically anded with the inverse of this mask equals the configured IP address.";
+                    type srl_nokia-comm:ipv4-address;
+                    must "../address >= ''" {
+                        error-message "An address must be configured to use with the mask";
+                    }
+                }
+            }
+            leaf fragment {
+                type boolean;
+                description
+                    "Match an IPv4 fragment
+
+                    A packet matches the true condition if the IPv4 header indicates that the fragment-offset is zero and and the more-fragments bit is 1 or if the IPv4 header indicates that the fragment-offset is greater than 0. A packet matches the false condition if it is unfragmented.";
+            }
+            leaf first-fragment {
+                type boolean;
+                description
+                    "Match the first fragment of an IPv4 datagram
+
+                    A packet matches the true condition if the IPv4 header indicates that the fragment-offset is zero and and the more-fragments bit is 1. It is not valid to configure this leaf without configuring a match value for the fragment leaf.";
+            }
+            container icmp {
+                description
+                    "A packet matches this condition if its ICMP type and code matches one of the specified combinations
+
+                    The rule should also have a condition that the IP protocol equals 1 (ICMP) in order for this to be interpreted correctly.";
+                leaf type {
+                    description "Match a single ICMP type value.";
+                    type srl_nokia-pkt-match-types:icmp-type;
+                }
+                leaf-list code {
+                    description
+                        "Match if the ICMP code value is any value in the list
+
+                        Requires ICMP type to be specified because codes are type dependent.";
+                    type uint8;
+                }
+            }
+            leaf protocol {
+                description
+                    "An IPv4 packet matches this condition if its IP protocol type field matches the specified value";
+                type srl_nokia-pkt-match-types:ip-protocol-type;
+            }
+            container source-ip {
+                description
+                    "Packet matching criteria based on source IPv4 address";
+                leaf prefix {
+                    description
+                        "Match a packet if its source IP address is within the specified IPv4 prefix.";
+                    type srl_nokia-comm:ipv4-prefix;
+                }
+                // leaf prefix-list
+                leaf address {
+                    description
+                        "Match a packet if its source IP address logically anded with the inverse of the mask equals this IP address.";
+                    type srl_nokia-comm:ipv4-address;
+                    must "../mask >= ''" {
+                        error-message "An inverse mask must be configured to use with the address";
+                    }
+                }
+                leaf mask {
+                    description
+                        "Match a packet if its source IP address logically anded with the inverse of this mask equals the configured IP address.";
+                    type srl_nokia-comm:ipv4-address;
+                    must "../address >= ''" {
+                        error-message "An address must be configured to use with the mask";
+                    }
+                }
+            }
+            uses common-filter-entry-match-layer4-config;
+        }
+    }
+
+    grouping common-ipv6-filter-entry-match-config {
+        container match {
+            description
+                "Container for the conditions that determine whether a packet matches this entry";
+            container destination-ip {
+                description
+                    "Packet matching criteria based on destination IPv6 address";
+                leaf prefix {
+                    description
+                        "Match a packet if its destination IP address is within the specified IPv6 prefix.";
+                    type srl_nokia-comm:ipv6-prefix;
+                }
+                // leaf prefix-list
+                leaf address {
+                    description
+                        "Match a packet if its destination IP address logically anded with the inverse of the mask equals this IP address.";
+                    type srl_nokia-comm:ipv6-address;
+                    must "../mask >= ''" {
+                        error-message "An inverse mask must be configured to use with the address";
+                    }
+                }
+                leaf mask {
+                    description
+                        "Match a packet if its destination IP address logically anded with the inverse of this mask equals the configured IP address.";
+                    type srl_nokia-comm:ipv6-address;
+                    must "../address >= ''" {
+                        error-message "An address must be configured to use with the mask";
+                    }
+                }
+            }
+            container icmp6 {
+                description
+                    "A packet matches this condition if its ICMPv6 type and code matches one of the specified combinations
+
+                    The rule should also have a condition that the next-header value equals 58 (ICMPv6) in order for this to be interpreted correctly.";
+                leaf type {
+                    description "Match a single ICMPv6 type value";
+                    type srl_nokia-pkt-match-types:icmp6-type;
+                }
+                leaf-list code {
+                    description
+                        "Match if the ICMPv6 code value is any value in the list
+
+                        Requires ICMPv6 type to be specified because codes are type dependent.";
+                    type uint8;
+                }
+            }
+            leaf next-header {
+                description
+                    "An IPv6 packet matches this condition if its first next-header field (in the IPv6 fixed header) contains the specified value";
+                type srl_nokia-pkt-match-types:ip-protocol-type;
+            }
+            container source-ip {
+                description
+                    "Packet matching criteria based on source IPv6 address";
+                leaf prefix {
+                    description
+                        "Match a packet if its source IP address is within the specified IPv6 prefix.";
+                    type srl_nokia-comm:ipv6-prefix;
+                }
+                // leaf prefix-list
+                leaf address {
+                    description
+                        "Match a packet if its source IP address logically anded with the inverse of the mask equals this IP address.";
+                    type srl_nokia-comm:ipv6-address;
+                    must "../mask >= ''" {
+                        error-message "An inverse mask must be configured to use with the address";
+                    }
+                }
+                leaf mask {
+                    description
+                        "Match a packet if its source IP address logically anded with the inverse of this mask equals the configured IP address.";
+                    type srl_nokia-comm:ipv6-address;
+                    must "../address >= ''" {
+                        error-message "An address must be configured to use with the mask";
+                    }
+                }
+            }
+            uses common-filter-entry-match-layer4-config;
+        }
+    }
+
+    grouping common-filter-entry-match-layer4-config {
+        description "ACL entry common layer 4 fields";
+        container destination-port {
+            description
+                "A packet matches this condition if its destination TCP or UDP port number matches the value or range that is specified
+
+                The rule should also have a condition that the IP protocol equals 6 (TCP) or 17 (UDP) in order for this to be interpreted correctly.";
+            leaf operator {
+                description
+                    "Comparison operator
+
+                    eq = equal
+                    ge = greater than or equal to
+                    le = less than or equal to";
+                type srl_nokia-pkt-match-types:operator;
+            }
+            leaf value {
+                description "A destination port number";
+                type srl_nokia-pkt-match-types:l4-port-type;
+            }
+            container range {
+                description
+                    "Container used to specify a contiguous range of TCP/UDP port numbers";
+                leaf start {
+                    type srl_nokia-pkt-match-types:l4-port-type;
+                    description "The starting port number to include in the range";
+                }
+                leaf end {
+                    type srl_nokia-pkt-match-types:l4-port-type;
+                    description "The ending port number to include in the range";
+                }
+            }
+        }
+        container source-port {
+            description
+                "A packet matches this condition if its source TCP or UDP port number matches the value or range that is specified
+
+                The rule should also have a condition that the IP protocol equals 6 (TCP) or 17 (UDP) in order for this to be interpreted correctly.";
+            leaf operator {
+                description
+                    "Comparison operator
+
+                    eq = equal
+                    ge = greater than or equal to
+                    le = less than or equal to";
+                type srl_nokia-pkt-match-types:operator;
+            }
+            leaf value {
+                description "A source port number";
+                type srl_nokia-pkt-match-types:l4-port-type;
+            }
+            container range {
+                description
+                    "Container used to specify a contiguous range of TCP/UDP port numbers";
+                leaf start {
+                    type srl_nokia-pkt-match-types:l4-port-type;
+                    description "The starting port number to include in the range";
+                }
+                leaf end {
+                    type srl_nokia-pkt-match-types:l4-port-type;
+                    description "The ending port number to include in the range";
+                }
+            }
+        }
+        leaf tcp-flags {
+            type string {
+                pattern '(\(|\)|&|\||!|ack|rst|syn)+';
+            }
+            description
+                "A logical expression using the &, | and ! logical operators and the TCP flag names: rst, syn and ack.";
+        }
+    }
+
+    grouping interface-ipv4-filter-top {
+        leaf statistics-per-entry {
+            type boolean;
+            description
+                "Collect statistics for each entry of the ACL
+
+                The exact set of statistics depend on the subinterface-specific mode";
+        }
+        leaf last-clear {
+            config false;
+            type srl_nokia-comm:date-and-time-delta;
+            description
+                "Time of the last clear command performed by the user at this level";
+        }
+        container statistics {
+            config false;
+        }
+        /* leaf programming-complete {
+            config false;
+            type boolean;
+            description
+                "Set to true when all recently committed changes to the ACL have been programmed into all TCAMs.";
+        } */
+        list entry {
+            description "List of filter rules.";
+            key sequence-id;
+            leaf sequence-id {
+                type uint32 {
+                    range "1..65535";
+                }
+                description
+                    "A number to indicate the relative evaluation order of the different entries; lower numbered entries are evaluated before higher numbered entries";
+            }
+            leaf description {
+                type srl_nokia-comm:description;
+                description "Description string for the filter entry";
+            }
+
+            uses interface-filter-entry-tcam;
+            uses interface-filter-entry-action-config;
+            uses common-ipv4-filter-entry-match-config;
+            uses interface-filter-entry-statistics;
+        }
+    }
+
+    grouping cpm-ipv4-filter-top {
+        leaf statistics-per-entry {
+            type boolean;
+            description
+                "Collect the following statistics per entry: the number of packets matching each entry, and the elapsed time since a packet last matched each entry";
+        }
+        leaf last-clear {
+            config false;
+            type srl_nokia-comm:date-and-time-delta;
+            description
+                "Time of the last clear command performed by the user at this level";
+        }
+        /* leaf programming-complete {
+            config false;
+            type boolean;
+            description
+                "Set to true when all recently committed changes to the ACL have been programmed into all TCAMs.";
+        } */
+        list entry {
+            description "List of filter rules.";
+            key sequence-id;
+            leaf sequence-id {
+                type uint32 {
+                    range "1..65535";
+                }
+                description
+                    "A number to indicate the relative evaluation order of the different entries; lower numbered entries are evaluated before higher numbered entries";
+            }
+            leaf description {
+                type srl_nokia-comm:description;
+                description "Description string for the filter entry";
+            }
+            leaf tcam-entries {
+                config false;
+                type uint16;
+                description
+                    "The number of TCAM entries required to implement a single instance of this filter rule.";
+            }
+
+            uses cpm-filter-entry-action-config;
+            uses common-ipv4-filter-entry-match-config;
+            uses cpm-filter-entry-statistics;
+        }
+    }
+
+    grouping capture-ipv4-filter-top {
+        list entry {
+            description "List of filter rules.";
+            key sequence-id;
+            leaf sequence-id {
+                type uint32 {
+                    range "1..65535";
+                }
+                description
+                    "A number to indicate the relative evaluation order of the different entries; lower numbered entries are evaluated before higher numbered entries";
+            }
+            leaf description {
+                type srl_nokia-comm:description;
+                description "Description string for the filter entry";
+            }
+            leaf tcam-entries {
+                config false;
+                type uint16;
+                description
+                    "The number of TCAM entries required to implement a single instance of this filter rule.";
+            }
+
+            uses capture-filter-entry-action-config;
+            uses common-ipv4-filter-entry-match-config;
+        }
+    }
+
+    grouping system-ipv4-filter-top {
+        leaf last-clear {
+            config false;
+            type srl_nokia-comm:date-and-time-delta;
+            description
+                "Time of the last clear command performed by the user at this level";
+        }
+        list entry {
+            description "List of filter rules.";
+            key sequence-id;
+            leaf sequence-id {
+                type uint32 {
+                    range "1..256";
+                }
+                description
+                    "A number to indicate the relative evaluation order of the different entries; lower numbered entries are evaluated before higher numbered entries";
+            }
+            leaf description {
+                type srl_nokia-comm:description;
+                description "Description string for the filter entry";
+            }
+            leaf tcam-entries {
+                config false;
+                type uint16;
+                description
+                    "The number of TCAM entries required to implement a single instance of this filter rule.";
+            }
+
+            uses system-filter-entry-action-config;
+            uses common-ipv4-filter-entry-match-config;
+            uses system-filter-entry-statistics;
+        }
+    }
+
+    grouping ipv4-filter-top {
+        list ipv4-filter {
+            description "List of IPv4 filter policies";
+            key name;
+            leaf name {
+                type srl_nokia-comm:name;
+                description "Name of the IPv4 filter policy.";
+            }
+            leaf description {
+                type srl_nokia-comm:description;
+                description "Description string for the IPv4 filter policy";
+            }
+            leaf subinterface-specific {
+                type enumeration {
+                    enum "disabled";
+                    enum "input-only";
+                    enum "output-only";
+                    enum "input-and-output";
+                }
+                default "disabled";
+                description
+                  "Controls the instantiation of the filter when it is applied as an input or output ACL
+
+                  disabled: all subinterfaces on a single linecard that reference the ACL as an input ACL use a shared filter instance, and all subinterfaces on a single linecard that reference the ACL as an output ACL use a shared filter instance
+
+                  input-only: all subinterfaces on a single linecard that reference the ACL as an output ACL use a shared filter instance, but each subinterface that references the ACL as an input ACL uses its own separate instance of the filter
+
+                  output-only: all subinterfaces on a single linecard that reference the ACL as an input ACL use a shared filter instance, but each subinterface that references the ACL as an output ACL uses its own separate instance of the filter
+
+                  input-and-output: each subinterface that references the ACL as either an input ACL or an output ACL uses its own separate instance of the filter";
+            }
+            uses interface-ipv4-filter-top;
+        }
+    }
+
+    grouping interface-ipv6-filter-top {
+        leaf statistics-per-entry {
+            type boolean;
+            description
+                "Collect statistics for each entry of the ACL
+
+                The exact set of statistics depend on the subinterface-specific mode";
+        }
+        leaf last-clear {
+            config false;
+            type srl_nokia-comm:date-and-time-delta;
+            description
+                "Time of the last clear command performed by the user at this level";
+        }
+        container statistics {
+            config false;
+        }
+        /* leaf programming-complete {
+            config false;
+            type boolean;
+            description
+                "Set to true when all recently committed changes to the ACL have been programmed into all TCAMs.";
+        } */
+        list entry {
+            description "List of filter rules.";
+            key sequence-id;
+            leaf sequence-id {
+                type uint32 {
+                    range "1..65535";
+                }
+                description
+                    "A number to indicate the relative evaluation order of the different entries; lower numbered entries are evaluated before higher numbered entries.";
+            }
+            leaf description {
+                type srl_nokia-comm:description;
+                description "Description string for the filter entry";
+            }
+
+            uses interface-filter-entry-tcam;
+            uses interface-filter-entry-action-config;
+            uses common-ipv6-filter-entry-match-config;
+            uses interface-filter-entry-statistics;
+        }
+    }
+
+    grouping ipv6-filter-top {
+        list ipv6-filter {
+            description "List of IPv6 filter policies";
+            key name;
+            leaf name {
+                type srl_nokia-comm:name;
+                description
+                    "Name of the IPv6 filter policy.";
+            }
+            leaf description {
+                type srl_nokia-comm:description;
+                description "Description string for the IPv6 filter policy";
+            }
+            leaf subinterface-specific {
+                type enumeration {
+                    enum "disabled";
+                    enum "input-only";
+                    enum "output-only";
+                    enum "input-and-output";
+                }
+                default "disabled";
+                description
+                  "Controls the instantiation of the filter when it is applied as an input or output ACL
+
+                  disabled: all subinterfaces on a single linecard that reference the ACL as an input ACL use a shared filter instance, and all subinterfaces on a single linecard that reference the ACL as an output ACL use a shared filter instance
+
+                  input-only: all subinterfaces on a single linecard that reference the ACL as an output ACL use a shared filter instance, but each subinterface that references the ACL as an input ACL uses its own separate instance of the filter
+
+                  output-only: all subinterfaces on a single linecard that reference the ACL as an input ACL use a shared filter instance, but each subinterface that references the ACL as an output ACL uses its own separate instance of the filter
+
+                  input-and-output: each subinterface that references the ACL as either an input ACL or an output ACL uses its own separate instance of the filter";
+            }
+            uses interface-ipv6-filter-top;
+        }
+    }
+
+    grouping cpm-ipv6-filter-top {
+        leaf statistics-per-entry {
+            type boolean;
+            description
+                "Collect the following statistics per entry: the number of packets matching each entry, and the elapsed time since a packet last matched each entry";
+        }
+        leaf last-clear {
+            config false;
+            type srl_nokia-comm:date-and-time-delta;
+            description
+                "Time of the last clear command performed by the user at this level";
+        }
+        /* leaf programming-complete {
+            config false;
+            type boolean;
+            description
+                "Set to true when all recently committed changes to the ACL have been programmed into all TCAMs.";
+        } */
+        list entry {
+            description "List of filter rules.";
+            key sequence-id;
+            leaf sequence-id {
+                type uint32 {
+                    range "1..65535";
+                }
+                description
+                    "A number to indicate the relative evaluation order of the different entries; lower numbered entries are evaluated before higher numbered entries";
+            }
+            leaf description {
+                type srl_nokia-comm:description;
+                description "Description string for the filter entry";
+            }
+            leaf tcam-entries {
+                config false;
+                type uint16;
+                description
+                    "The number of TCAM entries required to implement a single instance of this filter rule.";
+            }
+            uses cpm-filter-entry-action-config;
+            uses common-ipv6-filter-entry-match-config;
+            uses cpm-filter-entry-statistics;
+        }
+    }
+
+    grouping capture-ipv6-filter-top {
+        list entry {
+            description "List of filter rules.";
+            key sequence-id;
+            leaf sequence-id {
+                type uint32 {
+                    range "1..65535";
+                }
+                description
+                    "A number to indicate the relative evaluation order of the different entries; lower numbered entries are evaluated before higher numbered entries";
+            }
+            leaf description {
+                type srl_nokia-comm:description;
+                description "Description string for the filter entry";
+            }
+            leaf tcam-entries {
+                config false;
+                type uint16;
+                description
+                    "The number of TCAM entries required to implement a single instance of this filter rule.";
+            }
+            uses capture-filter-entry-action-config;
+            uses common-ipv6-filter-entry-match-config;
+        }
+    }
+
+    grouping system-ipv6-filter-top {
+        leaf last-clear {
+            config false;
+            type srl_nokia-comm:date-and-time-delta;
+            description
+                "Time of the last clear command performed by the user at this level";
+        }
+        list entry {
+            description "List of filter rules.";
+            key sequence-id;
+            leaf sequence-id {
+                type uint32 {
+                    range "1..128";
+                }
+                description
+                    "A number to indicate the relative evaluation order of the different entries; lower numbered entries are evaluated before higher numbered entries";
+            }
+            leaf description {
+                type srl_nokia-comm:description;
+                description "Description string for the filter entry";
+            }
+            leaf tcam-entries {
+                config false;
+                type uint16;
+                description
+                    "The number of TCAM entries required to implement a single instance of this filter rule.";
+            }
+            uses system-filter-entry-action-config;
+            uses common-ipv6-filter-entry-match-config;
+            uses system-filter-entry-statistics;
+        }
+    }
+
+    grouping cpm-filter-top {
+        container cpm-filter {
+            description "Top level container for CPM filters";
+            container ipv4-filter {
+                description "Top level container for CPM IPv4 filters";
+
+                uses cpm-ipv4-filter-top;
+            }
+
+            container ipv6-filter {
+                description "Top level container for CPM IPv6 filters";
+
+                uses cpm-ipv6-filter-top;
+            }
+        }
+    }
+
+    grouping capture-filter-top {
+        container capture-filter {
+            description "Top level container for capture filters";
+            container ipv4-filter {
+                description "Top level container for capture IPv4 filters";
+
+                uses capture-ipv4-filter-top;
+            }
+
+            container ipv6-filter {
+                description "Top level container for capture IPv6 filters";
+
+                uses capture-ipv6-filter-top;
+            }
+        }
+    }
+
+    grouping system-filter-top {
+        container system-filter {
+            if-feature srl_nokia-feat:trident3;
+            description "Top level container for System filters";
+            container ipv4-filter {
+                description "Top level container for System IPv4 filters";
+
+                uses system-ipv4-filter-top;
+            }
+
+            container ipv6-filter {
+                description "Top level container for System IPv6 filters";
+
+                uses system-ipv6-filter-top;
+            }
+        }
+    }
+
+    grouping acl-top {
+        container acl {
+            description
+                "Top level container for configuration and operational state related to access control lists (ACLs)";
+
+            uses ipv4-filter-top;
+            uses ipv6-filter-top;
+            uses cpm-filter-top;
+            uses capture-filter-top;
+            uses acl-policers-top;
+            uses system-filter-top;
+
+            leaf tcam-profile {
+                description
+                    "Specify the TCAM resource management profile";
+                type enumeration {
+                    enum "default" {
+                        description
+                            "Default allocation that provides twice as many resources to ingress ACLs as egress ACLs";
+                    }
+                    enum "ipv4-egress-scaled" {
+                        description
+                            "Alternate allocation that provides more resources to IPv4 egress ACLs than any other application";
+                    }
+                }
+            }
+        }
+    }
+
+    grouping subinterface-acl-filters {
+        leaf ipv4-filter {
+            description "IPv4 ACL filter to be applied on this interface";
+            type leafref {
+                path "/srl_nokia-acl:acl/srl_nokia-acl:ipv4-filter/name";
+            }
+        }
+
+        leaf ipv6-filter {
+            description "IPv6 ACL filter to be applied on this interface";
+            type leafref {
+                path "/srl_nokia-acl:acl/srl_nokia-acl:ipv6-filter/name";
+            }
+        }
+    }
+
+    grouping subinterface-acl-config {
+        container acl {
+            description
+                "Container for ACL policies applied to the subinterface";
+            container input {
+                description
+                    "Container for ACL options that apply to ingress traffic on the subinterface";
+                uses subinterface-acl-filters;
+            }
+            container output {
+                description
+                    "Container for ACL options that apply to egress traffic on the subinterface";
+                uses subinterface-acl-filters;
+            }
+        }
+    }
+
+    augment "/srl_nokia-if:interface/srl_nokia-if:subinterface" {
+        uses subinterface-acl-config;
+    }
+
+    uses acl-top;
+
+}

@@ -1,0 +1,151 @@
+module srl_nokia-platform-redundancy {
+  yang-version 1.1;
+
+  // namespace
+  namespace "urn:srl_nokia/platform-redundancy";
+  prefix srl_nokia-platform-redundancy;
+
+  import srl_nokia-common {
+    prefix srl-comm;
+  }
+  import srl_nokia-platform {
+    prefix srl-platform;
+  }
+  import srl_nokia-features {
+    prefix srl-feat;
+  }
+
+  description
+    "This module defines configuration and operational state data related platform redundancy.";
+
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+  typedef sync-options {
+    type enumeration {
+      enum overlay {
+        description
+          "Synchronize all system, as well as ancillary files";
+      }
+      enum system {
+        description
+          "Synchronize system-related data only";
+      }
+    }
+  }
+
+  typedef sync-state {
+    type enumeration {
+      enum synchronized {
+        description
+          "Standby control module is ready and synchronized";
+      }
+      enum synchronizing {
+        description
+          "Standby control module is currently synchronizing";
+      }
+      enum not-ready {
+        description
+          "Standby control module is not synchronized";
+      }
+    }
+  }
+
+  grouping redundancy-state-top {
+    description
+      "Grouping for global redundancy operational state";
+    leaf active-module {
+      type enumeration {
+        enum A;
+        enum B;
+      }
+      config false;
+      description
+        "Control module currently active";
+    }
+    leaf failover-time {
+      type srl-comm:date-and-time-delta;
+      config false;
+      description
+        "Date and time of the last control module failover";
+    }
+  }
+
+  grouping redundancy-synchronization-top {
+    container synchronization {
+      description
+        "Top-level container for redundancy synchronization";
+      leaf state {
+        type sync-state;
+        config false;
+        description
+          "Current synchronization status";
+      }
+      leaf last-synchronization {
+        type srl-comm:date-and-time-delta;
+        config false;
+        description
+          "Last date and time a synchronization of system files occurred";
+      }
+      container overlay {
+        description
+          "Top-level container for overlay synchronization";
+        leaf synchronization-frequency {
+          type uint32 {
+            range "30..65535";
+          }
+          default "60";
+          units "seconds";
+          description
+            "Sets the frequency of overlay synchronizations
+               
+             This has no effect if overlay is not a configured synchronization mode. Changing this value results in the timer to the next synchronization being reset.";
+        }
+        leaf last-synchronization {
+          config false;
+          type srl-comm:date-and-time-delta;
+          description
+            "Last date and time a synchronization of the overlay occurred";
+        }
+        leaf next-synchronization {
+          config false;
+          type srl-comm:date-and-time-delta;
+          description
+            "Next date and time a synchronization of the overlay will occur";
+        }
+      }
+    }
+  }
+
+  grouping redundancy-configuration-top {
+    description
+      "Grouping for global redundancy configuration";
+  }
+
+  grouping redundancy-top {
+    description
+      "Grouping for global redundancy configuration and state";
+    container redundancy {
+      description
+        "Top-level container for platform redundancy";
+      uses redundancy-configuration-top;
+      uses redundancy-state-top;
+      uses redundancy-synchronization-top;
+    }
+  }
+
+  augment "/srl-platform:platform" {
+    if-feature "srl-feat:chassis";
+    uses redundancy-top;
+  }
+}

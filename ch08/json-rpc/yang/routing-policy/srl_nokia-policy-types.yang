@@ -1,0 +1,303 @@
+module srl_nokia-policy-types {
+
+  yang-version 1.1;
+
+  namespace "urn:srl_nokia/policy-types";
+
+  prefix "srl_nokia-pol-types";
+
+  import srl_nokia-common { prefix srl_nokia-comm; } 
+
+  description
+    "This module contains general data definitions for use in routing
+    policy.  It can be imported by modules that contain protocol-
+    specific policy match and actions.";
+
+//Temporary definition to support only ext1 and ext2 ospf path types for 20.12
+
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+  identity pol-ospf-path-type {
+    description
+      "Base identity for the OSPF path type of a OSPF route..
+       This is as defined in RFC2328 chapter 1.1 path-type.";
+  }
+  
+  identity type-1-ext {
+    base pol-ospf-path-type;
+    description
+      "The route has path-type type 1 external";
+    reference
+      "RFC5838";
+  }
+
+  identity type-2-ext {
+    base pol-ospf-path-type;
+    description
+      "The route has path-type type 2 external";
+    reference
+      "RFC5838";
+  }
+  typedef comparison-operator-type {
+    type enumeration {
+      enum "eq";
+      enum "ge";
+      enum "le";
+    }
+    description "Operators used for comparison";
+  }
+
+  typedef bgp-family-type {
+    type identityref {
+      base srl_nokia-comm:bgp-address-family;
+    }
+    description "BGP address family types";
+  }
+
+  typedef as-path-regexp {
+    type string {
+      length "1..65535";
+    }
+    description "An AS Path regular expression used by policies";
+  }
+
+  typedef as-number {
+      type uint32 {
+          range "1..4294967295";
+      }
+      description
+          "An autonomous system number";
+  }
+
+  identity bgp-well-known-community {
+    description
+      "Reserved communities within the standard community space
+      defined by RFC1997. These communities must fall within the
+      range 0x00000000 to 0xFFFFFFFF";
+    reference "RFC1997";
+  }
+
+  identity no-export {
+    base bgp-well-known-community;
+    description
+      "Do not export NLRI received carrying this community outside
+      the bounds of this autonomous system, or this confederation if
+      the local autonomous system is a confederation member AS. This
+      community has a value of 0xFFFFFF01.";
+    reference "RFC1997";
+  }
+
+  identity no-advertise {
+    base bgp-well-known-community;
+    description
+      "All NLRI received carrying this community must not be
+      advertised to other BGP peers. This community has a value of
+      0xFFFFFF02.";
+    reference "RFC1997";
+  }
+
+  identity no-export-subconfed {
+    base bgp-well-known-community;
+    description
+      "All NLRI received carrying this community must not be
+      advertised to external BGP peers - including over confederation
+      sub-AS boundaries. This community has a value of 0xFFFFFF03.";
+    reference "RFC1997";
+  }
+
+/*  identity no-peer {
+    base bgp-well-known-community;
+    description
+      "An autonomous system receiving NLRI tagged with this community
+      is advised not to readvertise the NLRI to external bi-lateral
+      peer autonomous systems. An AS may also filter received NLRI
+      from bilateral peer sessions when they are tagged with this
+      community value";
+    reference "RFC3765";
+    }*/
+
+  typedef bgp-std-community-type {
+    type string {
+      pattern '(6553[0-5]|655[0-2][0-9]|654[0-9]{2}|65[0-4][0-9]{2}'      +
+              '|6[0-4][0-9]{3}|[1-5][0-9]{4}|[1-9][0-9]{1,3}|[0-9]):'      +
+              '(6553[0-5]|655[0-2][0-9]|654[0-9]{2}|65[0-4][0-9]{2}'       +
+              '|6[0-4][0-9]{3}|[1-5][0-9]{4}|[1-9][0-9]{1,3}|[0-9])';
+    }
+    description
+      "Type definition for standard commmunity values represented as a string of the form N:M where N and M are integers between 0 and 65535";
+    reference "RFC 1997 - BGP Communities Attribute";
+  }
+
+  typedef bgp-std-community-regexp-type {
+    type string {
+//      pattern '.*[0-9]+.*:.*[0-9*]+.*';
+      pattern '.*:.*';        
+    }
+    description
+      "Type definition for regular expressions that match standard BGP communities";
+  }
+
+  typedef bgp-std-community-well-known-type {
+    type identityref {
+      base bgp-well-known-community;
+    }
+    description
+      "Type definition for well-known BGP standard community values";
+    reference
+      "IANA Border Gateway Protocol (BGP) Well Known Communities";
+  }
+  
+  typedef bgp-large-community-type {
+    type string {
+      pattern '([1-9][0-9]{0,9}):([1-9][0-9]{0,9}):([1-9][0-9]{0,9})';
+    }
+    description
+      "Type definition for large commmunity values represented as a string of the form A:B:C where A, B and C are integers between 0 and 4294967295";
+    reference "RFC 8092 - BGP Large Communities Attribute";
+  }
+
+  typedef bgp-large-community-regexp-type {
+    type string {
+//      pattern '.*[0-9]+.*:.*[0-9*]+.*:.*[0-9*]+.*';
+        pattern '.*:.*:.*';        
+    }
+    description
+      "Type definition for regular expressions that match large BGP communities";
+  }
+
+  typedef bgp-ext-community-type {
+    type union {
+      type string {
+        // Type 1: 2-octet global and 4-octet local
+        //         (AS number)        (Integer)
+        pattern '(6553[0-5]|655[0-2][0-9]|654[0-9]{2}|65[0-4][0-9]{2}'      +
+                '|6[0-4][0-9]{3}|[1-5][0-9]{4}|[1-9][0-9]{1,3}|[0-9]):'      +
+                '(429496729[0-5]|42949672[0-8][0-9]|4294967[0-1][0-9]{2}'    +
+                '|429496[0-6][0-9]{3}|42949[0-5][0-9]{4}|4294[0-8][0-9]{5}|' +
+                '429[0-3][0-9]{6}|4[0-1][0-9]{7}|[1-3][0-9]{9}|'             +
+                '[1-9][0-9]{1,8}|[0-9])';
+      }
+      type string {
+        // Type 2: 4-octet global and 2-octet local
+        //         (ipv4-address)     (integer)
+        pattern '(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|'         +
+                '25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9][0-9]|'         +
+                '2[0-4][0-9]|25[0-5]):'                                +
+                '(6553[0-5]|655[0-2][0-9]|654[0-9]{2}|65[0-4][0-9]{2}' +
+                '|6[0-4][0-9]{3}|[1-5][0-9]{4}|[1-9][0-9]{1,3}|[0-9])';
+      }
+      type string {
+        // RFC5668: 4-octet global and 2-octet local
+        //            (AS number)        (integer)
+        pattern '(429496729[0-5]|42949672[0-8][0-9]|4294967[0-1][0-9]{2}'   +
+                '|429496[0-6][0-9]{3}|42949[0-5][0-9]{4}|4294[0-8][0-9]{5}|' +
+                '429[0-3][0-9]{6}|4[0-1][0-9]{7}|[1-3][0-9]{9}|'             +
+                '[1-9][0-9]{1,8}|[0-9]):'                                    +
+                '(6553[0-5]|655[0-2][0-9]|654[0-9]{2}|65[0-4][0-9]{2}'       +
+                '|6[0-4][0-9]{3}|[1-5][0-9]{4}|[1-9][0-9]{1,3}|[0-9])';
+      }
+      type string {
+        // route-target with Type 1
+        // route-target:(ASN):(local-part)
+        pattern 'target:'                                                   +
+                '(6553[0-5]|655[0-2][0-9]|654[0-9]{2}|65[0-4][0-9]{2}'       +
+                '|6[0-4][0-9]{3}|[1-5][0-9]{4}|[1-9][0-9]{1,3}|[0-9]):'      +
+                '(429496729[0-5]|42949672[0-8][0-9]|4294967[0-1][0-9]{2}'    +
+                '|429496[0-6][0-9]{3}|42949[0-5][0-9]{4}|4294[0-8][0-9]{5}|' +
+                '429[0-3][0-9]{6}|4[0-1][0-9]{7}|[1-3][0-9]{9}|'             +
+                '[1-9][0-9]{1,8}|[0-9])';
+      }
+      type string {
+        // route-target with Type 2
+        // route-target:(IPv4):(local-part)
+        pattern 'target:'                                             +
+                '(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|'          +
+                '25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9][0-9]|'         +
+                '2[0-4][0-9]|25[0-5]):'                                +
+                '(6553[0-5]|655[0-2][0-9]|654[0-9]{2}|65[0-4][0-9]{2}' +
+                '|6[0-4][0-9]{3}|[1-5][0-9]{4}|[1-9][0-9]{1,3}|[0-9])';
+      }
+      type string {
+        // 4-byte AS Type 1 route-target
+        pattern 'target:'                                                   +
+                '(429496729[0-5]|42949672[0-8][0-9]|4294967[0-1][0-9]{2}'    +
+                '|429496[0-6][0-9]{3}|42949[0-5][0-9]{4}|4294[0-8][0-9]{5}|' +
+                '429[0-3][0-9]{6}|4[0-1][0-9]{7}|[1-3][0-9]{9}|'             +
+                '[1-9][0-9]{1,8}|[0-9]):'                                    +
+                '(6553[0-5]|655[0-2][0-9]|654[0-9]{2}|65[0-4][0-9]{2}'       +
+                '|6[0-4][0-9]{3}|[1-5][0-9]{4}|[1-9][0-9]{1,3}|[0-9])';
+      }
+      type string {
+        // route-origin with Type 1
+        pattern 'origin:'                                                   +
+                '(6553[0-5]|655[0-2][0-9]|654[0-9]{2}|65[0-4][0-9]{2}'       +
+                '|6[0-4][0-9]{3}|[1-5][0-9]{4}|[1-9][0-9]{1,3}|[0-9]):'      +
+                '(429496729[0-5]|42949672[0-8][0-9]|4294967[0-1][0-9]{2}'    +
+                '|429496[0-6][0-9]{3}|42949[0-5][0-9]{4}|4294[0-8][0-9]{5}|' +
+                '429[0-3][0-9]{6}|4[0-1][0-9]{7}|[1-3][0-9]{9}|'             +
+                '[1-9][0-9]{1,8}|[0-9])';
+      }
+      type string {
+        // route-origin with Type 2
+        pattern 'origin:'                                             +
+                '(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|'          +
+                '25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9][0-9]|'         +
+                '2[0-4][0-9]|25[0-5]):'                                +
+                '(6553[0-5]|655[0-2][0-9]|654[0-9]{2}|65[0-4][0-9]{2}' +
+                '|6[0-4][0-9]{3}|[1-5][0-9]{4}|[1-9][0-9]{1,3}|[0-9])';
+      }
+      type string {
+        // 4-byte AS Type 1 route-origin
+        pattern 'origin:'                                                   +
+                '(429496729[0-5]|42949672[0-8][0-9]|4294967[0-1][0-9]{2}'    +
+                '|429496[0-6][0-9]{3}|42949[0-5][0-9]{4}|4294[0-8][0-9]{5}|' +
+                '429[0-3][0-9]{6}|4[0-1][0-9]{7}|[1-3][0-9]{9}|'             +
+                '[1-9][0-9]{1,8}|[0-9]):'                                    +
+                '(6553[0-5]|655[0-2][0-9]|654[0-9]{2}|65[0-4][0-9]{2}'       +
+                '|6[0-4][0-9]{3}|[1-5][0-9]{4}|[1-9][0-9]{1,3}|[0-9])';
+      }
+      type string {
+        // Extended Color Community
+        pattern 'color:'                                                    +
+                '[0-1]{2}:'                                                  +
+                '(429496729[0-5]|42949672[0-8][0-9]|4294967[0-1][0-9]{2}'    +
+                '|429496[0-6][0-9]{3}|42949[0-5][0-9]{4}|4294[0-8][0-9]{5}|' +
+                '429[0-3][0-9]{6}|4[0-1][0-9]{7}|[1-3][0-9]{9}|'             +
+                '[1-9][0-9]{1,8}|[0-9])';
+      }
+    }
+    description
+      "Type definition for extended community attributes. In the case that
+      common communities are utilised, they are represented as a string
+      of the form:
+        - <2b AS>:<4b value> per RFC4360 section 3.1
+        - <4b IPv4>:<2b value> per RFC4360 section 3.2
+        - <4b AS>:<2b value> per RFC5668 section 2.
+        - target:<2b AS>:<4b value> per RFC4360 section 4
+        - target:<4b IPv4>:<2b value> per RFC4360 section 4
+        - origin:<2b ASN>:<4b value> per RFC4360 section 5
+        - origin:<4b IPv4>:<2b value> per RFC4360 section 5
+        - color:<CO bits>:<4b value> per draft-ietf-idr-segment-routing-te-policy
+          section 3";
+    reference
+      "RFC 4360 - BGP Extended Communities Attribute
+       RFC 5668 - 4-Octet AS Specific BGP Extended Community
+       draft-ietf-idr-segment-routing-te-policy";
+  }
+  
+  typedef bgp-admin-tag {
+    description
+      "This type defines the range administrative route tags that can be assigned to BGP routes";
+    type uint32 {
+      range "0..4294967295";
+    }
+  }
+
+}

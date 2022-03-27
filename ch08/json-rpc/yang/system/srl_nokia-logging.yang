@@ -1,0 +1,527 @@
+module srl_nokia-logging {
+  yang-version 1.1;
+  namespace "urn:srl_nokia-logging";
+  prefix srl_nokia-logging;
+
+  import srl_nokia-system {
+    prefix srl-system;
+  }
+  import srl_nokia-common {
+    prefix srl-comm;
+  }
+  import srl_nokia-network-instance {
+    prefix srl-netinst;
+  }
+
+  description
+    "This module describes a YANG model for system logging.";
+
+  revision 2021-06-30 {
+    description
+      "SRLinux 21.6.1";
+  }
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+  grouping logging-top {
+    typedef priority-type {
+      type enumeration {
+        enum emergency;
+        enum alert;
+        enum critical;
+        enum error;
+        enum warning;
+        enum notice;
+        enum informational;
+        enum debug;
+      }
+      description
+        "In increasing severity, they are: debug, informational, notice, warning, error, critical, emergency";
+    }
+
+    typedef subsystem-name-type {
+      type enumeration {
+        enum aaa;
+        enum accounting;
+        enum acl;
+        enum app;
+        enum arpnd;
+        enum bfd;
+        enum bgp;
+        enum bridgetable;
+        enum chassis;
+        enum debug;
+        enum dhcp;
+        enum evpn;
+        enum fib;
+        enum gnmi;
+        enum isis;
+        enum json;
+        enum lag;
+        enum ldp;
+        enum linux;
+        enum lldp;
+        enum log;
+        enum mgmt;
+        enum mpls;
+        enum netinst;
+        enum ospf;
+        enum platform;
+        enum policy;
+        enum qos;
+        enum sdk;
+        enum sflow;
+        enum staticroute;
+        enum vxlan;
+        enum xdp;
+      }
+      description
+        "Subsystems that produce syslog input, and can be forwarded to output entities";
+    }
+
+    typedef facility-name-type {
+      type enumeration {
+        enum auth;
+        enum authpriv;
+        enum cron;
+        enum daemon;
+        enum ftp;
+        enum kern;
+        enum lpr;
+        enum mail;
+        enum news;
+        enum syslog;
+        enum user;
+        enum uucp;
+        enum local0;
+        enum local1;
+        enum local2;
+        enum local3;
+        enum local4;
+        enum local5;
+        enum local6;
+        enum local7;
+      }
+      description
+        "Name of a Linux entity that can produce messages
+
+         Some are generic and many programs produce them.";
+    }
+
+    typedef transport-type {
+      type enumeration {
+        enum udp;
+        enum tcp;
+      }
+      description
+        "Type of IP transport protocol used between local rsyslogd and a remote one";
+    }
+
+    typedef usage-capacity-size-type {
+      type string {
+        pattern '[1-9][0-9]{0,15}(K|M|G){0,1}';
+      }
+      description
+        "Maximum number of bytes budgeted for an individual file
+
+         The rotate feature can create several individual files.";
+    }
+
+    typedef restricted-file-name-type {
+      // Disallows (a) one single period character, (b) a pair of period characters, and (c) anything with slashes
+      type string {
+        pattern '([^./][^/]*)|(\.[^\./]+)|(\.\.[^/])+';
+      }
+    }
+
+    typedef directory-name-type {
+      type string {
+        pattern '/(.)*';
+      }
+    }
+
+    grouping priority-match-grouping {
+      container priority {
+        leaf match-above {
+          type priority-type;
+          description
+            "At a given severity and above";
+        }
+        leaf-list match-exact {
+          type priority-type;
+          description
+            "Individually specified severities";
+        }
+        description
+          "Narrows the capture to a given severity, a range or a specific set of severities";
+      }
+    }
+
+    grouping facility-grouping {
+      list facility {
+        description
+          "List of facilities to source messages from";
+        key "facility-name";
+        leaf facility-name {
+          description
+            "Name of a Linux syslog facility";
+          type facility-name-type;
+        }
+        uses priority-match-grouping;
+      }
+    }
+
+    grouping subsystem-grouping {
+      list subsystem {
+        key "subsystem-name";
+        leaf subsystem-name {
+          type subsystem-name-type;
+          description
+            "Reference to an available subsystem to source messages from";
+        }
+        description
+          "Entity or entities that may produce messages to be captured";
+        uses priority-match-grouping;
+      }
+    }
+
+    grouping filter-reference-grouping {
+      leaf-list filter {
+        type leafref {
+          path "/srl-system:system/logging/filter/filter-name";
+        }
+        description
+          "A set of all-matching criteria that messages must fulfill in order to be captured";
+      }
+    }
+
+    grouping format-grouping {
+      leaf format {
+        type string;
+        default "%TIMEGENERATED:::date-rfc3339% %HOSTNAME% %SYSLOGTAG%%MSG:::sp-if-no-1st-sp%%MSG:::drop-last-lf%\\n";
+        description
+          "Text format of the output syslog messages, in legacy syslog $template style";
+      }
+    }
+
+    grouping retention-grouping {
+      leaf rotate {
+        type uint16;
+        default "4";
+        description
+          "Number of files to keep in rotation when a maximum file size is reached";
+      }
+      leaf rotations {
+        config false;
+        type srl-comm:zero-based-counter64;
+        description
+          "Number of file rotations occurred";
+      }
+      leaf size {
+        type usage-capacity-size-type;
+        default "10M";
+        description
+          "Number of bytes an individual output file cannot exceed
+
+           The field allows the 'K, M, or G' suffixes as shorthand.
+           When reaching that size, a rotation happens and subsequent data is stored
+           in a new file with the same base name.";
+      }
+    }
+
+/*    grouping usage-configuration {
+      leaf configured-use {
+        type usage-capacity-size-type;
+        description
+          "Details the upperbound usage this log may occupy
+
+          This value is the combination of the size of each individual
+          output file, and the number of files that may be kept.";
+      }
+    }
+
+    grouping usage-common {
+      leaf in-use {
+        type usage-capacity-size-type;
+        description
+          "Details the amount of space currently used by this log";
+      }
+    }*/
+
+    container logging {
+      description
+        "System logging provides the interface to syslog services
+         to setup output entities on a selection of log sources.";
+      container console {
+        description
+          "Hardware serial device normally used for bring-up and diagnostics";
+        uses format-grouping;
+        uses facility-grouping;
+        uses subsystem-grouping;
+        uses filter-reference-grouping;
+      }
+      list filter {
+        key "filter-name";
+        description
+          "Describes a set of critieria that captured messages are required to fulfill";
+        leaf filter-name {
+          description
+            "Name of the filter";
+          type string {
+            pattern '([0-9a-zA-Z\-_.@!%^*()\[\]{}|\\/<>,;])+';
+          }
+        }
+        leaf prefix {
+          type string;
+          description
+            "Text to be present at the beginning of the MSG property of a message
+             This is a fast lookup.";
+        }
+        leaf contains {
+          type string;
+          description
+            "Text to find in the MSG property of messages to capture from the stream
+             This is slower than prefix.";
+        }
+        leaf tag {
+          type string;
+          description
+            "Text to be searched in the SYSLOGTAG property of messages
+             Usually a program name or part of it.";
+        }
+        leaf regex {
+          type string;
+          description
+            "Extended regular expression to search in the MSG property of messages";
+        }
+        uses facility-grouping;
+      }
+      list buffer {
+        key "buffer-name";
+        description
+          "Log files maintained in memory, non-persistent across system reboots
+
+           These files are stored at directory /var/log/srlinux/buffer. Rotation into multiple files is available.";
+        leaf buffer-name {
+          type restricted-file-name-type;
+          description
+            "Base name of the file(s) to be stored in memory";
+        }
+        leaf persist {
+          type uint32 {
+            range "0 | 60..604800";
+          }
+          description
+            "Time in seconds to shadow the buffer to persistent storage
+
+             Setting this field to 0 results in the buffer not being persisted. A value other than 0 will result in the log being persisted to disk based on the configured value. Logs with a non-zero persist value are persisted automatically on rollover, or at the configured value.";
+          units "seconds";
+          default "0";
+        }
+        uses format-grouping;
+        uses retention-grouping;
+        uses facility-grouping;
+        uses subsystem-grouping;
+        uses filter-reference-grouping;
+/*        container usage {
+          config false;
+          uses usage-common;
+          uses usage-configuration;
+        }*/
+      }
+      list file {
+        key "file-name";
+        description
+          "Log files maintained on disk, persistent across system reboots
+
+           When a maximum file size is reached, the file is renamed and a maximum
+           rotate number of them are kept.";
+        leaf file-name {
+          type restricted-file-name-type;
+          description
+            "Base name of the file(s) to be stored on disk";
+        }
+        leaf directory {
+          type directory-name-type;
+          default "/var/log/srlinux/file";
+          description
+            "Fully qualified path of a directory where the log file(s) shall be maintained";
+        }
+        uses format-grouping;
+        uses retention-grouping;
+        uses facility-grouping;
+        uses subsystem-grouping;
+        uses filter-reference-grouping;
+/*        container usage {
+          srl_nokia-ext:delivery-node-override true;
+          srl_nokia-ext:stream-mode sample=5;
+          config false;
+          uses usage-common;
+          uses usage-configuration;
+        }*/
+      }
+/*      container orphans {
+        description
+          "Top-level container for orphaned files
+
+          Orphaned files are files that have been deleted from configuration but still have logs on the system. These are periodically cleaned based on the retention-period parameter.";
+        leaf retention-period {
+          type uint8;
+          units hours;
+          default 24;
+          description
+            "The time in hours to retain orphaned logs in the system
+
+            After this period has elapsed the files are automatically deleted. Setting this field to 0 will result in no cleanup taking place.";
+        }
+        list file {
+          config false;
+          key "file-name";
+          description
+            "List of files that are currently orphans";
+          leaf file-name {
+            type restricted-file-name-type;
+            description
+              "Base name of the file(s) to be stored on disk";
+          }
+          leaf directory {
+            type directory-name-type;
+            description
+              "Fully qualified path of a directory where the log file(s) shall be maintained";
+          }
+          container usage {
+            uses usage-common;
+          }
+        }
+        list buffer {
+          key "buffer-name";
+          config false;
+          description
+            "Log files maintained in memory, non-persistent across system reboots
+
+            These files are stored at directory /var/log/srlinux/buffer.  Rotation into multiple files is available.";
+          leaf buffer-name {
+            type restricted-file-name-type;
+            description
+              "Base name of the file(s) to be stored in memory";
+          }
+          container usage {
+            uses usage-common;
+          }
+        }
+      }*/
+      list remote-server {
+        key "host";
+        description
+          "List of output remote syslog servers";
+        leaf host {
+          type srl-comm:host;
+          description
+            "Domain or IP address of a remote syslog server destination";
+        }
+        leaf transport {
+          type transport-type;
+          default "udp";
+          description
+            "Transport protocol for syslog to use for messages sent to a remote server";
+        }
+        leaf remote-port {
+          type uint32;
+          default "514";
+          description
+            "Transport port for syslog to use for messages sent to a remote server";
+        }
+        uses facility-grouping;
+        uses subsystem-grouping;
+        uses filter-reference-grouping;
+      }
+      leaf subsystem-facility {
+        type facility-name-type;
+        default "local6";
+        description
+          "Linux facility that internal application subsystems will use";
+      }
+      leaf network-instance {
+        type leafref {
+          path "/srl-netinst:network-instance/srl-netinst:name";
+        }
+        must 'not(/srl-netinst:network-instance[srl-netinst:name=current()]/srl-netinst:type = "srl-netinst:mac-vrf")' {
+          error-message "Syslog server cannot be started in a network-instance of type 'mac-vrf'";
+        }
+        description
+          "Reference to a configured network-instance to run rsyslogd in
+
+           This network-instance will be used as a source for requests to remote syslog servers.";
+      }
+/*      container usage {
+        config false;
+        description
+          "Runtime state updated every 10 minutes.";
+        container buffer {
+          description
+            "Runtime usage by all buffer log files in memory, and their potential maximum by configuration
+            Capacity is the space reserved in memory.";
+          leaf capacity {
+            type usage-capacity-size-type;
+            description
+              "The amount of memory allocated for buffered logs";
+          }
+          leaf in-use {
+            type usage-capacity-size-type;
+            description
+              "The amount of memory current in use by buffered logs";
+          }
+          leaf configured-use {
+            type usage-capacity-size-type;
+            description
+              "The amount of memory buffered logs may occupy with current configuration";
+          }
+        }
+        container file {
+          description
+            "Runtime usage by all output log files on disk, and their potential maximum by configuration";
+          leaf in-use {
+            type usage-capacity-size-type;
+            description
+              "The amount of disk space in use by persistent logs";
+          }
+          leaf configured-use {
+            type usage-capacity-size-type;
+            description
+              "The amount of disk space persistent logs may occupy with current configuration";
+          }
+        }
+        container orphans {
+          container file {
+            leaf in-use {
+              type usage-capacity-size-type;
+              description
+                "The amount of disk space in use by orphaned logs";
+            }
+          }
+          container buffer {
+            leaf in-use {
+              type usage-capacity-size-type;
+              description
+                "The amount of memory in use by orphaned buffered logs";
+            }
+          }
+        }
+      }*/
+    }
+  }
+
+  augment "/srl-system:system" {
+    uses logging-top;
+  }
+}

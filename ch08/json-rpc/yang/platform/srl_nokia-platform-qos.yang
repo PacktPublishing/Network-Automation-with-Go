@@ -1,0 +1,190 @@
+module srl_nokia-platform-qos {
+  yang-version 1.1;
+  namespace "urn:srl_nokia/platform-qos";
+  prefix srl_nokia-platform-qos;
+
+  import srl_nokia-common { prefix srl_nokia-comm; }
+  import srl_nokia-platform {prefix srl_nokia-platform; }
+  import srl_nokia-platform-lc {prefix srl_nokia-platform-lc; }
+  import srl_nokia-platform-resource-monitoring {prefix srl_nokia-platform-res-mon; }
+  import srl_nokia-features {prefix srl-feat; }
+  import srl_nokia-extensions {prefix srl-ext; }
+
+  description
+    "This module defines configuration and operational state related to QoS resources in the system";
+
+  revision 2021-06-30 {
+    description
+      "SRLinux 21.6.1";
+  }
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+  identity qos-resources {
+    description
+      "Base type for QoS resources";
+  }
+
+  identity classifier-profiles {
+    base qos-resources;
+    description
+      "A classifier-profile resource is used every time a different combination of IPv4 DSCP classifier and IPv6 DSCP classifier is applied to an ingress subinterface of the 7250 IXR IMM. There are 16 of these resources and one is always used by the combination of the default IPv4 DSCP classifier and the default IPv6 DSCP classifier.";
+  }
+
+  identity rewrite-profiles {
+    base qos-resources;
+    description
+      "A rewrite-profile resource is used every time a different combination of IPv4 DSCP rewrite-rule and IPv6 DSCP rewrite-rule is applied to an egress subinterface of the 7250 IXR IMM. There are 32 of these resources.";
+  }
+
+  identity rewrite-policies {
+    base qos-resources;
+    description
+      "A rewrite-policy resource is used every time a different DSCP or MPLS traffic-class rewrite-rule policy is applied to an egress subinterface of the 7250 IXR IMM. There are 32 of these resources.";
+  }
+
+  grouping qos-resource-monitoring {
+    container qos {
+      srl-ext:delivery-node-override true;
+      srl-ext:stream-mode sample=5;
+      list resource {
+        key name;
+        leaf name {
+          type identityref  {
+            base qos-resources;
+          }
+          description
+            "The name of the QoS resource";
+        }
+        leaf rising-threshold-log {
+          type srl_nokia-comm:percentage;
+          default "90";
+          description
+            "Sets the threshold that triggers the generation of a WARNING log whenever the utilization of the QoS resource in any linecard/complex/core reaches this value in a rising direction";
+        }
+        leaf falling-threshold-log {
+          type srl_nokia-comm:percentage;
+          default "70";
+          description
+            "Sets the threshold that triggers the generation of a NOTICE log whenever the utilization of the QoS resource in any linecard/complex/core falls reaches this value in a falling direction";
+        }
+      }
+    }
+  }
+
+  grouping qos-utilization {
+    container qos {
+      srl-ext:delivery-node-override true;
+      srl-ext:stream-mode sample=5;
+      config false;
+      list resource {
+        key name;
+        leaf name {
+          type identityref  {
+            base qos-resources;
+          }
+          description
+            "The name of the QoS resource";
+        }
+        leaf used {
+          type uint16;
+          description
+            "The number of resources that are in use";
+        }
+        leaf free {
+          type uint16;
+          description
+            "The number of resources that are unused and available";
+        }
+      }
+    }
+  }
+
+  grouping buffer-memory {
+    container buffer-memory {
+        srl-ext:delivery-node-override true;
+        srl-ext:stream-mode sample=5;
+        description
+          "Container for utilization statistics of the packet buffer memory";
+        leaf used {
+            config false;
+            if-feature "srl-feat:platform-7220-d2 or srl-feat:platform-7220-d3 or srl-feat:tomahawk3";
+            type uint64;
+            units "bytes";
+            description
+              "Used buffer memory, excluding reserved memory.";
+        }
+        leaf free {
+            config false;
+            if-feature "srl-feat:platform-7220-d2 or srl-feat:platform-7220-d3 or srl-feat:tomahawk3";
+            type uint64;
+            units "bytes";
+            description
+              "Available buffer memory, which equals the total memory less the used memory and the reserved memory.";
+        }
+        leaf reserved {
+            config false;
+            if-feature "srl-feat:platform-7220-d2 or srl-feat:platform-7220-d3 or srl-feat:tomahawk3";
+            type uint64;
+            units "bytes";
+            description
+              "Reserved for internal purposes.";
+        }
+        container sram {
+            config false;
+            if-feature "srl-feat:jericho2";
+            description
+              "Container for utilization statistics of the on-chip SRAM memory.";
+            leaf used {
+                type uint64;
+                units "bytes";
+                description
+                  "Used SRAM memory";
+            }
+            leaf free {
+                type uint64;
+                units "bytes";
+                description
+                  "Available SRAM memory";
+            }
+        }
+        container dram {
+            config false;
+            if-feature "srl-feat:jericho2";
+            description
+              "Container for utilization statistics of the DRAM memory.";
+            leaf used {
+                type srl_nokia-comm:percentage;
+                description
+                  "Used DRAM memory";
+            }
+        }
+    }
+  }
+
+  augment "/srl_nokia-platform:platform/srl_nokia-platform-res-mon:resource-monitoring" {
+    if-feature srl-feat:jericho2;
+    uses qos-resource-monitoring;
+  }
+
+  augment "/srl_nokia-platform:platform/srl_nokia-platform-lc:linecard/srl_nokia-platform-lc:forwarding-complex" {
+    if-feature srl-feat:jericho2;
+    uses qos-utilization;
+  }
+
+  augment "/srl_nokia-platform:platform/srl_nokia-platform-lc:linecard/srl_nokia-platform-lc:forwarding-complex" {
+    if-feature "srl-feat:jericho2 or srl-feat:platform-7220-d2 or srl-feat:platform-7220-d3 or srl-feat:tomahawk3";
+    uses buffer-memory;
+  }
+
+}

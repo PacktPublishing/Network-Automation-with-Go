@@ -1,0 +1,220 @@
+module srl_nokia-tcp-udp {
+  yang-version 1.1;
+  namespace "urn:srl_nokia/tcp-udp";
+  prefix srl_nokia-tcp-udp;
+
+  import srl_nokia-network-instance { prefix srl_nokia-netinst; }
+  import srl_nokia-common {
+    prefix srl_nokia-comm;
+  }
+
+  description
+    "A model for TCP and UDP statistics of a network instance.";
+
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+  grouping tcp-top {
+    container tcp {
+      config false;
+      description
+        "State for TCP connections that have been established or could be established using the route tables of this network instance.";
+      container statistics {
+        leaf active-opens {
+          type srl_nokia-comm:zero-based-counter64;
+          description
+            "The total number of times that TCP connections have made a direct transition to the SYN-SENT state from the CLOSED state.";
+        }
+        leaf passive-opens {
+          type srl_nokia-comm:zero-based-counter64;
+          description
+            "The total number of times TCP connections have made a direct transition to the SYN-RCVD state from the LISTEN state.";
+        }
+        leaf attempt-fails {
+          type srl_nokia-comm:zero-based-counter64;
+          description
+            "The total number of times that TCP connections have made a direct transition to the CLOSED state from either the SYN-SENT state or the SYN-RCVD state, plus the number of times that TCP connections have made a direct transition to the LISTEN state from the SYN-RCVD state.";
+        }
+        leaf established-resets {
+          type srl_nokia-comm:zero-based-counter64;
+          description
+            "The total number of times that TCP connections have made a direct transition to the CLOSED state from either the ESTABLISHED state or the CLOSE-WAIT state.";
+        }
+        leaf in-segments {
+          type srl_nokia-comm:zero-based-counter64;
+          description
+            "The total number of segments received, including those received in error.  This count includes segments received on currently established connections.";
+        }
+        leaf out-segments {
+          type srl_nokia-comm:zero-based-counter64;
+          description
+            "The total number of segments sent, including those on current connections but excluding those containing only retransmitted octets.";
+        }
+        leaf retransmitted-segments {
+          type srl_nokia-comm:zero-based-counter64;
+          description
+            "The total number of segments retransmitted; that is, the number of TCP segments transmitted containing one or more previously transmitted octets.";
+        }
+        leaf in-error-segments {
+          type srl_nokia-comm:zero-based-counter64;
+          description
+            "The total number of segments received in error (e.g., bad TCP checksums).";
+        }
+        leaf out-rst-segments {
+          type srl_nokia-comm:zero-based-counter64;
+          description
+            "The total number of TCP segments sent containing the RST flag.";
+        }
+        leaf in-checksum-errors {
+          type srl_nokia-comm:zero-based-counter64;
+          description
+            "The total number of segments that are received as bad TCP checksum errors.";
+        }
+      }
+      list connection {
+        description
+          "List of TCP connections that are established or that are in the process of being established – i.e. excluding those in the LISTEN state. An entry in this list is transient in that it ceases to exist when (or soon after) the connection makes the transition to the CLOSED state.";
+        key "local-address local-port remote-address remote-port";
+        leaf local-address {
+          type srl_nokia-comm:ip-address;
+          description
+            "The local IP address for this TCP connection.";
+        }
+        leaf local-port {
+          type srl_nokia-comm:port-number;
+          description
+            "The local port number for this TCP connection.";
+        }
+        leaf remote-address {
+          type srl_nokia-comm:ip-address;
+          description
+            "The remote IP address for this TCP connection.";
+        }
+        leaf remote-port {
+          type srl_nokia-comm:port-number;
+          description
+            "The remote port number for this TCP connection.";
+        }
+        leaf session-state {
+          type enumeration {
+            enum "closed" { value 1; }
+            enum "syn-sent" { value 3; }
+            enum "syn-received" { value 4; }
+            enum "established" { value 5; }
+            enum "fin-wait1" { value 6; }
+            enum "fin-wait2" { value 7; }
+            enum "close-wait" { value 8; }
+            enum "last-ack" { value 9; }
+            enum "closing" { value 10; }
+            enum "time-wait" { value 11; }
+            enum "delete-tcb" { value 12; }
+          }
+          description
+            "The state of this TCP connection.";
+        }
+        leaf process-id {
+          type uint32;
+          description
+            "The process ID of the application that owns the socket.";
+        }
+      }
+      list listening-application {
+        description
+          "List of applications that are listening on a particular TCP port bound to the network-instance.";
+        key "local-address local-port";
+        leaf local-address {
+          type srl_nokia-comm:ip-address;
+          description
+            "The local IP address accepted by the application. An all-zeroes value for the ipv4-address means that any IPv4 address is accepted. An all-zeroes value for the ipv6-address means that any IPv6 address is accepted.";
+        }
+        leaf local-port {
+          type srl_nokia-comm:port-number;
+          description
+            "The local port number accepted by the application.";
+        }
+        leaf process-id {
+          type uint32;
+          description
+            "The process ID of the application that owns the socket.";
+        }
+      }
+    }
+  }
+
+  grouping udp-top {
+    container udp {
+      config false;
+      description
+        "State for UDP datagrams routed using the route tables of this network instance.";
+      container statistics {
+        leaf in-packets {
+          type srl_nokia-comm:zero-based-counter64;
+          description
+            "The total number of UDP datagrams delivered to UDP users.";
+        }
+        leaf in-no-open-ports-packets {
+          type srl_nokia-comm:zero-based-counter64;
+          description
+            "The total number of received UDP datagrams for whichthere was no application at the destination port.";
+        }
+        leaf in-error-packets {
+          type srl_nokia-comm:zero-based-counter64;
+          description
+            "The total number of received UDP datagrams that could not be delivered for reasons other than the lack of an application at the destination port.";
+        }
+        leaf out-packets {
+          type srl_nokia-comm:zero-based-counter64;
+          description
+            "The total number of UDP datagrams sent from this network instance.";
+        }
+        leaf receive-buffer-errors {
+          type srl_nokia-comm:zero-based-counter64;
+          description
+            "Increased when memory cannot be allocated to process an incoming UDP packet.";
+        }
+        leaf send-buffer-errors {
+          type srl_nokia-comm:zero-based-counter64;
+          description
+            "Increased when memory cannot be allocated to send a UDP packet.";
+        }
+        leaf in-checksum-errors {
+          type srl_nokia-comm:zero-based-counter64;
+          description
+            "Increased when a received UDP packet has an invalid checksum.";
+        }
+        leaf ignored-multicast-packets {
+          type srl_nokia-comm:zero-based-counter64;
+          description
+            "The total number of ignored multicast UDP datagrams.";
+        }
+      }
+      list listening-application {
+        description
+          "List of applications that are listening on a particular UDP port bound to the network-instance.";
+        key "local-address local-port";
+        leaf local-address {
+          type srl_nokia-comm:ip-address;
+          description
+            "The local IP address accepted by the application. An all-zeroes value for the ipv4-address means that any IPv4 address is accepted. An all-zeroes value for the ipv6-address means that any IPv6 address is accepted.";
+        }
+        leaf local-port {
+          type srl_nokia-comm:port-number;
+          description
+            "The local port number accepted by the application.";
+        }
+        leaf process-id {
+          type uint32;
+          description
+            "The process ID of the application that owns the socket.";
+        }
+      }
+    }
+  }
+
+  augment "/srl_nokia-netinst:network-instance" {
+    uses tcp-top;
+    uses udp-top;
+  }
+}

@@ -1,0 +1,102 @@
+module srl_nokia-dns {
+  yang-version 1.1;
+
+  // namespace
+
+  namespace "urn:srl_nokia/dns";
+  prefix srl_nokia-dns;
+
+  import srl_nokia-system {
+    prefix srl-system;
+  }
+  import srl_nokia-network-instance {
+    prefix srl-netinst;
+  }
+  import srl_nokia-common {
+    prefix srl-comm;
+  }
+
+  description
+    "This module defines DNS configuration";
+
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+  grouping host-entry-variables {
+    description
+      "List of static host entries";
+    leaf name {
+      type srl-comm:domain-name;
+      description
+        "Name of host entry";
+    }
+    leaf ipv4-address {
+      type srl-comm:ipv4-address;
+      description
+        "IPv4 address for the host entry";
+    }
+    leaf ipv6-address {
+      type srl-comm:ipv6-address;
+      description
+        "IPv6 address for the host entry";
+    }
+  }
+
+  grouping host-entry-interface {
+    description
+      "List of static host entries";
+    list host-entry {
+      key "name";
+      description
+        "List of static host entries";
+      uses host-entry-variables;
+    }
+  }
+
+  grouping dns-top {
+    container dns {
+      description
+        "Top-level container for DNS configuration and state";
+      presence "Configure DNS";
+      leaf oper-state {
+        type srl-comm:oper-state;
+        config false;
+        description
+          "Details the operational state of the DNS client";
+      }
+      leaf-list search-list {
+        type srl-comm:domain-name;
+        description
+          "An ordered list of domains to search when resolving a host name";
+      }
+      leaf-list server-list {
+        type srl-comm:ip-address;
+        description
+          "List of the DNS servers that the resolver should query";
+        max-elements 3;
+      }
+      leaf network-instance {
+        type leafref {
+          path "/srl-netinst:network-instance/srl-netinst:name";
+        }
+        must 'not(/srl-netinst:network-instance[srl-netinst:name=current()]/srl-netinst:type = "srl-netinst:mac-vrf")' {
+          error-message "DNS client cannot be started in a network-instance of type 'mac-vrf'";
+        }
+        mandatory true;
+        description
+          "Reference to a configured network-instance to source DNS requests from";
+      }
+      uses host-entry-interface;
+    }
+  }
+
+  augment "/srl-system:system" {
+    uses dns-top;
+  }
+}

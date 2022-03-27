@@ -1,0 +1,92 @@
+module srl_nokia-mpls-route-tables {
+  yang-version 1.1;
+
+  namespace "urn:srl_nokia/mpls-route-tables";
+  prefix srl_nokia-mpls-route-tables;
+
+  import srl_nokia-common { prefix srl_nokia-comm; }
+  import srl_nokia-extensions { prefix srl_nokia-ext; }
+  import srl_nokia-network-instance { prefix srl_nokia-netinst; }
+  import srl_nokia-ip-route-tables { prefix srl_nokia-ip-tables; }
+
+  description
+    "A model describing the MPLS routing tables of a network instance.";
+
+  revision 2021-06-30 {
+    description
+      "SRLinux 21.6.1";
+  }
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+  grouping mpls-entry-common-fields {
+    leaf operation {
+      type enumeration {
+        enum "pop";
+        enum "swap";
+      }
+      srl_nokia-ext:show-importance "high";
+      description
+        "The forwarding operation associated with the MPLS label entry.";
+    }
+    leaf entry-type {
+      type identityref {
+        base srl_nokia-comm:mpls-label-entry-type;
+      }
+      srl_nokia-ext:show-importance "high";
+      description
+        "The entry type of the MPLS FIB entry.";
+    }
+    leaf last-app-update {
+      type srl_nokia-comm:date-and-time-delta;
+      description
+        "The date and time of the last update of this MPLS label entry by the owning application or protocol.";
+    }
+    leaf next-hop-group {
+      type leafref {
+        path "/srl_nokia-netinst:network-instance/srl_nokia-netinst:route-table/srl_nokia-ip-tables:next-hop-group/srl_nokia-ip-tables:index";
+      }
+      description "The next-hop-group indirection object used by this route. Applicable only if the operation is SWAP.";
+    }
+    leaf next-network-instance {
+      type leafref {
+        path "/srl_nokia-netinst:network-instance/srl_nokia-netinst:name";
+      }
+      description
+        "If this ILM entry is for a pop label, and this label is at the bottom of the stack, the next forwarding lookup will be done in the referenced network-instance";
+    }
+  }
+
+  grouping mpls-table-statistics {
+    container statistics {
+      leaf active-entries {
+        type srl_nokia-comm:zero-based-counter64;
+        description
+          "The total number of MPLS entries that are active in the FIB.";
+      }
+    }
+  }
+
+  grouping mpls-tables-top {
+    container mpls {
+      description
+        "The container for the MPLS routing table of the network instance.";
+      list label-entry {
+        key label-value;
+        leaf label-value {
+          type srl_nokia-comm:mpls-label;
+          description
+            "The MPLS label value";
+        }
+        uses mpls-entry-common-fields;
+      }
+      uses mpls-table-statistics;
+    }
+  }
+
+  augment "/srl_nokia-netinst:network-instance/srl_nokia-netinst:route-table" {
+    uses mpls-tables-top;
+  }
+}

@@ -1,0 +1,149 @@
+module srl_nokia-system-network-instance-bgp-vpn {
+
+  yang-version 1.1;
+
+  namespace "urn:srl_nokia/system-bgp-vpn";
+
+  prefix "srl_nokia-system-bgp-vpn";
+
+  import srl_nokia-common {
+      prefix srl_nokia-comm;
+  }
+  import srl_nokia-extensions {
+      prefix srl_nokia-ext;
+  }
+  import srl_nokia-policy-types {
+      prefix srl_nokia-pol-types;
+  }
+  import srl_nokia-system {
+    prefix srl_nokia-system;
+  }
+  import srl_nokia-system-network-instance {
+      prefix srl_nokia-system-network-instance;
+  }
+  
+/*  
+  import srl_nokia-features {
+      prefix srl-feat;
+      }*/
+
+  description
+    "This yang file models configuration and state of the bgp-vpn protocols in the system newtrok-instance.";
+
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+
+  grouping system-bgp-vpn-top {
+    description
+      "Top-level grouping containing a list of system bgp-vpn instances.";
+    container bgp-vpn {
+      presence
+        "Configuration and state of system bgp-vpn.";
+      list bgp-instance {
+        key "id";
+        max-elements "1";
+        description "List of bgp-vpn instances configured in the system network-instance. Only one instance allowed in the current release.";
+        leaf id {
+          type uint8 {
+            range "1..2";
+          }
+          description
+           "The index of the bgp-vpn instance";
+        }
+        container route-distinguisher {
+          description "Route Distinguisher (RD) of the bgp-vpn instance.";
+          leaf rd {
+            config false;
+            srl_nokia-ext:show-importance "high";
+            type srl_nokia-comm:route-distinguisher;
+            description 
+              "Route Distinguisher (RD) of the system bgp-vpn instance. The RD is auto-derived 
+               as <ip-address>:0 where 'ip-address' is the ipv4 address associated to the subinterface lo0.1.";
+          }
+          leaf route-distinguisher-origin {
+            config false;
+            srl_nokia-ext:show-importance "high";
+            type enumeration {
+              enum "auto-derived-from-system-ip:0"; 
+              enum "none";
+            }
+            description
+              "Origin of the operational Route Distinguisher (RD) of the bgp-vpn instance.
+
+                'Auto-derived-from-system-ip:0' refers to the RD for the EVPN Ethernet Segment routes that is automatically allocated with the format <ip-address>:0
+                where 'ip-address' is the ipv4 address associated to the subinterface lo0.1.";
+          }
+        }
+        container route-target {
+          description 
+            "Route Target (RT) of the system bgp-vpn instance.";
+          leaf export-rt {
+            config false;
+            srl_nokia-ext:show-importance "high";
+            type srl_nokia-pol-types:bgp-ext-community-type;
+            description 
+              "Export Route Target (RT) in the system bgp-vpn instance. 
+              
+               When used for evpn ES routes as ES-import Route Target, the RT is auto-derived from the high-order 6-octet portion of the 9-octet ESI value. 
+               Note that the ESI value excludes the left-most byte, which is reserved for the ESI type. The RT is encoded into the ES-import 
+               extended community advertised along with the ES route.";
+          }
+          leaf export-route-target-origin {
+            config false;
+            srl_nokia-ext:show-importance "high";
+            type enumeration {
+              enum "auto-derived-from-esi-bytes-1-6"; 
+              enum "none";
+            }
+            description
+              "Origin of the operational export Route Target (RT) of the bgp-vpn instance.
+
+                'Auto-derived-from-esi-bytes-1-6' refers to the ES-import RT for the EVPN Ethernet Segment routes that is derived from bytes 1 to 6 of the Ethernet Segment
+                Identifier of the route.";
+          }
+          leaf import-rt {
+            config false;
+            srl_nokia-ext:show-importance "high";
+            type srl_nokia-pol-types:bgp-ext-community-type;
+            description 
+              "Import Route Target (RT) in the system bgp-vpn instance. 
+              
+               When used for evpn ES routes as ES-import Route Target, the RT is auto-derived from the high-order 6-octet portion of the 9-octet ESI value. 
+               Note that the ESI value excludes the left-most byte, which is reserved for the ESI type. The RT is encoded into the ES-import 
+               extended community received along with the ES route.";
+          }
+          leaf import-route-target-origin {
+            config false;
+            srl_nokia-ext:show-importance "high";
+            type enumeration {
+              enum "auto-derived-from-esi-bytes-1-6"; 
+              enum "none";
+            }
+            description
+              "Origin of the operational import Route Target (RT) of the bgp-vpn instance.
+
+                'Auto-derived-from-esi-bytes-1-6' refers to the ES-import RT for the EVPN Ethernet Segment routes that is derived from bytes 1 to 6 of the Ethernet Segment
+                Identifier of the route.";
+          }
+        }
+        leaf oper-down-reason {
+            config false;
+            srl_nokia-ext:show-importance "high";
+            type enumeration {
+                enum "no-loopback-address";
+                enum "no-esi";
+                enum "none";
+                enum "network-instance-oper-down";
+            }
+            description
+                "Reason for the system bgp-instance being down";
+        }
+      }
+    }
+  }
+  augment "/srl_nokia-system:system/srl_nokia-system-network-instance:network-instance/srl_nokia-system-network-instance:protocols" {
+    uses system-bgp-vpn-top;
+  }
+}

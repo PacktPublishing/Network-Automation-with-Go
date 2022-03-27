@@ -1,0 +1,91 @@
+module srl_nokia-if-mpls {
+  yang-version 1.1;
+
+  // namespace
+
+  namespace "urn:srl_nokia/interfaces/mpls";
+  prefix srl_nokia-if-mpls;
+
+  // import some basic types
+
+  import srl_nokia-common {
+        prefix srl_nokia-comm;
+  }
+  import srl_nokia-features {
+      prefix srl_feat;
+  }
+
+  description
+    "Model for managing MPLS at a subinterface level";
+
+  revision 2021-06-30 {
+    description
+      "SRLinux 21.6.1";
+  }
+
+  grouping mpls-statistics {
+    container statistics {
+      config false;
+      description
+        "Container for MPLS-specific subinterface statistics";
+      leaf in-discarded-packets {
+        type srl_nokia-comm:zero-based-counter64;
+        description
+            "The total number of MPLS packets that were dropped because they were received with forwarded top label having an MPLS TTL value of 1";
+      }
+      leaf in-error-packets {    
+        type srl_nokia-comm:zero-based-counter64;
+        description
+          "The total number of MPLS packets that were dropped because they were received with errors that include:
+          - forwarded top label had an MPLS TTL value of 0
+          - terminating top label had an MPLS TTL value of 0
+          - the top label was unknown (no matching forwarding entry)";
+      }
+      leaf in-forwarded-packets {
+        type srl_nokia-comm:zero-based-counter64;
+        description
+          "The number of MPLS packets received on this subinterface that were attempted to be forwarded to another IP or MPLS interface";
+      }
+      leaf in-forwarded-octets {
+        type srl_nokia-comm:zero-based-counter64;
+        description
+          "The number of octets in MPLS packets received on this subinterface that were attempted to be forwarded to another IP or MPLS interface";
+      }
+      leaf out-forwarded-packets {
+        type srl_nokia-comm:zero-based-counter64;
+        description
+          "The number of MPLS packets transmitted on this subinterface. This does not include IP packets that resulted from a PHP pop operation.";
+      }
+      leaf out-forwarded-octets {
+        type srl_nokia-comm:zero-based-counter64;
+        description
+          "The number of octets in MPLS packets transmitted on this subinterface. This does not include IP packets that resulted from a PHP pop operation.";
+      }
+      leaf out-error-packets {
+        type srl_nokia-comm:zero-based-counter64;
+        description
+          "The number of MPLS packets that could not be transmitted on this subinterface because of an error.
+
+          For now this only counts transmission errors that result from the MPLS packet size exceeding the MPLS MTU of the subinterface.";
+      }
+      leaf last-clear {
+        type srl_nokia-comm:date-and-time-delta;
+        description
+          "Timestamp of the last time the subinterface MPLS counters were cleared.";
+      }
+    }
+  }
+
+  grouping mpls-top {
+    container mpls {
+      config false;
+      if-feature "srl_feat:future-21-6-3";
+      must "(../type != 'bridged') and (../type != 'local-mirror-dest')" {
+        error-message "mpls is not supported on bridged or local-mirror-dest subinterfaces";
+      }
+      description
+        "Container for MPLS configuration and state at the subinterface level";
+      uses mpls-statistics;
+    }
+  }
+}

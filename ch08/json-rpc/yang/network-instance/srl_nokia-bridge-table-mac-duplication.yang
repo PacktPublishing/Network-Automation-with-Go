@@ -1,0 +1,123 @@
+module srl_nokia-bridge-table-mac-duplication {
+  yang-version 1.1;
+  namespace "urn:srl_nokia/network-instance/bridge-table/mac-duplication";
+  prefix "srl_nokia-bridge-table-mac-duplication";
+
+  // imports
+  import srl_nokia-common { prefix srl_nokia-comm; }
+
+  description
+    "This yang file gives a description of bridge-table mac-duplication configuration.";
+
+// groupings
+
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+
+  grouping bridge-table-mac-duplication-top {
+    container mac-duplication {
+      description "Configuration of the MAC duplication procedures.";
+      leaf admin-state {
+        type srl_nokia-comm:admin-state;
+        default "enable";
+        description
+          "Configurable state of the mac-duplication procedures.
+           Mac-duplication detects duplicate macs that move between different subinterfaces
+           or a subinterface and an evpn destination.";
+      }
+      leaf monitoring-window {
+        type uint32 {
+          range "1..15";
+        }
+        units "minutes";
+        default "3";
+        description 
+          "Monitoring window for detecting duplication on a given mac address.
+           A mac is declared as duplicate if it exceeds the num-moves within the monitoring-window.";
+      }
+      leaf num-moves {
+        type uint32 {
+          range "3..10";
+        }
+        default "5";
+        description 
+          "Number of moves a mac is allowed within the monitoring-window, before it is declared duplicate.";
+      }
+      leaf hold-down-time {
+        type union {
+          type enumeration {
+            enum "indefinite" {
+              value 0;
+            }
+          }
+          type uint32 {
+            range "2..60";
+          }
+        }     
+        units "minutes";
+        default "9";
+        description 
+          "Time to wait from the moment a mac is declared duplicate to the mac is flushed from the bridge table.
+           When the duplicate mac is flushed, the monitoring process for the mac is restarted.";
+      }
+      leaf action {
+        type enumeration {
+          enum "stop-learning"   { value 0; }
+          enum "blackhole"   { value 1; }
+          enum "oper-down"   { value 2; }
+        }
+        default "stop-learning";
+        description 
+          "Action to take on the subinterface (if action is use-net-instance-action) upon detecting at least one mac addresses as duplicate
+           on the subinterface. In particular:
+           - oper-down: if configured, upon detecting a duplicate mac on the subinterface, the subinterface
+             will be brought oper-down, with oper-down-reason mac-dup-detected. The duplicate macs on the interface will be kept
+             in CPM though, and shown in the duplicate-entries state. In this case, arriving frames on a different subinterface with 
+             the duplicate mac as source mac are dropped. Arriving frames on a different subinterface with a destination mac 
+             matching the duplicate mac are dropped.
+           - blackhole: upon detecting a duplicate mac on the subinterface, the mac will be blackholed. Any
+             frame received on this or any other subinterface with source mac matching a blackhole mac will be discarded. Any frame
+             received with destination mac matching the blackhole mac will be discarded, although still processed for source mac
+             learning.
+           - stop-learning: upon detecting a duplicate mac on the subinterface, existing macs are kept (and refreshed) but new macs
+             are no longer learned on this subinterface. The duplicate mac will stay learned on the subinterface. Frames arriving to
+             a different subinterface with a source mac matching the duplicate mac will be dropped. Frames arriving to a different
+             subinterface with a destination mac matching the duplicate mac will be forwarded normally.";
+      }
+
+/*
+NOTE: see the open issues section of the PRD for the following container:
+
+        container last-good-location {
+          description "configuration of the last-good-location settings."
+          leaf admin-state {
+            type srl_nokia-comm:admin-state;
+            default "disable";
+            description
+              "Each mac entry will have an associated 'last-good-location' flag. If this is enabled,
+               when the mac is programmed in the bridge table for longer than the configured good-location-time,
+               the flag is set. If later the num-moves for the mac is exceeded, the mac will not be
+               considered as duplicate. The assumption is that the mac will have the 'last-good-location'
+               flag in only one of the leafs attached to the same broadcast domain.";
+          }
+          leaf good-location-time {
+            type int32 {
+              range "60..86400";
+            }
+            default "300";
+            description
+              "Time after which a mac is considered to be attached to a good location.
+               The timer is reset when the mac is flushed for any reason."
+          }
+        }
+*/
+    }
+  }
+}
+

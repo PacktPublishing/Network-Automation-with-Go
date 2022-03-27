@@ -1,0 +1,181 @@
+module srl_nokia-platform-cgroup {
+  yang-version 1.1;
+
+  // namespace
+
+  namespace "urn:srl_nokia/platform-cgroup";
+  prefix srl_nokia-platform-cgroup;
+
+  import srl_nokia-common {
+    prefix srl-comm;
+  }
+  import srl_nokia-platform {
+    prefix srl-platform;
+  }
+  import srl_nokia-platform-control {
+    prefix srl-platform-control;
+  }
+
+  description
+    "This module defines configuration and operational state data related to cgroups.";
+
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+
+  grouping memory-event-top {
+    description
+      "Grouping for cgroup memory events";
+    container memory-events {
+      description
+        "Top-level container for cgroup memory events";
+      leaf low {
+        type uint64;
+        description
+          "The number of times the cgroup is reclaimed due to high memory pressure even though its usage is under the
+           low boundary.";
+      }
+      leaf high {
+        type uint64;
+        description
+          "The number of times processes of the cgroup are throttled and routed to perform direct memory reclaim because
+           the high memory boundary was exceeded.";
+      }
+      leaf max {
+        type uint64;
+        description
+          "The number of times the cgroup’s memory usage was about to go over the max boundary.";
+      }
+      leaf oom {
+        type uint64;
+        description
+          "The number of time the cgroup’s memory usage was reached the limit and allocation was about to fail.";
+      }
+      leaf oom_kill {
+        type uint64;
+        description
+          "The number of processes belonging to this cgroup killed by any kind of OOM killer.";
+      }
+    }
+  }
+
+  grouping memory-statistics-top {
+    description
+      "Grouping for cgroup memory statistics";
+    container memory-statistics {
+      description
+        "Top-level container for cgroup memory statistics";
+      leaf current {
+        type uint64;
+        units "bytes";
+        description
+          "The total amount of memory currently being used by the cgroup and its descendants. Read from memory.current";
+      }
+      leaf current-swap {
+        type uint64;
+        units "bytes";
+        description
+          "The total amount of swap currently being used by the cgroup and its descendants. Read from memory.swap.current";
+      }
+      leaf anon {
+        type uint64;
+        units "bytes";
+        description
+          "Amount of memory used in anonymous mappings such as brk(), sbrk(), and mmap(MAP_ANONYMOUS)";
+      }
+      leaf kernel-stack {
+        type uint64;
+        units "bytes";
+        description
+          "Amount of memory allocated to kernel stacks.";
+      }
+      leaf slab {
+        type uint64;
+        units "bytes";
+        description
+          "Amount of memory used for storing in-kernel data structures.";
+      }
+      leaf sock {
+        type uint64;
+        units "bytes";
+        description
+          "Amount of memory used in network transmission buffers.";
+      }
+      leaf anon-thp {
+        type uint64;
+        units "bytes";
+        description
+          "Amount of memory used in anonymous mappings backed by transparent hugepages.";
+      }
+      leaf file {
+        type uint64;
+        units "bytes";
+        description
+          "Amount of memory used to cache filesystem data, including tmpfs and shared memory.";
+      }
+      leaf file-writeback {
+        type uint64;
+        units "bytes";
+        description
+          "Amount of cached filesystem data that was modified and is currently being written back to disk.";
+      }
+      leaf file-dirty {
+        type uint64;
+        units "bytes";
+        description
+          "Amount of cached filesystem data that was modified but not yet written back to disk.";
+      }
+      uses memory-event-top;
+    }
+  }
+
+  grouping cpuacct-statistics-top {
+    description
+      "Grouping for cgroup memory statistics";
+    container cpuacct-statistics {
+      description
+        "Top-level container for cgroup cpuacct statistics";
+      leaf user {
+        type uint64;
+        units "useconds";
+        description
+          "CPU usage user mode";
+      }
+      leaf system {
+        type uint64;
+        units "useconds";
+        description
+          "CPU usage user system";
+      }
+    }
+  }
+
+  grouping cgroup-state-top {
+    description
+      "Grouping for cgroup state";
+    leaf name {
+      type string;
+      description
+        "Name of the cgroup, as defined by its directory location in the filesystem";
+    }
+    uses memory-statistics-top;
+    uses cpuacct-statistics-top;
+  }
+
+  grouping cgroup-top {
+    description
+      "Grouping for cgroup configuration and state";
+    list cgroup {
+      description
+        "List of cgroups present in the system";
+      key "name";
+      config false;
+      uses cgroup-state-top;
+    }
+  }
+
+  augment "/srl-platform:platform/srl-platform-control:control" {
+    uses cgroup-top;
+  }
+}

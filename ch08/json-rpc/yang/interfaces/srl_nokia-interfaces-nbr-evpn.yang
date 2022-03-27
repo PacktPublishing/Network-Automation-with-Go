@@ -1,0 +1,73 @@
+module srl_nokia-interfaces-nbr-evpn {
+  yang-version 1.1;
+
+  // namespace
+  namespace "urn:srl_nokia/interfaces/ip/nbr/evpn";
+
+  prefix "srl_nokia-if-ip-nbr-evpn";
+
+  // import some basic types
+  import srl_nokia-interfaces {
+    prefix srl_nokia-if;
+  }
+  import srl_nokia-common {
+    prefix srl_nokia-comm;
+  }
+  import srl_nokia-extensions {
+    prefix srl_nokia-ext;
+  }
+  import srl_nokia-interfaces-nbr {
+    prefix srl_nokia-if-ip-nbr;
+  }
+  import srl_nokia-features {
+    prefix srl-feat;
+  }
+  description
+    "Model for managing ARP and IPv6 neighbor discovery for on IP subinterfaces.";
+
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+
+  grouping common-neighbor-discovery {
+    leaf route-type {
+      description "Controls what type of ARP or ND entries to advertise.";
+      type enumeration {
+        enum static  { value 1; }
+        enum dynamic { value 2; }
+      }
+    }
+    leaf admin-tag {
+      description "Configure tag to use with the host route generated from an ARP or ND entry.";
+      type uint32 { range "0..255"; }
+      default 0;
+    }
+  }
+  grouping evpn-top {
+    container evpn {
+      if-feature "srl-feat:evpn";
+      presence "Configure evpn parameters";
+      must "starts-with(../../../../name,'irb')" {
+        error-message "Only supported on IRB subinterfaces";
+      }
+      description "Configure which types of ARP or ND entries will be advertised in EVPN MAC/IP routes.";
+      list advertise {
+        key "route-type";
+        uses common-neighbor-discovery;
+      }
+    }
+  }
+  augment "/srl_nokia-if:interface/srl_nokia-if:subinterface/srl_nokia-if:ipv4/srl_nokia-if-ip-nbr:arp" {
+    description
+      "IPv4 addr family evpn configuration for interfaces";
+
+    uses evpn-top;
+  }
+  augment "/srl_nokia-if:interface/srl_nokia-if:subinterface/srl_nokia-if:ipv6/srl_nokia-if-ip-nbr:neighbor-discovery" {
+    description
+      "IPv6 address family evpn onfiguration for interfaces";
+
+    uses evpn-top;
+  }
+}

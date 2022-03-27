@@ -1,0 +1,1133 @@
+submodule srl_nokia-ospf-lsdb {
+  yang-version 1.1;
+  belongs-to srl_nokia-ospf {
+    prefix srl_nokia-ospf-lsdb;
+  }
+
+  import ietf-yang-types {
+    prefix yang;
+  }
+  import srl_nokia-common {
+    prefix srl_nokia-comm;
+  }
+  import srl_nokia-ospf-types {
+    prefix srl_nokia-ospf-types;
+  }
+  include srl_nokia-ospfv3-lsas;
+
+  description
+    "This yang file models configuration and state of the OSPFv2 protocol";
+
+  // typedef statements
+  // identities
+  //Groupings
+
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+
+  grouping ospfv2-lsdb-common-prefix-properties {
+    description
+      "Common properties used in the LSDB that relate to IPv4 prefixes";
+    leaf prefix-length {
+      type uint8 {
+        range "0..32";
+      }
+      description
+        "The length of the IPv4 prefix contained in the Extended Prefix LSA";
+    }
+    leaf address-family {
+      type enumeration {
+        enum IPV4_UNICAST {
+          value 0;
+          description
+            "The prefix contained within the Extended Prefix LSA is an IPv4
+             unicast prefix";
+        }
+      }
+      description
+        "The address family of the prefix contained in the Extended Prefix
+         LSA";
+    }
+  }
+
+  grouping ospfv2-lsdb-common-link-specification {
+    description
+      "Generic attributes used to identify links within OSPFv2";
+    leaf type {
+      type identityref {
+        base srl_nokia-ospf-types:router-lsa-types;
+      }
+      description
+        "The sub-type of the Router LSA.";
+    }
+    leaf link-id {
+      type srl_nokia-comm:ipv4-address;
+      description
+        "The identifier for the link specified. The value of the link
+         identifier is dependent upon the type of the LSA. The value is
+         specified to be, per sub-type:
+          1) Neighbouring router's router ID.
+          2) IP address of DR.
+          3) IP network address.
+          4) Neighbouring router router's ID.";
+    }
+    leaf link-data {
+      type union {
+        type yang:dotted-quad;
+        type uint32;
+      }
+      description
+        "The data associated with the link type. The value is
+         dependent upon the subtype of the LSA. When the connection is
+         to a stub network it represents the mask; for p2p connections
+         that are unnumbered it represents the ifIndex value of the
+         router's interface; for all other connections it represents
+         the local system's IP address";
+    }
+  }
+
+  grouping ospfv2-lsdb-common-unknown-tlv {
+    description
+      "A generic specification of a TLV to be used when the
+       value cannot be decoded by the local system";
+    leaf type {
+      type uint16;
+      description
+        "The type value of the unknown TLV";
+    }
+    leaf length {
+      type uint16;
+      description
+        "The length value of the unknown TLV";
+    }
+    leaf value {
+      type binary;
+      description
+        "The value portion of the unknwon TLV";
+    }
+  }
+
+  grouping ospfv2-lsdb-common-unknown-tlv-structure {
+    description
+      "A generic specification of an unknown TLV";
+    container unknown-tlv {
+      description
+        "An unknown TLV within the context. Unknown TLVs are
+         defined to be the set of TLVs that are not modelled
+         within the OpenConfig model, or are unknown to the
+         local system such that it cannot decode their value.";
+      uses ospfv2-lsdb-common-unknown-tlv;
+    }
+  }
+
+  grouping ospfv2-lsdb-common-unknown-subtlv-structure {
+    description
+      "A generic specification of an unknown TLV";
+    container unknown-subtlv {
+      description
+        "An unknown SubTLV within the context. Unknown Sub-TLV
+         are defined to be the set of SubTLVs that are not modelled
+         by the OpenConfig schema, or are unknown to the local system
+         such that it cannot decode their value.";
+      uses ospfv2-lsdb-common-unknown-tlv;
+    }
+  }
+
+  grouping ospfv2-lsdb-common-tos-metric {
+    description
+      "Common LSDB LSA parameters for type of service and metric";
+    leaf tos {
+      type uint8;
+      description
+        "OSPF encoding of the type of service referred to by this
+         LSA. Encoding for OSPF TOS are described in RFC2328.";
+    }
+    leaf metric {
+      type srl_nokia-ospf-types:ospf-metric-large ;
+      description
+        "The metric value to be used for the TOS specified. This value
+         represents the cost of use of the link for the specific type
+         of service.";
+    }
+  }
+
+  grouping ospf-lsdb-area-state {
+    description
+      "Per-area operational state parameters for an OSPFv2 area";
+    leaf identifier {
+      type srl_nokia-ospf-types:ospf-area-identifier;
+      description
+        "An identifier for the area, expressed as a dotted quad or
+         an unsigned 32-bit integer";
+    }
+  }
+
+  grouping ospf-lsdb-lsa-type-state {
+    description
+      "Per-LSA type operational state parameters for an OSPFv2 area";
+    leaf type {
+      type identityref {
+        base srl_nokia-ospf-types:ospf-lsa-type;
+      }
+      description
+        "The type of LSA being described. The type of the LSA is
+         expressed as a canonical name.";
+    }
+  }
+
+  grouping ospf-lsdb-lsa-state {
+    description
+      "Generic parameters of an OSPFv2 LSA";
+    // jjac todo remove this
+    leaf advertisement {
+      description
+        "Contents of the link state advertisement in hex, including the header.";
+      type string;
+    }
+    leaf sequence-number {
+      type srl_nokia-comm:hex-number;
+      description
+        "A signed 32-bit integer used to detect old and duplicate
+         LSAs. The greater the sequence number the more recent the
+         LSA.";
+    }
+    leaf checksum {
+      type srl_nokia-comm:hex-number;
+      description
+        "The checksum of the complete contents of the LSA excluding
+         the age field.";
+    }
+    leaf age {
+      type uint16;
+      units "seconds";
+      description
+        "The time since the LSA's generation in seconds";
+    }
+    leaf options {
+      type srl_nokia-comm:hex-number;
+      description
+        "Contents of the options field";
+    }
+  }
+
+  grouping ospfv2-lsdb-router-lsa-structure {
+    description
+      "Structural grouping for Router LSA contents within the LSDB";
+    container router-lsa {
+      description
+        "Contents of the router LSA";
+      leaf flags {
+        description
+          "Router-LSA flag values";
+        type uint8;
+      }
+      leaf number-links {
+        type uint16;
+        description
+          "The number of links that are described within the LSA";
+      }
+      list links {
+        key "link-id";
+        uses ospfv2-lsdb-common-link-specification;
+        leaf metric {
+          type srl_nokia-ospf-types:ospf-metric;
+          description
+            "The cost of utilising the link specified independent of TOS";
+        }
+        leaf number-tos-metrics {
+          type uint16;
+          description
+            "The number of different TOS metrics given for this link, not
+             including the link metric (which is referred to as TOS 0).";
+        }
+        uses ospfv2-lsdb-generic-lsa-tos-metric-structure;
+      }
+    }
+  }
+
+  grouping ospfv2-lsdb-generic-lsa-tos-metric-structure {
+    description
+      "Grouping including a generic TOS/metric structure for an
+       LSA";
+    container types-of-service {
+      description
+        "Breakdown of LSA contents specifying multiple
+         TOS values";
+      list type-of-service {
+        key "tos";
+        description
+          "Per-type of service parameters for the LSA";
+        uses ospfv2-lsdb-generic-lsa-tos-metric-state;
+      }
+    }
+  }
+
+  grouping ospfv2-lsdb-network-lsa-structure {
+    description
+      "Structural grouping for Network LSA contents within the LSDB";
+    container network-lsa {
+      description
+        "Contents of the network LSA";
+      uses ospfv2-lsdb-network-lsa-state;
+    }
+  }
+
+  grouping ospfv2-lsdb-summary-lsa-structure {
+    description
+      "Structural grouping for the Summary LSA contents within the
+       LSDB";
+    container summary-lsa {
+      description
+        "Contents of the summary LSA";
+      uses ospfv2-lsdb-summary-lsa-state;
+      uses ospfv2-lsdb-generic-lsa-tos-metric-structure;
+    }
+  }
+
+  grouping ospfv2-lsdb-asexternal-lsa-structure {
+    description
+      "Structural grouping for the AS External LSA contents within
+       the LSDB";
+    container as-external-lsa {
+      description
+        "Contents of the AS External LSA";
+      uses ospfv2-lsdb-asexternal-lsa-state;
+      container types-of-service {
+        description
+          "Breakdown of External LSA contents specifying multiple
+           TOS values";
+        list type-of-service {
+          key "tos";
+          description
+            "Per-type of service parameters for the AS External LSA";
+          uses ospfv2-lsdb-asexternal-tos-state;
+        }
+      }
+    }
+  }
+
+  grouping ospfv2-lsdb-nssa-external-lsa-structure {
+    description
+      "Structural grouping for the NSSA External LSA contents within
+       the LSDB";
+    container nssa-external-lsa {
+      description
+        "Contents of the NSSA External LSA";
+      uses ospfv2-lsdb-asexternal-lsa-state;
+      uses ospfv2-lsdb-nssa-external-lsa-state;
+      container types-of-service {
+        description
+          "Breakdown of the NSSA External LSA contents specifying multiple
+           TOS values";
+        list type-of-service {
+          key "tos";
+          description
+            "Per-type of service parameters for the NSSA external LSA";
+          uses ospfv2-lsdb-asexternal-tos-state;
+        }
+      }
+    }
+  }
+
+  grouping ospfv2-lsdb-opaque-lsa-structure {
+    description
+      "Structural grouping for Opaque LSA contents within the LSDB";
+    container opaque-lsa {
+      description
+        "Contents of the opaque LSA";
+      uses ospfv2-lsdb-opaque-lsa-state;
+      container grace-lsa {
+        when "../type = 'srl_nokia-ospf-types:grace-lsa'" {
+          description
+            "Include the grace-lsa container when the opaque LSA is specified
+             to be of that type.";
+        }
+        description
+          "The Grace LSA is utilised when a remote system is undergoing
+           graceful restart";
+        container tlvs {
+          description
+            "TLVs of the Grace LSA";
+          list tlv {
+            description
+              "TLV entry in the Grace LSA, advertised by a system undergoing
+               graceful restart";
+            // unkeyed list
+            uses ospfv2-lsdb-opaque-grace-state;
+            uses ospfv2-lsdb-common-unknown-tlv-structure;
+          }
+        }
+      } // grace LSA
+      container router-information {
+        when "../type = 'srl_nokia-ospf-types:router-information'" {
+          description
+            "Include the router-information container when the opaque LSA
+             type is specified to be an RI LSA";
+        }
+        description
+          "The router information LSA is utilised to advertise capabilities
+           of a system to other systems who receive the LSA";
+        container tlvs {
+          description
+            "The TLVs included within the Router Information LSA.";
+          list tlv {
+            description
+              "TLV entry in the Router Information LSA";
+            // unkeyed list
+            uses ospfv2-lsdb-opaque-ri-state;
+            uses ospfv2-lsdb-common-unknown-tlv-structure;
+            container informational-capabilities {
+              when "../type = 'srl_nokia-ospf-types:ri-informational-capabilities'" {
+                description
+                  "Include the informational capabilities specification when
+                   the TLV of the RI LSA is specified to be of this type";
+              }
+              description
+                "Information related to the capabilities of the advertising
+                 router within the scope that the opaque RI LSA is being
+                 advertised";
+              uses ospfv2-lsdb-opaque-ri-informational-state;
+            }
+            container node-administrative-tags {
+              when "../type = 'srl_nokia-ospf-types:ri-node-admin-tag'" {
+                description
+                  "Include the node administrative tags specification when
+                   the TLV of the RI LSA is specified to be of this type";
+              }
+              description
+                "Per-node administrative tags associated with the local system
+                 specified by the operator";
+              uses ospfv2-lsdb-opaque-ri-admintag-state;
+            }
+          }
+        }
+      } // router-information
+      container extended-prefix {
+        when "../type = 'srl_nokia-ospf-types:ospfv2-extended-prefix'" {
+          description
+            "Include the extended-prefix container when the opaque LSA
+             type is specified to be an extended prefix LSA";
+        }
+        description
+          "An OSPFv2 Extended Prefix Opaque LSA, used to encapsulate
+           TLV attributes associated with a prefix advertised in OSPF.";
+        reference
+          "RFC7684 - OSPFv2 Prefix/Link Attribute Advertisement";
+        uses ospfv2-lsdb-extended-prefix-state;
+        container tlvs {
+          description
+            "TLVs contained within the Extended Prefix LSA";
+          list tlv {
+            // unkeyed list
+            description
+              "A TLV contained within the extended prefix LSA";
+            uses ospfv2-lsdb-extended-prefix-tlv-state;
+            container extended-prefix-range {
+              when "../type = 'srl_nokia-ospf-types:extended-prefix-range'" {
+                description
+                  "Include the prefix range sub-TLV when the type of the
+                   sub-TLV is specified as such";
+              }
+              description
+                "State parameters relating to the extended prefix range
+                 sub-TLV of the extended prefix LSA";
+              uses ospfv2-lsdb-extended-prefix-range-state;
+            }
+            uses ospfv2-lsdb-common-unknown-tlv-structure;
+          }
+        }
+      } // extended-prefix
+      container extended-link {
+        description
+          "The OSPFv2 Extended Link Opaque LSA, used to encapsulate TLV
+           attributes associated with a link advertised in OSPF.";
+        reference
+          "RFC7684 - OSPFv2 Prefix/Link Attribute Advertisement";
+        uses ospfv2-lsdb-extended-link-state;
+        container tlvs {
+          description
+            "TLVs contained within the Extended Link LSA";
+          list tlv {
+            description
+              "List of TLVs within the Extended Link LSA";
+            uses ospfv2-lsdb-extended-link-tlv-state;
+            uses ospfv2-lsdb-common-unknown-tlv-structure;
+          }
+        }
+      } // extended-link
+      uses ospfv2-lsdb-common-unknown-tlv-structure;
+    }
+  }
+
+  grouping ospfv2-lsdb-generic-lsa-tos-metric-state {
+    description
+      "Per-TOS state parameters for the Router LSA";
+    uses ospfv2-lsdb-common-tos-metric;
+  }
+
+  grouping ospfv2-lsdb-network-lsa-state {
+    description
+      "Parameters of the Network LSA";
+    leaf network-mask {
+      type uint8 {
+        range "0..32";
+      }
+      description
+        "The mask of the network described by the Network LSA
+         represented as a CIDR mask.";
+    }
+    leaf-list attached-router {
+      type yang:dotted-quad;
+      description
+        "A list of the router ID of the routers that are attached to
+         the network described by the Network LSA";
+    }
+  }
+
+  grouping ospfv2-lsdb-summary-lsa-state {
+    description
+      "Parameters of the Summary LSA";
+    leaf network-mask {
+      type uint8 {
+        range "0..32";
+      }
+      description
+        "The mask of the network described by the Summary LSA
+         represented as a CIDR mask.";
+    }
+    leaf metric {
+      type srl_nokia-ospf-types:ospf-metric-large;
+      description
+        "The cost of utilising this network specified independent of TOS";
+      }
+  }
+
+  grouping ospfv2-lsdb-asexternal-lsa-common-parameters {
+    description
+      "Common parameters that are used for OSPFv2 AS External LSAs";
+    leaf forwarding-address {
+      type srl_nokia-comm:ipv4-address;
+      description
+        "The destination to which traffic for the external prefix
+         should be advertised. When this value is set to 0.0.0.0 then
+         traffic should be forwarded to the LSA's originator";
+    }
+    leaf external-route-tag {
+      type uint32;
+      description
+        "An opaque tag that set by the LSA originator to carry
+         information relating to the external route";
+    }
+  }
+
+  grouping ospfv2-lsdb-asexternal-lsa-state {
+    description
+      "Parameters for the AS External LSA";
+    leaf mask {
+      type uint8 {
+        range "0..32";
+      }
+      description
+        "The subnet mask for the advertised destination";
+    }
+    leaf metric-type {
+      type enumeration {
+        enum TYPE_1 {
+          description
+            "When the metric of a prefix is specified as Type 1
+             then it is considered to be expressed in the same units as
+             the link-state metrics carried in OSPF. That is to say
+             that the metric advertised is directly compared to the
+             internal cost";
+        }
+        enum TYPE_2 {
+          description
+            "When the metric of a prefix is specified as Type 2 then
+             it is considered to be expressed as a cost in addition to
+             that of the link-state metric to the advertising router.
+             That is to say that the metric is considered to be the
+             cost to the advertising router plus the advertised metric
+             for the external entity";
+        }
+      }
+      description
+        "The type of metric included within the AS External LSA.";
+    }
+    leaf metric {
+      type srl_nokia-ospf-types:ospf-metric-large ;
+      description
+        "The cost to reach the external network specified. The exact
+         interpretation of this cost is dependent on the type of
+         metric specified";
+    }
+    uses ospfv2-lsdb-asexternal-lsa-common-parameters;
+  }
+
+  grouping ospfv2-lsdb-asexternal-tos-state {
+    description
+      "Per-TOS parameters for the AS External LSA";
+    uses ospfv2-lsdb-asexternal-lsa-common-parameters;
+    uses ospfv2-lsdb-common-tos-metric;
+  }
+
+  grouping ospfv2-lsdb-nssa-external-lsa-state {
+    description
+      "Operational state parameters specific to the NSSA External
+       LSA";
+    leaf propagate {
+      type boolean;
+      description
+        "When this bit is set to true, an NSSA border router will
+         translate a Type 7 LSA (NSSA External) to a Type 5 LSA
+         (AS External).";
+      reference
+        "RFC3101, Section 2.3";
+    }
+  }
+
+  grouping ospfv2-lsdb-opaque-lsa-state {
+    description
+      "Operational state parameters specific to an Opaque LSA";
+    leaf scope {
+      type enumeration {
+        enum LINK {
+          description
+            "The scope of the LSA is the current link. The LSA
+             is not flooded beyond the local network. This
+             enumeration denotes a Type 9 LSA.";
+        }
+        enum AREA {
+          description
+            "The scope of the LSA is the local area. The LSA
+             is not flooded beyond the area of origin. This
+             enumeration denotes a Type 10 LSA.";
+        }
+        enum AS {
+          description
+            "The scope of the LSA is the local autonomous
+             system (AS). The flooding domain is the same
+             as a Type 5 LSA - it is not flooded into
+             stub areas or NSSAs. This enumeration denotes a
+             Type 11 LSA.";
+        }
+      }
+      description
+        "The scope of the opaque LSA. The type of the LSA
+         indicates its scope - the value of this leaf
+         determines both the flooding domain, and the type
+         of the LSA.";
+    }
+    leaf type {
+      type identityref {
+        base srl_nokia-ospf-types:ospf-opaque-lsa-type;
+      }
+      description
+        "The Opaque Type of the LSA. This value is used to
+         indicate the type of data carried by the opaque LSA";
+    }
+  }
+
+  grouping ospfv2-lsdb-opaque-grace-state {
+    description
+      "State parameters on a per-TLV basis of the Grace LSA";
+    leaf type {
+      type identityref {
+        base srl_nokia-ospf-types:grace-lsa-tlv-types;
+      }
+      description
+        "The type of the sub-TLV received within the Grace LSA";
+    }
+    leaf period {
+      when "../type = 'srl_nokia-ospf-types:grace-period'" {
+        description
+          "Include the period specification when the sub-TLV type is indicated
+           to be of this type";
+      }
+      type uint32;
+      units "seconds";
+      description
+        "The number of seconds that the router's neighbors should advertise
+         the local system as fully adjacent regardless of database
+         synchronization state";
+      reference
+        "RFC3623";
+    }
+    leaf reason {
+      when "../type = 'srl_nokia-ospf-types:grace-restart-reason'" {
+        description
+          "Include the restart reason when the sub-TLV type specifies this
+           is included";
+      }
+      type enumeration {
+        enum UNKNOWN {
+          value 0;
+          description
+            "The reason for the graceful restart is unknown";
+        }
+        enum SOFTWARE_RESTART {
+          value 1;
+          description
+            "The local system is restarting due to a software component
+             restart";
+        }
+        enum SOFTWARE_RELOAD_UPGRADE {
+          value 2;
+          description
+            "The local system is restarting due to a software reload or
+             upgrade";
+        }
+        enum CONTROL_PROCESSOR_SWITCH {
+          value 3;
+          description
+            "The local system is restarting due to a switch to a redundant
+             control plane element";
+        }
+      }
+      description
+        "The reason for the graceful restart event occurring, as advertised
+         by the restarting system";
+      reference
+        "RFC3623";
+    }
+    leaf ip-interface-address {
+      when "../type = 'srl_nokia-ospf-types:grace-ip-interface-address'" {
+        description
+          "Include the interface address when the sub-TLV type specifies that
+           it is included";
+      }
+      type srl_nokia-comm:ipv4-address;
+      description
+        "The restarting system's IP address on the interface via which the
+         Grace LSA is being advertised.";
+    }
+  }
+
+  grouping ospfv2-lsdb-opaque-ri-state {
+    description
+      "State parameters of the Router Information Opaque LSA";
+    leaf type {
+      type union {
+        type identityref {
+          base srl_nokia-ospf-types:ri-lsa-tlv-types;
+        }
+        type enumeration {
+          enum UNKNOWN {
+            description
+              "The TLV received within the RI LSA is unknown";
+          }
+        }
+      }
+      description
+        "The type of sub-TLV of the Router Information opaque LSA";
+    }
+  }
+
+  grouping ospfv2-lsdb-opaque-ri-informational-state {
+    description
+      "State parmaeters of the Router Information Informational Capabilities
+       sub-TLV";
+    leaf graceful-restart-capable {
+      type boolean;
+      default "false";
+      description
+        "When this leaf is set to true, the advertising system is capable of
+         OSPF graceful restart.";
+    }
+    leaf graceful-restart-helper {
+      type boolean;
+      default "false";
+      description
+        "When this leaf is set to true, the advertising system is capable of
+         being a helper for OSPF graceful restart";
+    }
+    leaf stub-router {
+      type boolean;
+      default "false";
+      description
+        "When this leaf is set to true, the advertising system is able to
+         advertise its status as a stub router";
+      reference
+        "RFC6987";
+    }
+    leaf point-to-point-over-lan {
+      type boolean;
+      default "false";
+      description
+        "When this leaf is set to true, the advertising system supports treating
+         LAN adjacencies as though they were point to point";
+      reference
+        "RFC5309";
+    }
+    leaf experimental-te {
+      type boolean;
+      default "false";
+      description
+        "When this leaf is set to ture, the advertising system supports the
+         experimental extensions to OSPF for TE described in RFC4973";
+      reference
+        "RFC4973";
+    }
+  }
+
+  grouping ospfv2-lsdb-opaque-ri-admintag-state {
+    description
+      "State parameters relating to the administrative tags specified for
+       a node within the RI LSA";
+    leaf-list administrative-tags {
+      type uint32;
+      description
+        "The set of administrative tags assigned to the local system by
+         the network operator. The meaning of these tags is opaque to OSPF
+         - and their interpretation is per-domain specific";
+      reference
+        "RFC7777";
+    }
+  }
+
+  grouping ospfv2-lsdb-opaque-ri-unknown-state {
+    description
+      "State parameters relating to an unknown TLV within the RI LSA";
+    uses ospfv2-lsdb-common-unknown-tlv;
+  }
+
+  grouping ospfv2-lsdb-extended-prefix-state {
+    description
+      "State parameters relating to an Extended Prefix LSA";
+    leaf route-type {
+      type enumeration {
+        enum UNSPECIFIED {
+          value 0;
+          description
+            "The prefix described in the extended prefix LSA is of an
+             unspecified type";
+        }
+        enum INTRA_AREA {
+          value 1;
+          description
+            "The prefix described in the extended prefix LSA is an intra-area
+             prefix for the advertising system";
+        }
+        enum INTER_AREA {
+          value 3;
+          description
+            "The prefix described in the extended prefix LSA is an inter-area
+             prefix for the advertising system";
+        }
+        enum AS_EXTERNAL {
+          value 5;
+          description
+            "The prefix described in the extended prefix LSA is external to the
+             autonomous system of the advertising system";
+        }
+        enum NSSA_EXTERNAL {
+          value 7;
+          description
+            "The prefix described in the extended prefix LSA externally
+             advertised from an NSSA area visibile to the advertising system";
+        }
+      }
+      description
+        "The type of prefix that is contained within the Extended Prefix LSA.
+         The information contained in sub-TLVs of the attribute is applicable
+         regardless of this value.";
+    }
+    uses ospfv2-lsdb-common-prefix-properties;
+    leaf attached {
+      type boolean;
+      default "false";
+      description
+        "If this value is set to true, the prefix being advertised was
+         generated by an ABR for an inter-area prefix. The value corresponds
+         to the A-flag of the flags field of the Extended Prefix LSA";
+    }
+    leaf node {
+      type boolean;
+      default "false";
+      description
+        "If this value is set to true, the prefix being advertised represents
+         the advertising router. Typically, the prefix within the LSA is
+         expected to be globally-reachable prefix associated with a loopback
+         interface";
+    }
+    leaf prefix {
+      type srl_nokia-comm:ipv4-address;
+      description
+        "The IPv4 prefix contained within the extended prefix LSA";
+    }
+  }
+
+  grouping ospfv2-lsdb-extended-link-state {
+    description
+      "State parameters related to an extended link LSA";
+    leaf link-type {
+      type identityref {
+        base srl_nokia-ospf-types:ospfv2-router-link-type;
+      }
+      description
+        "The type of link with which extended attributes are associated";
+    }
+    uses ospfv2-lsdb-common-link-specification;
+  }
+
+  grouping ospfv2-lsdb-extended-link-tlv-state {
+    description
+      "State parameters relating to a sub-TLV of the extended link LSA";
+    leaf type {
+      type identityref {
+        base srl_nokia-ospf-types:ospfv2-extended-link-subtlv-type;
+      }
+      description
+        "The type of the sub-TLV contained within the extended link TLV";
+    }
+  }
+
+  grouping ospfv2-lsdb-extended-prefix-tlv-state {
+    description
+      "State parameters related to a sub-TLV of an Extended Prefix LSA";
+    leaf type {
+      type identityref {
+        base srl_nokia-ospf-types:ospfv2-extended-prefix-subtlv-type;
+      }
+      description
+        "The type of sub-TLV as indicated by the Extended Prefix LSA";
+    }
+  }
+
+  grouping ospfv2-lsdb-extended-prefix-range-state {
+    description
+      "Parameters of the Extended Prefix Range SubTLV";
+    uses ospfv2-lsdb-common-prefix-properties;
+    leaf range-size {
+      type uint16;
+      description
+        "The number of prefixes that are covered by the advertisement.";
+    }
+    leaf inter-area {
+      type boolean;
+      default "false";
+      description
+        "When this leaf is set to true, then the prefix range is inter-area -
+         the flag is set by the ABR that advertises the Extended Prefix Range
+         TLV";
+    }
+    leaf prefix {
+      type srl_nokia-comm:ipv4-prefix;
+      description
+        "The first prefix in the range of prefixes being described by the
+         extended prefix range sub-TLV";
+    }
+  }
+
+  grouping ospf-area-lsdb-structure {
+    description
+      "Structural grouping for per-area LSDB contents";
+    container lsdb {
+      // Top-level RO, if this were ever to become writeable then
+      // the state containers lower down need config false added
+      config false;
+      description
+        "The link-state database for the OSPFv2 area";
+      uses ospf-lsdb-area-state;
+      container lsa-types {
+        description
+          "Enclosing container for a list of LSA types that are
+           in the LSDB for the specified area";
+        list lsa-type {
+          key "type";
+          description
+            "List of LSA types in the LSDB for the specified
+             area";
+          uses ospf-lsdb-lsa-type-state;
+          container lsas {
+            description
+              "Enclosing container for a list of the LSAs of
+               the specified type received by the system";
+            list lsa {
+              key "advertising-router link-state-id";
+              description
+                "List of the LSAs of a specified type in the
+                 LSDB for the specified area";
+              leaf advertising-router {
+                type srl_nokia-comm:ipv4-address;
+                description
+                  "The router ID of the router that originated the LSA";
+              }
+              leaf link-state-id {
+                type srl_nokia-comm:ipv4-address;
+                description
+                  "The Link State ID for the specified LSA type. The exact
+                   defined value of the Link State ID is dependent on the LSA
+                   type.";
+              }
+              uses ospf-lsdb-lsa-state;
+              uses ospfv2-lsdb-router-lsa-structure {
+                when "../../type = 'srl_nokia-ospf-types:router-lsa'" {
+                  description
+                    "Include the router LSA hierarchy solely when
+                     that LSA type is being described";
+                }
+              }
+              uses ospfv2-lsdb-network-lsa-structure {
+                when "../../type = 'srl_nokia-ospf-types:network-lsa'" {
+                  description
+                    "Include the network LSA hierarchy solely when
+                     that LSA type is being described";
+                }
+              }
+              uses ospfv2-lsdb-summary-lsa-structure {
+                when "../../type = "
+                   + "'srl_nokia-ospf-types:summary-ip-network-lsa' or "
+                   + "../../type = 'srl_nokia-ospf-types:summary-asbr-lsa'" {
+                  description
+                    "Include the summary LSA hierarchy solely when
+                     that LSA type is being described";
+                }
+              }
+              uses ospfv2-lsdb-nssa-external-lsa-structure {
+                when "../../type = 'srl_nokia-ospf-types:nssa-as-external-lsa'" {
+                  description
+                    "Include the NSSA External LSA hierarchy solely
+                     when that LSA type is being described";
+                }
+              }
+              uses ospfv2-lsdb-opaque-lsa-structure {
+                when "../../type = 'srl_nokia-ospf-types:ospfv2-area-scope-opaque-lsa'
+                      or ../../type = 'srl_nokia-ospf-types:ospfv2-as-scope-opaque-lsa'" {
+                  description
+                    "Include the Opaque LSA structure when type of entry
+                     being described in an opaque LSA";
+                }
+              }
+              uses ospfv3-lsdb-area-lsa-structures;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  grouping ospf-as-lsdb-structure {
+    description
+      "Structural grouping for AS-scope LSDB contents";
+    container lsdb {
+      // Top-level RO, if this were ever to become writeable then
+      // the state containers lower down need config false added
+      config false;
+      description
+        "The link-state database for the OSPF AS";
+      container lsa-types {
+        description
+          "Enclosing container for a list of LSA types that are
+           in the LSDB for the specified AS";
+        list lsa-type {
+          key "type";
+          description
+            "List of LSA types in the LSDB for the AS";
+          uses ospf-lsdb-lsa-type-state;
+          container lsas {
+            description
+              "Enclosing container for a list of the LSAs of
+               the specified type received by the system";
+            list lsa {
+              key "advertising-router link-state-id";
+              description
+                "List of the LSAs of a specified type in the
+                 LSDB for the specified AS";
+              leaf advertising-router {
+                type srl_nokia-comm:ipv4-address;
+                description
+                  "The router ID of the router that originated the LSA";
+              }
+              leaf link-state-id {
+                type srl_nokia-comm:ipv4-address;
+                description
+                  "The Link State ID for the specified LSA type. The exact
+                   defined value of the Link State ID is dependent on the LSA
+                   type.";
+              }
+              uses ospf-lsdb-lsa-state;
+
+              uses ospfv2-lsdb-asexternal-lsa-structure {
+                when "../../type = 'srl_nokia-ospf-types:as-external-lsa'" {
+                  description
+                    "Include the AS external LSA hierarchy solely when
+                     that LSA type is being described";
+                }
+              }
+              uses ospfv2-lsdb-opaque-lsa-structure {
+                when "../../type = 'srl_nokia-ospf-types:ospfv2-as-scope-opaque-lsa'" {
+                  description
+                    "Include the Opaque LSA structure when type of entry
+                     being described in an opaque LSA";
+                }
+              }
+              uses ospfv3-lsdb-as-lsa-structures;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  grouping ospf-link-lsdb-structure {
+    description
+      "Structural grouping for link-scope LSDB contents";
+    container lsdb {
+      // Top-level RO, if this were ever to become writeable then
+      // the state containers lower down need config false added
+      config false;
+      description
+        "The link-state database for the OSPF interface link";
+      container lsa-types {
+        description
+          "Enclosing container for a list of LSA types that are
+           in the LSDB for the specified link";
+        list lsa-type {
+          key "type";
+          description
+            "List of LSA types in the LSDB for the specified
+             link";
+          uses ospf-lsdb-lsa-type-state;
+          container lsas {
+            description
+              "Enclosing container for a list of the LSAs of
+               the specified type received by the system";
+            list lsa {
+              key "advertising-router link-state-id";
+              description
+                "List of the link local LSAs of a specified type in the
+                  LSDB for the specified interface";
+              leaf advertising-router {
+                type srl_nokia-comm:ipv4-address;
+                description
+                  "The router ID of the router that originated the LSA";
+              }
+              leaf link-state-id {
+                type srl_nokia-comm:ipv4-address;
+                description
+                  "The Link State ID for the specified LSA type. The exact
+                    defined value of the Link State ID is dependent on the LSA
+                    type.";
+              }
+              uses ospf-lsdb-lsa-state;
+              uses ospfv2-lsdb-opaque-lsa-structure {
+                when "../../type = 'srl_nokia-ospf-types:ospfv2-link-scope-opaque-lsa'" {
+                  description
+                    "Include the Link scope Opaque LSA structure when type of entry
+                      being described is a link scope opaque LSA";
+                }
+              }
+              uses ospfv3-lsdb-link-local-lsa-structures;
+            }
+          }
+        }
+      }
+    }
+  }
+}

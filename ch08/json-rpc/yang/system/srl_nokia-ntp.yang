@@ -1,0 +1,169 @@
+module srl_nokia-ntp {
+  yang-version 1.1;
+
+  // namespace
+
+  namespace "urn:srl_nokia/ntp";
+  prefix srl_nokia-ntp;
+
+  import srl_nokia-system {
+    prefix srl-system;
+  }
+  import srl_nokia-network-instance {
+    prefix srl_nokia-netinst;
+  }
+  import srl_nokia-common {
+    prefix srl-comm;
+  }
+  import srl_nokia-timezone {
+    prefix srl-tz;
+  }
+
+  description
+    "This module defines NTP configuration and state";
+
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+  grouping server-entry {
+    leaf address {
+      type srl-comm:ip-address;
+      description
+        "IP address of the NTP server, may be either IPv4 or IPv6";
+    }
+    leaf iburst {
+      type boolean;
+      default "false";
+      description
+        "Indicates whether this server should enable burst synchronization or not
+         iburst, or initial burst, improves the time taken for initial synchronization
+         by sending a burst of eight packets instead of the usual one, these packets are
+         spaced by a two second delay";
+    }
+    leaf prefer {
+      type boolean;
+      default "false";
+      description
+        "Indicates whether this server should be preferred or not
+         All other things being equal, this host will be chosen for synchronization among
+         a set of correctly operating NTP servers";
+    }
+    leaf stratum {
+      type uint8;
+      config false;
+      description
+        "Indicates the level of the server in the NTP hierarchy
+         as number increases, the accuracy is degraded.
+         Primary servers are stratum 1 while a maximum value of 16
+         indicates unsynchronized. The values have the following meanings:
+         0 unspecified or invalid
+         1 primary server (e.g., equipped with a GPS receiver)
+         2-15 secondary server (via NTP)
+         16 unsynchronized
+         17-255 reserved";
+    }
+    leaf jitter {
+      type string;
+      config false;
+      description
+        "Measurement of the variance in latency on the network";
+    }
+    leaf offset {
+      type string;
+      config false;
+      description
+        "Estimate of the current time offset from the peer
+         This is the time difference between the local and reference clock.";
+    }
+    leaf poll-interval {
+      type uint16 {
+        range "16..3600";
+      }
+      units "seconds";
+      config false;
+      description
+        "Polling interval of the peer";
+    }
+  }
+
+  grouping server-config {
+    description
+      "List of NTP servers to use for system clock synchronization";
+    list server {
+      key "address";
+      description
+        "List of NTP servers to use for system clock synchronization";
+      uses server-entry;
+    }
+  }
+
+  grouping ntp-top {
+    container ntp {
+      presence "Configure NTP";
+      description
+        "Top-level container for NTP configuration and state";
+      leaf admin-state {
+        type srl-comm:admin-state;
+        description
+          "Enables the system NTP client
+           and indicates that the system should attempt to synchronize
+           the clock";
+      }
+      leaf oper-state {
+        type srl-comm:oper-state;
+        config false;
+        description
+          "Details the operational state of the NTP client";
+      }
+      leaf synchronized {
+        type union {
+          type srl-comm:ip-address;
+          type string {
+            pattern 'unsynchronized';
+          }
+        }
+        config false;
+        description
+          "Address of the NTP server that the local client is synchronized to
+           This field is set to 'unsynchronized', if the local client is not
+           synchronized";
+      }
+      leaf network-instance {
+        type leafref {
+          path "/srl_nokia-netinst:network-instance/srl_nokia-netinst:name";
+        }
+        must 'not(/srl_nokia-netinst:network-instance[srl_nokia-netinst:name=current()]/srl_nokia-netinst:type = "srl_nokia-netinst:mac-vrf")' {
+          error-message "NTP client cannot be started in a network-instance of type 'mac-vrf'";
+        }
+        description
+          "Reference to a configured network-instance";
+        mandatory true;
+      }
+      uses server-config;
+    }
+  }
+
+  grouping clock-top {
+    container clock {
+      description
+        "Top-level container for system clock configuration and state";
+      leaf timezone {
+        type srl-tz:tzdata-timezone;
+        description
+          "The timezone to use for the system
+           Based on IANAs Time Zone database";
+      }
+    }
+  }
+
+  augment "/srl-system:system" {
+    uses ntp-top;
+    uses clock-top;
+  }
+}

@@ -1,0 +1,363 @@
+submodule srl_nokia-ospfv3-lsas {
+  yang-version 1.1;
+  belongs-to srl_nokia-ospf {
+    prefix srl_nokia-ospfv3-lsas;
+  }
+
+  import ietf-yang-types {
+    prefix yang;
+  }
+  import srl_nokia-common {
+    prefix srl_nokia-comm;
+  }
+  import srl_nokia-ospf-types {
+    prefix srl_nokia-ospf-types;
+  }
+
+  description
+    "This yang file models configuration and state of the OSPFv2 protocol";
+
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+
+  grouping ospfv3-lsdb-lsa-options {
+    description
+      "OSPFv3 LSA options";
+    container lsa-options {
+      leaf-list lsa-options {
+        type identityref {
+          base srl_nokia-ospf-types:ospfv3-lsa-option;
+        }
+        description
+          "OSPFv3 LSA Option flags list. This list will contain
+           the identities for the OSPFv3 LSA options that are
+           set for the LSA.";
+      }
+      description
+        "OSPFv3 LSA options.";
+    }
+  }
+
+  grouping ospfv3-lsdb-lsa-prefix {
+    description
+      "OSPFv3 LSA prefix.";
+    leaf prefix {
+      type srl_nokia-comm:ip-prefix;
+      description
+        "LSA Prefix.";
+    }
+    container prefix-options {
+      leaf-list prefix-options {
+        type identityref {
+          base srl_nokia-ospf-types:ospfv3-prefix-option;
+        }
+        description
+          "OSPFv3 prefix option flag list. This list will
+           contain the identities for the OSPFv3 options
+           that are set for the OSPFv3 prefix.";
+      }
+      description
+        "Prefix options.";
+    }
+  }
+
+  //Groupings
+
+  grouping ospfv3-lsdb-router-lsa-structure {
+    container ospfv3-router-lsa {
+      uses ospfv3-lsdb-lsa-options;
+      leaf flags {
+        description
+          "Router-LSA flag values";
+        type uint8;
+      }
+      list link {
+        key "interface-id";
+        description
+          "Router LSA link.";
+        leaf interface-id {
+          type uint32;
+          description
+            "Interface ID for link.";
+        }
+        leaf neighbor-interface-id {
+          type uint32;
+          description
+            "Neighbor's Interface ID for link.";
+        }
+        leaf neighbor-router-id {
+          type yang:dotted-quad;
+          description
+            "Neighbor's Router ID for link.";
+        }
+        leaf type {
+          type identityref {
+            base srl_nokia-ospf-types:router-lsa-types;
+          }
+          description
+            "The sub-type of the Router LSA.";
+        }
+        leaf metric {
+          type srl_nokia-ospf-types:ospf-metric;
+          description
+            "Link Metric.";
+        }
+      }
+    }
+  }
+
+  grouping ospfv3-lsdb-network-lsa-structure {
+    container ospfv3-network-lsa {
+      uses ospfv3-lsdb-lsa-options;
+      container attached-routers {
+        description
+          "All attached routers.";
+        leaf-list attached-router {
+          type yang:dotted-quad;
+          description
+            "List of the routers attached to the network.";
+        }
+      }
+    }
+  }
+
+  grouping ospfv3-lsdb-inter-area-prefix-lsa-structure {
+    container ospfv3-inter-area-prefix-lsa {
+      leaf metric {
+        type srl_nokia-ospf-types:ospf-metric-large;
+        description
+          "Inter-Area Prefix Metric";
+      }
+      uses ospfv3-lsdb-lsa-prefix;
+      description
+        "Prefix LSA.";
+    }
+  }
+
+  grouping ospfv3-lsdb-inter-area-router-lsa-structure {
+    container ospfv3-inter-area-router-lsa {
+      uses ospfv3-lsdb-lsa-options;
+      leaf metric {
+        type srl_nokia-ospf-types:ospf-metric-large;
+        description
+          "AS Boundary Router (ASBR) Metric.";
+      }
+      leaf destination-router-id {
+        type yang:dotted-quad;
+        description
+          "The Router ID of the ASBR described by the LSA.";
+      }
+      description
+        "Inter-Area-Router LSA.";
+    }
+  }
+
+  grouping ospfv3-lsdb-external-lsa-structure {
+    container ospfv3-external-lsa {
+      description
+        "AS-External and NSSA LSA.";
+      leaf metric {
+        type srl_nokia-ospf-types:ospf-metric-large;
+        description
+          "Metric";
+      }
+      leaf flags {
+        type bits {
+          bit E {
+            description
+              "When set, the metric specified is a Type 2
+               external metric.";
+          }
+          bit F {
+            description
+              "When set, a Forwarding Address is included
+               in the LSA.";
+          }
+          bit T {
+            description
+              "When set, an External Route Tag is included
+               in the LSA.";
+          }
+        }
+        description
+          "Flags.";
+      }
+      leaf referenced-ls-type {
+        type identityref {
+          base srl_nokia-ospf-types:ospfv3-lsa-type;
+        }
+        description
+          "Referenced Link State type.";
+      }
+      leaf unknown-referenced-ls-type {
+        type uint16;
+        description
+          "Value for an unknown Referenced Link State type.";
+      }
+      uses ospfv3-lsdb-lsa-prefix;
+      leaf forwarding-address {
+        type srl_nokia-comm:ip-address;
+        description
+          "Forwarding address.";
+      }
+      leaf external-route-tag {
+        type uint32;
+        description
+          "Route tag.";
+      }
+      leaf referenced-link-state-id {
+        type uint32;
+        description
+          "Referenced Link State ID.";
+      }
+    }
+  }
+
+  grouping ospfv3-lsdb-link-lsa-structure {
+    container ospfv3-link-lsa {
+      leaf rtr-priority {
+        type uint8;
+        description
+          "Router priority for DR election. A router with a
+           higher priority will be preferred in the election
+           and a value of 0 indicates the router is not
+           eligible to become Designated Router or Backup
+           Designated Router (BDR).";
+      }
+      uses ospfv3-lsdb-lsa-options;
+      leaf link-local-interface-address {
+        type srl_nokia-comm:ipv6-address;
+        description
+          "The originating router's link-local
+           interface address for the link.";
+      }
+      leaf num-of-prefixes {
+        type uint32;
+        description
+          "Number of prefixes.";
+      }
+      list prefixes {
+        // description "All prefixes for the link.";
+        // list prefix {    // cannot use `container prefixes > list prefix` as in IETF draft, it triggers a compile issue in autogenerated telemetry_ospf_mgr.h
+        description
+          "List of prefixes associated with the link.";
+        key "prefix";
+        uses ospfv3-lsdb-lsa-prefix;
+        // }
+      }
+      description
+        "Link LSA.";
+    }
+  }
+
+  grouping ospfv3-lsdb-intra-area-prefix-lsa-structure {
+    container ospfv3-intra-area-prefix-lsa {
+      description
+        "Intra-Area-Prefix LSA.";
+      leaf referenced-ls-type {
+        type identityref {
+          base srl_nokia-ospf-types:ospfv3-lsa-type;
+        }
+        description
+          "Referenced Link State type.";
+      }
+      leaf unknown-referenced-ls-type {
+        type uint16;
+        description
+          "Value for an unknown Referenced Link State type.";
+      }
+      leaf referenced-link-state-id {
+        type uint32;
+        description
+          "Referenced Link State ID.";
+      }
+      leaf referenced-adv-router {
+        type yang:dotted-quad;
+        description
+          "Referenced Advertising Router.";
+      }
+      leaf num-of-prefixes {
+        type uint16;
+        description
+          "Number of prefixes.";
+      }
+      list prefixes {
+        // description "All prefixes in this LSA.";
+        // list prefix {    // cannot use `container prefixes > list prefix`, it triggers a compile issue in autogenerated telemetry_ospf_mgr.h
+        description
+          "List of prefixes in this LSA.";
+        key "prefix";
+        uses ospfv3-lsdb-lsa-prefix;
+        leaf metric {
+          type srl_nokia-ospf-types:ospf-metric;
+          description
+            "Prefix Metric.";
+        }
+        // }
+      }
+    }
+  }
+
+  grouping ospfv3-lsdb-as-lsa-structures {
+    uses ospfv3-lsdb-external-lsa-structure {
+      when "../../type = 'srl_nokia-ospf-types:ospfv3-as-external-lsa'" {
+        description
+          "Only applies to AS-external LSAs.";
+      }
+    }
+  }
+
+  grouping ospfv3-lsdb-area-lsa-structures {
+    uses ospfv3-lsdb-router-lsa-structure {
+      when "../../type = 'srl_nokia-ospf-types:ospfv3-router-lsa'" {
+        description
+          "Only applies to Router LSAs.";
+      }
+    }
+    uses ospfv3-lsdb-network-lsa-structure {
+      when "../../type = 'srl_nokia-ospf-types:ospfv3-network-lsa'" {
+        description
+          "Only applies to Network LSAs.";
+      }
+    }
+    uses ospfv3-lsdb-inter-area-prefix-lsa-structure {
+      when "../../type = 'srl_nokia-ospf-types:ospfv3-inter-area-prefix-lsa'" {
+        description
+          "Only applies to Inter-Area-Prefix LSAs.";
+      }
+    }
+    uses ospfv3-lsdb-inter-area-router-lsa-structure {
+      when "../../type = 'srl_nokia-ospf-types:ospfv3-inter-area-router-lsa'" {
+        description
+          "Only applies to Inter-Area-Router LSAs.";
+      }
+    }
+    uses ospfv3-lsdb-external-lsa-structure {
+      when "../../type = 'srl_nokia-ospf-types:ospfv3-nssa-as-external-lsa'" {
+        description
+          "Only applies to NSSA LSAs.";
+      }
+    }
+    uses ospfv3-lsdb-intra-area-prefix-lsa-structure {
+      when "../../type = 'srl_nokia-ospf-types:ospfv3-intra-area-prefix-lsa'" {
+        description
+          "Only applies to Intra-Area-Prefix LSAs.";
+      }
+    }
+  }
+
+  grouping ospfv3-lsdb-link-local-lsa-structures {
+    uses ospfv3-lsdb-link-lsa-structure {
+      when "../../type = 'srl_nokia-ospf-types:ospfv3-link-lsa'" {
+        description
+          "Only applies to Link LSAs.";
+      }
+    }
+  }
+}

@@ -1,0 +1,43 @@
+module srl_nokia-tools-interfaces-ip-dhcp-relay {
+  yang-version 1.1;
+  namespace "urn:srl_nokia/tools-interfaces-ip-dhcp-relay";
+  prefix srl_nokia-tools-interfaces-ip-dhcp-relay;
+
+  import srl_nokia-tools-interfaces {
+    prefix srl_nokia_tools-if;
+  }
+
+  description
+    "Model for interface ip dhcp relay operational commands";
+
+  revision 2021-06-30 {
+    description
+      "SRLinux 21.6.1";
+  }
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+
+  grouping tools-interface-ip-dhcp-relay-top {
+    container dhcp-relay {
+      presence "Dhcp relay is enabled";
+      container statistics {
+        leaf clear {
+          type empty;
+        }
+      }
+    }
+  }
+
+  augment "/srl_nokia_tools-if:interface/srl_nokia_tools-if:subinterface/srl_nokia_tools-if:ipv4" {
+    uses tools-interface-ip-dhcp-relay-top;
+  }
+  augment "/srl_nokia_tools-if:interface/srl_nokia_tools-if:subinterface/srl_nokia_tools-if:ipv6" {
+    uses tools-interface-ip-dhcp-relay-top;
+  }
+}

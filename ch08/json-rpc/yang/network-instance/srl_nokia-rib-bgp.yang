@@ -1,0 +1,976 @@
+module srl_nokia-rib-bgp {
+    yang-version 1.1;
+
+    // namespace
+    namespace "urn:srl_nokia/bgp-rib";
+
+    prefix "srl_nokia-rib-bgp-routes";
+
+    import srl_nokia-common { prefix srl_nokia-comm; }
+    import srl_nokia-network-instance { prefix srl_nokia-netinst; }
+
+    description
+        "This yang file gives a description of static route configuration.";
+
+  revision 2021-06-30 {
+    description
+      "SRLinux 21.6.1";
+  }
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+    grouping state-common-key {
+        leaf prefix {
+            type srl_nokia-comm:ip-prefix; 
+        }
+        leaf neighbor {
+            description
+                "If the route was learned from a BGP neighbor, this is the IPv4 or IPv6 address of that neighbor.";
+            type srl_nokia-comm:ip-address-with-zone;
+        }
+    }
+    grouping state-routes-common {
+        leaf last-modified {
+            description
+                "Time of the last modification of the route stored in the BGP RIB. For a route learned from a BGP neighbor the initial value is the same as last-updatereceived. If an import policy later changed some attribute of the route last-modified would be updated to reflect the time of this change.";
+            type srl_nokia-comm:date-and-time;
+        }
+        leaf used-route {
+            description
+                "Indicates true if the route is being used for forwarding.";
+            type boolean;
+        }
+        leaf valid-route {
+            description
+                "Indicates true if the route is valid.";
+            type boolean;
+        }
+        leaf best-route {
+            description
+                "Set to true if the route is the BGP best path for the prefix.";
+            type boolean;
+        }
+        leaf stale-route {
+            description
+                "Set to true if the route is stale due to BGP graceful restart.";
+            type boolean;
+        }
+
+        leaf pending-delete {
+            description
+                "Set to true if the route is marked for deletion.";
+            type boolean;
+        }
+        leaf tie-break-reason {
+            description
+                "Indicates the reason why a BGP route is sorted behind the next best route. The BGP best path displays a value of 'none'.";
+                type enumeration {
+                enum unknown              { value -1; }
+                enum none                 { value 0; }
+                enum origin               { value 1; }
+                enum as-path-length       { value 2; }
+                enum next-hop-cost        { value 3; }
+                enum med                  { value 4; }
+                enum local-pref           { value 5; }
+                enum aggregate            { value 6; }
+                enum originator-id        { value 7; }
+                enum cluster-list         { value 9; }
+                enum extended-community   { value 10; }
+                enum aigp                 { value 11; }
+                enum missing-attribute    { value 12; }
+                enum rtm-pref             { value 13; }
+                enum owner                { value 14; }
+                enum eigp-labeled         { value 15; }
+                enum vpn-route            { value 16; }
+                enum ebgp-route           { value 17; }
+                enum peer-ip              { value 18; }
+                enum local-peer           { value 19; }
+                enum multi-path           { value 20; }
+                enum vpn-rd               { value 21; }
+                enum next-hop-type        { value 22; }
+                enum invalid-route        { value 23; }
+                enum origin-validation    { value 24; }
+                enum long-live-gr-stale   { value 25; }
+                enum default-originate    { value 26; }
+                enum rtm-install-disabled { value 27; }
+                enum peer-router-id       { value 28; }
+                enum path-identifier      { value 29; }
+            }
+        }
+        container invalid-reason {
+            leaf rejected-route {
+                description
+                    "Indicates true if the route was rejected by an import policy.";
+                type boolean;
+            }
+            leaf as-loop {
+                description
+                    "Indicates true if the BGP route has an AS path loop that exceeds the configured threshold.";
+                type boolean;
+            }
+            leaf next-hop-unresolved {
+                description
+                    "Indicates true if the BGP route has a BGP next-hop that cannot be resolved to an outgoing interface.";
+                type boolean;
+            }
+            leaf cluster-loop {
+                description
+                    "Indicates true if the BGP route has a cluster-list loop.";
+                type boolean;
+            }
+        }
+    }
+    grouping evpn-ethernet-ad-common {
+        leaf route-distinguisher {
+            description
+                "The route distinguisher encoded in the NLRI.";
+            type srl_nokia-comm:route-distinguisher;
+        }
+        leaf esi {
+            description
+                "The Ethernet Segment Identifier encoded in the NLRI";
+            type srl_nokia-comm:esi;
+        }
+        leaf ethernet-tag-id {
+            description
+                "The 32-bit Ethernet Tag ID encoded in the NLRI. The Ethernet Tag ID identifies a broadcast domain.";
+            type uint32;
+        }
+        leaf neighbor {
+            description
+                "If the route was learned from a BGP neighbor, this is the IPv4 or IPv6 address of that neighbor.";
+            type srl_nokia-comm:ip-address;
+        }
+        leaf vni {
+            description
+                "The VXLAN Netwpork Identifier";
+            type uint32 {
+                range "0..16777215";
+            }
+        }
+        leaf attr-id {
+            description
+            "Leaf reference to networkinstance/protocols/bgp/rib/attr-sets/attr-set/index.";
+            type leafref {
+                path "/srl_nokia-netinst:network-instance/srl_nokia-rib-bgp-routes:bgp-rib/srl_nokia-rib-bgp-routes:attr-sets/srl_nokia-rib-bgp-routes:attr-set/srl_nokia-rib-bgp-routes:index";
+            }
+        }
+    }
+
+    grouping evpn-mac-ip-common {
+        leaf route-distinguisher {
+            description
+                "The route distinguisher encoded in the NLRI.";
+            type srl_nokia-comm:route-distinguisher;
+        }
+        leaf mac-length {
+            description
+                "MAC address length";
+            type uint8 {
+                range "0..48";
+            }
+            units "bits";
+        }
+        leaf mac-address {
+            description
+                "The MAC address";
+            type srl_nokia-comm:mac-address;
+        }
+        leaf ip-address {
+            description
+                "The IP host address";
+            type srl_nokia-comm:ip-address;
+        }
+        leaf ethernet-tag-id {
+            description
+                "The 32-bit Ethernet Tag ID encoded in the NLRI. The Ethernet Tag ID identifies a broadcast domain.";
+            type uint32;
+        }
+        leaf neighbor {
+            description
+                "If the route was learned from a BGP neighbor, this is the IPv4 or IPv6 address of that neighbor.";
+            type srl_nokia-comm:ip-address;
+        }
+        leaf esi {
+            description
+                "The Ethernet Segment Identifier";
+            type srl_nokia-comm:esi;
+        }
+        leaf vni {
+            description
+                "The VXLAN Netwpork Identifier";
+            type uint32 {
+                range "0..16777215";
+            }
+        }
+        leaf attr-id {
+            description
+                "Leaf reference to networkinstance/protocols/bgp/rib/attr-sets/attr-set/index.";
+            type leafref {
+                path "/srl_nokia-netinst:network-instance/srl_nokia-rib-bgp-routes:bgp-rib/srl_nokia-rib-bgp-routes:attr-sets/srl_nokia-rib-bgp-routes:attr-set/srl_nokia-rib-bgp-routes:index";
+            }
+        }
+    }
+
+    grouping evpn-imet-common {
+        leaf route-distinguisher {
+            description
+                "The route distinguisher encoded in the NLRI.";
+            type srl_nokia-comm:route-distinguisher;
+        }
+        leaf originating-router {
+            description
+                "The IPv4 or IPv6 address of the originating router";
+            type srl_nokia-comm:ip-address;
+        }
+        leaf ethernet-tag-id {
+            description
+                "The 32-bit Ethernet Tag ID encoded in the NLRI. The Ethernet Tag ID identifies a broadcast domain.";
+            type uint32;
+        }
+
+        leaf neighbor {
+            description
+                "If the route was learned from a BGP neighbor, this is the IPv4 or IPv6 address of that neighbor.";
+            type srl_nokia-comm:ip-address;
+        }
+        leaf attr-id {
+            description
+                "Leaf reference to networkinstance/protocols/bgp/rib/attr-sets/attr-set/index.";
+            type leafref {
+                path "/srl_nokia-netinst:network-instance/srl_nokia-rib-bgp-routes:bgp-rib/srl_nokia-rib-bgp-routes:attr-sets/srl_nokia-rib-bgp-routes:attr-set/srl_nokia-rib-bgp-routes:index";
+            }
+        }
+    }
+
+    grouping evpn-es-common {
+        leaf route-distinguisher {
+            description
+                "The route distinguisher encoded in the NLRI.";
+            type srl_nokia-comm:route-distinguisher;
+        }
+        leaf esi {
+            description
+                "The Ethernet Segment Identifier";
+            type srl_nokia-comm:esi;
+        }
+        leaf originating-router {
+            description
+                "The IPv4 or IPv6 address of the originating router";
+            type srl_nokia-comm:ip-address;
+        }
+        leaf neighbor {
+            description
+                "If the route was learned from a BGP neighbor, this is the IPv4 or IPv6 address of that neighbor.";
+            type srl_nokia-comm:ip-address;
+        }
+        leaf attr-id {
+            description
+                "Leaf reference to networkinstance/protocols/bgp/rib/attr-sets/attr-set/index.";
+            type leafref {
+                path "/srl_nokia-netinst:network-instance/srl_nokia-rib-bgp-routes:bgp-rib/srl_nokia-rib-bgp-routes:attr-sets/srl_nokia-rib-bgp-routes:attr-set/srl_nokia-rib-bgp-routes:index";
+            }
+        }
+    }
+
+    grouping evpn-ip-common {
+        leaf route-distinguisher {
+            description
+                "The route distinguisher encoded in the NLRI.";
+            type srl_nokia-comm:route-distinguisher;
+        }
+        leaf ethernet-tag-id {
+            description
+                "The 32-bit Ethernet Tag ID encoded in the NLRI. The Ethernet Tag ID identifies a broadcast domain.";
+            type uint32;
+        }
+        leaf ip-prefix-length {
+            description
+                "IP prefix length";
+            type uint8 {
+                range "0..128";
+            }
+            units "bits";
+        }
+        leaf ip-prefix {
+            description
+                "The IPv4 or IPv6 prefix";
+            type srl_nokia-comm:ip-prefix;
+        }
+        leaf neighbor {
+            description
+                "If the route was learned from a BGP neighbor, this is the IPv4 or IPv6 address of that neighbor.";
+            type srl_nokia-comm:ip-address;
+        }
+        leaf esi {
+            description
+                "The Ethernet Segment Identifier";
+            type srl_nokia-comm:esi;
+        }
+        leaf gateway-ip {
+            description
+                "An IP address that encodes an overlay index";
+            type srl_nokia-comm:ip-address;
+        }
+        leaf vni {
+            description
+                "The VXLAN Netwpork Identifier";
+            type uint32 {
+                range "0..16777215";
+            }
+        }
+        leaf attr-id {
+            description
+                "Leaf reference to networkinstance/protocols/bgp/rib/attr-sets/attr-set/index.";
+            type leafref {
+                path "/srl_nokia-netinst:network-instance/srl_nokia-rib-bgp-routes:bgp-rib/srl_nokia-rib-bgp-routes:attr-sets/srl_nokia-rib-bgp-routes:attr-set/srl_nokia-rib-bgp-routes:index";
+            }
+        }
+    }
+
+    grouping bgp-rib-top {
+        container bgp-rib {
+            config false;
+            description "Container for BGP RIB state.";
+            container ipv4-unicast {
+                config false;
+                description "Container for RIB state of IPv4-unicast routes.";
+                container local-rib {
+                    config false;
+                    description "Container for local RIB, containing all imported routes
+                        from other protocols plus the post-import-policy version of all IPv4
+                        routes learned from all BGP neighbors.";
+                    list routes {
+                        config false;
+                        key "prefix neighbor origin-protocol";
+                        description "List of IPv4 routes in the local RIB.";
+
+                        uses state-common-key;
+                        leaf origin-protocol {
+                            description
+                                "If the route was imported from another protocol, this is the protocol name.";
+                            type identityref {
+                                base srl_nokia-comm:ip-route-type;
+                            }
+                        }
+
+                        uses state-routes-common;
+                        leaf attr-id {
+                            description "Leaf reference to networkinstance/bgp-rib/
+                                attr-sets/attr-set/index";
+                            type leafref {
+                                path "../../../../srl_nokia-rib-bgp-routes:attr-sets/srl_nokia-rib-bgp-routes:attr-set/srl_nokia-rib-bgp-routes:index";
+                            }
+                        }
+                    }
+                }
+
+                container rib-in-out {
+                    config false;
+                    description "Container for BGP routes learned and advertised to BGP neighbors.";
+                    container rib-in-pre {
+                        config false;
+                        description "Container for the pre-import-policy version of BGP
+                            routes learned from BGP neighbors.";
+                        list routes {
+                            config false;
+                            key "prefix neighbor";
+                            description "List of IPv4 routes.";
+                            uses state-common-key;
+
+                            leaf attr-id {
+                                description "Leaf reference to networkinstance/protocols/bgp/rib/
+                                    attr-sets/attr-set/index.";
+                                type leafref {
+                                    path "../../../../../srl_nokia-rib-bgp-routes:attr-sets/srl_nokia-rib-bgp-routes:attr-set/srl_nokia-rib-bgp-routes:index";
+                                }
+                            }
+                        }
+                    }
+                    container rib-in-post {
+                        config false;
+                        description "Container for the post-import-policy version of BGP routes
+                            learned from BGP neighbors.";
+                        list routes {
+                            config false;
+                            description "List of IPv4 routes";
+                            key  "prefix neighbor";
+                            uses state-common-key;
+                            uses state-routes-common;
+                            leaf attr-id {
+                                description "Leaf reference to networkinstance/protocols/bgp/rib/
+                                    attr-sets/attr-set/index.";
+                                type leafref {
+                                    path "../../../../../srl_nokia-rib-bgp-routes:attr-sets/srl_nokia-rib-bgp-routes:attr-set/srl_nokia-rib-bgp-routes:index";
+                                }
+                            }
+                        }
+                    }
+
+                    container rib-out-post {
+                        config false;
+                        description "Container for the post-export-policy version of BGP routes
+                            advertised to BGP neighbors.";
+                        list routes {
+                            config false;
+                            key "prefix neighbor";
+                            description "List of IPv4 routes.";
+                            uses state-common-key;
+                            leaf attr-id {
+                                description "Leaf reference to networkinstance/protocols/bgp/rib/
+                                    attr-sets/attr-set/index.";
+                                type leafref {
+                                    path "../../../../../srl_nokia-rib-bgp-routes:attr-sets/srl_nokia-rib-bgp-routes:attr-set/srl_nokia-rib-bgp-routes:index";
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            container ipv6-unicast {
+                config false;
+                description "Container for RIB state of IPv6-unicast routes.";
+                container local-rib {
+                    config false;
+                    description "Container for local RIB, containing all imported routes
+                        from other protocols plus the post-import-policy version of all IPv4
+                        routes learned from all BGP neighbors.";
+                    list routes {
+                        config false;
+                        key "prefix neighbor origin-protocol";
+                        description "List of IPv6 routes in the local RIB.";
+                        uses state-common-key;
+                        leaf origin-protocol {
+                            description
+                                "If the route was imported from another protocol, this is the protocol name.";
+                            type identityref {
+                                base srl_nokia-comm:ip-route-type;
+                            }
+                        }
+                        uses state-routes-common;
+                        leaf attr-id {
+                            description "Leaf reference to networkinstance/protocols/bgp/rib/
+                                attr-sets/attr-set/index";
+                            type leafref {
+                                path "../../../../srl_nokia-rib-bgp-routes:attr-sets/srl_nokia-rib-bgp-routes:attr-set/srl_nokia-rib-bgp-routes:index";
+                            }
+                        }
+                    }
+                }
+
+                container rib-in-out {
+                    config false;
+                    description "Container for BGP routes learned and advertised to BGP neighbors.";
+                    container rib-in-pre {
+                        config false;
+                        description "Container for the pre-import-policy version of BGP
+                            routes learned from BGP neighbors.";
+                        list routes {
+                            config false;
+                            key "prefix neighbor";
+                            description "List of IPv6 routes.";
+                            uses state-common-key;
+                            leaf attr-id {
+                                description "Leaf reference to networkinstance/protocols/bgp/rib/
+                                    attr-sets/attr-set/index.";
+                                type leafref {
+                                    path "../../../../../srl_nokia-rib-bgp-routes:attr-sets/srl_nokia-rib-bgp-routes:attr-set/srl_nokia-rib-bgp-routes:index";
+                                }
+                            }
+                        }
+                    }
+                    container rib-in-post {
+                        config false;
+                        description "Container for the post-import-policy version of BGP routes
+                            learned from BGP neighbors.";
+                        list routes {
+                            config false;
+                            description "List of IPv6 routes";
+                            key  "prefix neighbor";
+                            uses state-common-key;
+                            uses state-routes-common;
+                            leaf attr-id {
+                                description "Leaf reference to networkinstance/protocols/bgp/rib/
+                                    attr-sets/attr-set/index.";
+                                type leafref {
+                                    path "../../../../../srl_nokia-rib-bgp-routes:attr-sets/srl_nokia-rib-bgp-routes:attr-set/srl_nokia-rib-bgp-routes:index";
+                                }
+                            }
+                        }
+                    }
+
+                    container rib-out-post {
+                        config false;
+                        description "Container for the post-export-policy version of BGP routes
+                            advertised to BGP neighbors.";
+                        list routes {
+                            config false;
+                            key "prefix neighbor";
+                            description "List of IPv6 routes.";
+                            uses state-common-key;
+                            leaf attr-id {
+                                description "Leaf reference to networkinstance/protocols/bgp/rib/
+                                    attr-sets/attr-set/index.";
+                                type leafref {
+                                    path "../../../../../srl_nokia-rib-bgp-routes:attr-sets/srl_nokia-rib-bgp-routes:attr-set/srl_nokia-rib-bgp-routes:index";
+                                }
+                            }
+                        }
+
+                    }
+                }
+            }
+            container evpn {
+                description
+                    "Container for RIB state of EVPN routes.";
+                container rib-in-out {
+                    description
+                      "Container for BGP routes learned and advertised to BGP neighbors.";
+                    container rib-in-pre {
+                        description
+                          "Container for the pre-import-policy version of BGP routes learned from BGP neighbors.";
+                        list ethernet-ad-routes {
+                            description
+                                "List of Ethernet AD (Auto-Discovery) routes";
+
+                            key "route-distinguisher esi ethernet-tag-id neighbor";
+                            uses evpn-ethernet-ad-common;
+                        }
+                        list mac-ip-routes {
+                            description
+                                "List of Mac/IP Advertisement routes";
+
+                            key "route-distinguisher mac-length mac-address ip-address ethernet-tag-id neighbor";
+                            uses evpn-mac-ip-common;
+                        }
+                        list imet-routes {
+                            description
+                                "List of Inclusive Multicast Ethernet Tag routes";
+
+                            key "route-distinguisher originating-router ethernet-tag-id neighbor";
+                            uses evpn-imet-common;
+                        }
+                        list ethernet-segment-routes {
+                            description
+                                "List of Ethernet Segment routes";
+
+                            key "route-distinguisher esi originating-router neighbor";
+                            uses evpn-es-common;
+                        }
+                        list ip-prefix-routes {
+                            description
+                                "List of IP prefix routes";
+
+                            key "route-distinguisher ethernet-tag-id ip-prefix-length ip-prefix neighbor";
+                            uses evpn-ip-common;
+                        }
+                    }
+                    container rib-in-post {
+                        description
+                          "Container for the post-import-policy version of BGP routes learned from BGP neighbors.";
+                        list ethernet-ad-routes {
+                            description
+                                "List of Ethernet AD (Auto-Discovery) routes";
+
+                            key "route-distinguisher esi ethernet-tag-id neighbor";
+                            uses evpn-ethernet-ad-common;
+                            uses state-routes-common;
+                        }
+                        list mac-ip-routes {
+                            description
+                                "List of Mac/IP Advertisement routes";
+
+                            key "route-distinguisher mac-length mac-address ip-address ethernet-tag-id neighbor";
+                            uses evpn-mac-ip-common;
+                            uses state-routes-common;
+                        }
+                        list imet-routes {
+                            description
+                                "List of Inclusive Multicast Ethernet Tag routes";
+
+                            key "route-distinguisher originating-router ethernet-tag-id neighbor";
+                            uses evpn-imet-common;
+                            uses state-routes-common;
+                        }
+                        list ethernet-segment-routes {
+                            description
+                                "List of Ethernet Segment routes";
+
+                            key "route-distinguisher esi originating-router neighbor";
+                            uses evpn-es-common;
+                            uses state-routes-common;
+                        }
+                        list ip-prefix-routes {
+                            description
+                                "List of IP prefix routes";
+
+                            key "route-distinguisher ethernet-tag-id ip-prefix-length ip-prefix neighbor";
+                            uses evpn-ip-common;
+                            uses state-routes-common;
+                        }
+                    }
+                    container rib-out-post {
+                        description
+                          "Container for the post-export-policy version of BGP routes advertised to BGP neighbors.";
+                        list ethernet-ad-routes {
+                            description
+                                "List of Ethernet AD (Auto-Discovery) routes";
+
+                            key "route-distinguisher esi ethernet-tag-id neighbor";
+                            uses evpn-ethernet-ad-common;
+                            leaf next-hop {
+                                description
+                                    "The advertised BGP next-hop address.";
+                                type srl_nokia-comm:ip-address;
+                            }
+                        }
+                        list mac-ip-routes {
+                            description
+                                "List of Mac/IP Advertisement routes";
+
+                            key "route-distinguisher mac-length mac-address ip-address ethernet-tag-id neighbor";
+                            uses evpn-mac-ip-common;
+                            leaf next-hop {
+                                description
+                                    "The advertised BGP next-hop address.";
+                                type srl_nokia-comm:ip-address;
+                            }
+                        }
+                        list imet-routes {
+                            description
+                                "List of Inclusive Multicast Ethernet Tag routes";
+
+                            key "route-distinguisher originating-router ethernet-tag-id neighbor";
+                            uses evpn-imet-common;
+                            leaf next-hop {
+                                description
+                                    "The advertised BGP next-hop address.";
+                                type srl_nokia-comm:ip-address;
+                            }
+                        }
+                        list ethernet-segment-routes {
+                            description
+                                "List of Ethernet Segment routes";
+
+                            key "route-distinguisher esi originating-router neighbor";
+                            uses evpn-es-common;
+                            leaf next-hop {
+                                description
+                                    "The advertised BGP next-hop address.";
+                                type srl_nokia-comm:ip-address;
+                            }
+                        }
+                        list ip-prefix-routes {
+                            description
+                                "List of IP prefix routes";
+
+                            key "route-distinguisher ethernet-tag-id ip-prefix-length ip-prefix neighbor";
+                            uses evpn-ip-common;
+                            leaf next-hop {
+                                description
+                                    "The advertised BGP next-hop address.";
+                                type srl_nokia-comm:ip-address;
+                            }
+                        }
+                    }
+                }
+            }
+            container attr-sets {
+                config false;
+                description "Container for BGP RIB path attribute sets that can be shared by one or more
+                    BGP routes.";
+                list attr-set {
+                    config false;
+                    description "List of attribute sets.";
+                    key "attr-set-type index";
+                    leaf attr-set-type {
+                        description "The type of the attribute-set. RIB-IN attribute sets can only be referenced by
+                            BGP routes in the RIB-IN. RIB-OUT attribute sets can only be referenced by
+                            BGP routes in the RIB-OUT.";
+                        type enumeration {
+                            enum rib-in {value 1;}
+                            enum rib-out {value 2;}
+                        }
+                    }
+                    leaf index {
+                        description "A unique internal identifier of the attribute set.";
+                        type uint64;
+                    }
+                    container as-path {
+                        config false;
+                        description "A container for the AS path attribute of the attribute set.";
+
+                        list segment {
+                            config false;
+                            description "A list of segments. Each segment has a type and a list of one or more AS
+                                numbers.";
+                            key "as-path-index";
+                            leaf as-path-index {
+                                config false;
+                                description
+                                    "RIB attribute AS Path index";
+                                type uint32;
+                            }
+
+                            leaf type {
+                                description "The type of the AS path segment.";
+                                type enumeration {
+                                    enum as-set {}
+                                    enum as-sequence {}
+                                    enum as-confed-sequence {}
+                                    enum as-confed-set {}
+                                }
+                            }
+                            leaf-list member {
+                                description "A list of AS numbers (each of which is a 2byte-ASN or a 4byte-ASN) that belong
+                                    to the AS path segment.";
+                                type uint32 {
+                                    range "1..4294967295";
+                                }
+                                ordered-by user;
+                            }
+                        }
+                    }
+                    leaf origin {
+                        description "The value of the ORIGIN path attribute";
+                        type enumeration {
+                            enum igp {}
+                            enum egp {}
+                            enum incomplete {}
+                        }
+                    }
+                    leaf atomic-aggregate {
+                        description "Set to true to indicate the presence of the ATOMIC_AGGREGATE path attribute.";
+                        type boolean;
+                    }
+                    leaf next-hop {
+                        description "The IPv4 or IPv6 address of the BGP next-hop (extracted from the
+                            NEXT_HOP field of the UPDATE or the MP_REACH_NLRI next-hop).";
+                        type srl_nokia-comm:ip-address-with-zone;
+                    }
+                    leaf med {
+                        description "The value of the MULTI_EXIT_DISC path attribute.";
+                        type uint32;
+                    }
+                    leaf local-pref {
+                        description "The value of the LOCAL_PREF path attribute.";
+                        type uint32;
+                    }
+                    leaf originator-id {
+                        description "The address in the ORIGINATOR_ID attribute added by a route reflector.";
+                        type srl_nokia-comm:ip-address;
+                    }
+                    leaf-list cluster-list {
+                        description "The list of IPv4 addresses in the CLUSTER_LIST path attribute.";
+                        type srl_nokia-comm:ip-address;
+                        ordered-by user;
+                    }
+                    leaf aigp {
+                        description "The value in the AIGP path attribute.";
+                        type uint64;
+                    }
+                    container aggregator {
+                        config false;
+                        description "";
+
+                        leaf as-number {
+                            description "The 2byte or 4byte AS number of the router that formed the aggregate
+                                route.";
+                            type uint32 {
+                                range "1..4294967295";
+                            }
+                        }
+                        leaf address {
+                            description "The router ID of the BGP router that formed the aggregate route.";
+                            type srl_nokia-comm:ip-address;
+                        }
+                    }
+                    container pmsi-tunnel {
+                        description
+                            "A container for the Provider Multicast Service Interface Tunnel Attribute (PTA) of the attribute set.";
+                        leaf tunnel-type {
+                            description
+                                "The value of the tunnel-type in the PMSI Tunnel Attribute";
+                            type enumeration {
+                                enum no-tunnel {
+                                }
+                                enum rsvp-te-p2mp {
+                                }
+                                enum mldp-p2mp {
+                                }
+                                enum pim-ssm {
+                                }
+                                enum pim-sm {
+                                }
+                                enum bidir-pim {
+                                }
+                                enum ingress-replication {
+                                }
+                                enum mldp-mp2mp {
+                                }
+                                enum assisted-replication {
+                                }
+                                enum bier {
+                                }
+                            }
+                        }
+                        container flags {
+                            description
+                                "A container for the PTA Flags";
+                            leaf assisted-replication-type {
+                                description
+                                    "The value of the assisted-replication role type.";
+                                type enumeration {
+                                    enum none {
+                                    }
+                                    enum ar-replicator {
+                                    }
+                                    enum ar-leaf {
+                                    }
+                                    enum reserved {
+                                    }
+                                }
+                            }
+                            container pruned-flood-list {
+                                description
+                                    "A container for the optimized ingress replication pruned flood list flags.";
+                                leaf broadcast-multicast {
+                                    description
+                                        "The value of the broadcast-multicast flag.";
+                                    type enumeration {
+                                        enum 0 {
+                                        }
+                                        enum 1 {
+                                        }
+                                    }
+                                }
+                                leaf unknown-unicast {
+                                    description
+                                        "The value of the unknown-unicast flag.";
+                                    type enumeration {
+                                        enum 0 {
+                                        }
+                                        enum 1 {
+                                        }
+                                    }
+                                }
+                            }
+                            leaf leaf-information-required {
+                                description
+                                    "The value of the Leaf Information Required (LIR) flag.";
+                                type boolean;
+                            }
+                        }
+                        leaf vni {
+                            description
+                                "The VXLAN Netwpork Identifier";
+                            type uint32 {
+                                range "0..16777215";
+                            }
+                        }
+                        leaf tunnel-endpoint {
+                            description
+                                "The value of the tunnel-endpoint in the PMSI Tunnel Attribute.";
+                            type srl_nokia-comm:ip-address;
+                        }
+                    }
+
+                    container communities {
+                        config false;
+                        description "";
+
+                        leaf-list community {
+                            description "List of standard 4-byte community values in the COMMUNITY path
+                                attribute. Each should be displayed in the format <0..65355>:<0..65535>";
+                            type string;
+                            ordered-by user;
+                        }
+                        leaf-list ext-community {
+                            description "List of extended 8-byte community values in the COMMUNITY path
+                                attribute.";
+                            type string;
+                            ordered-by user;
+                        }
+                        leaf-list large-community {
+                            description "List of large 12-byte community values in the LARGE_COMMUNITY path
+                                attribute. Each should be displayed in the format: <0..4294967295>:<0..4294967295>:<
+                                0..4294967295>";
+                            type string {
+                                length 1..72;
+                            }
+                            ordered-by user;
+                        }
+                    }
+
+                    container unknown-attributes {
+                        config false;
+                        description "Container for unknown path attributes";
+
+                        list unknown-attribute {
+                            config false;
+                            description "";
+                            key "unknown-attr-index";
+
+                            leaf unknown-attr-index {
+                                config false;
+                                description
+                                    "RIB attribute unknown attribute index";
+                                type uint32;
+                            }
+
+                            leaf attr-type {
+                                config false;
+                                description "The type code of the unknown path
+                                    attribute";
+                                type uint8;
+                            }
+                            leaf attr-len {
+                                config false;
+                                description "The length of the unknown path
+                                    attribute";
+                                type uint16;
+                            }
+                            leaf optional {
+                                config false;
+                                description "Set to true if the unknown path
+                                    attribute has the optional flag is set to
+                                    1.";
+                                type boolean;
+                            }
+                            leaf transitive {
+                                config false;
+                                description "Set to true if the unknown path
+                                    attribute has the transitive flag is set to
+                                    1.";
+                                type boolean;
+                            }
+                            leaf partial {
+                                description "Set to true if the unknown path
+                                    attribute has the partial flag is set to 1.";
+                                type boolean;
+                            }
+                            leaf  extended {
+                                description "Set to true if the unknown path attribute has the extended length flag
+                                    is set to 1.";
+                                type boolean;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    augment "/srl_nokia-netinst:network-instance" {
+        uses bgp-rib-top;
+    }
+}

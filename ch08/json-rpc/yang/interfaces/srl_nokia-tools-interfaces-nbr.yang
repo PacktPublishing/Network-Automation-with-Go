@@ -1,0 +1,75 @@
+module srl_nokia-tools-interfaces-nbr {
+  yang-version 1.1;
+  namespace "urn:srl_nokia/tools-interfaces-nbr";
+  prefix srl_nokia-tools-if-nbr;
+
+  import srl_nokia-tools-interfaces {
+    prefix srl_nokia_tools-if;
+  }
+
+  import srl_nokia-common {
+    prefix srl_nokia-comm;
+  }
+
+  description
+    "Model for operational commands on ARP and ND tables.";
+
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+  grouping arp-top {
+    container arp {
+      presence "IPv4 ARP protocol is enabled";
+      list neighbor {
+        key "ipv4-address";
+        leaf ipv4-address {
+          type srl_nokia-comm:ipv4-address;
+          description "IPv4 address resolved by the ARP entry";
+        }
+        leaf delete-dynamic {
+          type empty;
+          description
+            "Delete one specific dynamic ARP entry";
+        }
+      }
+      leaf delete-dynamic {
+        type empty;
+        description
+          "Delete all dynamic ARP entries";
+      }
+    }
+  }
+  
+  grouping nd-top {
+    container neighbor-discovery {
+      presence "IPv6 ND protocol is enabled";
+      list neighbor {
+        key "ipv6-address";
+        leaf ipv6-address {
+          type srl_nokia-comm:ipv6-address;
+          description
+            "IPv6 address resolved by the ND cache entry";
+        }
+        leaf delete-dynamic {
+          type empty;
+          description
+            "Delete one specific dynamic neighbor cache entry";
+        }
+      }
+      leaf delete-dynamic {
+        type empty;
+        description
+          "Delete all dynamic neighbor cache entries";
+      }
+    }
+  }
+  
+  augment "/srl_nokia_tools-if:interface/srl_nokia_tools-if:subinterface/srl_nokia_tools-if:ipv4" {
+    uses arp-top;
+  }
+  augment "/srl_nokia_tools-if:interface/srl_nokia_tools-if:subinterface/srl_nokia_tools-if:ipv6" {
+    uses nd-top;
+  }
+}

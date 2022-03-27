@@ -1,0 +1,255 @@
+module srl_nokia-gribi-server {
+  yang-version 1.1;
+  namespace "urn:srl_nokia/gribi-server";
+  prefix srl-gribi-server;
+
+  import srl_nokia-common {
+    prefix srl-comm;
+  }
+  import srl_nokia-system {
+    prefix srl-system;
+  }
+  import srl_nokia-network-instance {
+    prefix srl-netinst;
+  }
+  import srl_nokia-tls {
+    prefix srl-tls;
+  }
+  import srl_nokia-extensions {
+    prefix srl-ext;
+  }
+  import srl_nokia-features {
+    prefix srl-feat;
+  }
+
+  description
+    "This module defines configuration and operational state data related to the gRIBI server";
+
+  revision 2021-06-30 {
+    description
+      "SRLinux 21.6.1";
+  }
+
+  grouping gribi-common {
+    leaf admin-state {
+      type srl-comm:admin-state;
+      srl-ext:show-importance "high";
+      default "disable";
+      description
+        "Administratively enable or disable the gRIBI service";
+    }
+    leaf oper-state {
+      config false;
+      type srl-comm:oper-state;
+      srl-ext:show-importance "high";
+      description
+        "Details if the gRIBI service is operationally available";
+    }
+    leaf use-authentication {
+      type boolean;
+      srl-ext:show-importance "high";
+      default "true";
+      description
+        "Enable or disable the use of username/password authentication for every gRIBI RPC request";
+    }
+  }
+
+  grouping gribi-socket {
+    container unix-socket {
+      description
+        "Top-level container for configuration and state related to unix sockets";
+      uses gribi-common;
+      leaf socket-path {
+        srl-ext:show-importance "high";
+        config false;
+        type string;
+        description
+          "Path to the unix socket used by gRIBI";
+      }
+      leaf tls-profile {
+        type leafref {
+          path "/srl-system:system/srl-tls:tls/srl-tls:server-profile/srl-tls:name";
+        }
+        srl-ext:show-importance "high";
+        description
+          "Reference to the TLS profile to use on the gRIBI unix socket server
+
+           If none is specified, then TLS is not used.";
+      }
+    }
+  }
+
+  grouping gribi-netinst {
+    list network-instance {
+      description
+        "List of network instances to run a gRIBI socket in";
+      key "name";
+      uses gribi-common;
+      leaf name {
+        type leafref {
+          path "/srl-netinst:network-instance/srl-netinst:name";
+        }
+        must 'not(/srl-netinst:network-instance[srl-netinst:name=current()]/srl-netinst:type = "srl-netinst:mac-vrf")' {
+          error-message "gRIBI socket cannot be created in a network-instance of type 'mac-vrf'";
+        }
+        description
+          "Reference to a configured network instance";
+      }
+      leaf-list source-address {
+        type srl-comm:ip-address;
+        description
+          "List of IP addresses the gRIBI server will listen on within the network instance
+          
+          By default the gRIBI server will listen on all addresses in the network-instance.";
+      }
+      leaf port {
+        type srl-comm:port-number;
+        srl-ext:show-importance "high";
+        default "57401";
+        description
+          "TCP port the gRIBI server will listen on for incoming connections";
+      }
+      leaf tls-profile {
+        mandatory true;
+        type leafref {
+          path "/srl-system:system/srl-tls:tls/srl-tls:server-profile/srl-tls:name";
+        }
+        srl-ext:show-importance "high";
+        description
+          "Reference to the TLS profile to use on the gRIBI server";
+      }
+    }
+  }
+
+  grouping gribi-traceoptions {
+    description
+      "Top-level grouping for gRIBI trace options";
+    leaf-list trace-options {
+      description
+        "gRIBI trace options";
+      type enumeration {
+        enum request;
+        enum response;
+        enum common;
+      }
+    }
+  }
+
+  grouping gribi-server-top {
+    container gribi-server {
+      if-feature srl-feat:gribi;
+      description
+        "Configures the gRPC Routing Information Base Interface (gRIBI) service";
+      presence "Configures the gRPC Routing Information Base Interface (gRIBI) service";
+      leaf admin-state {
+        type srl-comm:admin-state;
+        default "disable";
+        srl-ext:show-importance "high";
+        description
+          "Globally enable or disable the gRIBI service
+
+           Disabling this will disable all gRIBI sockets in all configured network-instances (including unix sockets).";
+      }
+      uses gribi-traceoptions;
+      uses gribi-netinst;
+      uses gribi-socket;
+      leaf timeout {
+        type uint16 {
+          range "0..65535";
+        }
+        default "7200";
+        srl-ext:show-importance "low";
+        units "seconds";
+        description
+          "Set the idle timeout in seconds on gRIBI clients";
+      }
+      leaf rate-limit {
+        type uint16 {
+          range "0..65535";
+        }
+        srl-ext:show-importance "low";
+        default "60";
+        description
+          "Set a limit on the number of connection attempts per minute";
+      }
+      leaf session-limit {
+        type uint16 {
+          range "0..65535";
+        }
+        srl-ext:show-importance "low";
+        default "20";
+        description
+          "Set a limit on the number of simultaneous active gRIBI sessions";
+      }
+      list client {
+        config false;
+        description
+          "List of active gRIBI client sessions";
+        key "id";
+        leaf id {
+          type uint32 {
+            range "0..4294967295";
+          }
+          description
+            "System generated ID for for the client";
+        }
+        leaf election-id {
+          type string;
+          srl-ext:show-importance "high";
+          description
+            "Election ID of this client";
+        }
+        leaf persistence-mode {
+          type enumeration {
+            enum "preserve" {
+              description "Entries populated by the client will be persisted during a client disconnect, or control module switchover";
+            }
+            enum "delete" {
+              description "Entries populated by the client will be purged on the client disconnecting, or a control module switchover
+              
+              If no persistence mode is signaled, the default is to delete entries.";
+            }
+          }
+          srl-ext:show-importance "high";
+          description
+            "The defined persistence mode as signaled by the client";
+        }
+        leaf user {
+          type string;
+          srl-ext:show-importance "high";
+          description
+            "Authenticated username for the client";
+        }
+        leaf user-agent {
+          type string;
+          srl-ext:show-importance "low";
+          description
+            "User agent used for by the client";
+        }
+        leaf remote-host {
+          type srl-comm:ip-address;
+          srl-ext:show-importance "high";
+          description
+            "Remote host of the client";
+        }
+        leaf remote-port {
+          type srl-comm:port-number;
+          srl-ext:show-importance "high";
+          description
+            "Remote port of the client";
+        }
+        leaf start-time {
+          type srl-comm:date-and-time-delta;
+          srl-ext:show-importance "high";
+          description
+            "Time the client first connected";
+        }
+      }
+    }
+  }
+
+  augment "/srl-system:system" {
+    srl-ext:first-released "21.11.1";
+    uses gribi-server-top;
+  }
+}

@@ -1,0 +1,408 @@
+module srl_nokia-bfd {
+  yang-version 1.1;
+
+  // namespace
+
+  namespace "urn:srl_nokia/bfd";
+  prefix srl_nokia-bfd;
+
+  // import some basic types
+
+  import srl_nokia-common {
+    prefix srl_nokia-comm;
+  }
+  import srl_nokia-extensions {
+    prefix srl_nokia-ext;
+  }
+  import srl_nokia-interfaces {
+    prefix srl_nokia-if;
+  }
+
+  description
+    "This yang file gives a description of bfd protocol
+     configuration.";
+
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+  typedef bfd-session-state {
+    type enumeration {
+      enum ADMIN_DOWN {
+        value 0;
+        description
+          "The BFD session is administratively disabled";
+      }
+      enum DOWN {
+        value 1;
+        description
+          "The BFD session is perceived to be down by the system";
+      }
+      enum INIT {
+        value 2;
+        description
+          "The BFD session is perceived to be initialising by the system";
+      }
+      enum UP {
+        value 3;
+        description
+          "The BFD session is perceived to be up by the system";
+      }
+    }
+    description
+      "The state of the BFD session according to the system referred to by the context of the leaf";
+    reference
+      "RFC5880 - Bidirectional Forwarding Detection, Section 4.1";
+  }
+
+  typedef bfd-diagnostic-code {
+    type enumeration {
+      enum NO_DIAGNOSTIC {
+        value 0;
+        description
+          "No diagnostic code was specified, or the session has not changed state";
+      }
+      enum DETECTION_TIMEOUT {
+        value 1;
+        description
+          "The control detection time expired: no BFD packet was received within the required period";
+      }
+      enum ECHO_FAILED {
+        value 2;
+        description
+          "The BFD echo function failed - echo packets have not been received for the required period of time";
+      }
+      enum NEIGHBOR_SIGNALED_DOWN {
+        value 3;
+        description
+          "The neighbor signaled session down";
+      }
+      enum FORWARDING_RESET {
+        value 4;
+        description
+          "The forwarding plane in the local system was reset
+
+           The remote system cannot rely on the forwarding state of the device
+           specifying this error code.";
+      }
+      enum PATH_DOWN {
+        value 5;
+        description
+          "Signalling outside of BFD specified that the path underlying this session has failed";
+      }
+      enum CONCATENATED_PATH_DOWN {
+        value 6;
+        description
+          "A segment on the path between source and destination has failed
+
+           When a BFD session runs over a series of path segments, this error code indicates that a subsequent path
+           segment (i.e., one in the transmit path between the source and destination of the session) has failed.";
+      }
+      enum ADMIN_DOWN {
+        value 7;
+        description
+          "The BFD session has been administratively disabled by the peer";
+      }
+      enum REVERSE_CONCATENATED_PATH_DOWN {
+        value 8;
+        description
+          "A segment on the reverse path between destination and source has failed
+
+           In the case that a BFD session is running over a series of path segments, this error code indicates that a
+           path segment on the reverse path (i.e., in the transmit direction from the destination to the source of the
+           session) has failed.";
+      }
+    }
+    description
+      "Diagnostic codes defined by BFD. These typically indicate the reason for a change of session state.";
+    reference
+      "RFC5880 - Bidirectional Forwarding Detection, Section 4.1";
+  }
+
+  grouping bfd-top {
+    container bfd {
+      presence "Configure BFD";
+      description
+        "Context to configure BFD parameters and report BFD sessions state";
+      list subinterface {
+        key "id";
+        description
+          "List of subinterface references to associating BFD config and state";
+        leaf id {
+          description
+            "Reference ID for associated subinterface
+             Example: ethernet-2/1.100 (Reference Interface ethernet-2/1, subinterface 100).";
+          type srl_nokia-comm:subinterface-no-mgmt;
+          must "/srl_nokia-if:interface[srl_nokia-if:name=substring-before(current(), '.')]/srl_nokia-if:subinterface[srl_nokia-if:index=substring-after(current(), '.')]" {
+            error-message "Must be an existing subinterface name";
+          }
+        }
+        leaf admin-state {
+          type srl_nokia-comm:admin-state;
+          default "disable";
+          description
+            "Administratively enable or disable BFD for this subinterface";
+        }
+        leaf desired-minimum-transmit-interval {
+          type uint32 {
+            range "10000..100000000";
+          }
+          default "1000000";
+          units "microseconds";
+          description
+            "The minimum interval between transmission of BFD control packets
+
+             This value is advertised to the peer, however the actual interval used is specified
+             by taking the maximum of desired-minimum-transmit-interval and the value of the remote
+             required-minimum-receive interval value.
+             This value is specified as an integer number of microseconds.";
+        }
+        leaf required-minimum-receive {
+          type uint32 {
+            range "10000..100000000";
+          }
+          default "1000000";
+          units "microseconds";
+          description
+            "The minimum interval between received BFD control packets that this system should support
+
+             This value is advertised to the remote peer to indicate the maximum frequency (i.e., minimum
+             inter-packet interval) between BFD control packets that is acceptable to the local system.
+             This value is specified as an integer number of microseconds.";
+        }
+        leaf detection-multiplier {
+          type uint8 {
+            range "3..20";
+          }
+          default "3";
+          description
+            "The number of packets that must be missed to declare this session as down
+
+             The detection interval for the BFD session is calculated by multiplying the
+             value of the negotiated transmission interval by this value.";
+        }
+        leaf minimum-echo-receive-interval {
+          type uint32 {
+            range "0 | 250000..100000000";
+          }
+          default "0";
+          description
+            "The minimum interval between echo packets the local node can receive
+
+             Implicitly enabled echo mode on the associated interface.";
+        }
+      }
+      list network-instance {
+        key "name";
+        config false;
+        description
+          "network-instance context for BFD session.";
+        leaf name {
+          type string;
+          description
+            "A unique name identifying the network instance";
+        }
+        list peer {
+          key "local-discriminator";
+          config false;
+          description
+            "BFD session state related to this peer";
+          leaf local-discriminator {
+            srl_nokia-ext:show-importance "high";
+            type uint32;
+            description
+              "BFD session local discriminator";
+          }
+          leaf oper-state {
+            srl_nokia-ext:show-importance "high";
+            type srl_nokia-comm:oper-state;
+            description
+              "Details the operational state of the session";
+          }
+          leaf ipv6-link-local-interface {
+            type string;
+            description
+              "For IPv6 link local sessions only, indicates the local interface with which the session is associated.";
+          }
+          leaf local-address {
+            srl_nokia-ext:show-importance "high";
+            type srl_nokia-comm:ip-address;
+            description
+              "IP address to be used as source address in BFD packets";
+          }
+          leaf remote-address {
+            srl_nokia-ext:show-importance "high";
+            type srl_nokia-comm:ip-address;
+            description
+              "The remote IP address for the far-end of the BFD session
+
+               This must be the same IP version as the local-address.";
+          }
+          leaf remote-discriminator {
+            srl_nokia-ext:show-importance "high";
+            type uint32;
+            description
+              "A unique identifier used by the remote system to identify this BFD session";
+          }
+          leaf subscribed-protocols {
+            srl_nokia-ext:show-importance "high";
+            type string;
+            description
+              "Indicates the set of protocols that currently use this BFD session for liveliness detection";
+          }
+          leaf session-state {
+            srl_nokia-ext:show-importance "high";
+            type bfd-session-state;
+            description
+              "The state of the BFD session perceived by the local system";
+          }
+          leaf remote-session-state {
+            srl_nokia-ext:show-importance "high";
+            type bfd-session-state;
+            description
+              "The reported state of the BFD session according to the remote system
+
+               This state reflects the last state reported in a BFD control packet.";
+          }
+          leaf last-state-transition {
+            type srl_nokia-comm:date-and-time-delta;
+            description
+              "Timestamp of the last BFD session transition from any state to any state
+               Time of the session in the current state can be calculated from this value.";
+          }
+          leaf last-failure-time {
+            type srl_nokia-comm:date-and-time-delta;
+            description
+              "Timestamp of the last BFD session transition out of the up state to down state";
+          }
+          leaf failure-transitions {
+            type uint64;
+            description
+              "The number of times that the BFD session has transitioned out of the up state";
+          }
+          leaf local-diagnostic-code {
+            srl_nokia-ext:show-importance "high";
+            type bfd-diagnostic-code;
+            description
+              "The local BFD diagnostic code indicating the most recent reason for failure of this BFD session";
+          }
+          leaf remote-diagnostic-code {
+            srl_nokia-ext:show-importance "high";
+            type bfd-diagnostic-code;
+            description
+              "The remote BFD diagnostic code indicating the remote system's reason for failure of the BFD session";
+          }
+          leaf remote-minimum-receive-interval {
+            type uint32;
+            description
+              "The value of the minimum receive interval that was specified by the peer
+
+               This value references the value in the most recent BFD control packet
+               received from the peer.";
+          }
+          leaf remote-control-plane-independent {
+            type boolean;
+            description
+              "Indicates if the remote neighbor has set the control independent flag";
+          }
+          leaf active-transmit-interval {
+            srl_nokia-ext:show-importance "high";
+            type uint32;
+            description
+              "The transmit interval currently being used by this BFD session
+
+               This is the amount of time the local BFD agent will wait between the
+               sending of BFD messages to the remote peer";
+          }
+          leaf active-receive-interval {
+            srl_nokia-ext:show-importance "high";
+            type uint32;
+            description
+              "The receive interval currently being used by this BFD session
+
+               This is the amount of time the BFD state machine expects between
+               receiving BFD messages from the remote peer.";
+          }
+          leaf remote-multiplier {
+            srl_nokia-ext:show-importance "high";
+            type uint8;
+            description
+              "The current number of packets that must be missed to declare the session as down
+
+               The detection interval for the BFD session is calculated by multiplying the
+               value of the negotiated transmission interval by this value.";
+          }
+          container async {
+            srl_nokia-ext:delivery-node-override true;
+            srl_nokia-ext:stream-mode sample=5;
+            presence "State async operational parameters";
+            description
+              "Container for async BFD operational state parameters";
+            leaf last-packet-transmitted {
+              type srl_nokia-comm:date-and-time-delta;
+              description
+                "Timestamp for when the last BFD packet was transmitted for this session";
+            }
+            leaf last-packet-received {
+              type srl_nokia-comm:date-and-time-delta;
+              description
+                "Timestamp for when the last BFD packet was received for this session";
+            }
+            leaf transmitted-packets {
+              srl_nokia-ext:show-importance "high";
+              type srl_nokia-comm:zero-based-counter64;
+              description
+                "Counter for the number of BFD packets transmitted for this session";
+            }
+            leaf received-packets {
+              srl_nokia-ext:show-importance "high";
+              type srl_nokia-comm:zero-based-counter64;
+              description
+                "Counter for the number of BFD packets received for this session";
+            }
+            leaf up-transitions {
+              srl_nokia-ext:delivery-node-override true;
+              srl_nokia-ext:stream-mode on_change;
+              type srl_nokia-comm:zero-based-counter64;
+              description
+                "Counter for the number of UP transitions for this BFD session";
+            }
+            leaf received-errored-packets {
+              type srl_nokia-comm:zero-based-counter64;
+              description
+                "Counter for the number of BFD packets received with BFD level errors";
+            }
+            leaf last-clear {
+              type srl_nokia-comm:date-and-time-delta;
+              description
+                "Timestamp of the last time the session counters were cleared.";
+            }
+          }
+        }
+      }
+      leaf total-bfd-sessions {
+        type srl_nokia-comm:zero-based-counter32;
+        config false;
+        description
+          "Counter for the total number of BFD sessions";
+      }
+      leaf total-unmatched-bfd-packets {
+        type srl_nokia-comm:zero-based-counter64;
+        config false;
+        description
+          "Counter for the total number of BFD packets received not matching a BFD session";
+      }
+    }
+  }
+
+  uses bfd-top;
+}

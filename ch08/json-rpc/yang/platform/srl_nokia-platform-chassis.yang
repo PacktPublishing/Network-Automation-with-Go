@@ -1,0 +1,168 @@
+module srl_nokia-platform-chassis {
+  yang-version 1.1;
+
+  // namespace
+
+  namespace "urn:srl_nokia/platform-chassis";
+  prefix srl_nokia-platform-chassis;
+
+  import srl_nokia-platform {
+    prefix srl-platform;
+  }
+  import srl_nokia-common {
+    prefix srl-comm;
+  }
+  import srl_nokia-extensions {
+    prefix srl-ext;
+  }
+  import srl_nokia-features {
+    prefix srl-feat;
+  }
+
+  description
+    "This module defines configuration and operational state data related to chassis.";
+
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+  typedef watts {
+    type uint32;
+    units "watts";
+  }
+
+  grouping chassis-per-component-power {
+    leaf allocated {
+      if-feature "srl-feat:chassis";
+      type watts;
+      description
+        "Allocated power";
+    }
+    leaf used {
+      type watts;
+      description
+        "Used power";
+    }
+    leaf peak {
+      type watts;
+      description
+        "Peak power used";
+    }
+  }
+
+  grouping chassis-config-top {
+    description
+      "Grouping for chassis configuration.";
+  }
+
+  grouping chassis-state-top {
+    description
+      "Grouping for chassis state.";
+    leaf type {
+      config false;
+      description
+        "The chassis type";
+      srl-ext:show-importance "high";
+      type string;
+    }
+    leaf last-boot-type {
+      config false;
+      description
+        "The type of boot the chassis initialized from
+        
+        This field indicates what type of reboot occurred, whether it be warm, normal, or otherwise.";
+      srl-ext:show-importance "high";
+      type string;
+    }
+    leaf mac-address {
+      config false;
+      description
+        "The chassis MAC address";
+      type srl-comm:mac-address;
+    }
+    leaf slots {
+      config false;
+      description
+        "The number of line card slots supported by the chassis";
+      type uint8;
+    }
+    container power {
+      description
+        "Top-level container for chassis-wide power state";
+      container total {
+        srl-ext:delivery-node-override true;
+        srl-ext:stream-mode sample=5;
+        config false;
+        description
+          "Top-level container for total power usage and capacity";
+        leaf capacity {
+          type watts;
+          description
+            "Total power capacity provided by all power supplies";
+        }
+        uses chassis-per-component-power;
+      }
+      container fan-tray {
+        srl-ext:delivery-node-override true;
+        srl-ext:stream-mode sample=5;
+        config false;
+        if-feature "srl-feat:chassis";
+        description
+          "Top-level container for power usage of fan-trays";
+        uses chassis-per-component-power;
+      }
+      container control {
+        srl-ext:delivery-node-override true;
+        srl-ext:stream-mode sample=5;
+        config false;
+        if-feature "srl-feat:chassis";
+        description
+          "Top-level container for power usage of control modules";
+        uses chassis-per-component-power;
+      }
+      container linecard {
+        srl-ext:delivery-node-override true;
+        srl-ext:stream-mode sample=5;
+        config false;
+        if-feature "srl-feat:chassis";
+        description
+          "Top-level container for power usage of linecard modules";
+        uses chassis-per-component-power;
+      }
+      container fabric {
+        srl-ext:delivery-node-override true;
+        srl-ext:stream-mode sample=5;
+        config false;
+        if-feature "srl-feat:chassis";
+        description
+          "Top-level container for power usage of fabric modules";
+        uses chassis-per-component-power;
+      }
+    }
+    uses srl-platform:component-common-state-top;
+  }
+
+  grouping chassis-top {
+    description
+      "Grouping for chassis configuration and state";
+    container chassis {
+      description
+        "Top-level container for chassis configuration and state";
+      uses chassis-config-top;
+      uses chassis-state-top;
+    }
+  }
+
+  augment "/srl-platform:platform" {
+    uses chassis-top;
+  }
+}

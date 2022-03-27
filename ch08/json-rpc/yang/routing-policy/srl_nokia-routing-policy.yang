@@ -1,0 +1,526 @@
+module srl_nokia-routing-policy {
+
+  yang-version 1.1;
+
+  namespace "urn:srl_nokia/routing-policy";
+
+  prefix "srl_rpol";
+
+  import srl_nokia-common { prefix srl_nokia-comm; }
+  import srl_nokia-extensions { prefix srl_nokia-ext; }
+  import srl_nokia-policy-types { prefix srl_nokia-pol-types; }
+  import srl_nokia-ospf-types {
+    prefix srl_nokia-ospf-types;
+  }
+
+  import srl_nokia-features {     prefix srl_nokia-feat;  }
+
+  description
+    "YANG model for route policies. It supports widely used constructs for managing how routes are imported, exported, and modified across different routing protocols.";
+
+  revision 2021-06-30 {
+    description
+      "SRLinux 21.6.1";
+  }
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+  grouping prefix-top {
+    list prefix {
+      key "ip-prefix mask-length-range";
+      description
+        "List of prefixes in the prefix set";
+      leaf ip-prefix {
+        type srl_nokia-comm:ip-prefix;
+        description
+          "The IPv4 or IPv6 prefix in CIDR notation";
+      }
+      leaf mask-length-range {
+        type string {
+          pattern '([0-9]+\.\.[0-9]+)|exact';
+        }
+        description
+          "The range of prefix lengths to match
+
+          Example: 10.3.192.0/21 through 10.3.192.0/24 would be expressed as prefix: 10.3.192.0/21, mask-length-range: 21..24.
+
+          Example: 10.3.192.0/21 would be expressed as prefix: 10.3.192.0/21,
+          mask-length-range: exact";
+      }
+    }
+  }
+
+  grouping as-path-set-top {
+    list as-path-set {
+      key "name";
+      description "AS Path regular expressions for use in policy entries";
+      leaf name {
+        type srl_nokia-comm:name;
+        description
+          "A name used to identify the AS path regular expression";
+      }
+      leaf expression {
+        type srl_nokia-pol-types:as-path-regexp;
+        description
+          "A regular expression where each AS number is an elemental term";
+      }
+    }
+  }
+
+  grouping prefix-set-top {
+    list prefix-set {
+      key "name";
+      description
+        "List of defined prefix sets";
+
+      leaf name {
+        type srl_nokia-comm:name;
+        description
+          "A name used to identify the prefix set";
+      }
+      uses prefix-top;
+    }
+  }
+
+  grouping community-member-top {
+    description
+      "Members of a community set";
+
+    leaf-list member {
+      srl_nokia-ext:no-globbing;
+      min-elements 1;
+      type union {
+        type srl_nokia-pol-types:bgp-std-community-type;
+        type srl_nokia-pol-types:bgp-std-community-regexp-type;
+        type srl_nokia-pol-types:bgp-std-community-well-known-type;
+        type srl_nokia-pol-types:bgp-large-community-type;
+        type srl_nokia-pol-types:bgp-large-community-regexp-type;
+      }
+      description
+        "A standard BGP community value, regular expression or well-known name or else a large BGP community value or regular expression";
+    }
+  }
+
+  grouping community-set-top {
+    list community-set {
+      key "name";
+      description
+          "List of BGP community sets containing standard and large BGP communities";
+      leaf name {
+        type srl_nokia-comm:name;
+        description
+          "A name used to identify the community set";
+      }
+      uses community-member-top;
+    }
+  }
+
+  grouping action-accept  {
+      description "Common grouping containing policy action accept";
+
+      container bgp {
+          presence "bgp specific actions";
+          
+          container as-path {
+              presence "bgp as-path specific actions";
+              description "Modify AS Path attribute of routes";
+              leaf remove {
+                  description
+                      "Clear the AS path to make it empty.";
+                  type boolean;
+              }
+              leaf-list replace {
+                  type srl_nokia-pol-types:as-number;
+                  ordered-by user;
+                  must "not(../remove)";
+                  description
+                      "Clear the existing AS path and replace it a new AS_SEQUENCE containing the listed AS numbers.";
+              }
+
+              container prepend {
+                  presence "bgp as-path specific actions";
+                  description "Prepend a BGP AS number to the AS Path attribute of routes";
+                  leaf as-number {
+                      type union {
+                          type srl_nokia-pol-types:as-number;
+                          type enumeration {
+                              enum "auto" {value 1;}
+                          }
+                      }
+                      description
+                          "The AS number to prepend to the AS Path attributes
+
+              If 'auto' is specified then the peer's AS number is used in the context of an import policy and the local AS number is used in the context of an export policy.";
+                  }
+                  leaf repeat-n {
+                      type uint8 {
+                          range "1..50";
+                      }
+                      default "1";
+                      description
+                          "The number of repetitions of the prepended AS number";
+                  }
+              }
+          } // container as-path
+
+          container communities {
+              description "Modify BGP communities attached to routes";
+              leaf add {
+                  type leafref {
+                      path "/srl_rpol:routing-policy/srl_rpol:community-set/name";
+                  }
+                  description
+                      "Reference to a community-set name
+
+                       All of the non-regex community members in the referenced community-set are added to the COMMUNTIES and LARGE_COMMUNITIES attributes.";
+              }
+              leaf remove {
+                  type leafref {
+                      path "/srl_rpol:routing-policy/srl_rpol:community-set/name";
+                  }
+                  description
+                      "Reference to a community-set name
+
+                       The communities in the route are compared to all of the community members in the referenced community-set, and all matching communities are removed from the COMMUNITIES and LARGE_COMMUNITIES  attributes.";
+
+              }
+              leaf replace {
+                  type leafref {
+                      path "/srl_rpol:routing-policy/srl_rpol:community-set/name";
+                  }
+                  description
+                      "Reference to a community-set name
+
+                       All of the existing communities are deleted and then all of the non-regex community members in the referenced community-set are encoded in new COMMUNTIES and LARGE_COMMUNITIES attributes.";
+                  must "not(../remove or ../add)";
+              }
+          }
+
+          container local-preference {
+              leaf set {
+                  type uint32;
+                  description
+                      "The new value of LOCAL_PREF to write into the matching BGP routes";
+              }
+          }
+
+          container origin {
+              leaf set {
+                  type enumeration {
+                      enum "igp";
+                      enum "egp";
+                      enum "incomplete";
+                  }
+                  description
+                      "The new value of the ORIGIN attribute to write into the matching BGP routes";
+              }
+          }
+      }
+  }
+
+  grouping common-action-top {
+      description "grouping for policy actions";
+      container reject {
+          presence "Reject routes that do not match any policy entry";
+          description "Reject action";
+          //must "not(../accept or ../next-entry or ../next-policy)";
+          must "not(../accept)";
+      }
+      container accept {
+          presence "Accept routes that do not match any policy entry";
+          description "Accept action";
+          //must "not(../reject or ../next-entry or ../next-policy)";
+          must "not(../reject)";
+          uses action-accept;
+      }
+        container next-entry {
+          presence "match next entry";
+          if-feature srl_nokia-feat:future-21-11;
+          must "not(../reject or ../accept or ../next-policy)";
+          description "next entry action";
+      }
+      container next-policy {
+        presence "match next policy";
+        if-feature srl_nokia-feat:future-21-11;
+        description "next policy action";
+        must "not(../reject or ../accept or ../next-entry)";
+      }
+}
+
+  grouping default-action-top {
+    container default-action {
+      description "Actions for routes that do not match any policy entry";
+      uses common-action-top;
+    } // container default-action
+  } // grouping default-action-top
+
+  grouping match-prefix-set {
+      description
+          "Configuration for prefix-set match criteria";
+      leaf prefix-set {
+          type leafref {
+              path "/srl_rpol:routing-policy/srl_rpol:prefix-set/name";
+          }
+          description "Reference to a prefix set name";
+      }
+  }
+
+  grouping match-bgp-config-top {
+    description
+      "Configuration for BGP-specific policy match criteria";
+    leaf as-path-set {
+      description
+        "Reference to an as-path-set name
+
+        A route meets this condition if it matches the regular expression";
+      type leafref {
+        path "/srl_rpol:routing-policy/srl_rpol:as-path-set/name";
+      }
+    }
+    container as-path-length {
+        presence "number of asn match conditions";
+        description
+            "A BGP route matches this condition if the number of (unique) AS numbers in its AS_PATH matches this value or the range implied by the value+operator.";
+        leaf value {
+            type uint8 {
+                range "0..255";
+            }
+            mandatory true;
+            description
+                "The number of (unique) AS numbers in the AS path";
+        }
+        leaf operator {
+            type srl_nokia-pol-types:comparison-operator-type;
+            default 'eq';
+            description
+            "The comparison operator that applies to the value";
+        }
+        leaf unique {
+            type boolean;
+            default false;
+            description
+                "Count a repeated sequence of the same AS number as just 1 element";
+        }
+    }
+    leaf community-set {
+        description
+            "Reference to a community-set name
+
+             A route meets this condition if has any community value matching a community member in the referenced community-set";
+        type leafref {
+            path "/srl_rpol:routing-policy/srl_rpol:community-set/name";
+        }
+    }
+  }
+  grouping match-protocol-top {
+      description "A routing protocol as a match criterion for the entry";
+      leaf protocol {
+          type identityref {
+              base srl_nokia-comm:ip-route-type;
+          }
+          description "The route type to match";
+      }
+  }
+
+  grouping match-bgp-top {
+    description
+      "Top-level grouping for BGP-specific policy conditions";
+
+    container bgp {
+      presence "bgp specific match conditions";
+      description
+        "Top-level container ";
+      uses match-bgp-config-top;
+      uses match-bgp-evpn;
+    }
+  }
+  
+  grouping match-igp-top {
+
+  container isis {
+      srl_nokia-ext:first-released "20.12.1";
+      description
+        "Configuration for ISIS-specific policy match criteria";
+      leaf level {
+        description "IS-IS route level";
+        type uint8 {
+          range "1..2";
+        }
+        must "../../protocol = 'isis'" {
+          error-message "Protocol must be isis";
+        }
+      }
+      leaf route-type {
+        if-feature srl_nokia-feat:future-21-6;
+        description
+          "An IS-IS IPv4 prefix is external if it is signalled in TLV 130 or TLV135 with RFC 7794 X flag=1. An IS-IS IPv6 prefix is external if the TLV 236/TLV 237 external bit = 1.";
+        type enumeration {
+          enum "internal";
+          enum "external";
+        }
+        must "../../protocol = 'isis'" {
+          error-message "Protocol must be isis";
+        }
+      }
+    }
+
+  container ospf {
+      srl_nokia-ext:first-released "20.12.1";
+      description
+        "Configuration for OSPF-specific policy match criteria";
+      leaf area-id {
+        type srl_nokia-ospf-types:ospf-area-identifier;
+        description
+          "The area identifier as a dotted-quad.";
+        must "../../protocol = 'ospfv2' or ../../protocol = 'ospfv3'" {
+          error-message "Protocol must be OSPF";
+        }
+
+      }
+
+      leaf route-type {
+        description
+          "The OSPF route type.";
+        type identityref {
+          base srl_nokia-pol-types:pol-ospf-path-type;
+        }
+        must "../../protocol = 'ospfv2' or ../../protocol = 'ospfv3'" {
+          error-message "Protocol must be OSPF";
+        }
+      }
+      leaf instance-id {
+        description
+          "OSPFv3 instance identifier";
+        type uint32 {
+          range "0..255";
+        }
+        must "../../protocol = 'ospfv3'" {
+          error-message "Protocol must be OSPFv3";
+        }
+      }
+    }
+  }
+  grouping match-top {
+    description
+      "Top-level grouping for match criteria";
+
+    container match {
+      presence "policy conditions to match on routes ";
+      description
+          "Match conditions of the policy statement";
+
+    leaf family {
+      type srl_nokia-pol-types:bgp-family-type;
+      description
+        "The name of an address family
+
+        A route meets this condition if the prefix belongs to the indicated address family.";
+    }
+
+      uses match-prefix-set;
+      uses match-bgp-top;
+      uses match-protocol-top;
+      uses match-igp-top;
+    }
+
+  }
+
+  grouping action-top {
+      description
+        "Top-level grouping for policy actions";
+      container action {
+          description "Policy actions";
+          uses common-action-top;
+      }
+  }
+
+  grouping match-bgp-evpn {
+    container evpn {
+      //srl_nokia-ext:first-released "20.12.1";
+      description
+        "Container for match conditions that are specific to BGP EVPN routes.";
+        leaf-list route-type {
+        type uint8 {
+          range "1..5";
+        }
+        max-elements 1;
+        description
+        "An EVPN route meets this condition if the route-type field in the NLRI is one of the values provided in this list.";
+      }
+    }
+  }
+
+  grouping statement-top {
+    description
+      "Top-level grouping for the policy statements list";
+
+      list statement {
+        key "sequence-id";
+        // requires a unique id for lists
+
+        description
+          "Policy statements group conditions and actions within a policy definition.  They are evaluated in the order of their sequence id.";
+
+        leaf sequence-id {
+          type uint32 {
+              range "1..4294967295";
+          }
+          description
+            "Number indicating when this policy statement should be evaluated relative to other policy statements
+
+            Lower numbered statements are evaluated before higher numbered statements.";
+        }
+
+        uses match-top;
+        uses action-top;
+      }
+  }
+
+  grouping policy-top {
+      description
+          "Top-level grouping for the policy list";
+
+      list policy {
+          key "name";
+          description
+              "List of policy definitions, keyed by unique name
+               These policy definitions are expected to be referenced (by name) in policy in import-policy and/or export-policy statements.";
+
+          leaf name {
+              type srl_nokia-comm:name;
+            description
+                "A name used to identify the policy";
+          }
+          uses default-action-top;
+          uses statement-top;
+      }
+  }
+
+  grouping routing-policy-top {
+      description
+          "Top level container for route policies";
+
+      container routing-policy {
+          presence "Configure Routing Policy";
+          description
+              "Top-level container for all routing policy configuration";
+
+          uses as-path-set-top;
+          uses prefix-set-top;
+          uses community-set-top;
+          uses policy-top;
+      }
+  }
+
+  uses routing-policy-top;
+}

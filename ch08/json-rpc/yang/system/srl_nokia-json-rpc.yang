@@ -1,0 +1,228 @@
+module srl_nokia-json-rpc {
+  yang-version 1.1;
+  namespace "urn:srl_nokia/json-rpc";
+  prefix srl-json-rpc;
+
+  import srl_nokia-common {
+    prefix srl-comm;
+  }
+  import srl_nokia-system {
+    prefix srl-system;
+  }
+  import srl_nokia-network-instance {
+    prefix srl-netinst;
+  }
+  import srl_nokia-tls {
+    prefix srl-tls;
+  }
+  import srl_nokia-extensions {
+    prefix srl-ext;
+  }
+
+  description
+    "This module defines configuration and operational state data related to the JSON RPC server.";
+
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+  grouping json-rpc-oper {
+    leaf oper-state {
+      config false;
+      srl-ext:show-importance "high";
+      type srl-comm:oper-state;
+      description
+        "Details if the JSON RPC server is operationally available";
+    }
+  }
+
+  grouping json-rpc-common {
+    uses json-rpc-oper;
+    leaf-list source-address {
+      type srl-comm:ip-address;
+      srl-ext:show-importance "low";
+      default "::";
+      description
+        "List of IP addresses the JSON RPC server will listen on within the network instance";
+    }
+    leaf use-authentication {
+      type boolean;
+      srl-ext:show-importance "high";
+      default "true";
+      description
+        "Enable or disable the use of username/password authentication for every JSON RPC request";
+    }
+    leaf session-limit {
+      type uint16 {
+        range "1..100";
+      }
+      srl-ext:show-importance "low";
+      default "10";
+      description
+        "The number of concurrent requests the server will allow
+         If a request comes in while this limit is reached, the request will block until another request is finished.";
+    }
+  }
+
+  grouping json-rpc-socket {
+    container unix-socket {
+      description
+        "Top-level container for configuration and state related to unix sockets";
+      leaf admin-state {
+        type srl-comm:admin-state;
+        srl-ext:show-importance "high";
+        default "disable";
+        description
+          "Administratively enable or disable the JSON RPC server via unix socket
+           This requires the JSON RPC server to be globally enabled";
+      }
+      uses json-rpc-oper;
+      leaf use-authentication {
+        type boolean;
+        srl-ext:show-importance "high";
+        default "true";
+        description
+          "Enable or disable the use of username/password authentication for every JSON RPC request";
+      }
+      leaf socket-path {
+        config false;
+        type string;
+        srl-ext:show-importance "high";
+        description
+          "Path to the unix socket used by JSON RPC";
+      }
+      leaf tls-profile {
+        type leafref {
+          path "/srl-system:system/srl-tls:tls/srl-tls:server-profile/srl-tls:name";
+        }
+        srl-ext:show-importance "high";
+        description
+          "Reference to the TLS profile to use on the JSON RPC unix socket server
+
+          If none is specified, then TLS is not used.";
+      }
+    }
+  }
+
+  grouping json-rpc-traceoptions {
+    description
+      "Top-level grouping for JSON RPC server trace options";
+    leaf-list trace-options {
+      description
+        "JSON RPC trace options";
+      type enumeration {
+        enum request;
+        enum response;
+        enum common;
+      }
+    }
+  }
+
+  grouping json-rpc-top {
+    container json-rpc-server {
+      description
+        "Configures the JSON RPC access API";
+      leaf admin-state {
+        type srl-comm:admin-state;
+        srl-ext:show-importance "high";
+        default "disable";
+        description
+          "Globally enable or disable the JSON RPC server
+           Disabling this will disable all JSON RPC servers.";
+      }
+      leaf commit-confirmed-timeout {
+        srl-ext:first-released "20.6.1";
+        type uint32 {
+          range "0..86400";
+        }
+        default "0";
+        srl-ext:show-importance "low";
+        units "seconds";
+        description
+          "Number of seconds to wait for confirmation. A value of 0 means commit confirmed is not used";
+      }
+      list network-instance {
+        description
+          "List of network instances to run the JSON RPC server in";
+        key "name";
+        leaf name {
+        description
+          "Reference to a configured network-instance";
+          type leafref {
+            path "/srl-netinst:network-instance/srl-netinst:name";
+          }
+          must 'not(/srl-netinst:network-instance[srl-netinst:name=current()]/srl-netinst:type = "srl-netinst:mac-vrf")' {
+            error-message "JSON RPC server cannot be started in a network-instance of type 'mac-vrf'";
+          }
+        }
+        container http {
+        description
+          "Top-level container for the JSON RPC HTTP server";
+          presence "Configure JSON RPC HTTP server";
+          leaf admin-state {
+            type srl-comm:admin-state;
+            srl-ext:show-importance "high";
+            default "disable";
+            description
+              "Administratively enable or disable the HTTP JSON RPC server
+               This requires the JSON RPC server to be globally enabled";
+          }
+          uses json-rpc-common;
+          leaf port {
+            type srl-comm:port-number;
+            srl-ext:show-importance "high";
+            default "80";
+            description
+              "The port the HTTP JSON RPC server will listen on for incoming connections";
+          }
+        }
+        container https {
+        description
+          "Top-level container for the JSON-RPC HTTPS server";
+          presence "Configure JSON RPC HTTPS server";
+          leaf admin-state {
+            type srl-comm:admin-state;
+            srl-ext:show-importance "high";
+            default "disable";
+            description
+              "Administratively enable or disable the HTTPS JSON RPC server
+               This requires the JSON RPC server to be globally enabled";
+          }
+          uses json-rpc-common;
+          leaf port {
+            type srl-comm:port-number;
+            srl-ext:show-importance "high";
+            default "443";
+            description
+              "Port the HTTPS JSON RPC server will listen on for incoming connections";
+          }
+          leaf tls-profile {
+            mandatory true;
+            type leafref {
+              path "/srl-system:system/srl-tls:tls/srl-tls:server-profile/srl-tls:name";
+            }
+            srl-ext:show-importance "high";
+            description
+              "Reference to the TLS profile to use on the HTTP JSON RPC server";
+          }
+        }
+      }
+      uses json-rpc-traceoptions;
+      uses json-rpc-socket;
+    }
+  }
+
+  augment "/srl-system:system" {
+    srl-ext:first-released "19.11.1";
+    uses json-rpc-top;
+  }
+}

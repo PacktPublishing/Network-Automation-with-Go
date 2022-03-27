@@ -1,0 +1,123 @@
+module srl_nokia-platform-psu {
+  yang-version 1.1;
+
+  // namespace
+
+  namespace "urn:srl_nokia/platform-psu";
+  prefix srl_nokia-platform-psu;
+
+  import srl_nokia-platform {
+    prefix srl-platform;
+  }
+  import srl_nokia-extensions {
+    prefix srl-ext;
+  }
+
+  description
+    "This module defines configuration and operational state data related to power supplies.";
+
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+  grouping psu-state-top {
+    description
+      "Grouping for power supply module state";
+    leaf id {
+      type uint8 {
+        range "1..255";
+      }
+      description
+        "Numeric identifier for the power supply module";
+    }
+    leaf type {
+      type string;
+      srl-ext:show-importance "high";
+      description
+        "Power-supply type, as translated from the components EEPROM";
+    }
+    leaf capacity {
+      type uint32;
+      srl-ext:show-importance "low";
+      description
+        "The total capacity the power supply module can provide";
+      units "watts";
+    }
+    container input {
+      srl-ext:delivery-node-override true;
+      srl-ext:stream-mode sample=5;
+      description
+        "Top-level container for power-supply input state";
+      leaf voltage {
+        description
+          "Current input voltage for the power-supply";
+        units "volts";
+        type decimal64 {
+          fraction-digits 2;
+        }
+      }
+      leaf current {
+        description
+          "Current input amperage for the power-supply";
+        units "amps";
+        type decimal64 {
+          fraction-digits 2;
+        }
+      }
+      leaf power {
+        description
+          "Current input power for the power-supply";
+        units "watts";
+        type decimal64 {
+          fraction-digits 2;
+        }
+      }
+    }
+    leaf oper-reason {
+      description
+        "Indicates the reason for the current state of the component";
+      type enumeration {
+        enum no-input/fault {
+          description
+            "No power input, or other hardware fault detected";
+        }
+        enum eeprom-invalid {
+          description
+            "EEPROM of this power supply is either invalid or corrupt";
+        }
+        enum airflow-mismatch {
+          description
+            "The detected airflow of this power supply does not match the system-calculated airflow direction
+            
+            The logic for determining the system-calculated direction is:
+            - Majority wins between present fan trays
+            - In the case where there are equal F2B or B2F fan-trays, PSUs are used as a tie break (PSUs only are counted in the event a tie breaker is needed)
+            - F2B wins if no tie break can be used";
+        }
+      }
+    }
+  }
+
+  grouping psu-top {
+    description
+      "Grouping for power supply module configuration and state";
+    list power-supply {
+      config false;
+      key "id";
+      description
+        "Top-level container for power supply module configuration and state";
+      uses psu-state-top;
+      uses srl-platform:component-common-state-top;
+      uses srl-platform:component-temperature-no-thresh-state-top;
+    }
+  }
+
+  augment "/srl-platform:platform" {
+    uses psu-top;
+  }
+}

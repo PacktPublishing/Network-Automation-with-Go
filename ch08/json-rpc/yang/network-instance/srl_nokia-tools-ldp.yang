@@ -1,0 +1,35 @@
+module srl_nokia-tools-ldp {
+  yang-version 1.1;
+  namespace "urn:srl_nokia/tools-ldp";
+  prefix srl_nokia-tools-ldp;
+
+  import srl_nokia-tools-network-instance { 
+    prefix srl_nokia-tools-netinst; 
+  }
+  import srl_nokia-features {
+    prefix srl_nokia-feat;
+  }
+
+  description
+    "Model for LDP operational commands";
+
+  revision 2021-06-30 {
+    description
+      "SRLinux 21.6.1";
+  }
+
+  grouping ldp-tools-top {
+    container ldp {
+      if-feature srl_nokia-feat:ldp;
+      presence "Configure the LDP protocol";
+      description
+        "Operational tools commands for LDP.";
+      container reset-overload {
+        presence "Reset the overload state of LDP";
+      }
+    }
+  }
+  augment "/srl_nokia-tools-netinst:network-instance/srl_nokia-tools-netinst:protocols" {
+      uses ldp-tools-top;
+  }
+}

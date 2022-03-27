@@ -1,0 +1,88 @@
+module srl_nokia-system-info {
+  yang-version 1.1;
+
+  // namespace
+
+  namespace "urn:srl_nokia/system-info";
+  prefix srl_nokia-system-info;
+
+  import srl_nokia-system {
+    prefix srl-system;
+  }
+  import srl_nokia-common {
+    prefix srl-comm;
+  }
+
+  description
+    "This module defines configuration and state related to miscellaneous system information";
+
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+  grouping information-top {
+    container information {
+      description
+        "Top-level container for system information configuration and state";
+      leaf contact {
+        type string;
+        description
+          "The system contact
+
+           This field represents contact information for the person or group that maintains the system. This field is exposed via SNMP at the sysContact OID.";
+      }
+      leaf location {
+        type string;
+        description
+          "The system location
+
+           This field represents the location of the system, and is commonly used by inventory management systems to group elements together. This field is exposed via SNMP at the sysLocation OID.";
+      }
+      leaf description {
+        type string;
+        description
+          "The system description
+
+           This field is system generated, and is a combination of the system host name, software version, kernel version, and build date. The template for this field is: SRLinux-<version> <hostname> <kernel> <build date>. This field is exposed via SNMP at the sysDescr OID.";
+        config false;
+      }
+      leaf current-datetime {
+        type srl-comm:date-and-time;
+        description
+          "The current system date and time";
+        config false;
+      }
+      leaf last-booted {
+        type srl-comm:date-and-time-delta;
+        description
+          "The date and time the system was last booted";
+        config false;
+      }
+      leaf version {
+        type string;
+        description
+          "The system version
+
+           This field represents the version of the management server";
+        config false;
+      }
+    }
+  }
+
+  grouping sysinfo-top {
+    uses information-top;
+  }
+
+  augment "/srl-system:system" {
+    uses sysinfo-top;
+  }
+}

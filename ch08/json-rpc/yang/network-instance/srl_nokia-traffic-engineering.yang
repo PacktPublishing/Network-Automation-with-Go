@@ -1,0 +1,275 @@
+module srl_nokia-traffic-engineering {
+
+  yang-version 1.1;
+
+  // namespace
+  namespace "urn:srl_nokia/te";
+
+  prefix "srl_nokia-te";
+
+  import srl_nokia-common { prefix srl_nokia-comm; }
+  import srl_nokia-network-instance { prefix srl_nokia-netinst; }
+  import srl_nokia-features { prefix srl-feat; }
+
+  description
+    "Configuration and state related to the use and propagation of TE information.";
+
+  revision 2021-06-30 {
+    description
+      "SRLinux 21.6.1";
+  }
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+
+  typedef srlg-flooding-type {
+    type enumeration {
+      enum flooded {
+        description
+          "SRLG is flooded in the IGP";
+      }
+      enum static {
+        description
+          "SRLG is not flooded, the members are statically configured";
+      }
+    }
+    description
+      "Enumerated bype for specifying how the SRLG is flooded";
+  }
+
+  grouping igp-instance-te-advertisement {
+    container traffic-engineering {
+      description
+        "Container with options for controlling the link-state advertisement of the TE properties of this network instance's TE interfaces";
+      leaf advertisement {
+        description
+          "A setting of false means that no TE-related TLVs and subTLVs should be added to LSAs or LSPs originated by this IGP instance.
+          A setting of true means that TE-related TLVs and subTLVs should be added to LSAs or LSPs originated by this IGP instance.";
+        type boolean;
+        default "false";
+      }
+      must "(../../../../srl_nokia-netinst:type = 'srl_nokia-netinst:default') or (./advertisement = false())" {
+        error-message "traffic-engineering is only allowed on network-instance of type default";
+      }
+      leaf legacy-link-attribute-advertisement {
+        description
+          "The advertisement mode for TE link attributes.
+
+          A setting of true means that TE properties should be advertised in legacy mode as defined in RFC 8919 and RFC 8920.";
+        type boolean;
+        default "true";
+      }
+    }
+  }
+
+  grouping tedb-bgp-ls {
+    container bgp-ls {
+      presence "Install topology and TE information related to this protocol instance into the TE database in a format that supports export as BGP-LS routes.";
+      description
+        "When present, topology and TE information related to this protocol instance is installed into the TE database in a format that supports export as BGP-LS routes";
+      leaf bgp-ls-identifier {
+        description
+          "BGP-LS identifier value that is sent in the BGP-LS NLRI";
+        type uint32;
+      }
+      leaf igp-identifier {
+        description
+          "Unique identifier of the IGP instance that is sent in the BGP-LS NLRI";
+        type uint64 {
+          range "0..18446744073709551615";
+        }
+      }
+    }
+  }
+
+  grouping direct-tedb {
+    container te-database-install {
+      presence "Install local topology and TE information into the TE database.";
+      description
+        "When present, local topology and TE information is installed into the TE database";
+      must "(../../../srl_nokia-netinst:type = 'srl_nokia-netinst:default')" {
+        error-message "traffic-engineering is only allowed on network-instance of type default";
+      }
+      uses tedb-bgp-ls;
+    }
+  }
+
+  grouping protocol-instance-tedb {
+    container te-database-install {
+      presence "Install topology and TE information related to this protocol instance into the TE database.";
+      description
+        "When present, topology and TE information related to this protocol instance is installed into the TE database";
+      must "(../../../../srl_nokia-netinst:type = 'srl_nokia-netinst:default')" {
+        error-message "traffic-engineering is only allowed on network-instance of type default";
+      }
+      uses tedb-bgp-ls;
+    }
+  }
+
+  grouping igp-area-level-tedb {
+    leaf bgp-ls-exclude {
+      description
+        "When set to true, topology and TE information related to this area or level should nkot be imported into the TE database in a format that supports export as BGP-LS routes";
+      type boolean;
+      must ". = false() or (. = true() and ../../te-database-install/bgp-ls)";
+      default false;
+    }
+  }
+
+  grouping net-instance-te {
+    container traffic-engineering {
+      presence "Enable traffic engineering in the network instance.";
+      must "../srl_nokia-netinst:type = 'srl_nokia-netinst:default'";
+      description
+        "Container with traffic engineering options for the network-instance";
+      leaf autonomous-system {
+        description
+          "The autonomous system number of the network-instance, for protocols and pseudo-protocols that do not have their own configuration of AS number.";
+        type srl_nokia-comm:as-number;
+      }
+      leaf ipv4-te-router-id {
+        description
+          "A routable IPv4 address to identify the router uniquely in a TE domain.";
+        type srl_nokia-comm:ipv4-address;
+        //TODO: need a new type that restricts input to a routable IPv4 address
+      }
+      leaf ipv6-te-router-id {
+        description
+          "A routable IPv6 address to identify the router uniquely in a TE domain.";
+        type srl_nokia-comm:ipv6-address;
+        //TODO: need a new type that restricts input to a routable IPv6 address
+      }
+      container admin-groups {
+        description
+          "Container for configuring admin groups";
+        list group {
+          description
+            "List of admin groups defined for this network instance.";
+          key name;
+          leaf name {
+            description
+              "The name of the admin group";
+            type srl_nokia-comm:name;
+          }
+          // leaf application-name
+          leaf bit-position {
+            mandatory "true";
+            type uint32 {
+              range "0..31";
+            }
+            description
+              "The bit-position value for the admin-group.
+
+              The value for the admin group is an integer that represents one of the bit positions in the admin-group bitmask.";
+          }
+        }
+      }
+      container shared-risk-link-groups {
+        description
+          "Container for configuring SRLGs";
+        list group {
+          description
+            "List of shared risk link groups defined for this network instance.";
+          key name;
+          leaf name {
+            description
+              "The name of the shared risk link group";
+            type srl_nokia-comm:name;
+          }
+          // leaf application-name
+          leaf value {
+            mandatory "true";
+            type uint32;
+            description
+              "Group ID for the SRLG";
+          }
+          leaf cost {
+            type uint32;
+            description
+              "The cost of the SRLG to the computation algorithm";
+          }
+          /*
+          leaf flooding-type {
+            type srlg-flooding-type;
+            default flooded;
+            description
+              "The type of SRLG, either flooded in the IGP or statically configured";
+          }
+          */
+          list static-member {
+            description
+              "Static SRLG members";
+            key from-address;
+            leaf from-address {
+              type srl_nokia-comm:ip-address;
+              description
+                "IP address of the a-side of the SRLG link";
+            }
+            leaf to-address {
+              type srl_nokia-comm:ip-address;
+              description
+                "IP address of the z-side of the SRLG link";
+            }
+          }
+        }
+      }
+      list interface {
+        description
+          "List of routed subinterfaces that have associated TE information";
+        key "interface-name";
+        leaf interface-name {
+          type leafref {
+            path "../../../srl_nokia-netinst:interface/srl_nokia-netinst:name";
+          }
+          description
+            "Name of a subinterface that is already bound to this network-instance that should have TE information associated with it";
+        }
+        // leaf ipv4-interface-address
+        // leaf ipv4-neighbor-address
+        // leaf ipv6-interface-address
+        // leaf ipv6-neighbor-address
+        leaf-list admin-group {
+          description
+            "The list of admin-groups generically associated with the interface (not application specific)";
+          type leafref {
+            path "../../admin-groups/group/name";
+          }
+        }
+        container delay {
+          description
+            "Container with options for assigning a TE delay value to the interface (not application specific)";
+          leaf static {
+            description
+              "A statically configured delay value";
+            type uint32;
+            units "microseconds";
+          }
+        }
+        leaf-list srlg-membership {
+          description
+            "The list of srlgs generically associated with the interface (not application specific)";
+          type leafref {
+            path "../../shared-risk-link-groups/group/name";
+          }
+        }
+        leaf te-metric {
+          description
+            "The TE metric associated with the interface (not application specific)";
+          type uint32 {
+            range "1..16777215";
+          }
+        }
+        // application-specific
+      }
+    }
+  }
+  augment "/srl_nokia-netinst:network-instance" {
+    if-feature srl-feat:traffic-engineering;
+    uses net-instance-te;
+  }
+  augment "/srl_nokia-netinst:network-instance/srl_nokia-netinst:protocols/srl_nokia-netinst:directly-connected" {
+    if-feature srl-feat:traffic-engineering;
+    uses direct-tedb;
+  }
+}

@@ -1,0 +1,61 @@
+module srl_nokia-system-network-instance {
+
+  yang-version 1.1;
+
+  namespace "urn:srl_nokia/system-network-instance";
+  prefix "srl_nokia-system-netinst";
+
+  import srl_nokia-common {
+      prefix srl_nokia-comm;
+  }
+  import srl_nokia-bgp-vpn {
+      prefix srl_nokia-bgp-vpn;
+  }
+  import srl_nokia-rib-bgp {
+      prefix srl_nokia-rib-bgp-routes;
+  }
+  import srl_nokia-interfaces {
+    prefix srl_nokia-if;
+  }
+  import srl_nokia-extensions {
+    prefix srl_nokia-ext;
+  }
+  import srl_nokia-features {
+    prefix srl_nokia-feat;
+  }
+  import srl_nokia-system {
+    prefix srl_nokia-system;
+  }
+
+  description
+    "This yang file models configuration and state of the system network-instance.";
+
+  revision 2021-06-30 {
+    description
+      "SRLinux 21.6.1";
+  }
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+
+  grouping system-network-instance-top {
+    description
+      "Top-level grouping containing the system network-instance configuration and state.";
+    container network-instance {
+      presence "Configure the system network-instance.";
+      container protocols {
+        description
+          "The routing protocols that are enabled for this
+           network-instance.";
+        container evpn {
+          if-feature "srl_nokia-feat:evpn";
+          presence "System network-instance evpn configuration and state.";
+        }
+      }
+    }
+  }
+  augment "/srl_nokia-system:system" {
+    uses system-network-instance-top;
+  }
+}

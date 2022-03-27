@@ -1,0 +1,1024 @@
+module srl_nokia-packet-match-types {
+  yang-version 1.1;
+
+  // namespace
+  namespace "urn:srl_nokia/packet-match-types";
+
+  prefix "srl_nokia-pkt-match-types";
+  organization "Nokia";
+
+  // import some basic types
+
+  description
+    "This module defines common types for use in models requiring
+    data definitions related to packet matches.";
+
+  // extension statements
+
+  // feature statements
+
+  // identity statements
+
+  // typedef statements
+
+  /*
+   * Typedefs
+   */
+
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+  typedef operator {
+    type enumeration {
+      enum le {
+        description
+          "Less than or equal.";
+      }
+      enum ge {
+        description
+          "Greater than or equal.";
+      }
+      enum eq {
+        description
+          "Equal to.";
+      }
+    }
+    description
+      "The source and destination port range definitions
+       can be further qualified using an operator. An
+       operator is needed only if lower-port is specified
+       and upper-port is not specified. The operator
+       therefore further qualifies lower-port only.";
+  }
+
+  typedef ip-protocol-type {
+    type union {
+      type uint8 {
+        range 0..255;
+      }
+      type enumeration {
+        enum "ipv6-hop" {
+          value "0";
+          description "IPv6 hop-by-hop option";
+        }
+        enum "icmp" {
+          value "1";
+          description "Internet Control Message Protocol";
+        }
+        enum "igmp" {
+          value "2";
+          description "Internet Group Management Protocol";
+        }
+        enum "ggp" {
+          value "3";
+          description "Gateway-to-Gateway Protocol";
+          reference "RFC823";
+        }
+        enum "ipv4" {
+          value "4";
+          description "IPv4 encapsulation";
+          reference "RFC2003";
+        }
+        enum "st" {
+          value "5";
+          description "Stream Protocol";
+          reference "RFC1190";
+        }
+        enum "tcp" {
+          value "6";
+          description "Transmission Control Protocol";
+          reference "RFC793";
+        }
+        enum "egp" {
+          value "8";
+          description "Exterior Gateway Protocol";
+          reference "RFC888";
+        }
+        enum "igp" {
+          value "9";
+          description "Interior Gateway Protocol";
+        }
+        enum "udp" {
+          value "17";
+          description "User Datagram Protocol";
+          reference "RFC768";
+        }
+        enum "ipv6" {
+          value "41";
+          description "IPv6 encapsulation";
+          reference "RFC2473";
+        }
+        enum "idrp" {
+          value "45";
+          description "Inter-Domain Routing Protocol";
+        }
+        enum "rsvp" {
+          value "46";
+          description "Resource Reservation Protocol";
+          reference "RFC2205";
+        }
+        enum "gre" {
+          value "47";
+          description "Generic Routing Encapsulation";
+          reference "RFC2784";
+        }
+        enum "esp" {
+          value "50";
+          description "IPSec Encapsulating Security Payload";
+          reference "RFC4303";
+        }
+        enum "ah" {
+          value "51";
+          description "IPSec Authentication Header";
+          reference "RFC4302";
+        }
+        enum "icmp6" {
+          value "58";
+          description "IPSec Authentication Header";
+          reference "RFC8200";
+        }
+        enum "no-next-hdr" {
+          value "59";
+          description "No Next Header for IPv6";
+          reference "RFC8200";
+        }
+        enum "ipv6-dest-opts" {
+          value "60";
+          description "Destination Options for IPv6";
+          reference "RFC8200";
+        }
+        enum "eigrp" {
+          value "88";
+          description "Cisco EIGRP";
+          reference "RFC7868";
+        }
+        enum "pim" {
+          value "103";
+          description "Protocol Independent Multicast";
+          reference "RFC7761";
+        }
+        enum "vrrp" {
+          value "112";
+          description "Virtual Router Redundancy Protocol";
+          reference "RFC5798";
+        }
+        enum "l2tp" {
+          value "115";
+          description "Layer Two Tunneling Protocol";
+          reference "RFC3931";
+        }
+        enum "sctp" {
+          value "132";
+          description "Stream Control Transmission Protocol";
+        }
+        enum "mpls-in-ip" {
+          value "137";
+          description "MPLS Encapsulation inside IP";
+        }
+        enum "rohc" {
+          value "142";
+          description "Robust Header Compression";
+          reference "RFC5858";
+        }
+      }
+    }
+    description
+      "The IP protocol number or next-header value.";
+  }
+
+  typedef l4-port-type {
+    type union {
+      type uint16 {
+        range 0..65535;
+      }
+      type enumeration {
+        enum "acap" {
+            value "674";
+            description "Application Configuration Access Protocol";
+        }
+        enum "afp-tcp" {
+            value "548";
+            description "Apple Filing Protocol over TCP";
+        }
+        enum "arns" {
+            value "384";
+            description "A Remote Network Server System";
+        }
+        enum "asf-rmcp" {
+            value "623";
+            description "ASF Remote Management and Control Protocol & IPMI Remote Management Protocol";
+        }
+        enum "ashare" {
+            value "311";
+            description "AppleShare IP Web Administration";
+        }
+        enum "atalk-rm" {
+            value "201";
+            description "AppleTalk Routing Maintenance";
+        }
+        enum "aurp" {
+            value "387";
+            description "AppleTalk Update-Based Routing Protocol";
+        }
+        enum "auth" {
+            value "113";
+            description "Authentication Service";
+        }
+        enum "bfd" {
+            value "3784";
+            description "Bidirectional Forwarding Detection Single Hop";
+        }
+        enum "bfd-echo" {
+            value "3785";
+            description "BFD Echo";
+        }
+        enum "bftp" {
+            value "152";
+            description "Background File Transfer Program";
+        }
+        enum "bgmp" {
+            value "264";
+            description "Border Gateway Multicast Protocol";
+        }
+        enum "bgp" {
+            value "179";
+            description "Border Gateway Protocol";
+        }
+        enum "bootpc" {
+            value "68";
+            description "Bootstrap Protocol (BOOTP) Client and DHCP Client";
+        }
+        enum "bootps" {
+            value "67";
+            description "Bootstrap Protocol (BOOTP) Server and DHCP Server";
+        }
+        enum "ccso-ns" {
+            value "105";
+            description "CCSO Nameserver";
+        }
+        enum "chargen" {
+            value "19";
+            description "Character Generator Protocol (CHARGEN)";
+        }
+        enum "cisco-tdp" {
+            value "711";
+            description "Cisco Tag Distribution Protocol";
+        }
+        enum "citadel" {
+            value "504";
+            description "Citadel";
+        }
+        enum "clearcase" {
+            value "371";
+            description "ClearCase albd";
+        }
+        enum "commerce" {
+            value "542";
+            description "Commerce Applications";
+        }
+        enum "courier" {
+            value "530";
+            description "Remote Procedure Call";
+        }
+        enum "daytime" {
+            value "13";
+            description "Daytime Protocol";
+        }
+        enum "dhcpv6-client" {
+            value "546";
+            description "DHCPv6 Client";
+        }
+        enum "dhcpv6-server" {
+            value "547";
+            description "DHCPv6 Server";
+        }
+        enum "dhcp-failover" {
+            value "847";
+            description "DHCP Failover Protocol";
+        }
+        enum "dicom" {
+            value "104";
+            description "Digital Imaging and Communications in Medicine";
+        }
+        enum "discard" {
+            value "9";
+            description "Discard Protocol. Also Wake-on-LAN.";
+        }
+        enum "dnsix" {
+            value "195";
+            description "DNSIX security protocol auditing";
+        }
+        enum "domain" {
+            value "53";
+            description "Domain Name System";
+        }
+        enum "dsp" {
+            value "33";
+            description "Display Support Protocol";
+        }
+        enum "echo" {
+            value "7";
+            description "Echo Protocol";
+        }
+        enum "epp" {
+            value "700";
+            description "Extensible Provisioning Protocol";
+        }
+        enum "esro" {
+            value "259";
+            description "Efficient Short Remote Operations (ESRO)";
+        }
+        enum "exec" {
+            value "512";
+            description "Remote Process Execution (Rexec)";
+        }
+        enum "finger" {
+            value "79";
+            description "Finger protocol";
+        }
+        enum "ftp" {
+            value "21";
+            description "File Transfer Protocol control";
+        }
+        enum "ftp-data" {
+            value "20";
+            description "File Transfer Protocol data";
+        }
+        enum "ftps" {
+            value "990";
+            description "FTPS (FTP over SSL/TLS) control";
+        }
+        enum "ftps-data" {
+            value "989";
+            description "FTPS (FTP over SSL/TLS) data";
+        }
+        enum "godi" {
+            value "848";
+            description "Group Domain Of Interpretation (GDOI) protocol";
+        }
+        enum "gopher" {
+            value "70";
+            description "Gopher protocol";
+        }
+        enum "gtp-c" {
+            value "2123";
+            description "GTP control messages (GTP-C)";
+        }
+        enum "gtp-prime" {
+            value "3386";
+            description "GTP prime CDR logging protocol";
+        }
+        enum "gtp-u" {
+            value "2152";
+            description "GTP user data messages (GTP-U)";
+        }
+        enum "ha-cluster" {
+            value "694";
+            description "Linux-HA high-availability heartbeat";
+        }
+        enum "hostname" {
+            value "101";
+            description "NIC hostname server";
+        }
+        enum "hp-alarm-mgr" {
+            value "383";
+            description "HP data alarm manager";
+        }
+        enum "http" {
+            value "80";
+            description "Hypertext Transfer Protocol";
+        }
+        enum "http-alt" {
+            value "591";
+            description "FileMaker Web Sharing (HTTP Alternate)";
+        }
+        enum "http-mgmt" {
+            value "280";
+            description "http-mgmt";
+        }
+        enum "http-rpc" {
+            value "593";
+            description "Remote procedure call over Hypertext Transfer Protocol";
+        }
+        enum "https" {
+            value "443";
+            description "Hypertext Transfer Protocol over TLS/SSL";
+        }
+        enum "ieee-mms-ssl" {
+            value "695";
+            description "IEEE Media Management System over SSL";
+        }
+        enum "imap" {
+            value "143";
+            description "Internet Message Access Protocol (IMAP)";
+        }
+        enum "imap3" {
+            value "220";
+            description "Internet Message Access Protocol (IMAP), version 3";
+        }
+        enum "imaps" {
+            value "993";
+            description "Internet Message Access Protocol over TLS/SSL";
+        }
+        enum "ipp" {
+            value "631";
+            description "Internet Printing Protocol";
+        }
+        enum "ipsec" {
+            value "1293";
+            description "Internet Protocol Security (IPSec)";
+        }
+        enum "ipx" {
+            value "213";
+            description "Internetwork Packet Exchange (IPX)";
+        }
+        enum "irc" {
+            value "194";
+            description "Internet Relay Chat (IRC)";
+        }
+        enum "iris-beep" {
+          value "702";
+          description "IRIS (Internet Registry Information Service) over BEEP";
+        }
+        enum "isakmp" {
+          value "500";
+          description "Internet Security Association and Key Management Protocol (ISAKMP) / Internet Key Exchange (IKE)";
+        }
+        enum "isakmp-nat" {
+          value "4500";
+          description "IPSec NAT Traversal";
+        }
+        enum "iscsi" {
+          value "860";
+          description "iSCSI";
+        }
+        enum "iso-tsap" {
+          value "102";
+          description "ISO Transport Service Access Point (TSAP) Class 0 protocol";
+        }
+        enum "kerberos" {
+          value "88";
+          description "Kerberos authentication system";
+        }
+        enum "kerberos-adm" {
+          value "749";
+          description "Kerberos administration";
+        }
+        enum "klogin" {
+          value "543";
+          description "Kerberos login";
+        }
+        enum "kpasswd" {
+          value "464";
+          description "Kerberos Change/Set password";
+        }
+        enum "kshell" {
+          value "544";
+          description "Kerberos Remote shell";
+        }
+        enum "l2tp" {
+          value "1701";
+          description "Layer 2 Forwarding Protocol (L2F) and Layer 2 Tunneling Protocol (L2TP)";
+        }
+        enum "ldap" {
+          value "389";
+          description "Lightweight Directory Access Protocol (LDAP)";
+        }
+        enum "ldaps" {
+          value "636";
+          description "Lightweight Directory Access Protocol over TLS/SSL (LDAPS)";
+        }
+        enum "ldp" {
+          value "646";
+          description "Label Distribution Protocol";
+        }
+        enum "lmp" {
+          value "701";
+          description "Link Management Protocol (LMP)";
+        }
+        enum "login" {
+          value "513";
+          description "rlogin (TCP) or Who (UDP)";
+        }
+        enum "lpd" {
+          value "515";
+          description "Line Printer Daemon";
+        }
+        enum "lsp-ping" {
+          value "3503";
+          description "MPLS LSP-echo";
+        }
+        enum "mac-server-adm" {
+          value "660";
+          description "Mac OS X Server administration";
+        }
+        enum "matip-a" {
+          value "350";
+          description "Mapping of Airline Traffic over Internet Protocol (MATIP) type A";
+        }
+        enum "matip-b" {
+          value "351";
+          description "Mapping of Airline Traffic over Internet Protocol (MATIP) type B";
+        }
+        enum "micro-bfd" {
+          value "6784";
+          description "BFD session over each LAG member link";
+        }
+        enum "microsoft-ds" {
+          value "445";
+          description "Microsoft Directory Services";
+        }
+        enum "mobile-ip" {
+          value "434";
+          description "Mobile IP Agent";
+        }
+        enum "monitor" {
+          value "561";
+          description "Monitor";
+        }
+        enum "mpp" {
+          value "218";
+          description "Message posting protocol (MPP)";
+        }
+        enum "mssql-m" {
+          value "1434";
+          description "Microsoft SQL Server database management system (MSSQL) monitor";
+        }
+        enum "mssql-s" {
+          value "1433";
+          description "Microsoft SQL Server database management system (MSSQL) server";
+        }
+        enum "msdp" {
+          value "639";
+          description "Multicast Source Discovery Protocol";
+        }
+        enum "ms-exchange" {
+          value "691";
+          description "MS Exchange Routing";
+        }
+        enum "msp" {
+          value "18";
+          description "Message Send Protocol";
+        }
+        enum "multihop-bfd" {
+          value "4784";
+          description "Bidirectional Forwarding Detection Multi-Hop";
+        }
+        enum "nas" {
+          value "991";
+          description "Netnews Administration System (NAS)";
+        }
+        enum "ncp" {
+          value "524";
+          description "NetWare Core Protocol";
+        }
+        enum "netrjs-1" {
+          value "71";
+          description "NETRJS protocol";
+        }
+        enum "netrjs-2" {
+          value "72";
+          description "NETRJS protocol";
+        }
+        enum "netrjs-3" {
+          value "73";
+          description "NETRJS protocol";
+        }
+        enum "netrjs-4" {
+          value "74";
+          description "NETRJS protocol";
+        }
+        enum "netbios-data" {
+          value "138";
+          description "NetBIOS Datagram Service";
+        }
+        enum "netbios-ns" {
+          value "137";
+          description "NetBIOS Name Service";
+        }
+        enum "netbios-ss" {
+          value "139";
+          description "NetBIOS Session Service";
+        }
+        enum "netnews" {
+          value "532";
+          description "Netnews";
+        }
+        enum "netwall" {
+          value "533";
+          description "netwall, for Emergency Broadcasts";
+        }
+        enum "new-rwho" {
+          value "550";
+          description "new-rwho, new-who";
+        }
+        enum "nfs" {
+          value "2049";
+          description "Network File System (NFS)";
+        }
+        enum "nntp" {
+          value "119";
+          description "Network News Transfer Protocol (NNTP)";
+        }
+        enum "nntps" {
+          value "563";
+          description "Network News Transfer Protocol over TLS/SSL (NNTPS)";
+        }
+        enum "ntp" {
+          value "123";
+          description "Network Time Protocol (NTP)";
+        }
+        enum "odmr" {
+          value "366";
+          description "On-Demand Mail Relay (ODMR)";
+        }
+        enum "olsr" {
+          value "698";
+          description "Optimized Link State Routing (OLSR)";
+        }
+        enum "openvpn" {
+          value "1194";
+          description "OpenVPN";
+        }
+        enum "pim-auto-rp" {
+          value "496";
+          description "PIM Auto-RP";
+        }
+        enum "pkix-timestamp" {
+          value "318";
+          description "PKIX Time Stamp Protocol (TSP)";
+        }
+        enum "pop2" {
+          value "109";
+          description "Post Office Protocol, version 2 (POP2)";
+        }
+        enum "pop3" {
+          value "110";
+          description "Post Office Protocol, version 3 (POP3)";
+        }
+        enum "pop3s" {
+          value "995";
+          description "Post Office Protocol 3 over TLS/SSL (POP3S)";
+        }
+        enum "pptp" {
+          value "1723";
+          description "Point-to-Point Tunneling Protocol (PPTP)";
+        }
+        enum "ptp-event" {
+          value "319";
+          description "Precision Time Protocol (PTP) event messages";
+        }
+        enum "ptp-general" {
+          value "320";
+          description "Precision Time Protocol (PTP) general messages";
+        }
+        enum "print-srv" {
+          value "170";
+          description "Network PostScript print server";
+        }
+        enum "qmtp" {
+          value "209";
+          description "Quick Mail Transfer Protocol";
+        }
+        enum "qotd" {
+          value "17";
+          description "Quote of the Day (QOTD)";
+        }
+        enum "radius" {
+          value "1812";
+          description "RADIUS authentication protocol";
+        }
+        enum "radius-acct" {
+          value "1813";
+          description "RADIUS accounting protocol";
+        }
+        enum "remote-mail" {
+          value "50";
+          description "Remote Mail Checking Protocol";
+        }
+        enum "remotefs" {
+          value "556";
+          description "Remotefs, RFS Server";
+        }
+        enum "remotecmd" {
+          value "641";
+          description "SupportSoft Nexus Remote Command";
+        }
+        enum "rip" {
+          value "520";
+          description "Routing Information Protocol";
+        }
+        enum "rje" {
+          value "5";
+          description "Remote Job Entry";
+        }
+        enum "rlp" {
+          value "39";
+          description "Resource Location Protocol";
+        }
+        enum "rlzdb" {
+          value "635";
+          description "RLZ DBase";
+        }
+        enum "rmc" {
+          value "657";
+          description "IBM RMC (Remote monitoring and Control) protocol";
+        }
+        enum "rmonitor" {
+          value "560";
+          description "rmonitor, Remote Monitor";
+        }
+        enum "rpc2portmap" {
+          value "369";
+          description "Rpc2portmap";
+        }
+        enum "rsync" {
+          value "873";
+          description "rsync file synchronization protocol";
+        }
+        enum "rtelnet" {
+          value "107";
+          description "Remote User Telnet Service (RTelnet)";
+        }
+        enum "rtsp" {
+          value "554";
+          description "Real Time Streaming Protocol (RTSP)";
+        }
+        enum "sgmp" {
+          value "153";
+          description "Simple Gateway Monitoring Protocol (SGMP)";
+        }
+        enum "silc" {
+          value "706";
+          description "Secure Internet Live Conferencing (SILC)";
+        }
+        enum "smux" {
+          value "199";
+          description "SNMP multiplexing protocol (SMUX)";
+        }
+        enum "sna-gw" {
+          value "108";
+          description "IBM Systems Network Architecture (SNA) gateway access server";
+        }
+        enum "snmp" {
+          value "161";
+          description "Simple Network Management Protocol (SNMP)";
+        }
+        enum "snmp-trap" {
+          value "162";
+          description "SNMP Traps";
+        }
+        enum "snpp" {
+          value "444";
+          description "Simple Network Paging Protocol (SNPP)";
+        }
+        enum "smtp" {
+          value "25";
+          description "Simple Mail Transfer Protocol (SMTP)";
+        }
+        enum "sql-svcs" {
+          value "118";
+          description "Structured Query Language (SQL) Services";
+        }
+        enum "sql" {
+          value "156";
+          description "Structured Query Language (SQL) Service";
+        }
+        enum "ssh" {
+          value "22";
+          description "Secure Shell Protocol";
+        }
+        enum "submission" {
+          value "587";
+          description "Email message submission (SMTP)";
+        }
+        enum "sunrpc" {
+          value "111";
+          description "Open Network Computing Remote Procedure Call (ONC RPC), also Sun RPC";
+        }
+        enum "svcloc" {
+          value "427";
+          description "Service Location Protocol (SLP)";
+        }
+        enum "syslog" {
+          value "514";
+          description "Syslog (UDP) and Remote Shell (TCP)";
+        }
+        enum "systat" {
+          value "11";
+          description "Active Users (systat service)";
+        }
+        enum "tacacs" {
+          value "49";
+          description "TACACS Login Host protocol";
+        }
+        enum "talk" {
+          value "517";
+          description "Talk";
+        }
+        enum "tcpmux" {
+          value "1";
+          description "TCP Port Service Multiplexer (TCPMUX)";
+        }
+        enum "tcpnethaspsrv" {
+          value "475";
+          description "tcpnethaspsrv, Aladdin Knowledge Systems Hasp services";
+        }
+        enum "tftp" {
+          value "69";
+          description "Trivial File Transfer Protocol (TFTP)";
+        }
+        enum "time" {
+          value "37";
+          description "Time Protocol";
+        }
+        enum "timed" {
+          value "525";
+          description "Timeserver";
+        }
+        enum "ups" {
+          value "401";
+          description "Uninterruptible power supply (UPS)";
+        }
+        enum "xdmcp" {
+          value "177";
+          description "X Display Manager Control Protocol (XDMCP)";
+        }
+        enum "xns-ch" {
+          value "54";
+          description "Xerox Network Systems (XNS) Clearinghouse (Name Server)";
+        }
+        enum "xns-mail" {
+          value "58";
+          description "Xerox Network Systems (XNS) Mail";
+        }
+        enum "xns-time" {
+          value "52";
+          description "Xerox Network Systems (XNS) Time Protocol";
+        }
+        enum "z3950" {
+          value "210";
+          description "ANSI Z39.50";
+        }
+      }
+    }
+    description
+      "The IP protocol number may be expressed as a valid protocol
+      number (integer) or using a protocol type defined by the
+      IP_PROTOCOL identity";
+  }
+
+  typedef icmp-type {
+    type union {
+      type uint8 {
+        range 0..255;
+      }
+      type enumeration {
+        enum "echo-reply" {
+          value "0";
+          description "ICMP Echo Reply";
+        }
+        enum "dest-unreachable" {
+          value "3";
+          description "ICMP Destination Unreachable";
+        }
+        enum "source-quench" {
+          value "4";
+          description "ICMP Source Quench";
+        }
+        enum "redirect" {
+          value "5";
+          description "ICMP Redirect";
+        }
+        enum "echo" {
+          value "8";
+          description "ICMP Echo";
+        }
+        enum "router-advertise" {
+          value "9";
+          description "ICMP Router Advertisement";
+        }
+        enum "router-solicit" {
+          value "10";
+          description "ICMP Router Solicitation";
+        }
+        enum "time-exceeded" {
+          value "11";
+          description "ICMP Time Exceeded";
+        }
+        enum "param-problem" {
+          value "12";
+          description "ICMP Parameter Problem";
+        }
+        enum "timestamp" {
+          value "13";
+          description "ICMP Timestamp";
+        }
+        enum "timestamp-reply" {
+          value "14";
+          description "ICMP Timestamp Reply";
+        }
+      }
+    }
+  }
+
+  typedef icmp6-type {
+    type union {
+      type uint8 {
+        range 0..255;
+      }
+      type enumeration {
+        enum "dest-unreachable" {
+          value "1";
+          description "ICMPv6 Destination Unreachable";
+        }
+        enum "packet-too-big" {
+          value "2";
+          description "ICMPv6 Packet Too Big";
+        }
+        enum "time-exceeded" {
+          value "3";
+          description "ICMPv6 Time Exceeded";
+        }
+        enum "param-problem" {
+          value "4";
+          description "Parameter Problem";
+        }
+        enum "echo-request" {
+          value "128";
+          description "ICMPv6 Echo Request";
+        }
+        enum "echo-reply" {
+          value "129";
+          description "ICMPv6 Echo Reply";
+        }
+        enum "mld-query" {
+          value "130";
+          description "Multicast Listener Discovery Query";
+        }
+        enum "mld-report" {
+          value "131";
+          description "Multicast Listener Discovery Report";
+        }
+        enum "mld-done" {
+          value "132";
+          description "Multicast Listener Discovery Done";
+        }
+        enum "router-solicit" {
+          value "133";
+          description "ICMPv6 Router Solicitation";
+        }
+        enum "router-advertise" {
+          value "134";
+          description "ICMPv6 Router Advertisement";
+        }
+        enum "neighbor-solicit" {
+          value "135";
+          description "ICMPv6 Neighbor Solicitation";
+        }
+        enum "neighbor-advertise" {
+          value "136";
+          description "ICMPv6 Neighbor Advertisement";
+        }
+        enum "redirect" {
+          value "137";
+          description "ICMPv6 Redirect";
+        }
+        enum "router-renumber" {
+          value "138";
+          description "ICMPv6 Router Renumbering";
+        }
+        enum "node-info-query" {
+          value "139";
+          description "ICMPv6 Node Information Query";
+        }
+        enum "node-info-response" {
+          value "140";
+          description "ICMPv6 Node Information Response";
+        }
+        enum "mld-v2" {
+          value "143";
+          description "Multicast Listener Discovery Version 2";
+        }
+        enum "mcast-rtr-adv" {
+          value "151";
+          description "Multicast Router Advertisement";
+        }
+        enum "mcast-rtr-solicit" {
+          value "152";
+          description "Multicast Router Solicitation";
+        }
+        enum "mcast-rtr-term" {
+          value "153";
+          description "Multicast Router Termination";
+        }
+      }
+    }
+  }
+}

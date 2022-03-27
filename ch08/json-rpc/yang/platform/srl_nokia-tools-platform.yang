@@ -1,0 +1,172 @@
+module srl_nokia-tools-platform {
+  yang-version 1.1;
+  namespace "urn:srl_nokia/tools-platform";
+  prefix srl_nokia-tools-platform;
+
+  import srl_nokia-features {
+    prefix srl-feat;
+  }
+
+  description
+    "Model for operational commands for platform.";
+
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+  grouping locator-tools {
+    container locator {
+      description
+        "Operational commands for the locator LED";
+      container enable {
+        presence "Activate the locator LED for this component";
+        description
+          "Activate the locator LED for this component";
+        leaf duration {
+          type uint16 {
+            range "10..3600";
+          }
+          units "seconds";
+          description
+            "Sets the duration to activate the locator LED, after which it will disable automatically";
+        }
+      }
+      leaf disable {
+        type empty;
+        description
+          "Deactivates the locator LED for this component";
+      }
+    }
+  }
+
+  grouping common-tools {
+    description
+      "Grouping for common component commands";
+    leaf reboot {
+      type empty;
+      description
+        "Reboot this component";
+    }
+  }
+
+  grouping tools-platform-top {
+    container chassis {
+      description
+        "Operational commands related to the chassis";
+      container reboot {
+        presence "Trigger a reboot of the chassis";
+        description
+          "Trigger a reboot of the chassis";
+        leaf force {
+          type empty;
+          description
+            "Force a reboot of the chassis, overriding any synchronizations or other activities in progress
+
+             This option can be dangerous, and may result in a standby module booting on an older image if used after an image change";
+        }
+        container warm {
+          if-feature "srl-feat:warm-reboot";
+          presence "Trigger a warm reboot operation on the system";
+          description
+            "Perform a warm reboot of the system
+
+             This option will perform checks against the current configuration, before prompting to confirm the reboot, and then rebooting the system without impacting the datapath - if a new image has been configured, this will upgrade the system.";
+          container force {
+            presence "Force a warm reboot of the system";
+            description
+              "Force a warm reboot of the system, overriding any validation, synchronizations or other activities in progress
+
+               This option can be dangerous, and may result in an outage - but can be used to support a fast reboot of the system.";
+          }
+          container validate {
+            presence "Validate a warm reboot is supported";
+            description
+              "Validate that the system's current configuration and state supports a warm reboot operation";
+          }
+        }
+      }
+    }
+    list linecard {
+      if-feature "srl-feat:chassis";
+      description
+        "Operational commands related to line cards";
+      key "slot";
+      leaf slot {
+        type uint8;
+        description
+          "Numeric identifier for the line card";
+      }
+      uses common-tools;
+      uses locator-tools;
+    }
+    leaf show-fabric-bandwidth {
+      if-feature "srl-feat:chassis";
+      type empty;
+      description
+        "Show fabric bandwidth";
+    }
+    list fabric {
+      if-feature "srl-feat:chassis";
+      description
+        "Operational commands related to fabric modules";
+      key "slot";
+      leaf slot {
+        type uint8;
+        description
+          "Numeric identifier for the fabric module";
+      }
+      uses common-tools;
+      uses locator-tools;
+    }
+    list control {
+      description
+        "Operational commands related to control modules";
+      key "slot";
+      leaf slot {
+        type string;
+        description
+          "Slot identifier for the control module";
+      }
+      container reboot {
+        if-feature "srl-feat:chassis";
+        presence "Trigger a reboot of the control module";
+        description
+          "Trigger a reboot of the control module";
+        leaf force {
+          type empty;
+          description
+            "Force a reboot of the control module, overriding any synchronizations or other activies in progress
+
+             This option can be dangerous, and may result in a standby module booting on an older image if used after an image change";
+        }
+      }
+      uses locator-tools;
+    }
+    list fan-tray {
+      description
+        "Operational commands related to fan modules";
+      key "id";
+      leaf id {
+        type uint8;
+        description
+          "Numeric identifier for the fan module";
+      }
+      uses locator-tools;
+    }
+  }
+
+  container platform {
+    description
+      "Top-level container for platform operational commands";
+    uses tools-platform-top;
+  }
+}

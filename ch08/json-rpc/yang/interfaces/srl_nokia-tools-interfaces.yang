@@ -1,0 +1,118 @@
+module srl_nokia-tools-interfaces {
+  yang-version 1.1;
+  namespace "urn:srl_nokia/tools-interfaces";
+  prefix srl_nokia-tools-if;
+
+  // import some basic types
+
+  import srl_nokia-features {
+    prefix srl_nokia-feat;
+  }
+
+  description
+    "Model for operational commands on network interfaces and subinterfaces.";
+
+  revision 2021-06-30 {
+    description
+      "SRLinux 21.6.1";
+  }
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+  grouping tools-subinterface-top {
+    description
+      "Subinterface data for logical interfaces associated with a given interface";
+    list subinterface {
+      key "index";
+      description
+        "The list of subinterfaces (logical interfaces) associated with a physical interface";
+      leaf index {
+        type uint32;
+        description
+          "The index of the subinterface, or logical interface number";
+      }
+      container statistics {
+        leaf clear {
+          type empty;
+        }
+      }
+      container ipv4;
+      container ipv6;
+      container bridge-table;
+    }
+  }
+
+  grouping tools-interface-top {
+    description
+      "Top-level grouping for interface configuration and operational state data";
+    list interface {
+      key "name";
+      description
+        "The list of named interfaces on the device.";
+      leaf name {
+        type string;
+        description
+          "References the configured name of the interface";
+      }
+      container statistics {
+        container clear {
+          presence "Clear interface statistics";
+          description
+            "Clear interface statistics";
+          leaf include-members {
+            if-feature srl_nokia-feat:lag;
+            must "starts-with(../../../name,'lag')" {
+              error-message "Must be used with a LAG interface";
+            }
+            type empty;
+            description
+              "Causes the member link statistics to also be cleared";
+          }
+        }
+      }
+      container ethernet {
+        container statistics {
+          container clear {
+            presence "Clear interface ethernet statistics";
+            description
+              "Clear interface ethernet statistics";
+            leaf include-members {
+              if-feature srl_nokia-feat:lag;
+              must "starts-with(../../../../name,'lag')" {
+                error-message "Must be used with a LAG interface";
+              }
+              type empty;
+              description
+                "Causes the member link ethernet statistics to also be cleared";
+            }
+          }
+        }
+      }
+      container resource {
+        presence "resource interface tools";
+        if-feature srl_nokia-feat:lag;
+        must "starts-with(../name,'lag')" {
+          error-message "Must be used with a LAG interface";
+        }
+        leaf retry {
+          type empty;
+          description
+            "Causes the specified lag to be reevaluate for missing system resources";
+        }
+      }
+      uses tools-subinterface-top;
+    }
+  }
+
+  uses tools-interface-top;
+}

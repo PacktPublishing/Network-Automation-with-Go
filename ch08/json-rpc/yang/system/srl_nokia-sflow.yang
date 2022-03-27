@@ -1,0 +1,161 @@
+module srl_nokia-sflow {
+    yang-version 1.1;
+
+    // namespace
+
+    namespace "urn:srl_nokia/sflow";
+    prefix srl_nokia-sflow;
+
+    // import some basic types
+    import srl_nokia-common { prefix srl_nokia-comm; }
+    import srl_nokia-extensions { prefix srl_nokia-ext; }
+    import srl_nokia-interfaces { prefix srl_nokia-if; }
+    import srl_nokia-system { prefix srl_nokia-system; }
+    import srl_nokia-network-instance { prefix srl-netinst; }
+
+  import srl_nokia-features {
+    prefix srl-feat;
+  }
+    description
+      "This yang file gives a description of sflow-agent 
+       configuration.";
+
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+    grouping sflow-agent-top {
+      container sflow {
+        presence "Configure sFlow Agent";
+        description
+          "Context to configure sFlow Agent parameters and report sFlow state";
+        leaf admin-state {
+          type srl_nokia-comm:admin-state;
+          default "disable";
+          description
+            "Administratively enable or disable sFlow for the system";
+        }
+        list collector{
+          key "collector-id";
+          max-elements 8;
+          description
+            "List of sFlow collectors to which sFlow sample data is sent";
+          
+          leaf collector-id {
+            type uint16 { range "1..8"; }
+            description
+              "Specify the collector ID" ;
+          }
+          leaf collector-address {
+            srl_nokia-ext:show-importance high;
+            type srl_nokia-comm:ip-address;
+            description
+              "The IP address for an sFlow collector";
+          }
+          leaf network-instance {
+            type leafref { path "/srl-netinst:network-instance/srl-netinst:name"; }
+            must 'not(/srl-netinst:network-instance[srl-netinst:name=current()]/srl-netinst:type = "srl-netinst:mac-vrf")' {
+              error-message "sFlow collector cannot be in a network-instance of type 'mac-vrf'";
+            }
+            mandatory true;
+            description
+              "Reference to a configured network-instance";
+          }
+          leaf source-address {
+            srl_nokia-ext:show-importance high;
+            type srl_nokia-comm:ip-address;
+            mandatory true;
+            description
+              "Specifies the IP address to be used as the source address in sFlow packets";
+          }
+          leaf port {
+            srl_nokia-ext:show-importance high;
+            type uint16 ;
+            default "6343";
+            description
+              "Specifies the destination UDP port number to be used in sFlow packets";
+          }
+          leaf next-hop {
+            config false;
+            srl_nokia-ext:show-importance high;
+            type srl_nokia-comm:ip-address;
+            description
+              "Specifies the active IP next hop used to reach the associated collector";
+          }  	
+        }
+        leaf sample-rate {
+          srl_nokia-ext:show-importance high;
+          type uint32 { range "1..2000000"; }
+          default "10000";
+          description
+            "Specify sFlow sample rate 
+          
+            This value is the rate at which traffic will be sampled at a rate of 1:N received packets.";
+        }
+        leaf sample-size {
+        	srl_nokia-ext:show-importance high;
+          type uint16 { range "256"; }
+          default 256;
+          description
+            "Specify sFlow sample size 
+          
+            This value specifies the number of bytes the sFlow agent samples from each frame.";
+        }
+				container statistics {
+					config false;
+					leaf total-offered-packets {
+          	type srl_nokia-comm:zero-based-counter64;
+          	description
+            	"Total number of packets subject to sFlow sampling";
+        	}
+        	leaf total-samples-taken {
+          	type srl_nokia-comm:zero-based-counter64;
+          	description
+            	"Total number of sFlow samples taken";
+        	}
+        	leaf total-sent-packets {
+          	type srl_nokia-comm:zero-based-counter64;
+          	description
+            	"Total number of sFlow packets sent to collectors";
+        	}
+				}
+
+      }
+    }
+
+    grouping interface-sflow-config {
+      description "Container for sFlow configuration applied at the interface level";
+    
+      container sflow {
+          description
+            "Context to configure sFlow parameters";
+          leaf admin-state {
+            type srl_nokia-comm:admin-state;
+            must 'starts-with(../../srl_nokia-if:name, "ethernet") or (../admin-state = "disable")' {
+              error-message "sFlow collector is supported only on ethernet interfaces.";
+            }
+            description
+              "Administratively enable or disable sFlow on this interface";
+          }
+
+      }
+    }   
+
+    augment "/srl_nokia-system:system" {
+      uses sflow-agent-top;
+    }
+    
+    augment "/srl_nokia-if:interface" {
+      uses interface-sflow-config;
+    }
+
+}

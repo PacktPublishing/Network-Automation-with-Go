@@ -1,0 +1,227 @@
+module srl_nokia-dhcp-server {
+  yang-version 1.1;
+  namespace "urn:srl_nokia/dhcp-server";
+  prefix srl-dhcp-server;
+
+  import srl_nokia-common {
+    prefix srl-comm;
+  }
+  import srl_nokia-system {
+    prefix srl-system;
+  }
+  import srl_nokia-network-instance {
+    prefix srl-netinst;
+  }
+  import srl_nokia-extensions {
+    prefix srl-ext;
+  }
+  import srl_nokia-features {
+    prefix srl_nokia-feat;
+  }
+
+  description
+    "This module defines configuration and operational state data related to the dhcp server.";
+
+  revision 2021-06-30 {
+    description
+      "SRLinux 21.6.1";
+  }
+
+  grouping dhcp-common {
+    leaf admin-state {
+      type srl-comm:admin-state;
+      srl-ext:show-importance "high";
+      default "disable";
+      description
+        "Administratively enable or disable the dhcp server";
+    }
+    leaf oper-state {
+      config false;
+      type srl-comm:oper-state;
+      srl-ext:show-importance "high";
+      description
+        "Details if the dhcp server is operationally available";
+    }
+    container trace-options {
+      description
+        "Container for tracing DHCP server operations instance";
+      leaf-list trace {
+        type enumeration {
+          enum "messages" {
+            description
+              "Capture all DHCP server messages sent and received";
+          }
+        }
+        description
+          "List of events to trace";
+      }
+    }
+    container statistics {
+      config false;
+      leaf client-packets-received {
+        type srl-comm:zero-based-counter64;
+        description
+          "Total received dhcp packets from dhcp client(s)";
+      }
+      leaf client-packets-discarded {
+        type srl-comm:zero-based-counter64;
+        description
+          "Total discarded dhcp packets from dhcp client(s)";
+      }
+      leaf server-packets-sent {
+        type srl-comm:zero-based-counter64;
+        description
+          "Total dhcp packets sent from DHCP server towards dhcp client(s)";
+      }
+    }
+  }
+
+  grouping static-allocation-v4 {
+    container static-allocation {
+       list host {
+         key mac;
+         description "host name for static ip allocations";
+         leaf mac {
+           type srl-comm:mac-address;
+         }
+         leaf ip-address {
+           type srl-comm:ipv4-prefix-with-host-bits;
+         }
+         uses dhcp-server-v4-options;
+       }
+    }
+   }   
+
+  grouping static-allocation-v6 {
+    container static-allocation {
+       list host {
+         key mac;
+         description "host name for static ip allocations";
+         leaf mac {
+           type srl-comm:mac-address;
+         }
+         leaf ip-address {
+           type srl-comm:ipv6-prefix-with-host-bits;
+         }
+         uses dhcp-server-v6-options;
+       }
+    }
+   }
+
+  grouping dhcp-server-v4-options {
+    container options {
+      leaf bootfile-name {
+        type string {
+          length "1..128"; }
+        description
+          "The URL to the provisioning script the client will use during booting";
+      }
+      leaf-list dns-server {
+        type srl-comm:ipv4-address;
+        max-elements 4;
+        description
+           "An Ordered List of DNS servers to return to the dhcp client";
+      }
+      leaf-list domain-name {
+        type srl-comm:domain-name;
+        description
+          "The list of domain names to return to the dhcp client that the client should use when resolving hostnames via the Domain Name System";
+      }
+      leaf hostname {
+        type string {
+          length "1..63";
+          pattern "(([a-zA-Z]|[a-zA-Z][a-zA-Z0-9._-]*[a-zA-Z0-9]))*([A-Za-z]|[A-Za-z][A-Za-z0-9._-]*[A-Za-z0-9])";
+        }
+        description
+           "Host Name option of the dhcp client";
+      }
+      leaf-list ntp-server {
+        type srl-comm:ipv4-address;
+        max-elements 4;
+        description
+           "List of NTP Servers to return to the dhcp client";
+      }
+      leaf router {
+        type srl-comm:ipv4-address;
+        description
+           "IPv4 address of the gateway for the dhcp client";
+      }
+      leaf server-id {
+        type srl-comm:ipv4-address;
+        description
+          "IP address the dhcp server must match any address within the network_instance e.g. sub-interface primary address, loopback address,
+           anycast gateway address in case of multihoming";
+      }
+    }
+  }
+
+  grouping dhcp-server-v6-options {
+    container options {
+      leaf-list dns-server {
+        type srl-comm:ipv6-address;
+        max-elements 4;
+        description
+           "An Ordered List of DNS servers to return to the dhcp client";
+      }
+    }
+  } 
+
+  grouping dhcp-server-v4 {
+    container dhcpv4 {  
+      uses dhcp-common;
+      uses dhcp-server-v4-options;
+      uses static-allocation-v4;
+    }
+  }
+
+  grouping dhcp-server-v6 {
+    container dhcpv6 {
+      uses dhcp-common;
+      uses dhcp-server-v6-options;
+      uses static-allocation-v6;
+    }
+  }
+
+  grouping dhcp-netinst {
+    list network-instance {
+      description
+        "List of network instances to run a dhcp server in";
+      key "name";
+      leaf name {
+        type leafref {
+          path "/srl-netinst:network-instance/srl-netinst:name";
+        }
+        must 'not(/srl-netinst:network-instance[srl-netinst:name=current()]/srl-netinst:type = "srl-netinst:mac-vrf")' {
+          error-message "dhcp server cannot be started in a network-instance of type 'mac-vrf'";
+        }
+        description
+          "Reference to a configured network instance";
+      }
+    uses dhcp-server-v4;
+    uses dhcp-server-v6;
+    }
+  }
+
+  grouping dhcp-server-top {
+    container dhcp-server {
+      if-feature srl_nokia-feat:future-21-11;
+      presence "Performs DHCP server function";
+      description
+        "Configures the dhcp server";
+      leaf admin-state {
+        type srl-comm:admin-state;
+        default "disable";
+        srl-ext:show-importance "high";
+        description
+          "Globally enable or disable the dhcp server
+           Disabling this will disable all dhcp servers.";
+      }
+      uses dhcp-netinst;
+    }
+  }
+
+  augment "/srl-system:system" {
+    srl-ext:first-released "21.6.1";
+    uses dhcp-server-top;
+  }
+}

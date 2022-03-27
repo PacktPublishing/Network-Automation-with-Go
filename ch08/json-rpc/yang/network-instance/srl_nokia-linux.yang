@@ -1,0 +1,46 @@
+module srl_nokia-linux {
+
+    yang-version 1.1;
+
+    // namespace
+    namespace "urn:srl_nokia/linux";
+
+    prefix "srl_nokia-linux";
+
+    import srl_nokia-network-instance { prefix srl_nokia-netinst; }
+
+    description
+        "This YANG file gives a description of network-instance interface to linux";
+
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+    grouping linux-top {
+        container linux {
+            presence "Enables routing interaction with the Linux kernel";
+            leaf import-routes {
+                type boolean;
+                default false;
+                description
+                    "Import routes from linux routing table";
+            }
+            leaf export-routes {
+                type boolean;
+                default false;
+                description
+                    "Export routes to linux routing table";
+            }
+            leaf export-neighbors {
+                type boolean;
+                default true;
+                description
+                    "Export neighbors to linux routing table";
+            }
+        }
+    }
+    augment "/srl_nokia-netinst:network-instance/srl_nokia-netinst:protocols" {
+        uses linux-top;
+    }
+}

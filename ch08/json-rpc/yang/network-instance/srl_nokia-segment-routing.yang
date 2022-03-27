@@ -1,0 +1,118 @@
+module srl_nokia-segment-routing {
+
+    yang-version 1.1;
+
+    // namespace
+    namespace "urn:srl_nokia/segment-routing";
+
+    prefix "srl_nokia-sr";
+
+    import srl_nokia-network-instance { prefix srl_nokia-netinst; }
+    import srl_nokia-system { prefix srl_nokia-system; }
+    import srl_nokia-mpls-label-management { prefix srl_nokia-mplslbl; }
+    import srl_nokia-mpls { prefix srl_nokia-mpls; }
+    import srl_nokia-features { prefix srl-feat; }
+
+    description
+        "This YANG file covers segment routing configuration and state at the network-instance level.";
+
+  revision 2021-06-30 {
+    description
+      "SRLinux 21.6.1";
+  }
+
+   grouping segment-routing-top {
+        container segment-routing {
+            description
+                "Container with segment routing configuration options";
+            container mpls {
+                presence "Enable segment routing based on the MPLS dataplane";
+                description
+                    "Adding this container activates datapath support for SR-MPLS";
+                must '(/srl_nokia-netinst:network-instance[srl_nokia-netinst:name = current()/../../srl_nokia-netinst:name]/srl_nokia-netinst:type = "srl_nokia-netinst:default")';
+                must "../../srl_nokia-mpls:mpls/srl_nokia-mpls:admin-state = 'enable'" {
+                    error-message "Precondition failed: MPLS must be enabled";
+                }
+                must "global-block/label-range" {
+                    error-message "SRGB label-range must be defined.";
+                }
+                // TO-DO: do we need to add config flags for IPv4 and IPv6 support
+                container global-block {
+                    if-feature srl-feat:label-management;
+                    description
+                        "Container with SRGB configuration that is applicable to all IGP protocol instances";
+                    leaf label-range {
+                        //mandatory true;
+                        type leafref {
+                            path "/srl_nokia-system:system/srl_nokia-mplslbl:mpls/srl_nokia-mplslbl:label-ranges/srl_nokia-mplslbl:static/srl_nokia-mplslbl:name";
+                        }
+                        description
+                            "Reference to a static label range";
+                    }
+                    leaf label-range-status {
+                        config false;
+                        type enumeration {
+                            enum "available";
+                            enum "unavailable";
+                        }
+                        description
+                            "Status of the label block.
+                            The label block may show as unavailable if there is pending cleanup.";
+                    }
+                }
+                list prefix-sid {
+                    max-elements 4;
+                    description
+                        "List of protocol-independent prefix SIDs associated with the network-instance";
+                    key prefix-sid-index;
+                    leaf prefix-sid-index {
+                        description
+                            "An index to enumerate the different prefix sids";
+                        type uint8 {
+                            range "1..4";
+                        }
+                    }
+                    leaf interface {
+                        mandatory true;
+                        description
+                            "Reference to the subinterface that owns the prefix(es) to be advertised.
+
+                            If ipv4-label-index is assigned a value then the primary IPv4 address of the referenced subinterface is advertised as a prefix SID.
+
+                            If ipv6-label-index is assigned a value then the primary IPv6 address of the referenced subinterface is advertised as a prefix SID.";
+                        type leafref {
+                            path "/srl_nokia-netinst:network-instance[srl_nokia-netinst:name = current()/../../../../srl_nokia-netinst:name]/srl_nokia-netinst:interface/srl_nokia-netinst:name";
+                        }
+                    }
+                    leaf ipv4-label-index {
+                        description
+                            "Label index to add to SRGB base.";
+                        type uint32 {
+                            range "0..1048575";
+                        }
+                    }
+                    leaf ipv6-label-index {
+                        description
+                            "Label index to add to SRGB base.";
+                        type uint32 {
+                            range "0..1048575";
+                        }
+                    }
+                    leaf node-sid {
+                        description
+                            "If set, the prefix SID(s) identity the router as a whole.";
+                        type boolean;
+                        default true;
+                        must "not(. = false() and ../interface = 'system0.0')";
+                    }
+                }
+            }
+        }
+    }
+
+    augment "/srl_nokia-netinst:network-instance" {
+        uses segment-routing-top {
+            if-feature srl-feat:segment-routing;
+        }
+    }
+}

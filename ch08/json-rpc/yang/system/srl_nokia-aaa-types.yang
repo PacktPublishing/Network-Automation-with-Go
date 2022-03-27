@@ -1,0 +1,130 @@
+module srl_nokia-aaa-types {
+  yang-version 1.1;
+
+  // namespace
+
+  namespace "urn:srl_nokia/aaa-types";
+  prefix srl-aaa-types;
+
+  description
+    "This module defines shared types for data related to AAA (authentication, authorization, accounting).";
+
+  // identity statements
+
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+  identity aaa_server_type {
+    description
+      "Base identity for types of AAA servers";
+  }
+
+  identity tacacs {
+    base aaa_server_type;
+    description
+      "Specifies servers using the TACACS+ protocol
+
+       Terminal Access Controller Access Control System (TACACS+)";
+    reference
+      "The TACACS+ Protocol (draft-ietf-opsawg-tacacs-05) RFC 1492 - An Access Control Protocol, Sometimes Called TACACS";
+  }
+
+  identity local {
+    base aaa_server_type;
+    description
+      "Specifies using Linux local methods
+
+       This type cannot be combined with a server address";
+  }
+
+  identity system_defined_roles {
+    description
+      "Base identity for system_defined roles that can be assigned to users.";
+  }
+
+  identity system_role_admin {
+    base system_defined_roles;
+    description
+      "Built-in role that allows the equivalent of superuser permission for all configuration and operational commands on the device.";
+  }
+
+  identity aaa_accounting_event_type {
+    description
+      "Base identity for specifying event types that should be sent to AAA server for accounting";
+  }
+
+  identity command {
+    base aaa_accounting_event_type;
+    description
+      "Specifies interactive command events for AAA accounting";
+  }
+
+  // identity aaa_accounting_event_login {
+  //     base AAA_ACCOUNTING_EVENT_TYPE;
+  //     description "Specifies login events for AAA accounting";
+  // }
+
+  identity aaa_accounting_record_type {
+    description
+      "Base identity for specifying record types that should be sent to the server for accounting";
+  }
+
+  identity start-stop {
+    base aaa_accounting_record_type;
+    description
+      "Send start and stop records for user activities
+
+       A start record is sent to the accounting server at the beginning of the activity, and a stop record at the end of the activity";
+  }
+
+  identity stop {
+    base aaa_accounting_record_type;
+    description
+      "Send only stop records for user activities
+
+       A stop record is sent to the accounting server when the user activity completes";
+  }
+
+  identity aaa_authorization_event_type {
+    description
+      "Base identity for specifying activities that should be sent to server for authorization";
+  }
+
+  identity commands {
+    base aaa_authorization_event_type;
+    description
+      "Specifies interactive command events for authorization";
+  }
+
+  identity config {
+    base aaa_authorization_event_type;
+    description
+      "Specifies configuration events for authorization";
+  }
+
+  // typedef statements
+
+  typedef crypt-password-type {
+    type string;
+    description
+      "A password that is hashed based on the hash algorithm
+       indicated by the prefix in the string.  The string
+       takes the following form, based on the Unix crypt function:
+
+       $<id>[$<param>=<value>(,<param>=<value>)*][$<salt>[$<hash>]]
+
+       Common hash functions include:
+
+       id  | hash function
+        ---+---------------
+         1 | MD5
+         2a| Blowfish
+         2y| Blowfish (correct handling of 8-bit chars)
+         5 | SHA-256
+         6 | SHA-512
+
+       These may not all be supported by a target device.";
+  }
+}

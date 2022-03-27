@@ -1,0 +1,128 @@
+module srl_nokia-next-hop-groups {
+
+    yang-version 1.1;
+
+    // namespace
+    namespace "urn:srl_nokia/next-hop-groups";
+
+    prefix "srl_nokia-next-hop-groups";
+
+    import srl_nokia-common { prefix srl_nokia-comm; }
+    import srl_nokia-network-instance { prefix srl_nokia-netinst; }
+    import srl_nokia-features { prefix srl-feat; }
+
+    description
+        "This yang file gives a description of next-hop-groups configuration.";
+
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+    grouping next-hop-group-top {
+        container next-hop-groups {
+            presence "Configure Nexthop Groups";
+            list group {
+                key "name";
+                description "Specifies the next hop group.";
+                leaf name {
+                    type srl_nokia-comm:name;
+                    description
+                        "Specifies the next hop group name";
+                }
+                leaf admin-state {
+                    type srl_nokia-comm:admin-state;
+                    default "enable";
+                    description
+                        "Used to enable or disable a next-hop group";
+                }
+                container blackhole {
+                    presence "Specifies that the next-hop-group performs a blackhole discard action.";
+                    leaf generate-icmp {
+                        type boolean;
+                        default false;
+                        description
+                            "When set to true the router generates ICMP unreachable messages for the dropped packets";
+                    }
+                }
+                list nexthop {
+                    max-elements 128;
+                    key "index";
+                    leaf index {
+                        type uint16;
+                        description
+                            "Numerical index of the next-hop member";
+                    }
+                    leaf ip-address {
+                        type srl_nokia-comm:ip-address;
+                        description
+                            "The next-hop IPv4 or IPv6 address";
+                    }
+                    leaf admin-state {
+                        type srl_nokia-comm:admin-state;
+                        default "enable";
+                        description
+                            "Used to enable or disable a particular next-hop";
+                    }
+                    leaf resolve {
+                        type boolean;
+                        default true;
+                        description
+                            "When set to true, the router is allowed to use any route to resolve the nexthop address to an outgoing interface
+
+                            When set to false the router is only allowed to use a local route to resolve the next-hop address.";
+                    }
+                    leaf-list pushed-mpls-label-stack {
+                        if-feature "srl-feat:jericho2";
+                        must "(../resolve != true())" {
+                           error-message "resolve should be set to false for pushed-mpls-label-stack";
+                        }
+                        type srl_nokia-comm:mpls-label;
+                        max-elements 1;
+                        description
+                            "A list of MPLS labels to push onto the packet when forwarding to this particular next-hop
+
+                            Default is none/empty. Pushing an MPLS label stack is not supported unless the resolve flag is set to false.";
+                    }
+
+                   container failure-detection {
+                	    container enable-bfd {
+                            presence "Configure BFD within this Next Hop";
+                		    leaf local-address {
+                			    type srl_nokia-comm:ip-address;
+                			    description
+                      	        "The local address to be used for the associated BFD session";
+                                mandatory true;
+                		    }
+                            leaf local-discriminator {
+                                type uint32 {
+                                    range "1..16384";
+                                }
+                                description
+                                "The local discriminator to be used for the associated BFD session";
+                            }
+                            leaf remote-discriminator {
+                                type uint32 {
+                                    range "1..16384";
+                                }
+                                description
+                                "The remote discriminator to be used for the associated BFD session";
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    augment "/srl_nokia-netinst:network-instance" {
+        uses next-hop-group-top;
+    }
+}

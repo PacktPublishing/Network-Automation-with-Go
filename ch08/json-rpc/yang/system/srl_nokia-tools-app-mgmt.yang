@@ -1,0 +1,82 @@
+module srl_nokia-tools-app-mgmt {
+  yang-version 1.1;
+  namespace "urn:srl_nokia/tools-app-mgmt";
+  prefix srl_nokia-tools-app-mgmt;
+
+  import srl_nokia-tools-system {
+    prefix srl-tools-system;
+  }
+
+  description
+    "Model for operational commands for app-management.";
+
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+  grouping tools-app-mgmt-stats-top {
+    container statistics {
+      description
+        "Top-level grouping of operational commands related to application statistics";
+      leaf clear {
+        type empty;
+        description
+          "Clear statistics for this application instance";
+      }
+    }
+  }
+
+  grouping tools-app-mgmt-top {
+    container app-management {
+      presence "Configure tools system app-management";
+      description
+        "Operational commands related to app-management";
+      list application {
+        description
+          "List of all applications managed by the application manager";
+        key "name";
+        leaf name {
+          type string;
+          description
+            "Unique name of this application instance";
+        }
+        leaf stop {
+          type empty;
+          description
+            "Terminate the application instance gracefully";
+        }
+        leaf start {
+          type empty;
+          description
+            "Start the application instance";
+        }
+        leaf restart {
+          type empty;
+          description
+            "Restart the application instance";
+        }
+        leaf reload {
+          type empty;
+          description
+            "Reload the configuration of the application instance";
+        }
+        leaf quit {
+          type empty;
+          description
+            "Terminate the application instance, requesting it to core dump";
+        }
+        leaf kill {
+          type empty;
+          description
+            "Terminate the application instance ungracefully";
+        }
+        uses tools-app-mgmt-stats-top;
+      }
+    }
+  }
+
+  augment "/srl-tools-system:system" {
+    uses tools-app-mgmt-top;
+  }
+}

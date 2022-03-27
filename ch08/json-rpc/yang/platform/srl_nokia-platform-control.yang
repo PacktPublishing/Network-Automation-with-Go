@@ -1,0 +1,89 @@
+module srl_nokia-platform-control {
+  yang-version 1.1;
+
+  // namespace
+
+  namespace "urn:srl_nokia/platform-control";
+  prefix srl_nokia-platform-control;
+
+  import srl_nokia-platform {
+    prefix srl-platform;
+  }
+  import srl_nokia-extensions {
+    prefix srl-ext;
+  }
+  import srl_nokia-features {
+    prefix srl-feat;
+  }
+
+  description
+    "This module defines configuration and operational state data related to control modules.";
+
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+  typedef control-role-type {
+    description
+      "Details the current role of the control module";
+    type enumeration {
+      enum active;
+      enum standby;
+    }
+  }
+
+  grouping control-state-top {
+    description
+      "Grouping for control module state";
+    leaf slot {
+      type string {
+        pattern 'A|B';
+      }
+      description
+        "Slot identifier for the control module
+
+         This is set to 'A' for systems without removable control modules.";
+    }
+    leaf type {
+      type string;
+      srl-ext:show-importance "high";
+      description
+        "Control module type, as translated from the components EEPROM";
+    }
+    leaf role {
+      if-feature "srl-feat:chassis";
+      type control-role-type;
+      srl-ext:show-importance "high";
+      description
+        "Control module role, detailing active or standby state
+
+         This field is not present on systems without removable control modules.";
+    }
+  }
+
+  grouping control-top {
+    description
+      "Grouping for control module configuration and state";
+    list control {
+      config false;
+      key "slot";
+      description
+        "Top-level container for control module configuration and state";
+      uses control-state-top;
+      uses srl-platform:component-common-state-top;
+      uses srl-platform:component-common-state-sw;
+      uses srl-platform:component-locator;
+      uses srl-platform:component-power-state-top;
+      uses srl-platform:component-temperature-state-top;
+    }
+  }
+
+  augment "/srl-platform:platform" {
+    uses control-top;
+  }
+}

@@ -1,0 +1,56 @@
+module srl_nokia-tools-qos {
+  yang-version 1.1;
+  namespace "urn:srl_nokia/tools-qos";
+  prefix "srl-qos";
+
+//  import srl_nokia-qos { prefix srl_nokia-qos; }
+  import srl_nokia-common { prefix srl_nokia-comm; }
+  import srl_nokia-tools-interfaces { prefix srl_nokia-tools-if; }
+  import srl_nokia-features { prefix srl-feat; }  
+  
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+  revision 2019-06-26 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+  augment "/srl_nokia-tools-if:interface/srl_nokia-tools-if:statistics" {
+
+      container queue-statistics {
+            if-feature "srl-feat:jericho2 or srl-feat:platform-7220-d2 or srl-feat:platform-7220-d3 or srl-feat:tomahawk3";
+            leaf clear {
+                type empty;
+            }
+            list unicast-queue {
+                key "queue-id";
+                leaf queue-id {
+                    type srl_nokia-comm:queue-index;
+                    description
+                      "Queue number: 0-7";
+                }
+                leaf clear {
+                    type empty;
+                }
+            }
+            list multicast-queue {
+                key "queue-id";
+                leaf queue-id {
+                    type srl_nokia-comm:queue-index;
+                    description
+                      "Queue number: 0-7";
+                }
+                leaf clear {
+                    type empty;
+                }
+            }
+        }
+    }
+}  
+  

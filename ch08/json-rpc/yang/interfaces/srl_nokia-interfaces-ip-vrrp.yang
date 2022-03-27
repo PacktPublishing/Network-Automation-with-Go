@@ -1,0 +1,432 @@
+module srl_nokia-interfaces-ip-vrrp {
+  yang-version 1.1;
+
+  // namespace
+  namespace "urn:srl_nokia/interfaces/ip/vrrp";
+
+  prefix "srl_nokia-if-ip-vrrp";
+
+  // import some basic types
+  import ietf-inet-types {
+    prefix inet;
+  }
+  import srl_nokia-interfaces {
+    prefix srl_nokia-if;
+  }
+  import srl_nokia-system{
+    prefix srl_nokia-system;
+  }
+  import srl_nokia-if-ip {
+    prefix srl_nokia-if-ip;
+  } 
+  import srl_nokia-keychains {
+    prefix srl-keychain;
+  }
+  import srl_nokia-features {
+      prefix srl_nokia-feat;
+  }
+  import srl_nokia-common {
+    prefix srl_nokia-comm;
+  }
+  import ietf-yang-types {
+    prefix yang;
+  }
+
+  description
+    "Model for managing VRRP sessions on IP interfaces.
+
+    This model reuses most of the IETF YANG model for VRRP session
+    management described by RFC 8347.  The primary differences are 
+    in the structure of configuration and state data.";
+
+  /* vrrp-state-type identity and its derivatives. */
+
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+
+  identity vrrp-state-type {
+      description
+          "Indicates the state of a virtual router.";
+  }
+  identity initialize {
+      base vrrp-state-type;
+      description
+          "Indicates that the virtual router is waiting
+          for a startup event.";
+  }
+  identity backup {
+      base vrrp-state-type;
+      description
+          "Indicates that the virtual router is monitoring the
+          availability of the master router.";
+  }
+  identity master {
+      base vrrp-state-type;
+      description
+          "Indicates that the virtual router is forwarding
+          packets for IP addresses that are associated with
+          this virtual router.";
+  }
+
+  typedef vrrp-auth-type {
+      description
+          "This type defines the type of authentication used by VRRP packets";
+      type enumeration {
+          enum text;
+          enum md5;
+          enum md5-hash;
+      }
+  }
+
+  typedef vrrp-oper-down-reason {
+    type enumeration {
+      enum "admin-down";
+      enum "sub-intf-down";
+      enum "virtual-ip-mismatch";
+      enum "authentication-config";
+      enum "other";
+    }
+  }
+
+  grouping vrrp-group-key {
+      leaf virtual-router-id {
+          description 
+              "VRRP Group Index";
+          type uint8;
+      }
+  }
+
+  grouping vrrp-group-common-config {
+    leaf admin-state {
+      default "enable";
+      description
+        "Administrative state for the associated VRRP group instance";
+      type srl_nokia-comm:admin-state;
+    }
+
+      leaf priority {
+          default 100;
+          description 
+              "Base VRRP Priority for associated Virtual Address";
+          type uint8;
+      }
+
+      leaf preempt {
+          description 
+              "Enable VRRP master pre-emption.
+               If enabled, router with higher priority can assume
+               master role.
+               If disabled, router can only become master if no
+               other master is present";
+          type boolean;
+           
+      }
+
+      leaf virtual-mac {
+          type srl_nokia-comm:mac-address;
+          config false;
+          description "VRRP Instance generated virtual mac";
+      }
+
+      leaf preempt-delay {
+          description 
+              "Delay before a router preemts an existing master router,
+               only applicable if preemt is enabled";
+          type uint16;
+      }
+
+      leaf init-delay {
+          description 
+              "Initialization delay before a router that just rebooted 
+               will preemt an existing master router. Only applicable
+               if preemt is enabled";
+          type uint16;
+      }
+
+      leaf accept-mode {
+          description 
+              "Allows ssh,ping,traceroute to be accepted on the virtual
+               IP address";
+          type boolean;
+      }
+
+      leaf advertise-interval {
+          default 1000;
+          description 
+              "The interval between VRRP messages in milliseconds";
+          type uint16;
+      }
+
+      container authentication {
+          description 
+        "Context to configure authentication keychain";
+     
+          leaf keychain {
+              description 
+                  "Reference to a keychain. The keychain type must be md5 or clear-text";
+              type leafref {
+                  path "/srl_nokia-system:system/srl-keychain:authentication/srl-keychain:keychain/srl-keychain:name";
+              }
+              must "(../../version = 2)"
+              {
+                  error-message "VRRP version 2 only supports authentication";
+              }
+              must '/srl_nokia-system:system/srl-keychain:authentication/srl-keychain:keychain[srl-keychain:name = current()]' + '/srl-keychain:type = "vrrp"'
+              {
+                  error-message "Only keychain of type vrrp can be assigned";
+              }
+          }  
+
+    }  
+
+      container interface-tracking {
+          description 
+              "Interface reference for interface tracking";
+
+          list track-interface {
+              key "interface";
+              description 
+                 "Interface reference for interface tracking.
+                  VRRP Group can track multiple interfaces.";
+              leaf interface {
+                  description 
+                      "Interface to track";
+                  type leafref {
+                      path "/srl_nokia-if:interface/srl_nokia-if:name";
+                  }
+              }
+              leaf priority-decrement {
+                  description 
+                      "For each tracked interface that is down then the priority 
+                      is decremented by the specific amount to a minimum value of 0";
+                  type uint8;
+              }
+          }
+      }
+      leaf state {
+          type identityref {
+        base vrrp-state-type;
+          }
+          config false;
+          description
+        "Virtual Router state (Initialize, Backup, Master)";
+    }
+    leaf oper-state {
+      config false;
+      description
+        "VRRP Operational state";
+      type srl_nokia-comm:oper-state;
+      }
+      leaf oper-down-reason {
+        config false;
+        type vrrp-oper-down-reason;
+        description
+          "The first (and possibly only) reason for the vrrp-group being operationally down";
+      }
+      leaf owner {
+        config false;
+        type boolean;
+        description
+          "VRRP instance is owner or not";
+      }
+      leaf operational-priority {
+          config false;
+          description 
+              "Reports the current VRRP operational priority.";
+          type uint8;
+      }
+      leaf master-inherit-interval {
+          description 
+              "Learn VRRP advertisement interval from master";
+          type boolean;
+          default false;
+      }
+    leaf oper-interval {
+      description 
+        "The operational advertisement interval between VRRP messages";
+      type uint16;
+      }
+    leaf current-master {
+          config false;
+              description
+        "IP address of node currently acting as VRRP master";
+      type srl_nokia-comm:ip-address;
+          }
+    leaf last-transition {
+      config false;
+              description
+        "timestamp for last master router transition";
+      type srl_nokia-comm:date-and-time;
+          }
+    container statistics {
+      leaf advertisements-sent {
+        config false;
+              description
+            "Counter for the total number fo VRRP advertisement messages sent";
+        type srl_nokia-comm:zero-based-counter64;
+          }
+      leaf advertisements-received {
+        config false;
+        description 
+            "Counter for the total numebr fo VRRP advertisement messages received";
+        type srl_nokia-comm:zero-based-counter64;
+      }
+      leaf advertisements-discarded-version-mismatch {
+        config false;
+        description 
+            "Counter for the total numebr fo VRRP advertisement messages discarded due to version mismatch";
+        type srl_nokia-comm:zero-based-counter64;
+      }
+
+      leaf advertisements-discarded-authfail {
+        config false;
+        description 
+            "Counter for the total numebr fo VRRP advertisement messages discarded due to authentication failure";
+        type srl_nokia-comm:zero-based-counter64;
+      }
+      leaf advertisements-discarded-authtype-mismatch {
+        config false;
+        description 
+            "Counter for the total numebr fo VRRP advertisement messages discarded due to authentication type mismatch";
+        type srl_nokia-comm:zero-based-counter64;
+      }
+      leaf advertisements-discarded-address-mismatch {
+        config false;
+        description 
+            "Counter for the total numebr fo VRRP advertisement messages discarded due to address mismatch";
+        type srl_nokia-comm:zero-based-counter64;
+      }
+      leaf priority-zero-packets-sent {
+        config false;
+        description 
+            "Counter for the total numebr fo VRRP advertisement messages sent out with priority 0";
+        type srl_nokia-comm:zero-based-counter64;
+      }
+      leaf priority-zero-packets-received {
+        config false;
+        description 
+            "Counter for the total numebr fo VRRP advertisement messages received with priority 0";
+        type srl_nokia-comm:zero-based-counter64;
+      }
+      leaf advertisements-discarded-ttl {
+        config false;
+        description 
+            "Counter for the total numebr fo VRRP advertisement messages discarded due to ttl error";
+        type srl_nokia-comm:zero-based-counter64;
+      }
+      leaf advertisements-discarded-length {
+        config false;
+        description 
+            "Counter for the total numebr fo VRRP advertisement messages discarded due to length of the packet";
+        type srl_nokia-comm:zero-based-counter64;
+      }
+      leaf advertisements-discarded-interval {
+        config false;
+        description 
+            "Counter for the total numebr fo VRRP advertisement messages discarded due to interval mismatch";
+        type srl_nokia-comm:zero-based-counter64;
+      }
+      leaf advertisements-interval-error {
+        config false;
+        description 
+            "Counter for the total numebr fo VRRP advertisement messages with interval mismatch";
+        type srl_nokia-comm:zero-based-counter64;
+      }
+      leaf advertisements-discarded-total {
+        config false;
+        description 
+            "Counter for the total numebr fo VRRP advertisement messages dicarded";
+        type srl_nokia-comm:zero-based-counter64;
+      }
+  }
+
+  }
+
+  grouping ipv4-vrrp-top {
+      container vrrp {
+          if-feature srl_nokia-feat:vrrp;
+          presence "Configure VRRP IPv4";
+          description 
+              "VRRP Configuration and State under a IPv4 context of a 
+               sub-interface"; 
+
+          list vrrp-group {
+              key "virtual-router-id";
+              description 
+                  "VRRP Group Specific Configuration under IPv4 context"; 
+          
+              uses vrrp-group-key;
+              uses vrrp-group-common-config;
+              leaf-list virtual-address {
+                  description 
+                      "Associated Virtual IP address.";
+                  type srl_nokia-comm:ip-address;
+              }
+              leaf version {
+                  default 2;
+                  description 
+                      "VRRP version for the Instance";
+                  type uint8;
+              }
+          }
+      }      
+  }
+
+  grouping ipv6-vrrp-top {
+      container vrrp {
+          if-feature srl_nokia-feat:vrrp;
+          presence "Configure VRRP IPv6";
+          description 
+              "VRRP Configuration and State under a IPv6 context of a 
+               sub-interface"; 
+
+          list vrrp-group {
+              key "virtual-router-id";
+              description 
+                  "VRRP Group Specific Configuration under IPv6 context"; 
+
+              uses vrrp-group-key;
+              uses vrrp-group-common-config;
+              leaf-list virtual-address {
+                  description 
+                      "Associated Virtual IP address.";
+                  type srl_nokia-comm:ipv6-address;
+                  must "not(.=starts-with(.,'ff') or starts-with(.,'fe80'))" {
+                      error-message "Not a global unicast IPv6 address";
+                  }
+              }
+              leaf version {
+                  default 3;
+                  description 
+                      "VRRP version for the Instance";
+                  type uint8;
+                  must ".=3" {
+                      error-message "version 3 only allowed for IPv6 instance";
+                  }
+              }
+
+              leaf virtual-link-local-address {
+                  config false;
+                  type srl_nokia-comm:ipv6-address;
+                  description
+                      "Generated link local address based on virtual-mac for virtual router instance";
+              }
+          }
+      }
+  }
+
+  augment "/srl_nokia-if:interface/srl_nokia-if:subinterface/srl_nokia-if:ipv4" {
+      uses ipv4-vrrp-top;
+  }
+
+  augment "/srl_nokia-if:interface/srl_nokia-if:subinterface/srl_nokia-if:ipv6" {
+      uses ipv6-vrrp-top;
+  }
+
+}

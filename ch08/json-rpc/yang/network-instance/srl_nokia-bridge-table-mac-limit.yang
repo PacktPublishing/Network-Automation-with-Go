@@ -1,0 +1,40 @@
+module srl_nokia-bridge-table-mac-limit {
+
+  yang-version "1.1";
+
+  // namespace
+  namespace "urn:srl_nokia/network-instance/bridge-table/mac-limit";
+
+  prefix "srl_nokia-bridge-table-mac-limit";
+
+  description
+    "This yang file gives a description of bridge table mac limit configuration.";
+
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+
+  grouping bridge-table-mac-limit-top {
+    container mac-limit {
+      description "Bridge Table size and thresholds.";
+      leaf maximum-entries {
+        type int32 {
+          range "1..8192";
+        }
+        default "250";
+        description "Maximum number of mac addresses allowed in the bridge-table.";
+      }
+      leaf warning-threshold-pct {
+        type int32 {
+          range "6..100";
+        }
+        default "95";
+        description 
+          "Percentage of the configured max-number-macs over which a warning is triggered.
+          The warning message is cleared when the percentage drops below the configured 
+          percentage minus 5%";
+      }
+    }
+  }
+}

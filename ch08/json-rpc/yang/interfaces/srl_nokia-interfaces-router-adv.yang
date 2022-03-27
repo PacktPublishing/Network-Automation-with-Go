@@ -1,0 +1,197 @@
+module srl_nokia-interfaces-router-adv {
+    yang-version 1.1;
+
+    // namespace
+    namespace "urn:srl_nokia/interfaces/ip/ra";
+
+    prefix "srl_nokia-if-ip-ra";
+
+    // import some basic types
+    import srl_nokia-interfaces {
+        prefix srl_nokia-if;
+    }
+    import srl_nokia-common {
+        prefix srl_nokia-comm;
+    }
+
+    import srl_nokia-features {
+        prefix srl_nokia-feat;
+    }
+
+    description
+      "Model for managing ICMPv6 router advertisement on IPv6 subinterfaces.";
+
+  revision 2021-06-30 {
+    description
+      "SRLinux 21.6.1";
+  }
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+
+    grouping ipv6-ra-top {
+        container router-advertisement {
+            description
+              "Container for configuring IPv6 router discovery options";
+
+            if-feature srl_nokia-feat:future-21-6-2;
+
+            container router-role {
+                description
+                  "IPv6 router advertisement options that apply when the role of the interface is a router interface.";
+                leaf admin-state {
+                    description
+                      "Administratively enable or disable the sending of router advertisements on the subinterface.";
+                    type srl_nokia-comm:admin-state;
+                }
+                leaf current-hop-limit {
+                    description
+                      "The current hop limit to advertise in the router advertisement messages.";
+                    type uint8;
+                    default 64;
+                }
+                leaf ip-mtu {
+                    description
+                      "The IP MTU to advertise in the router advertisement messages and that hosts should associate with the link on which these messages are received.
+
+                      If no value is specified the option is not included.";
+                    type uint16 {
+                        range "1280..9486";
+                    }
+                }
+                leaf managed-configuration-flag {
+                    description
+                      "When this is set the M-bit is set in the router advertisement messages, indicating that hosts should use DHCPv6 to obtain IPv6 addresses.";
+                    type boolean;
+                    default false;
+                }
+                leaf other-configuration-flag {
+                    description
+                      "When this is set the O-bit is set in the router advertisement messages, indicating that hosts should use DHCPv6 to obtain other configuration information (besides addresses).";
+                    type boolean;
+                    default false;
+                }
+                leaf max-advertisement-interval {
+                    description
+                      "The maximum time between sending router advertisement messages to the all-nodes multicast address. 
+                       
+                       Each subinterface has its own timer. Whenever the timer fires the message is sent and then the timer is reset to a uniformly distributed random value between min-advertisement-interval and max-advertisement-interval. The RA message can be sent before timer expiry in response to a RS message.";
+                    type uint16 {
+                        range "4..1800";
+                    }
+                    default 600;
+                    units "seconds";
+                }
+                leaf min-advertisement-interval {
+                    description
+                      "The minimum time between sending router advertisement messages to the all-nodes multicast address.
+                       
+                       Each subinterface has its own timer. Whenever the timer fires the message is sent and then the timer is reset to a uniformly distributed random value between min-advertisement-interval and max-advertisement-interval. The RA message can be sent before timer expiry in response to a RS message.";
+                    type uint16 {
+                        range "3..1350";
+                    }
+                    default 200;
+                    units "seconds";
+                }
+                leaf reachable-time {
+                    description
+                      "The time, in milliseconds, that is advertised as the reachable time in RA messages and that hosts use for the ICMPv6 Neighbor Unreachability Detection algorithm. A value of zero means unspecified by this router.";
+                    type uint32 {
+                        range "0..3600000";
+                    }
+                    default 0;
+                }
+                leaf retransmit-time {
+                    description
+                      "The time, in milliseconds, that is advertised as the retrans-timer in RA messages and that hosts use for address resolution and the Neighbor Unreachability Detection algorithm. It represents the time between retransmitted NS messages. A value of zero means unspecified by this router.";
+                    type uint32 {
+                        range "0..1800000";
+                    }
+                    default 0;
+                }
+                leaf router-lifetime {
+                    description
+                      "The lifetime in seconds that is advertised as the router lifetime in RA messages. This indicates the time period for which the advertising router can be used as a default router/gateway. A value of 0 means the router should not be used as a default gateway.";
+                    type uint16 {
+                        range "0..9000";
+                    }
+                    default 1800;
+                }
+                list prefix {
+                    description
+                      "The list of IPv6 prefixes to advertise in the router advertisement messages.";
+                    max-elements 16;
+
+                    key ipv6-prefix;
+
+                    leaf ipv6-prefix {
+                        description
+                          "An IPv6 global unicast address prefix.";
+                        type srl_nokia-comm:ipv6-prefix;
+                        must "not(.='::/128' or .='::1/128' or starts-with(.,'ff') or starts-with(.,'fe80'))" {
+                            error-message "Not a global unicast IPv6 address prefix";
+                        }
+                    }
+                    leaf autonomous-flag {
+                        description
+                          "When this is set in the prefix information option hosts can use the prefix for stateless address autoconfiguration (SLAAC). ";
+                        type boolean;
+                        default true;
+                    }
+                    leaf on-link-flag {
+                        description
+                          "When this is set in the prefix information option hosts can use the prefix for on-link determination.";
+                        type boolean;
+                        default true;
+                    }
+                    leaf preferred-lifetime {
+                        description
+                          "The length of time in seconds (relative to the time the packet is sent) that addresses generated from the prefix via stateless address autoconfiguration remain preferred.";
+                        type union {
+                            type enumeration {
+                                enum "infinite";
+                            }
+                            type uint32;
+                        }
+                        units "seconds";
+                        default 604800;
+                    }
+                    leaf valid-lifetime {
+                        description
+                          "The length of time in seconds (relative to the time the packet is sent) that the prefix is valid for the purpose of on-link determination. ";
+                        type union {
+                            type enumeration {
+                                enum "infinite";
+                            }
+                            type uint32;
+                        }
+                        units "seconds";
+                        default 2592000;
+                    }
+                }
+            }
+            leaf-list debug {
+                type enumeration {
+                    enum "messages" {
+                        description
+                          "Capture all router-solicitation and router-advertisement messages sent and received by the subinterface";
+                    }
+                }
+                description
+                  "List of events to debug";
+            }
+        }
+    }
+
+    augment "/srl_nokia-if:interface/srl_nokia-if:subinterface/srl_nokia-if:ipv6" {
+        description
+          "IPv6 address family configuration for interfaces";
+
+        uses ipv6-ra-top;
+    }
+}

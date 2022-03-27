@@ -1,0 +1,379 @@
+module srl_nokia-te-policies {
+
+  yang-version 1.1;
+
+  // namespace
+  namespace "urn:srl_nokia/te-policies";
+
+  prefix "srl_nokia-te-policies";
+
+  import srl_nokia-common { prefix srl_nokia-comm; }
+  import srl_nokia-network-instance { prefix srl_nokia-netinst; }
+
+  description
+    "Configuration and state related to segment routing TE policies.";
+
+  revision 2021-06-30 {
+    description
+      "SRLinux 21.6.1";
+  }
+
+  identity candidate-path-not-selected-reason {
+    description
+      "Base identity for which reasons for not selecting candidate path are derived from";
+  }
+  identity not-best {
+    base candidate-path-not-selected-reason;
+    description
+      "Higher preference path exists";
+  }
+  identity no-valid-segment-list {
+    base candidate-path-not-selected-reason;
+    description
+      "Candidate path has no valid segment list(s)";
+  }
+  identity empty-segment-list {
+    base candidate-path-not-selected-reason;
+    description
+      "Candidate path has empty segment list(s)";
+  }
+  identity invalid-binding-sid {
+    base candidate-path-not-selected-reason;
+    description
+      "Candidate path has invalid binding SID";
+  }
+  identity policy-down-reason {
+   description
+      "Base identity for the reasons why SR policy is operationally down";
+  }
+  identity policy-admin-down {
+    base policy-down-reason;
+    description "Policy is administrately down";
+  }
+  identity no-candidate-path {
+    base policy-down-reason;
+    description "Policy has no candidate path";
+  }
+  identity no-valid-candidate-path {
+    base policy-down-reason;
+    description "Policy has no valid candidate path";
+  }
+  identity candidate-path-invalid-segment-list {
+    base policy-down-reason;
+    description "Policy's candidate path has invalid segment list";
+  }
+
+  typedef segment-type {
+    type enumeration {
+      enum segment-type-1 {
+        value 1;
+        description "SR-MPLS Label";
+      }
+      enum segment-type-2 {
+        value 2;
+        description "SRv6 SID";
+      }
+      enum segment-type-3 {
+        value 3;
+        description "IPv4 Prefix with optional SR Algorithm";
+      }
+      enum segment-type-4 {
+        value 4;
+        description "IPv6 Global Prefix with optional SR Algorithm for SR-MPLS";
+      }
+      enum segment-type-5 {
+        value 5;
+        description "IPv4 Prefix with Local Interface ID";
+      }
+      enum segment-type-6 {
+        value 6;
+        description "IPv4 Addresses for link endpoints as Local, Remote pair";
+      }
+      enum segment-type-7 {
+        value 7;
+        description "IPv6 Prefix and Interface ID for link endpoints as Local,
+           Remote pair for SR-MPLS";
+      }
+      enum segment-type-8 {
+        value 8;
+        description "IPv6 Addresses for link endpoints as Local, Remote pair for
+           SR-MPLS";
+      }
+      enum segment-type-9 {
+        value 9;
+        description "IPv6 Global Prefix with optional SR Algorithm for SRv6";
+      }
+      enum segment-type-10 {
+        value 10;
+        description "IPv6 Prefix and Interface ID for link endpoints as Local,
+           Remote pair for SRv6";
+      }
+      enum segment-type-11 {
+        value 11;
+        description "IPv6 Addresses for link endpoints as Local, Remote pair for
+           SRv6";
+      }
+    }
+    description "SR segment type";
+  }
+
+  typedef protocol-origin-type {
+    type enumeration {
+      enum pcep {
+        value 10;
+        description "PCEP used as signalling mechanism for the candidate path";
+      }
+      enum bgp {
+        value 20;
+        description "BGP used as signalling mechanism for the candidate path";
+      }
+      enum local {
+        value 30;
+        description "Management interface used for candidate path instantiation";
+      }
+    }
+    description "Originating protocol type";
+  }
+
+  typedef policy-oper-state {
+    type enumeration {
+      enum up {
+        value 1;
+        description "TE policy is operationally up";
+      }
+      enum down {
+        value 2;
+        description "TE policy is operationally down";
+      }
+    }
+    description "TE policy oper state";
+  }
+
+  grouping segment-config {
+    description "Segment properties grouping";
+    leaf segment-index {
+      type uint8;
+      description "Index to enumerate the different segments in a segment-list";
+    }
+    leaf type {
+      type segment-type;
+      description "Segment type";
+    }
+    container segment-type-1 {
+      description
+        "Segment identified by MPLS label";
+      leaf sid-value {
+        type srl_nokia-comm:mpls-label;
+        description "MPLS label value";
+      }
+    }
+  }
+
+  grouping explicit-path-properties {
+    description
+      "Explicit path properties of the candidate path";
+    list segment-list {
+      key "segment-list-index";
+      leaf segment-list-index {
+        type uint8;
+        description "Index to enumerate the different segment lists for a candidate path.";
+      }
+      list segment {
+        key "segment-index";
+        description "Configure Segment/hop at the index";
+        uses segment-config;
+      }
+    }
+  }
+
+  grouping candidate-paths {
+    description "SR policy candidate path grouping";
+    list candidate-path {
+      description "SR policy Candidate path(s) list entry";
+      key "candidate-path-index";
+      leaf candidate-path-index {
+        type uint8;
+        description
+          "Index to enumerate the different candidate paths for a (color, endpoint).";
+      }
+      leaf protocol-origin {
+        config false;
+        type protocol-origin-type;
+        description
+          "Instantiation mechanism used to create the candidate path";
+      }
+      leaf originator {
+        config false;
+        type string;
+        description
+          "Identifier (concatenation of ASN and node-address) of the node that signalled/instantiated the candidate path on headend";
+      }
+      leaf discriminator {
+        config false;
+        type uint32;
+        description "Candidate path distinguisher";
+      }
+      leaf preference {
+        type uint32 {
+          range "1..65535";
+        }
+        description "Candidate path preference";
+      }
+      leaf is-best-candidate-path {
+        type boolean;
+        config false;
+        description
+          "True if the candidate path is the best candidate path, False otherwise";
+      }
+      leaf non-selection-reason {
+        type identityref {
+          base candidate-path-not-selected-reason;
+        }
+        config false;
+        description
+          "Candidate path not selected reason";
+      }
+      leaf is-valid {
+        type boolean;
+        config false;
+        description
+          "True if the segment-list is valid, False otherwise";
+      }
+    }
+  }
+
+  grouping te-policies-top {
+    description "Traffic engineering policies grouping";
+    container te-policies {
+      description "Container with TE policies";
+      uses static-policies;
+      uses sr-policies;
+    }
+  }
+
+  grouping static-policies {
+    list static-policy {
+      key "name";
+      leaf name {
+        type srl_nokia-comm:name;
+        description "policy name";
+      }
+      leaf color {
+        type uint32 {
+          range "1..4294967295";
+        }
+        description "Color associated with the policy. Only applicable to SR policies.";
+        //must "not (../class-based-forwarding)";
+      }
+      leaf endpoint {
+        mandatory "true";
+        type srl_nokia-comm:ip-address;
+        description "Policy endpoint IP address";
+      }
+      //cbf
+      leaf admin-state {
+        type srl_nokia-comm:admin-state;
+        default 'enable';
+        description
+          "SR policy administrative state";
+      }
+      leaf description {
+        type srl_nokia-comm:description;
+        description "Description of the policy";
+      }
+      leaf preference {
+        type uint32 {
+          range "1..65535";
+        }
+        default 100;
+        description "TE policy preference";
+      }
+      leaf oper-state {
+        type policy-oper-state;
+        config false;
+        description
+          "TE policy operational state";
+      }
+      leaf used-in-forwarding {
+        type boolean;
+        config false;
+        description
+          "True if the TE policy is installed in the datapath";
+      }
+      leaf forwarded-packets {
+        type srl_nokia-comm:zero-based-counter64;
+        config false;
+        description "Number of packets forwarded";
+      }
+      leaf forwarded-octets {
+        type srl_nokia-comm:zero-based-counter64;
+        config false;
+        units "byte";
+        description "Number of bytes forwarded";
+      }
+      choice type {
+        description
+          "Type of path";
+        case explicit-local {
+          description
+            "Candidate path with explicitly defined set/s of segment-lists";
+          uses explicit-path-properties;
+        }
+        case dynamic-local {
+          //if-feature "srl_nokia-feat:local-cspf";
+          description
+            "Candidate path with dynamic computed segment-lists";
+        }
+      }
+    }
+  }
+
+  grouping sr-policies {
+    list segment-routing-policy {
+      config false;
+      key "color endpoint";
+      leaf color {
+        type uint32 {
+          range "1..4294967295";
+        }
+        description
+          "Color associated with the SR policy";
+      }
+      leaf endpoint {
+        type srl_nokia-comm:ip-address;
+        description "Policy endpoint IP address";
+      }
+      leaf transition-count {
+        type uint32;
+        config false;
+        description "Indicates number of up/down transitions";
+      }
+      leaf up-time {
+        type srl_nokia-comm:date-and-time;
+        config false;
+        description "Policy up time in seconds";
+      }
+      leaf down-time {
+        type srl_nokia-comm:date-and-time;
+        config false;
+        description "Policy down time in seconds";
+      }
+      leaf forwarded-packets {
+        type srl_nokia-comm:zero-based-counter64;
+        config false;
+        description "Number of packets forwarded";
+      }
+      leaf forwarded-octets {
+        type srl_nokia-comm:zero-based-counter64;
+        config false;
+        units "byte";
+        description "Number of bytes forwarded";
+      }
+      uses candidate-paths;
+    }
+  }
+
+  augment "/srl_nokia-netinst:network-instance" {
+    uses te-policies-top;
+  }
+}

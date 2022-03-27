@@ -1,0 +1,29 @@
+module srl_nokia-tools-boot {
+  yang-version 1.1;
+  namespace "urn:srl_nokia/tools-boot";
+  prefix srl-tools-boot;
+
+  import srl_nokia-tools-system {
+    prefix srl-tools-system;
+  }
+
+  description
+    "This module defines operational commands related to the booting the system.";
+
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+  grouping boot-top {
+    container boot {
+      presence "Configure tools system boot";
+      description
+        "Top-level container for operational commands related to booting the system";
+    }
+  }
+
+  augment "/srl-tools-system:system" {
+    uses boot-top;
+  }
+}

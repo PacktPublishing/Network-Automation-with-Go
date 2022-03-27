@@ -1,0 +1,79 @@
+module srl_nokia-interfaces-bridge-table-mac-table {
+
+  yang-version "1.1";
+
+  // namespace
+  namespace "urn:srl_nokia/interfaces/bridge-table/mac-table";
+
+  prefix "srl_nokia-interfaces-bridge-table-mac-table";
+
+  import srl_nokia-common {
+    prefix srl_nokia-comm;
+  }
+  import srl_nokia-interfaces {
+    prefix srl_nokia-if;
+  }
+  import srl_nokia-extensions {
+    prefix srl_nokia-ext;
+  }
+
+  description
+    "This yang file gives a description of mac entries installed in this interfac's bridge table.";
+
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+
+  grouping bridge-table-mac-table-top {
+    container mac-table {
+      config false;
+      list mac {
+        key "address";
+        description "macs learnt on the bridging instance";
+        leaf address {
+          type srl_nokia-comm:mac-address;
+        }
+
+        leaf type {
+          type srl_nokia-comm:mac-type;
+          srl_nokia-ext:show-importance "high";
+          description
+            "the type of the mac installed in the fib.";
+        }
+
+        leaf last-update {
+          type srl_nokia-comm:date-and-time-delta;
+          srl_nokia-ext:show-importance "high";
+          description
+            "The date and time of the last update of this mac";
+        }
+
+        leaf not-programmed-reason {
+          type enumeration {
+            enum "mac-limit";
+            enum "failed-on-slots";
+            enum "no-destination-index";
+          }
+          description 
+             "The reason why the mac is not programmed";
+        }
+        leaf-list failed-slots {
+          type uint8 {
+            range "1..8";
+          }
+          description
+            "The list of slot IDs corresponding to the linecards that did not successfully program the mac";
+        }
+      }
+    }  
+  }
+
+  augment "/srl_nokia-if:interface/srl_nokia-if:subinterface/srl_nokia-if:bridge-table" {
+    uses bridge-table-mac-table-top;
+  }
+}

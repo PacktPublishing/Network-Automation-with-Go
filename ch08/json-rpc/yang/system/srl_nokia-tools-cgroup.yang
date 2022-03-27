@@ -1,0 +1,29 @@
+module srl_nokia-tools-cgroup {
+  yang-version 1.1;
+  namespace "urn:srl_nokia/tools-cgroup";
+  prefix srl-tools-cgroup;
+
+  import srl_nokia-tools-system {
+    prefix srl-tools-system;
+  }
+
+  description
+    "This module defines query commands related to the cgroup in the system.";
+
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+
+  grouping cgroup-top {
+    container cgroup {
+      presence "Command for tools system cgroup";
+      description
+        "Top-level container for query commands related to cgroup in the system";
+    }
+  }
+
+  augment "/srl-tools-system:system" {
+    uses cgroup-top;
+  }
+}

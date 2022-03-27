@@ -1,0 +1,89 @@
+module srl_nokia-interfaces-ip-dhcp {
+  yang-version 1.1;
+
+  // namespace
+  namespace "urn:srl_nokia/interfaces/ip/dhcp";
+
+  prefix "srl_nokia-if-ip-dhcp";
+
+  // import some basic types
+  import srl_nokia-interfaces { prefix srl_nokia-if; }
+
+  description
+    "Model for managing DHCP and DHCPv6 on IP subinterfaces";
+
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+  grouping subinterface-dhcpv4 {
+    container dhcp-client {
+      presence "The subinterface attempts to obtain its IPv4 address and prefix using DHCP";
+      description
+        "Container for options related to DHCP";
+      must "../../../srl_nokia-if:name = 'mgmt0' and ../../srl_nokia-if:index = 0" {
+        error-message "dhcp-client only configurable on mgmt0.0 subinterface";
+      }
+      /* leaf accept-default {
+        type boolean;
+        default false;
+        description
+          "If set to true the DHCP client processes option 3 in the received DHCPACK message to install a default-route with preference 254 into the route-table of the network-instance owning the mgmt0.0 subinterface
+
+          The owner of this default route is dhcp";
+      } */
+      container trace-options {
+        description
+          "Container for tracing DHCPv4 operations on the subinterface";
+        leaf-list trace {
+          type enumeration {
+            enum "messages" {
+              description
+                "Capture all DHCPv4 messages sent and received by the subinterface";
+            }
+          }
+          description
+            "List of events to trace";
+        }
+      }
+    }
+  }
+
+  grouping subinterface-dhcpv6 {
+    container dhcp-client {
+      presence "The subinterface attempts to obtain its IPv6 address using DHCPv6";
+      description
+        "Container for options related to DHCPv6";
+      must "../../../srl_nokia-if:name = 'mgmt0' and ../../srl_nokia-if:index = 0" {
+        error-message "dhcp-client only configurable on mgmt0.0 subinterface";
+      }
+      container trace-options {
+        description
+          "Container for tracing DHCPv6 operations on the subinterface";
+        leaf-list trace {
+          type enumeration {
+            enum "messages" {
+              description
+                "Capture all DHCPv6 messages sent and received by the subinterface";
+            }
+          }
+          description
+            "List of events to trace";
+        }
+      }
+    }
+  }
+
+  augment "/srl_nokia-if:interface/srl_nokia-if:subinterface/srl_nokia-if:ipv4" {
+    uses subinterface-dhcpv4;
+  }
+
+  augment "/srl_nokia-if:interface/srl_nokia-if:subinterface/srl_nokia-if:ipv6" {
+    uses subinterface-dhcpv6;
+  }
+}

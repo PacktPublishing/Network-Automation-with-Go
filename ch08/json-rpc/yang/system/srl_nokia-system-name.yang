@@ -1,0 +1,54 @@
+module srl_nokia-system-name {
+  yang-version 1.1;
+
+  // namespace
+
+  namespace "urn:srl_nokia/system-name";
+  prefix srl_nokia-system-name;
+
+  import srl_nokia-system {
+    prefix srl-system;
+  }
+  import srl_nokia-common {
+    prefix srl-comm;
+  }
+
+  description
+    "This module defines configuration related to the name of the system";
+
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+  grouping name-config-top {
+    container name {
+      description
+        "Contains configuration and state related to system naming";
+      leaf domain-name {
+        type srl-comm:domain-name;
+        description
+          "The system domain name";
+      }
+      leaf host-name {
+        type string {
+          length "1..63";
+          pattern '(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])';
+        }
+        description
+          "The system host name";
+        // The default can't be specified here becuase the back end needs to know if a value is actually configured
+        // or not - and by specifying the default, a value is always passed to the back end.
+        // default "srlinux";
+      }
+    }
+  }
+
+  grouping name-top {
+    uses name-config-top;
+  }
+
+  augment "/srl-system:system" {
+    uses name-top;
+  }
+}

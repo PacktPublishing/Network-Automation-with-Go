@@ -1,0 +1,459 @@
+module srl_nokia-ip-route-tables {
+  yang-version 1.1;
+
+  namespace "urn:srl_nokia/ip-route-tables";
+  prefix srl_nokia-ip-route-tables;
+
+  import srl_nokia-common { prefix srl_nokia-comm; }
+  import srl_nokia-extensions { prefix srl_nokia-ext; }
+  import srl_nokia-network-instance { prefix srl_nokia-netinst; }
+  import srl_nokia-interfaces { prefix srl_nokia-if; }
+
+  description
+    "A model describing the IP routing tables of a network instance.";
+
+  revision 2021-06-30 {
+    description
+      "SRLinux 21.6.1";
+  }
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+  identity fib-nexthop-type {
+    description
+      "Base type for next-hop object types.";
+  }
+
+  identity extract {
+    base fib-nexthop-type;
+    description
+      "Next-hop will cause matching packets to be delivered to the CPM.";
+  }
+
+  identity direct {
+    base fib-nexthop-type;
+    description
+      "Next-hop was resolved by a local route - i.e. it is an address on a connected subnet.";
+  }
+
+  identity discard {
+    base fib-nexthop-type;
+    description
+      "Next-hop will cause matching packets to be dropped without ICMP generation.";
+  }
+
+  identity reject {
+    base fib-nexthop-type;
+    description
+      "Next-hop will cause matching packets to be dropped with ICMP generation.";
+  }
+
+  identity indirect {
+    base fib-nexthop-type;
+    description
+      "Next-hop was resolved by a non-local route - i.e. it is not an address on a connected subnet.";
+  }
+
+  identity static-mpls {
+    base fib-nexthop-type;
+    description
+      "Next-hop will push or swap a label.";
+  }
+
+  identity tunnel {
+    base fib-nexthop-type;
+    description
+      "Next-hop is a tunnel.";
+  }
+
+  identity broadcast {
+    base fib-nexthop-type;
+    description
+      "Next-hop will cause matching subnet-bradcast packets to be delivered to the control plane.";
+  }
+
+  grouping ipv4-ipv6-entry-common-fields {
+    leaf route-type {
+      type identityref {
+        base srl_nokia-comm:ip-route-type;
+      }
+      srl_nokia-ext:show-importance "high";
+      description
+        "The type of the IP route";
+    }
+    leaf route-owner {
+      type string;
+      srl_nokia-ext:show-importance "high";
+      description
+        "The application name of the owner of the IP route";
+    }
+    leaf metric {
+      type uint32;
+      srl_nokia-ext:show-importance "high";
+      description
+        "The metric of the IP route. In general, when comparing two routes with the same owner and preference, the route with the lower metric is the one that is activated and used for forwarding.";
+    }
+    leaf preference {
+      type uint8;
+      srl_nokia-ext:show-importance "high";
+      description
+        "The IP route table preference. This is sometimes called the administrative distance of the route. In general, when comparing any two routes, the route with the lower preference is the one that is activated and used for forwarding.";
+    }
+    leaf active {
+      type boolean;
+      srl_nokia-ext:show-importance "high";
+      description
+        "If set to true then the route is installed as the active route for the IP prefix in the FIB. A route can be inactive because there is a more preferred route for the same prefix or else its next-hops are unresolved.";
+    }
+    leaf best {
+      type boolean;
+      srl_nokia-ext:show-importance "high";
+      description
+        "If set to true the route is the most preferred route for the IP prefix amongst all route types and route owners.";
+    }
+    leaf last-app-update {
+      type srl_nokia-comm:date-and-time-delta;
+      description
+        "The date and time of the last update of this route by the owning application or protocol.";
+    }
+    leaf next-hop-group {
+      type leafref {
+        path "../../../next-hop-group/index";
+      }
+      description "The next-hop-group indirection object used by this route.";
+    }
+    leaf resilient-hash {
+      type boolean;
+      description
+        "Set to true if the route is covered by a resilient-hash-prefix entry";
+    }
+    container fib-programming {
+      description
+        "Container for state related to the FIB programming of the route";
+      leaf status {
+        type enumeration {
+          enum "success" {
+            description
+              "The route was downloaded to the linecards and all of them have sent an acknowledgement that covers the route.";
+          }
+          enum "failed" {
+            description
+              "The route was not programmed into the FIB table of one or more linecards due to the FIB table being full.";
+          }
+          enum "pending" {
+            description
+              "The route was downloaded to the linecards but some of them have not sent an acknowledgement yet.";
+          }
+        }
+        description
+          "The status of the FIB programming";
+      }
+      leaf-list failed-slots {
+        type uint8 {
+          range "1..8";
+        }
+        description
+          "The list of slot IDs corresponding to the linecards that did not successfully program the route due to the FIB table being full";
+      }
+    }
+  }
+
+  grouping ip-table-statistics {
+    container statistics {
+      leaf active-routes {
+        type uint32;
+        description
+          "The total number of prefixes, belonging to this address family, with an active route in the FIB.";
+      }
+      leaf active-routes-with-ecmp {
+        type uint32;
+        description
+          "The total number of prefixes, belonging to this address family, that have an active route in the FIB with multiple ECMP next-hops.";
+      }
+      leaf resilient-hash-routes {
+        type uint32;
+        description
+          "The total number of prefixes, belonging to this address family, with an active route in the FIB that have resilient hash support.";
+      }
+      leaf fib-failed-routes {
+        type uint32;
+        description
+          "The total number of prefixes, belonging to this address family, that were not installed successfully because datapath resources were unavailable.";
+      }
+      leaf total-routes {
+        type srl_nokia-comm:zero-based-counter64;
+        description
+          "The total number of routes, active and inactive, belonging to this address family, that are present in the routing table.";
+      }
+    }
+  }
+
+  grouping route-summary {
+    container route-summary {
+      description
+        "Route summary information";
+      list route-type {
+        key ip-route-type-name;
+        leaf ip-route-type-name {
+          type identityref {
+            base srl_nokia-comm:ip-route-type;
+          }
+          description
+            "IP route type";
+        }
+        leaf active-routes {
+          type uint32;
+          description
+            "Total number of prefixes associated with this route type that were submitted to fib-mgr and that fib-mgr successfully installed as active routes";
+        }
+      }
+    }
+  }
+
+  grouping ip-tables-top {
+    container ipv4-unicast {
+      description
+        "The container for the IPv4 unicast routing table of the network instance.";
+      list route {
+        key "ipv4-prefix route-type route-owner id";
+        leaf ipv4-prefix {
+          type srl_nokia-comm:ipv4-prefix;
+          description
+            "The IPv4 prefix associated with the route.";
+        }
+        leaf id {
+          type uint32;
+          description
+            "An owner-assigned index value that is unique for each of the routes for a given prefix.";
+        }
+        uses ipv4-ipv6-entry-common-fields;
+      }
+      uses ip-table-statistics;
+      uses route-summary;
+    }
+    container ipv6-unicast {
+      description
+        "The container for the IPv6 unicast routing table of the network instance.";
+      list route {
+        key "ipv6-prefix route-type route-owner id";
+        leaf ipv6-prefix {
+          type srl_nokia-comm:ipv6-prefix;
+          description
+            "The IPv6 prefix associated with the route.";
+        }
+        leaf id {
+          type uint32;
+          description
+            "An owner-assigned index value that is unique for each of the routes for a given prefix.";
+        }
+        uses ipv4-ipv6-entry-common-fields;
+      }
+      uses ip-table-statistics;
+      uses route-summary;
+    }
+  }
+
+  grouping next-hops-top {
+    list next-hop-group {
+      key index;
+      leaf index {
+        type uint64;
+        description
+          "A system-wide unique identifier of a next-hop-group indirection object (system allocated).";
+      }
+      // container fib-programming {
+      //   description
+      //     "Container for state related to the FIB programming of the next-hop-group";
+      //   leaf status {
+      //     description
+      //       "The fib programming status of the next-hop-group";
+      //     type enumeration {
+      //       enum "success" {
+      //         description
+      //           "All linecards report that they were able to successfully allocate a group FEC resource for the NHG (even if some of them could not obtain all the member FEC resources associated with the group).";
+      //       }
+      //       enum "failed" {
+      //         description
+      //           "At least one linecard could not successfully allocate a group FEC resource for the NHG";
+      //       }
+      //       enum "pending" {
+      //         description
+      //           "fib-mgr has not yet heard from all linecards yet.";
+      //       }
+      //     }
+      //   }
+      //   leaf-list failed-slots {
+      //     type uint8;
+      //     description
+      //       "The list of slot IDs corresponding to the linecards that did not successfully program the next-hop-group due to an out-of-resource condition.
+
+      //       Non-empty corresponds to a status of failed.";
+      //   }
+      // }
+      list next-hop {
+        key id;
+        leaf id {
+          type uint16 {
+            range 0..1023;
+          }
+          description
+            "A unique identifier of a next-hop member (system allocated).";
+        }
+        leaf next-hop {
+          type leafref {
+            path "../../../next-hop/index";
+          }
+        }
+        leaf resolved {
+          type enumeration {
+            enum "true";
+            enum "false";
+            enum "not-applicable";
+          }
+          description
+            "Set to true when the next-hop was resolved. This reads not-applicable for resolve=false next-hops.";
+        }
+        // container fib-programming {
+        //   description
+        //     "Container for state related to the FIB programming of the next-hop";
+        //   leaf status {
+        //     description
+        //       "The fib programming status of the next-hop";
+        //     type enumeration {
+        //       enum "success" {
+        //         description
+        //           "All linecards report that they were able to successfully allocate a member FEC resource for this next-hop within this NHG";
+        //       }
+        //       enum "failed" {
+        //         description
+        //           "At least one linecard could not successfully allocate a member FEC resource for this next-hop within this next-hop-group.";
+        //       }
+        //       enum "pending" {
+        //         description
+        //           "fib-mgr has not yet heard from all linecards yet.";
+        //       }
+        //     }
+        //   }
+        //   leaf-list failed-slots {
+        //     type uint8;
+        //     description
+        //       "The list of slot IDs corresponding to the linecards that did not successfully program the next-hop due to an out-of-resource condition.
+
+        //       Non-empty corresponds to a status of failed.";
+        //   }
+        // }
+      }
+    }
+    list next-hop {
+      key index;
+      leaf index {
+        type uint64;
+        description
+          "A system-wide unique identifier of a next-hop object (system allocated).";
+      }
+      leaf type {
+        type identityref {
+          base fib-nexthop-type;
+        }
+        srl_nokia-ext:show-importance "high";
+        description
+          "The next-hop type used by the datapath.";
+      }
+      leaf ip-address {
+        type srl_nokia-comm:ip-address;
+        srl_nokia-ext:show-importance "high";
+        description
+          "The next-hop IP address. Only populated when the next-hop type is indirect or tunnel or static-mpls.
+          
+          For a VXLAN tunnel this is the destination VTEP address.";
+      }
+      leaf subinterface {
+        type leafref {
+          path "/srl_nokia-if:interface/srl_nokia-if:subinterface/srl_nokia-if:name";
+        }
+        srl_nokia-ext:show-importance "high";
+        description
+          "The next-hop interface. Only populated when the next-hop type is direct.";
+      }
+      container resolving-route {
+        leaf ip-prefix {
+          type srl_nokia-comm:ip-prefix;
+          description
+            "The prefix of the resolving route.";
+        }
+        leaf route-type {
+          type identityref {
+            base srl_nokia-comm:ip-route-type;
+          }
+          description
+            "The type of the resolving route.";
+        }
+        leaf route-owner {
+          type string;
+          description
+            "The application name of the owner of the resolving route.";
+        }
+      }
+      container resolving-tunnel {
+        leaf ip-prefix {
+          type srl_nokia-comm:ip-prefix;
+          description
+            "The prefix of the resolving tunnel.";
+        }
+        leaf tunnel-type {
+          type identityref {
+            base srl_nokia-comm:tunnel-type;
+          }
+          description
+          "The type of the tunnel.";
+        }
+        leaf tunnel-owner {
+          type string;
+          description
+            "The application name of the owner of the resolving tunnel.";
+        }
+      }
+      container mpls {
+        leaf-list pushed-mpls-label-stack {
+          type srl_nokia-comm:mpls-label;
+          max-elements 1;
+          description
+            "The list of MPLS labels to push onto the packet when forwarding to this particular next-hop.";
+        }
+      }
+      container vxlan {
+        leaf vni {
+          type uint32 {
+            range "1..16777215";
+          }
+          description 
+            "VXLAN Network Identifier of the destination.";
+        }
+        leaf source-mac {
+          type srl_nokia-comm:mac-address;
+          description 
+            "VXLAN inner ethernet source mac-address.";
+        }
+        leaf destination-mac {
+          type srl_nokia-comm:mac-address;
+          description 
+            "VXLAN inner ethernet destination mac-address.";
+        }
+      }     
+    }
+  }
+  augment "/srl_nokia-netinst:network-instance/srl_nokia-netinst:route-table" {
+    uses ip-tables-top;
+    uses next-hops-top;
+  }
+}

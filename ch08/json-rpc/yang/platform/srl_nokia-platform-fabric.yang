@@ -1,0 +1,69 @@
+module srl_nokia-platform-fabric {
+  yang-version 1.1;
+
+  // namespace
+
+  namespace "urn:srl_nokia/platform-fabric";
+  prefix srl_nokia-platform-fabric;
+
+  import srl_nokia-platform {
+    prefix srl-platform;
+  }
+  import srl_nokia-extensions {
+    prefix srl-ext;
+  }
+  import srl_nokia-features {
+    prefix srl-feat;
+  }
+
+  description
+    "This module defines configuration and operational state data related to fabric modules.";
+
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+  grouping fabric-state-top {
+    description
+      "Grouping for fabric module state";
+    leaf slot {
+      type uint8 {
+        range "1..255";
+      }
+      description
+        "Numeric identifier for the fabric module";
+    }
+    leaf type {
+      config false;
+      type string;
+      srl-ext:show-importance "high";
+      description
+        "Fabric module type, as translated from the components EEPROM";
+    }
+  }
+
+  grouping fabric-top {
+    description
+      "Grouping for fabric configuration and state";
+    list fabric {
+      key "slot";
+      description
+        "Top-level container for fabric configuration and state";
+      uses fabric-state-top;
+      uses srl-platform:component-common-top;
+      uses srl-platform:component-locator;
+      uses srl-platform:component-power-state-top;
+      uses srl-platform:component-temperature-state-top;
+    }
+  }
+
+  augment "/srl-platform:platform" {
+    if-feature srl-feat:chassis;  
+    uses fabric-top;
+  }
+}

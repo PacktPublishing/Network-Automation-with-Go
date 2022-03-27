@@ -1,0 +1,150 @@
+module srl_nokia-ra_guard {
+    yang-version 1.1;
+
+    // namespace
+
+    namespace "urn:srl_nokia/ra_guard";
+    prefix srl_nokia-ra_guard;
+
+    // import some basic types
+    import srl_nokia-common { prefix srl_nokia-comm; }
+    import srl_nokia-extensions { prefix srl_nokia-ext; }
+    import srl_nokia-interfaces { prefix srl_nokia-if; }
+    import srl_nokia-system { prefix srl_nokia-system; }
+//    import srl_nokia-network-instance { prefix srl-netinst; }
+    import srl_nokia-routing-policy { prefix srl_rpol; }
+
+    import srl_nokia-features {
+      prefix srl-feat;
+    }
+
+/*
+system 
+     +--rw ra-guard-policy* [name] 
+        +--rw name                    
+        +--rw action {accept|discard; default=discard} 
+        +--rw source-prefix-set [name]  
+        +--rw hop-limit  {1..255} 
+        +--rw managed-config-flag {enable|disabled} 
+        +--rw other-config-flag {enable|disabled} 
+        +--rw advertised-prefix-set [name]  
+        +--rw router-preference {high|medium|low} 
+*/
+
+  revision 2021-06-30 {
+    description
+      "SRLinux 21.6.1";
+  }
+
+    grouping ra_guard-top {
+      list ra-guard-policy {
+       if-feature "srl-feat:ra-guard";
+        description
+          "List containing RA Guard Policy and parameters";
+        key "name";
+        leaf name {
+          type srl_nokia-comm:name;
+          description
+            "RA Guard Policy name";
+        }
+        leaf action {
+          type enumeration {
+            enum "accept";
+            enum "discard";
+          }
+          default "discard";
+          description
+            "Describes the RA Guard Policy action for RA Messages matching the specified attributes.
+            RA Messages no matching the specified attributes will be handled in the opposite manner.";
+        }
+        leaf source-prefix-set {
+          type leafref {
+            path "/srl_rpol:routing-policy/srl_rpol:prefix-set/srl_rpol:name";
+          }
+          description 
+            "Reference to a prefix set to match RA source address.
+            If not specified the verification is skipped.";   
+        }
+        leaf hop-limit{
+          type uint8 {
+            range "1..255";
+          }
+          description 
+            "Verifies the minimum advertised hop count limit.
+            If not specified the verification is skipped.";
+        }
+        leaf managed-config-flag {
+          type boolean;
+          description
+            "Causes the RA Guard policy to match IPv6 RA messages with the M (Managed address) flag set.
+            If not specified the verification is skipped.";
+        }
+        leaf other-config-flag {
+          type boolean;
+          description
+            "Causes the RA Guard policy to match IPv6 RA messages with the O (Other config) flag set.
+            If not specified the verification is skipped.";
+        }
+        leaf advertise-prefix-set {
+          type leafref {
+            path "/srl_rpol:routing-policy/srl_rpol:prefix-set/srl_rpol:name";
+          }
+          description 
+            "Reference to a prefix set to match advertised address within RA message";   
+        }
+        leaf router-preference {
+          type enumeration {
+            enum "high";
+            enum "medium";
+            enum "low";
+          }
+          description 
+            "Verifies that the advertised default router preference parameter value is 
+            equal to or less than the specified limit.
+            If not specified the verification is skipped.";
+        }
+
+      }
+    }
+           	
+    grouping interface-raguard-config {
+      description "Container for RA Guard configuration applied at the sub-interface level and statistics";
+    
+      container ra-guard {
+        if-feature "srl-feat:ra-guard";
+        description
+          "Context to configure RA Guard subinterface parameters";
+        leaf policy {
+          type leafref {
+            path "/srl_nokia-system:system/srl_nokia-ra_guard:ra-guard-policy/name";
+          }
+          description 
+            "Reference to RA Guard Policy to apply to the associated subinterface";   
+        }
+        list vlan-list {
+          description
+            "List of VLAN IDs that the RA policy should be matched against";
+          key vlan-id;
+          leaf vlan-id{
+            //must "../../vlan/encap = untagged"
+            type uint16{
+              range 0..4095;
+            }
+          }
+        }
+        leaf matched-ra-pkts {
+          config false;
+          type srl_nokia-comm:zero-based-counter64;
+        }
+      }
+    }   
+
+    augment "/srl_nokia-system:system" {
+      uses ra_guard-top;
+    }
+    
+    augment "/srl_nokia-if:interface/srl_nokia-if:subinterface" {
+      uses interface-raguard-config;
+    }
+
+}

@@ -1,0 +1,38 @@
+module srl_nokia-system-reboot {
+  yang-version 1.1;
+
+  // namespace
+  namespace "urn:srl_nokia/system-reboot";
+  prefix srl_nokia-system-reboot;
+
+  import srl_nokia-system {
+    prefix srl-system;
+  }
+  import srl_nokia-extensions {
+    prefix srl-ext;
+  }
+  import srl_nokia-features {
+    prefix srl_nokia-feat;
+  }
+
+  description
+    "This module defines configuration and state related to system reboot options";
+
+  revision 2021-06-30 {
+    description
+      "SRLinux 21.6.1";
+  }
+
+  grouping warm-reboot {
+    container warm-reboot {
+      description
+        "Top-level container for warm reboot options";
+    }
+  }
+
+  augment "/srl-system:system" {
+    if-feature srl_nokia-feat:warm-reboot;
+    srl-ext:first-released "21.6.1";
+    uses warm-reboot;
+  }
+}

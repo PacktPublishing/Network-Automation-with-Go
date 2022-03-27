@@ -1,0 +1,84 @@
+module srl_nokia-bridge-table-mac-duplication-entries {
+
+  yang-version "1.1";
+
+  // namespace
+  namespace "urn:srl_nokia/network-instance/bridge-table/mac-duplication/mac-duplication-entries";
+
+  prefix "srl_nokia-bridge-table-mac-duplication-entries";
+
+  import srl_nokia-common { prefix srl_nokia-comm; }
+  import srl_nokia-extensions { prefix srl_nokia-ext; }
+  import srl_nokia-network-instance { prefix srl_nokia-netinst; }
+
+  description
+    "This yang file gives a description of bridge table configuration.";
+
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+
+  grouping bridge-table-mac-duplication-entries-top {
+    container duplicate-entries {
+      config false;
+      list mac {
+        config false;
+        key "address";
+        description "macs duplicate on the bridging instance";
+        leaf address {
+          type srl_nokia-comm:mac-address;
+        }
+
+        leaf destination-type {
+          type srl_nokia-comm:destination-type ;
+          description
+            "the type of the destination the duplicate mac is installed against in the fdb.";
+        }
+
+        leaf destination-index {
+          type uint64;
+          srl_nokia-ext:show-importance "high";
+          description
+            "A system-wide unique identifier of a subinterface object (system allocated).";
+        }
+
+        leaf dup-detect-time {
+          type srl_nokia-comm:date-and-time-delta;
+          srl_nokia-ext:show-importance "high";
+          description
+            "The date and time when the mac was declared duplicate";
+        }
+
+        leaf hold-down-time-remaining {
+          type union {
+            type enumeration {
+              enum "indefinite" {
+                value 1;
+              }
+            }
+            type uint64;
+          }     
+          units "seconds";
+          srl_nokia-ext:show-importance "high";
+          description 
+            "remaining hold down time for duplicate mac";
+        }     
+        leaf destination {
+          type string;
+          srl_nokia-ext:show-importance "high";
+          description
+            "the name of the destination the duplicate mac is installed against in the fdb.";
+        }
+      }   
+    }
+  }
+
+  augment "/srl_nokia-netinst:network-instance/srl_nokia-netinst:bridge-table/srl_nokia-netinst:mac-duplication" {
+    uses bridge-table-mac-duplication-entries-top;
+  }
+}

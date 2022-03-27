@@ -1,0 +1,122 @@
+module srl_nokia-platform-resource-mgmt {
+  yang-version 1.1;
+  namespace "urn:srl_nokia/platform-res-mgmt";
+  prefix srl_nokia-platform-res-mgmt;
+
+  import srl_nokia-platform {prefix srl_nokia-platform; }
+  import srl_nokia-features {prefix srl-feat; }
+
+  description
+    "This module defines configuration and operational data for system-wide management of critical resources";
+
+  revision 2021-06-30 {
+    description
+      "SRLinux 21.6.1";
+  }
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+
+  grouping res-mgmt {
+    container resource-management {
+      description
+        "Container for managing resources in a system-wide context";
+      container tcam {
+        description
+          "Container for managing the allocation of TCAM banks to different applications.";
+      }
+      container unified-forwarding-resources {
+        if-feature "srl-feat:trident3 or srl-feat:tomahawk3";
+        description
+          "Container for managing Broadcom-specific UFT resources.";
+        leaf xdp-restart-required {
+          config false;
+          type boolean;
+          description
+            "Reads true if the user has committed a change to one or more of the configurable values in the uft container but has not yet restarted XDP so the operational values are still the values initialized at the last XDP restart.";
+        }
+        leaf alpm {
+          if-feature "srl-feat:trident3";
+          description
+            "Controls the ALPM mode.
+
+            If this is set to disabled then no UFT banks are allocated to ALPM.
+
+            If this is set to enabled then 4 UFT shared banks are allocated to ALPM.
+
+            If this is set to high-scale then 8 UFT shared banks are allocated to ALPM. This mode is not supported by 7220 IXR-D1.";
+          type enumeration {
+            enum "disabled";
+            enum "enabled" {
+              if-feature "srl-feat:platform-7220-d1";
+            }
+            enum "high-scale" {
+              if-feature "srl-feat:platform-7220-d2 or srl-feat:platform-7220-d3";
+            }
+          }
+          default "disabled";
+        }
+        leaf requested-extra-ip-host-entries {
+          if-feature "srl-feat:trident3";
+          description
+            "The extra number of host entries that are desired.
+            
+            The number of UFT shared banks that are reserved for IPv4 and IPv6 host entries is given by:
+            min(N//X,P-A)
+            
+            where:
+            N = configured value of requested-extra-ip-host-entries
+            X = the size of each shared bank, which is platform specific
+            P-A = platform-specific number of shared banks, subtracting the ALPM banks
+            
+            requested-extra-ip-host-entries is interpreted in terms of IPv4 hosts (single-wide entries). IPv6 host entries are double-wide so 1 IPv4 host entry + 1 IPv6 host-entry counts as 3 entries.
+            
+            All UFT shared banks that are not reserved by ALPM and not reserved for extra IP host entries are used for extra MAC entries.
+            
+            On D1 the default value is 48K entries, which provides 3 shared banks, max is 96K.
+            On D2/D3 the default value is 128K entries, which provides 4 shared banks, max is 256K.";
+          type uint32 {
+            range "0..262144";
+          }
+        }
+        leaf allocated-extra-ip-host-entries {
+          config false;
+          description
+            "The extra number of host entries that have been allocated from UFT shared banks.";
+          type uint32 {
+            range "0..262144";
+          }
+        }
+        leaf allocated-extra-mac-entries {
+          config false;
+          description
+            "The extra number of MAC address entries that have been allocated from UFT shared banks.";
+          type uint32 {
+            range "0..262144";
+          }
+        }
+        leaf ipv6-128bit-lpm-entries {
+          if-feature "srl-feat:trident3 or srl-feat:tomahawk3";
+          description
+            "Sets the value for num_ipv6_lpm_128b_entries, which affects IP FIB scale.
+            
+            H2/H3 range: 0-1024
+            D1 range: 0-4096
+            D2/D3 range: 0-8192";
+          type uint16 {
+            range "0..8192";
+          }
+          // default is platform specific, set by back end
+          // D1 default 1024
+          // D2/D3 default 2048
+          // H2/H3 default 512
+        }
+      }
+    }
+  }
+
+  augment "/srl_nokia-platform:platform" {
+    uses res-mgmt;
+  }
+}

@@ -1,0 +1,62 @@
+module srl_nokia-tools-vxlan-tunnel {
+  yang-version 1.1;
+  namespace "urn:srl_nokia/tools-vxlan-tunnel";
+  prefix srl_nokia-tools-vxlan-tunnel;
+
+  // import some basic types
+
+  import srl_nokia-common {
+    prefix srl_nokia-comm;
+  }
+
+  import srl_nokia-tools-tunnel { 
+    prefix srl_nokia-tools-tunnel; 
+  }
+  import srl_nokia-features { prefix srl-feat; }
+
+  description
+    "Model for operational commands on vxlan tunnels.";
+
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+
+  grouping tools-vxlan-tunnel-vtep-top {
+    description
+      "Top-level grouping for vxlan-tunnel vtep tools.";
+    list vtep {
+      key "address";
+      description
+        "The IP address that identifies the remote VXLAN Termination Endpoint (VTEP).";
+      leaf address {
+        type srl_nokia-comm:ip-address;
+        description
+          "The IP address that identifies the remote VXLAN Termination Endpoint (VTEP).";
+      }
+      container statistics {
+        leaf clear {
+          type empty;
+        }
+      }
+    }
+  }
+
+  grouping tools-vxlan-tunnel-top {
+    description
+      "Top-level grouping for vxlan-tunnel tools.";
+    container vxlan-tunnel {
+      if-feature "srl-feat:vxlan"; 
+      container statistics {
+        leaf clear {
+          type empty;
+        }
+      }
+      uses tools-vxlan-tunnel-vtep-top;
+    }
+  }
+
+  augment "/srl_nokia-tools-tunnel:tunnel" {
+    uses tools-vxlan-tunnel-top;
+  }
+}

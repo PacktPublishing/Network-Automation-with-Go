@@ -1,0 +1,202 @@
+module srl_nokia-mpls-label-management {
+  yang-version 1.1;
+  namespace "urn:srl_nokia/mpls-label-management";
+  prefix srl_nokia-mplslbl;
+
+  import srl_nokia-features { prefix srl_nokia-feat; }
+  import srl_nokia-common {
+    prefix srl_nokia-comm;
+  }
+  import srl_nokia-extensions {
+    prefix srl_nokia-ext;
+  }
+  import srl_nokia-system {
+    prefix srl_nokia-system;
+  }
+  import srl_nokia-network-instance {
+    prefix srl_nokia-netinst;
+  }
+
+  description
+    "This module defines configuration and operational state data for system wide MPLS label management.";
+
+  revision 2021-06-30 {
+    description
+      "SRLinux 21.6.1";
+  }
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+
+  identity mpls-protocol {
+    description
+      "Base identity for protocols that may request a label from label manager";
+  }
+
+  identity bgp {
+    base mpls-protocol;
+    description
+      "The BGP/MP-BGP protocol carrying labels.";
+  }
+
+  identity ldp {
+    base mpls-protocol;
+    description
+      "The label distribution protocol (LDP).";
+  }
+
+  identity sr-isis {
+    base mpls-protocol;
+    description
+      "The IS-IS protocol with segment routing extensions";
+  }
+
+  identity sr-ospf {
+    base mpls-protocol;
+    description
+      "The OSPFv2 protocol with segment routing extensions";
+  }
+
+  identity sr-ospfv3 {
+    base mpls-protocol;
+    description
+      "The OSPFv3 protocol with segment routing extensions";
+  }
+
+  identity sr-policy {
+    base mpls-protocol;
+    description
+      "A pseudo protocol representing SR policies";
+  }
+
+  identity static-mpls {
+    base mpls-protocol;
+    description
+      "A pseudo protocol representing static MPLS routes";
+  }
+
+  grouping common-label-block {
+    leaf start-label {
+      description
+        "The starting label value of the label block.
+
+        When the status is not-ready or updating, the state value may be different from the configured value";
+      type srl_nokia-comm:mpls-label;
+    }
+    leaf end-label {
+      description
+        "The ending label value of the label block.
+
+        When the status is not-ready or updating, the state value may be different from the configured value";
+      type srl_nokia-comm:mpls-label;
+      must ". > ../start-label";
+    }
+    leaf allocated-labels {
+      srl_nokia-ext:delivery-node-override true;
+      srl_nokia-ext:stream-mode sample=5;
+      config false;
+      description
+        "The number of labels that are currently used in this block";
+      type uint32;
+    }
+    leaf free-labels {
+      srl_nokia-ext:delivery-node-override true;
+      srl_nokia-ext:stream-mode sample=5;
+      config false;
+      description
+        "The number of labels that are currently available and free in this block.
+
+        When the status is not-ready or updating, the state value may be different from the configured value";
+      type uint32;
+    }
+    leaf status {
+      config false;
+      description
+        "The status of the MPLS label block";
+      type enumeration {
+        enum "ready" {
+          description "The label block is ready to use.";
+        }
+        enum "not-ready" {
+          description "The label block is not ready to use.";
+        }
+        enum "delete-pending" {
+          description "The label block is in the process of being deleted.";
+        }
+        enum "updating" {
+          description "The label block is available to use but the new limits do not apply yet.";
+        }
+      }
+    }
+    list user {
+      config false;
+      description
+        "The list of protocols that are using this label block. If the block is not shared there will only be 1 user";
+      key index;
+      leaf index {
+        description
+          "Index number used to enumerate the clients";
+        type uint8;
+      }
+      leaf protocol {
+        description
+          "The protocol associated with the client";
+        type identityref {
+          base mpls-protocol;
+        }
+      }
+    }
+  }
+
+  grouping mpls-label-management-top {
+    container mpls {
+      if-feature srl_nokia-feat:label-management;
+      description
+        "Container for system wide MPLS label management";
+      container label-ranges {
+        description
+          "Container for managing MPLS label blocks";
+        list static {
+          description
+            "List of static label blocks
+
+            When a client application binds its operation to a static label block that client application is expected to specify the exact label value it wants to use every time it requests a label within the static label block.";
+          key name;
+          leaf name {
+            description
+              "The name of the static label block";
+            type srl_nokia-comm:name;
+          }
+          leaf shared {
+            // this is an immutable leaf, to be enforced by the backend
+            description
+              "When set to true, the label block can be shared by multiple protoccols. When set to false, the label block is dedicated to one protocol.";
+            type boolean;
+            default "true";
+          }
+          uses common-label-block;
+        }
+        list dynamic {
+          description
+            "List of dynamic label blocks
+            
+            When a client application binds its operation to a dynamic label block that client application is expected to just ask for the next available label within the dynamic label block.
+            
+            At this time a dynamic label block cannot be shared by multiple different clients/protocols. Each protocol needing dynamic labels must have its own label block.";
+          key name;
+          leaf name {
+            description
+              "The name of the dynamic label block";
+            type srl_nokia-comm:name;
+          }
+          uses common-label-block;
+        }
+      }
+    }
+  }
+
+  augment "/srl_nokia-system:system" {
+    uses mpls-label-management-top;
+  }
+}

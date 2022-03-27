@@ -1,0 +1,60 @@
+module srl_nokia-network-instance-mtu {
+  yang-version 1.1;
+  namespace "urn:srl_nokia/netinst-mtu";
+  prefix srl-netinst-mtu;
+
+  import srl_nokia-network-instance {
+    prefix srl_nokia-netinst;
+  }
+
+  description
+    "This module defines configuration and operational state data related to MTU at the network-instance level";
+
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+  grouping mtu-config-top {
+    description
+      "Configuration data related to network-instance MTU";
+    leaf path-mtu-discovery {
+        type boolean;
+        description
+            "Enables or disables path MTU discovery in this network-instance
+
+            This is controlled via the kernel ip_no_pmtu_disc option. Path MTU discovery (PMTUD) is a standardized technique in networking for determining the MTU size on the network path between two hosts, sually with the goal of avoiding IP fragmentation.
+
+            For IPv4 packets, Path MTU discovery works by setting the Don't Fragment (DF) flag bit in the IP headers of outgoing packets. Then, any device along the path whose MTU is smaller than the packet will drop it, and send back an Internet Control Message Protocol (ICMP) Fragmentation Needed (Type 3, Code 4) message containing its MTU, allowing the source host to reduce its Path MTU appropriately.
+            The process is repeated until the MTU is small enough to traverse the entire path without fragmentation.";
+        reference "RFC 1191, RFC 1981, RFC 4821";
+    }
+  }
+
+  grouping netinst-mtu-top {
+    container mtu {
+      must "../srl_nokia-netinst:type != 'srl_nokia-netinst:mac-vrf'" {
+        error-message "Network-instance MTU configuration is not possible on network-instance of type mac-vrf";
+      }
+      must "../srl_nokia-netinst:type != 'srl_nokia-netinst:host'" {
+        error-message "Network-instance MTU configuration is not possible on network-instance of type host";
+      }
+      presence "Network-instance MTU configuration";
+      description
+        "Top-level container for configuration and state data related to network-instance MTU";
+      uses mtu-config-top;
+    }
+  }
+
+  augment "/srl_nokia-netinst:network-instance" {
+    uses netinst-mtu-top;
+  }
+}

@@ -1,0 +1,174 @@
+module srl_nokia-vxlan-tunnel-vtep {
+  yang-version 1.1;
+
+  // namespace
+  namespace "urn:srl_nokia/tunnel/vxlan-tunnel";
+  prefix "srl_nokia-vxlan-tunnel";
+
+  import srl_nokia-common {
+    prefix srl_nokia-comm;
+  }
+  import srl_nokia-features {
+    prefix srl_nokia-feat;
+  }
+  import srl_nokia-extensions {
+    prefix srl_nokia-ext;
+  }
+  import srl_nokia-tunnel {
+    prefix srl_nokia-tunnel;
+  }
+
+  description
+    "Config state for vxlan tunnel VXLAN termination endpoint's in SRLinux.";
+
+  // typedef statements
+
+  // groupings 
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+
+  grouping vxlan-tunnel-global-statistics {
+    container statistics {
+      srl_nokia-ext:first-released "21.3.1";
+      if-feature "srl_nokia-feat:platform-7220-d2 or srl_nokia-feat:platform-7220-d3";
+      config false;
+      description
+        "Container for vxlan-tunnel global statistics.";
+      leaf in-octets {
+        type srl_nokia-comm:zero-based-counter64;
+        description
+          "The total sum of ingress VXLAN octets.";
+      }
+      leaf in-packets {
+        type srl_nokia-comm:zero-based-counter64;
+        description
+          "The total sum of ingress VXLAN packets. 
+          
+           A packet in this context is an inner frame.";
+      }
+      leaf in-discarded-packets {
+        type srl_nokia-comm:zero-based-counter64;
+        description
+          "The total number of discarded ingress VXLAN packets. 
+          
+           Ingress VXLAN packets can be discarded due to one of the following reasons:
+           - The tunnel source IP address is not found on the list of discovered remote VTEPs.
+           - The VNI is not a local one."; // TO DO: need to review/confirm these reasons
+      }
+      leaf out-octets {
+        type srl_nokia-comm:zero-based-counter64;
+        description
+          "The total sum of egress VXLAN octets";
+      }
+      leaf out-packets {
+        type srl_nokia-comm:zero-based-counter64;
+        description
+          "The total sum of egress VXLAN packets. . 
+          
+           A packet in this context is an inner frame.";
+      }
+      leaf last-clear {
+        type srl_nokia-comm:date-and-time-delta;
+        description
+          "Timestamp of the last time the vxlan tunnel counters were cleared.";
+      }
+    }
+  }
+
+  grouping vxlan-tunnel-vtep-statistics {
+    container statistics {
+      srl_nokia-ext:first-released "21.3.1";
+      if-feature "srl_nokia-feat:platform-7220-d2 or srl_nokia-feat:platform-7220-d3";
+      config false;
+      description
+        "Container for vxlan-tunnel per VTEP (Vxlan Termination EndPoint) statistics.";
+      leaf in-octets {
+        type srl_nokia-comm:zero-based-counter64;
+        description
+          "The number of octets encapsulated in ingress VXLAN packets.";
+      }
+      leaf in-packets {
+        type srl_nokia-comm:zero-based-counter64;
+        description
+          "The number of packets encapsulated in ingress VXLAN packets. 
+          
+           A packet in this context is an inner frame.";
+      }
+      leaf in-discarded-packets {
+        type srl_nokia-comm:zero-based-counter64;
+        description
+          "The number of discarded ingress VXLAN packets. 
+          
+           Ingress VXLAN packets can be discarded due to one of the following reasons:
+           - The outer destination IP address matches a local loopback in the default network-instance, 
+             but the sub-interface is operationally down.
+           - The outer destination IP address matches a local interface in the default network-instance,
+             but the sub-interface is not a loopback. 
+           - The VNI is not a local one.
+           - The VXLAN packet is malformed."; // TO DO: need to review/confirm these reasons
+      }
+      leaf out-octets {
+        type srl_nokia-comm:zero-based-counter64;
+        description
+          "The number of octets encapsulated in egress VXLAN packets.";
+      }
+      leaf out-packets {
+        type srl_nokia-comm:zero-based-counter64;
+        description
+          "The number of packets encapsulated in egress VXLAN packets. 
+          
+           A packet in this context is an inner frame.";
+      }
+      leaf out-discarded-packets {
+        type srl_nokia-comm:zero-based-counter64;
+        description
+          "The number of discarded egress VXLAN packets. 
+          
+           Egress VXLAN packets can be discarded due to one of the following reasons:
+           - The packet size exceeds the outgoing sub-interface MTU or interface MTU.
+           - The packet is discarded due to existing ACLs or QoS policies."; // TO DO: need to review/confirm these reasons
+      }
+      leaf last-clear {
+        type srl_nokia-comm:date-and-time-delta;
+        description
+          "Timestamp of the last time the vxlan tunnel counters were cleared.";
+      }
+    }
+  }
+
+  grouping tunnel-vxlan-tunnel-top {
+    container vxlan-tunnel {
+      list vtep {
+        config false;
+        key "address";
+          description
+            "The IP address that identifies the remote VXLAN Termination Endpoint (VTEP).";
+        leaf address {
+          srl_nokia-ext:show-importance high;
+          type srl_nokia-comm:ip-address;
+          description
+            "The IP address that identifies the remote VXLAN Termination Endpoint (VTEP).";
+        }
+        leaf index {
+          srl_nokia-ext:show-importance high;
+          type uint64;
+          description
+            "the next-hop-group-id (system allocated) for resolving the VXLAN termination endpoint";
+        }
+        leaf last-change {
+          srl_nokia-ext:show-importance high;
+          type srl_nokia-comm:date-and-time-delta;
+          description
+            "The date and time of the most recent change to the tunnel state";
+        }
+        uses vxlan-tunnel-vtep-statistics;
+      }
+      uses vxlan-tunnel-global-statistics;
+    }
+  }
+  augment "/srl_nokia-tunnel:tunnel" {
+    uses tunnel-vxlan-tunnel-top;
+  }
+}

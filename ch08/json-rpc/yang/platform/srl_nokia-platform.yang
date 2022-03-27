@@ -1,0 +1,237 @@
+module srl_nokia-platform {
+  yang-version 1.1;
+
+  // namespace
+  namespace "urn:srl_nokia/platform";
+  prefix srl_nokia-platform;
+
+  import srl_nokia-extensions {
+    prefix srl-ext;
+  }
+  import srl_nokia-common {
+    prefix srl-comm;
+  }
+  import srl_nokia-features {
+    prefix srl-feat;
+  }
+
+  description
+    "This module defines configuration and operational state data related to platform components.";
+
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+  typedef locator-led-state {
+    type enumeration {
+      enum active {
+        description
+          "Locator LED is currently active";
+      }
+      enum inactive {
+        description
+          "Locator LED is currently inactive";
+      }
+    }
+    description
+      "Details if the locator LED is active on this component";
+  }
+
+  grouping component-power-state-top {
+    container power {
+      config false;
+      description
+        "State related to power consumption and allocation for this component";
+      leaf allocated-power {
+        if-feature "srl-feat:chassis";
+        type uint32;
+        description
+          "The power budget allocated to this component";
+        units "watts";
+      }
+      leaf used-power {
+        srl-ext:delivery-node-override true;
+        srl-ext:stream-mode sample=5;
+        type uint32;
+        description
+          "The power in use by this component";
+        units "watts";
+      }
+    }
+  }
+
+  grouping component-temperature-state-top {
+    container temperature {
+      config false;
+      description
+        "State related to temperature for this component";
+      leaf instant {
+        srl-ext:delivery-node-override true;
+        srl-ext:stream-mode sample=5;
+        type srl-comm:temperature;
+        description
+          "Represents the highest temperature of any sensor on this component
+
+          Note that as multiple sensors may feed in, that this field and the margin field may be referencing different sensors.";
+      }
+      leaf margin {
+        srl-ext:delivery-node-override true;
+        srl-ext:stream-mode sample=5;
+        type srl-comm:temperature;
+        description
+          "Indicates the lowest alarm margin of any sensor on this component
+          
+          The margin is the delta between the current sensor temperature and the thermal protection threshold for that sensor. Note that as multiple sensors may feed in, that this field and the instant field may be referencing different sensors.";
+      }
+      leaf alarm-status {
+        type boolean;
+        description
+          "Indicates if a temperature sensor of this component is currently in an alarm state
+          
+          An alarm state is triggered if the margin field is <=2 degrees, indicating that a thermal protection shut down is imminent unless adequate system cooling is provided to bring the temperature sensor back into safe operating ranges.";
+      }
+    }
+  }
+
+  grouping component-temperature-no-thresh-state-top {
+    container temperature {
+      config false;
+      description
+        "State related to temperature for this component";
+      leaf instant {
+        srl-ext:delivery-node-override true;
+        srl-ext:stream-mode sample=5;
+        type srl-comm:temperature;
+        description
+          "The current temperature of this component";
+      }
+      leaf alarm-status {
+        type boolean;
+        description
+          "Indicates if the temperature of this component is currently in an alarm state";
+      }
+    }
+  }
+
+  grouping component-common-config-top {
+    leaf admin-state {
+      type srl-comm:admin-state;
+      srl-ext:show-importance "high";
+      default "enable";
+      description
+        "The administrative state of this component";
+    }
+  }
+
+  grouping component-common-state-sw {
+    description
+      "Grouping for component software version state";
+    leaf software-version {
+      type string;
+      config false;
+      description
+        "Image version version running on this component
+
+         This version is the squashfs version, and may not represent the current per-application versions if versions have been modified after the system has been installed.";
+    }
+  }
+
+  grouping component-common-state-top {
+    description
+      "Grouping for component state";
+    leaf oper-state {
+      type srl-comm:oper-state;
+      srl-ext:show-importance "high";
+      config false;
+      description
+        "The operational state of this component";
+    }
+    leaf last-booted {
+      type srl-comm:date-and-time-delta;
+      srl-ext:show-importance "high";
+      config false;
+      description
+        "The date and time this component last booted
+
+         For components that do not boot, this is the time the component was last discovered by the active control module";
+    }
+    leaf last-change {
+      type srl-comm:date-and-time-delta;
+      srl-ext:show-importance "high";
+      config false;
+      description
+        "The date and time this component last changed state";
+    }
+    leaf part-number {
+      type string;
+      config false;
+      description
+        "Part number for this component";
+    }
+    leaf clei-code {
+      type string;
+      config false;
+      description
+        "The Common Language Identification Code for this component";
+    }
+    leaf serial-number {
+      type string;
+      config false;
+      description
+        "The serial number for this component";
+    }
+    leaf manufactured-date {
+      type string;
+      config false;
+      description
+        "The date this component was manufactured";
+    }
+    leaf removable {
+      type boolean;
+      config false;
+      description
+        "Details if this component can be removed from the system";
+    }
+    leaf failure-reason {
+      type string;
+      config false;
+      description
+        "The reason the component transitioned to a failed state
+
+         Field is empty if the component is not currently in a failure state";
+    }
+  }
+
+  grouping component-locator {
+    description
+      "Grouping for components that support locator-leds";
+    leaf locator-state {
+      type locator-led-state;
+      config false;
+      default "inactive";
+      description
+        "Details if the locator LED is active on this component";
+    }
+  }
+
+  grouping component-common-top {
+    description
+      "Grouping for common component configuration and state";
+    uses component-common-config-top;
+    uses component-common-state-top;
+  }
+
+  container platform {
+    description
+      "Enclosing container for platform components";
+  }
+}

@@ -1,0 +1,77 @@
+module srl_nokia-bridge-table-mac-learning {
+
+  yang-version 1.1;
+
+  // namespace
+  namespace "urn:srl_nokia/network-instance/bridge-table/mac-learning";
+  prefix "srl_nokia-bridge-table-mac-learning";
+
+  // imports
+  import srl_nokia-common { prefix srl_nokia-comm; }
+
+  description
+    "This yang file gives a description of bridge table mac learning configuration.";
+
+// groupings
+
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+
+  grouping bridge-table-mac-learning-top {
+    container mac-learning {
+      leaf admin-state {
+        type srl_nokia-comm:admin-state;
+        default "enable";
+        description
+          "Configurable state of the learning procedures for dynamic mac addresses.
+           If disabled, the existing macs in the bridge-table will be kept (and refreshed 
+           if new frames arrive for them) but no new mac addresses will be learned. Frames
+           with unknown mac addresses are not dropped, unless discard-unknown-src-mac is
+           configured.";
+      }
+      leaf oper-mac-learning {
+         config false;
+         type srl_nokia-comm:oper-state;
+         description
+           "The operational state of mac-learning on this network instance.";
+      }
+      leaf oper-mac-learning-disabled-reason {
+         config false;
+         type enumeration {
+           enum "admin-disabled";
+         }
+         description
+           "The reason for the mac-learning being disabled on this network instance";
+      }
+      leaf mac-relearn-only {
+         config false;
+         type boolean;
+         default true;
+         description
+            "The value of this leaf indicates that network-instance will not
+             learn any new mac addresses, but will relearn any that are already
+             programmed";
+      }
+      container aging {
+        leaf admin-state {
+          type srl_nokia-comm:admin-state;
+          default "enable";
+          description
+            "Configurable state of the aging for the dynamic mac entries in the bridge table.
+             If disabled, dynamically learned mac entries will be programmed in the bridge table
+             until the network instance is disabled.";
+        }
+        leaf age-time {
+          type int32 {
+            range "60..86400";
+          }
+          default "300";
+          description 
+            "Configurable aging time for dynamically learned mac addresses";
+        }
+      }
+    }
+  }
+}

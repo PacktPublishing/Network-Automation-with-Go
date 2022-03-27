@@ -1,0 +1,151 @@
+module srl_nokia-keychains {
+    yang-version 1.1;
+    namespace "urn:srl_nokia/keychains";
+    prefix srl_nokia-keychains;
+
+    import srl_nokia-common {
+        prefix srl_nokia-comm;
+    }
+    import srl_nokia-system {
+        prefix srl_nokia-system;
+    }
+
+    import srl_nokia-extensions { 
+        prefix srl-ext; 
+    }
+
+    description
+      "This module defines configuration and operational state data for authentication keychains used by control plane protocols such as OSPF, ISIS and BGP.";
+
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+
+    typedef keychain-type {
+        type enumeration {
+            enum "tcp-md5" {
+                description
+                  "Keychain intended to be used for TCP-MD5 authentication.";
+            }
+            enum "isis" {
+                description
+                  "Keychain intended to be used for authentication of IS-IS PDUs.";
+            }
+            enum "ospf" {
+                description
+                  "Keychain intended to be used for authentication of OSPFv2 messages.";
+            }
+            enum "tcp-ao" {
+                description
+                  "Keychain intended to be used for TCP-AO authentication.";
+            }
+            enum "vrrp" {
+                description
+                  "Keychain intended to be used for authentication of VRRPv2 messages.";
+            }
+        }
+    }
+
+    typedef algorithm-type {
+        type enumeration {
+            enum "cleartext" {
+                description
+                  "The authentication-key is encoded in plaintext.";
+            }
+            enum "md5" {
+                description
+                  "The authentication-key is used to generate an MD5 digest (RFC 1321).";
+            }
+            enum "hmac-md5" {
+                description
+                  "The authentication-key is used to generate a 16-byte (128 bit) MD5 digest using the HMAC algorithm (RFC 2104).";
+            }
+            enum "hmac-sha-1" {
+                description
+                  "The authentication-key is used to generate a SHA1 digest using the HMAC algorithm (RFC 2104).";
+            }
+            enum "hmac-sha-256" {
+                description
+                  "The authentication-key is used to generate a SHA2 digest using the HMAC algorithm (RFC 2104).The SHA-256 variant of SHA2 produces an output of 32 bytes (256 bits).";
+            }
+            enum "aes-128-cmac" {
+                description
+                  "The authentication-key is used with the AES-128 encryption algorithm to generate a cipher MAC (RFC 4493).";
+            }
+        }
+    }
+
+    grouping authentication-top {
+        description
+          "Configuration and state related to authentication procedures";
+        container authentication {
+            description
+              "Container for protocol authentication options available system wide";
+            list keychain {
+                max-elements 1024;
+                key "name";
+                description
+                  "List of system keychains";
+                leaf name {
+                    type srl_nokia-comm:name;
+                    description
+                      "The user configured name for the keychain";
+                }
+                leaf admin-state {
+                    type srl_nokia-comm:admin-state;
+                    default "disable";
+                    description
+                      "When set to disable, the keychain is inactive. When a protocol refers to a keychain that is inactive, no authentication data is added to the outbound messages and all inbound messages with authentication data are dropped.
+                       
+                       A key chain is also inactive if no key is configured.";
+                }
+                leaf description {
+                    type srl_nokia-comm:description;
+                    description
+                      "The user configured description for the keychain";
+                }
+                leaf type {
+                    type keychain-type;
+                    description
+                      "Specifies the intended use of the keychain. The type constrains the set of crypto algorithms that are available to use with each key in the keychain. It is also used ensure that this keychain is only used by protocols for which it is intended.";
+                }
+                list key {
+                    max-elements 1;
+                    key index;
+                    description
+                      "List of keys in the keychain";
+                    leaf index {
+                        type uint8;
+                        description
+                          "Each key in a keychain requires a unique identifier. The index value specifies this identifier.";
+                    }
+                    leaf algorithm {
+                        type algorithm-type;
+                        description
+                          "The cryptographic algorithm used with the keying material to secure the messages.";
+                        must ". = 'cleartext' and (../../type = 'ospf' or ../../type = 'isis' or ../../type = 'vrrp') or . = 'md5' and (../../type = 'ospf' or ../../type = 'tcp-md5' or ../../type = 'vrrp') or . = 'hmac-md5' and ../../type = 'isis'";
+                    }
+                    leaf authentication-key {
+                        type string {
+                            length "1..25";
+                            srl-ext:generated-class-name "SecretKey";
+                        }
+                        description
+                          "The secret key.
+                           
+                           The maximum string length is 25 characters, of which a maximum of 20 characters is the secret data and the remaining 5 characters, if provided, must be ‘ hash’ (i.e. one whitespace plus the word hash). The trailing ‘hash’ keyword indicates that the secret data was already encrypted and this is the display version of that secret data, which is a hash of the original data. If the ‘hash’ keyword is omitted the string is assumed to be the actual secret data. Whenever the value of authentication-key is read by any management interface, from any datastore (candidate, running, state) the return value is always the encrypted value – i.e. with the trailing ‘ hash’ characters included.";
+                    }
+                }
+            }
+        }
+    }
+
+    augment "/srl_nokia-system:system" {
+        uses authentication-top;
+    }
+}

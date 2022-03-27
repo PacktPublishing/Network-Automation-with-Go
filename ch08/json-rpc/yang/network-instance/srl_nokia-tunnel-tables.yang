@@ -1,0 +1,223 @@
+module srl_nokia-tunnel-tables {
+  yang-version 1.1;
+
+  namespace "urn:srl_nokia/tunnel-tables";
+  prefix srl_nokia-tunnel-tables;
+
+  import srl_nokia-common { prefix srl_nokia-comm; }
+  import srl_nokia-extensions { prefix srl_nokia-ext; }
+  import srl_nokia-network-instance { prefix srl_nokia-netinst; }
+  import srl_nokia-ip-route-tables { prefix srl_nokia-rt; }
+
+  description
+    "A model describing the tunnel tables of a network instance.";
+
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+
+  grouping tunnel-entry-common-fields {
+    leaf next-hop-group {
+      type leafref {
+        path "/srl_nokia-netinst:network-instance/srl_nokia-netinst:route-table/srl_nokia-rt:next-hop-group/srl_nokia-rt:index";
+      }
+      description
+        "Leaf reference to a next-hop-group that has the direct next-hops towards the tunnel far-end";
+    }
+    leaf metric {
+      type uint32;
+      srl_nokia-ext:show-importance "high";
+      description
+        "The metric of the tunnel.";
+    }
+    leaf preference {
+      type uint8;
+      srl_nokia-ext:show-importance "high";
+      description
+        "The tunnel table preference.";
+    }
+    leaf last-app-update {
+      type srl_nokia-comm:date-and-time-delta;
+      description
+        "The date and time of the last update of this tunnel by the owning application or protocol.";
+    }
+    container fib-programming {
+      description
+        "Container for state related to the FIB programming of the tunnel";
+      leaf status {
+        type enumeration {
+          enum "active" {
+            description
+              "The tunnel is active and programmed into the datapath.";
+          }
+          enum "inactive" {
+            description
+              "The tunnel is inactive and not programmed into the datapath.";
+          }
+        }
+        description
+          "The status of the tunnel programming";
+      }
+      leaf not-programmed-reason {
+        type enumeration {
+          enum "out-of-dvp-resources";
+        }
+        description 
+          "The reason why the tunnel is not programmed";
+      }
+    }
+  }
+
+  grouping vxlan-fields {
+    container vxlan {
+      // when type == vxlan
+      leaf destination-address {
+        srl_nokia-ext:show-importance high;
+        type srl_nokia-comm:ip-address;
+        description
+          "The IP address that identifies the remote VXLAN Termination Endpoint (VTEP).";
+      }
+      leaf source-address {
+        srl_nokia-ext:show-importance high;
+        type srl_nokia-comm:ip-address;
+        description
+          "The IP address that identifies the local VXLAN Termination Endpoint (VTEP).";
+      }
+      leaf time-to-live {
+        type uint8;
+        description
+          "The Time To Live (TTL) value written into the outer IP header of VXLAN packets associated with this tunnel and originated by this router.";
+      }
+      leaf destination-udp-port {
+        type uint16;
+        description
+          "The destination UDP port number written into the outer IP/UDP header of VXLAN packets associated with this tunnel and originated by this router.";
+      }
+    }
+  }
+  grouping tunnel-statistics {
+    container statistics {
+      leaf active-tunnels {
+        type uint32;
+        description
+          "The total number of tunnels, belonging to this address family, that are active.";
+      }
+      leaf inactive-tunnels {
+        type uint32;
+        description
+          "The total number of tunnels, belonging to this address family, that are inactive (not programmed).";
+      }
+      leaf total-tunnels {
+        type srl_nokia-comm:zero-based-counter64;
+        description
+          "The total number of tunnels, active and inactive, belonging to this address family";
+      }
+    }
+  }
+
+  grouping tunnel-summary {
+    container tunnel-summary {
+      description
+        "Tunnel summary information";
+      list tunnel-type {
+        key type;
+        leaf type {
+          type identityref {
+            base srl_nokia-comm:tunnel-type;
+          }
+          description
+            "Tunneling encapsulation format";
+        }
+        leaf active-tunnels {
+        type uint32;
+        description
+          "The total number of tunnels, using this encapsulation type, that are active.";
+      }
+        leaf inactive-tunnels {
+          type uint32;
+          description
+            "The total number of tunnels, using this encapsulation type, that are inactive (not programmed).";
+        }
+        leaf total-tunnels {
+          type srl_nokia-comm:zero-based-counter64;
+          description
+            "The total number of tunnels, active and inactive, using this encapsulation type.";
+        }
+      }
+    }
+  }
+
+  grouping tunnel-tables-top {
+    container ipv4 {
+      description
+        "The container for the IPv4 tunnels associated with the network instance.";
+      list tunnel {
+        key "ipv4-prefix type owner id";
+        leaf ipv4-prefix {
+          type srl_nokia-comm:ipv4-prefix;
+          description
+            "The IPv4 prefix associated with the endpoint of the tunnel.";
+        }
+        leaf type {
+          type identityref {
+            base srl_nokia-comm:tunnel-type;
+          }
+          description
+            "The tunnel (encapsulation) type";
+        }
+        leaf owner {
+          type string;
+          description
+            "The name of the application that submitted the tunnel to TTM";
+        }
+        leaf id {
+          type uint32;
+          description
+            "An owner-assigned index value that is unique for each of the tunnels terminating at a particular prefix.";
+        }
+        uses tunnel-entry-common-fields;
+        uses vxlan-fields;
+      }
+      uses tunnel-statistics;
+      uses tunnel-summary;
+    }
+    container ipv6 {
+      description
+        "The container for the IPv6 tunnels associated with the network instance.";
+      list tunnel {
+        key "ipv6-prefix type owner id";
+        leaf ipv6-prefix {
+          type srl_nokia-comm:ipv6-prefix;
+          description
+            "The IPv6 prefix associated with the endpoint of the tunnel.";
+        }
+        leaf type {
+          type identityref {
+            base srl_nokia-comm:tunnel-type;
+          }
+          description
+            "The tunnel (encapsulation) type";
+        }
+        leaf owner {
+          type string;
+          description
+            "The name of the application that submitted the tunnel to TTM";
+        }
+        leaf id {
+          type uint32;
+          description
+            "An owner-assigned index value that is unique for each of the tunnels terminating at a particular prefix.";
+        }
+        uses tunnel-entry-common-fields;
+        uses vxlan-fields;
+      }
+      uses tunnel-statistics;
+      uses tunnel-summary;
+    }
+  }
+
+  augment "/srl_nokia-netinst:network-instance/srl_nokia-netinst:tunnel-table" {
+    uses tunnel-tables-top;
+  }
+}

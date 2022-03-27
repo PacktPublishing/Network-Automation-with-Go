@@ -1,0 +1,1236 @@
+module srl_nokia-qos {
+    yang-version 1.1;
+    namespace "urn:srl_nokia/qos";
+    prefix "srl_nokia-qos";
+
+    import srl_nokia-common {
+        prefix srl_nokia-comm;
+    }
+    import srl_nokia-extensions {
+        prefix srl_nokia-ext;
+    }
+    import srl_nokia-interfaces {
+        prefix srl_nokia-if;
+    }
+    import srl_nokia-features {
+        prefix srl-feat;
+    }
+
+  revision 2021-06-30 {
+    description
+      "SRLinux 21.6.1";
+  }
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+    typedef traffic-class {
+        type uint8 {
+            range "0..7";
+        }
+    }
+
+    typedef forwarding-class {
+        type enumeration {
+            enum "fc0";
+            enum "fc1";
+            enum "fc2";
+            enum "fc3";
+            enum "fc4";
+            enum "fc5";
+            enum "fc6";
+            enum "fc7";
+        }
+    }
+
+    typedef dscp-name {
+        type enumeration {
+            enum "CS0" {
+                value 0;
+            }
+            enum "LE" {
+                value 1;
+                reference
+                  "RFC 8622";
+            }
+            enum "CS1" {
+                value 8;
+            }
+            enum "AF11" {
+                value 10;
+            }
+            enum "AF12" {
+                value 12;
+            }
+            enum "AF13" {
+                value 14;
+            }
+            enum "CS2" {
+                value 16;
+            }
+            enum "AF21" {
+                value 18;
+            }
+            enum "AF22" {
+                value 20;
+            }
+            enum "AF23" {
+                value 22;
+            }
+            enum "CS3" {
+                value 24;
+            }
+            enum "AF31" {
+                value 26;
+            }
+            enum "AF32" {
+                value 28;
+            }
+            enum "AF33" {
+                value 30;
+            }
+            enum "CS4" {
+                value 32;
+            }
+            enum "AF41" {
+                value 34;
+            }
+            enum "AF42" {
+                value 36;
+            }
+            enum "AF43" {
+                value 38;
+            }
+            enum "CS5" {
+                value 40;
+            }
+            enum "EF" {
+                value 46;
+            }
+            enum "CS6" {
+                value 48;
+            }
+            enum "CS7" {
+                value 56;
+            }
+        }
+    }
+
+    typedef drop-probability {
+        description
+          "The various drop probability classifications that can be applied to a packet";
+        type enumeration {
+            enum "low" {
+                description
+                  "Traffic that should be dropped last when there is congestion. Internally this is traffic that is colored green.";
+            }
+            enum "medium" {
+                description
+                  "Traffic that should be dropped before green traffic but after red traffic when there is congestion. Internally this is traffic that is colored yellow.";
+            }
+            enum "high" {
+                description
+                  "Traffic that should be dropped first when there is congestion. Internally this is traffic that is colored red.";
+            }
+        }
+    }
+
+    typedef ecn-drop-probability {
+        description
+          "The various drop probability classifications that can apply to an ECN slope";
+        type enumeration {
+            enum "low" {
+                if-feature "srl-feat:platform-7220-d2 or srl-feat:platform-7220-d3 or srl-feat:platform-7220-h2 or srl-feat:platform-7220-h3";
+                description
+                  "Traffic that should be dropped last when there is congestion. Internally this is traffic that is colored green.";
+            }
+            enum "medium" {
+                if-feature "srl-feat:platform-7220-d2 or srl-feat:platform-7220-d3 or srl-feat:platform-7220-h2 or srl-feat:platform-7220-h3";
+                description
+                  "Traffic that should be dropped before green traffic but after red traffic when there is congestion. Internally this is traffic that is colored yellow.";
+            }
+            enum "high" {
+                if-feature "srl-feat:platform-7220-d2 or srl-feat:platform-7220-d3 or srl-feat:platform-7220-h2 or srl-feat:platform-7220-h3";
+                description
+                  "Traffic that should be dropped first when there is congestion. Internally this is traffic that is colored red.";
+            }
+            enum "all" {
+                if-feature "srl-feat:jericho2";
+                description
+                  "All traffic, consisting of traffic marked low, medium and high drop-probability.";
+            }
+        }
+    }
+
+    typedef scheduler-level {
+        description
+          "Type for identifying the different scheduler hierarchy levels";
+        type uint8 {
+            range "1..4";
+        }
+    }
+
+    typedef scheduler-node-id {
+        description
+          "Type for assignment of a unique ID to each scheduler node at a particular scheduler level/tier";
+        type uint8 {
+            range "0..11";
+        }
+    }
+
+    grouping qos-top {
+        description
+          "Top-level grouping for QoS model";
+
+        container qos {
+            srl_nokia-ext:first-released "19.11.1";
+            if-feature "srl-feat:jericho2 or srl-feat:platform-7220-d2 or srl-feat:platform-7220-d3 or srl-feat:tomahawk3";
+            description
+              "Top-level container for QoS data";
+            uses ecn-top;
+            uses queue-templates-top;
+            uses qos-classifier-top;
+            uses qos-rewrite-top;
+        }
+    }
+
+    grouping ecn-top {
+        container explicit-congestion-notification {
+            srl_nokia-ext:first-released "20.12.1";
+            presence
+              "When present ECN marking is enabled globally (on all interfaces)";
+        // leaf-list supported-protocols
+            leaf ecn-dscp-policy {
+                if-feature srl-feat:jericho2;
+                mandatory true;
+                description
+                    "Reference to the DSCP rewrite policy to use when DSCP rewrite is required as a side effect of ECN remarking.
+                    
+                    This is required configuration in order to globally enable ECN on J2 platforms.";
+                type leafref {
+                    path "../../rewrite-rules/dscp-policy/name";
+                }
+            }
+        }
+    }
+
+    grouping queue-templates-top {
+        container queue-templates {
+            srl_nokia-ext:first-released "20.12.1";
+            list queue-template {
+                max-elements 64;
+                description
+                  "List of queue templates that can be applied to egress queues or VOQ sets
+                   
+                   The 7250 IXR-6/10 platforms supports a maximum 8 queue-templates. The 7220-D2/D3/H2/H3 platforms support a maximum of 64 queue-templates.";
+                key "name";
+                leaf name {
+                    type srl_nokia-comm:name;
+                    description
+                      "The name of the queue template
+                       
+                       The queue template with the special name “default” is used when a queue-template reference is missing.";
+                }
+                container queue-depth {
+                    leaf maximum-burst-size {
+                        type uint32;
+                        units "bytes";
+                        default 0;
+                        description
+                          "Maximum queue depth in bytes. MBS buffer space is not guaranteed.
+                           
+                           On J2 systems this parameter applies to a set of VOQs and the default is 256 MB (268435456 bytes).
+                           
+                           On TD3/TH3 systems this parameter applies to an egress queue and the default value is based on system-derived ‘alpha’ calculation.
+                           
+                           Must be non-zero/non-default in order to add the active-queue-management presence container.";
+                    }
+                    /* leaf committed-burst-size {
+                     *     type uint32;
+                     *     units "bytes";
+                     *     description
+                     *         "Committed queue depth in bytes. 
+
+                     *         On J2 systems this parameter applies to a set of VOQs and the default is 10 KB (10240 bytes).
+
+                     *         On TD3/TH3 systems this parameter applies to an egress queue and the default is 0.";
+                     } */
+                    leaf high-threshold-bytes {
+                        type uint32;
+                        must ". <= ../maximum-burst-size";
+                        default 0;
+                        description
+                          "The queue depth that, when crossed in a rising direction, triggers a hardware interrupt and a recording of the current system time.
+
+                          The default value of 0 disables the functionality.
+                           
+                           On J2 systems this parameter applies to a set of VOQs (and therefore to unicast traffic only). On TD3/TH3 systems this parameter applies to a unicast queue only; the configuration of this leaf is ignored when the queue-template is attached to a multicast-queue.
+                           
+                           On TD3 the threshold is rounded up the nearest multiple of 2048 bytes. On J2 the threshold is rounded up to the nearest multiple of 4096 bytes. On TH3 the threshold is rounded up to the nearest multiple of 254 bytes.";
+                    }
+                }
+                container active-queue-management {
+                    presence
+                      "Presence container for WRED and/or ECN slopes. On TD3/TH3, this container cannot be present to use the queue-template with a multicast queue.";
+                    leaf weight-factor {
+                        type uint8 {
+                            range "0..15";
+                        }
+                        default 0;
+                        description
+                          "Weight factor to use in the calculation of the current (average weighted) queue depth.";
+                    }
+                    list wred-slope {
+                        description
+                          "List of WRED slopes.";
+                        key "traffic-type drop-probability";
+                        leaf traffic-type {
+                            description
+                              "The traffic type to which the WRED slope applies.";
+                            type enumeration {
+                                enum "tcp" {
+                                    if-feature "srl-feat:platform-7220-d2 or srl-feat:platform-7220-d3 or srl-feat:platform-7220-h2 or srl-feat:platform-7220-h3";
+                                    description
+                                      "Refers to IPv4/IPv6 packets with a protocol/next-header indicating a value of 6.";
+                                }
+                                enum "non-tcp" {
+                                    if-feature "srl-feat:platform-7220-d2 or srl-feat:platform-7220-d3 or srl-feat:platform-7220-h2 or srl-feat:platform-7220-h3";
+                                    description
+                                      "Refers to all packets that are not IPv4/IPv6 packets with a protocol/next-header indicating a value of 6.";
+                                }
+                                enum "all" {
+                                    if-feature "srl-feat:jericho2";
+                                    description
+                                      "Refers to all traffic, whether it is TCP or non-TCP.";
+                                }
+                            }
+                        }
+                        leaf drop-probability {
+                            description
+                              "The drop probability to which the WRED slope applies.";
+                            type drop-probability;
+                        }
+                        leaf min-threshold-percent {
+                            type srl_nokia-comm:percentage;
+                            default 100;
+                            description
+                              "The percentage of the MBS that corresponds to the WRED mininum threshold parameter.
+                              
+                              A slope is disabled by setting min-threshold-percent=100, max-threshold-percent=100 and max-probability=0";
+                        }
+                        leaf max-threshold-percent {
+                            type srl_nokia-comm:percentage;
+                            must ". >= ../min-threshold-percent";
+                            default 100;
+                            description
+                              "The percentage of the MBS that corresponds to the WRED maximum threshold parameter.
+                              
+                              A slope is disabled by setting min-threshold-percent=100, max-threshold-percent=100 and max-probability=0";
+                        }
+                        leaf max-probability {
+                            type srl_nokia-comm:percentage;
+                            default 0;
+                            description
+                              "The maximum probability of dropping a packet (at or above the max-threshold).
+                              
+                              A slope is disabled by setting min-threshold-percent=100, max-threshold-percent=100 and max-probability=0";
+                        }
+                    }
+                    list ecn-slope {
+                        description
+                          "List of ECN slopes.";
+                        key "ecn-drop-probability";
+                        leaf ecn-drop-probability {
+                            description
+                              "The drop probability to which the ECN slope applies.";
+                            type ecn-drop-probability;
+                        }
+                        leaf min-threshold-percent {
+                            type srl_nokia-comm:percentage;
+                            default 100;
+                            description
+                              "The percentage of the MBS that corresponds to the ECN mininum threshold parameter.
+                              
+                              A slope is disabled by setting min-threshold-percent=100, max-threshold-percent=100 and max-probability=0.";
+                        }
+                        leaf max-threshold-percent {
+                            type srl_nokia-comm:percentage;
+                            must ". >= ../min-threshold-percent";
+                            default 100;
+                            description
+                              "The percentage of the MBS that corresponds to the ECN maximum threshold parameter.
+                              
+                              A slope is disabled by setting min-threshold-percent=100, max-threshold-percent=100 and max-probability=0.";
+                        }
+                        leaf max-probability {
+                            type srl_nokia-comm:percentage;
+                            default 0;
+                            description
+                              "The maximum probability of marking a packet (at or above the max-threshold).
+                               
+                               On TD3/TH3 max-probability has a limited set of discrete values: 1,2,3,4,5,6,7,8,9,10,25,50,75,100. The user is allowed to enter any value but the system will choose the next-highest value that is supported.
+                               
+                               A slope is disabled by setting min-threshold-percent=100, max-threshold-percent=100 and max-probability=0.";
+                        }
+                    }
+                } // active-queue-management
+            } // queue-template
+        } // queue-templates
+    } // queue-templates-top
+    grouping qos-classifier-top {
+        description
+          "Top-level grouping for classifier data";
+
+        container classifiers {
+            srl_nokia-ext:first-released "19.11.1";
+            uses dscp-classifier;
+            uses mpls-tc-classifier;
+        }
+    }
+
+    grouping dscp-classifier {
+        leaf vxlan-default {
+            if-feature "srl-feat:platform-7220-d2 or srl-feat:platform-7220-d3";
+            type leafref {
+                path "/srl_nokia-qos:qos/srl_nokia-qos:classifiers/srl_nokia-qos:dscp-policy/name";
+            }
+            description
+              "Reference to the name of a DSCP classifier policy that applies to terminating VXLAN packets.";
+        }
+        
+        list dscp-policy {
+            key name;
+            leaf name {
+                type srl_nokia-comm:name;
+                description
+                  "User-configured name for a DSCP classification policy
+                   
+                   The name 'default' is reserved for the system default DSCP classifier.";
+            }
+            list dscp {
+                key value;
+                leaf value {
+                    type uint8 {
+                        range "0..63";
+                    }
+                    description
+                      "DSCP codepoint value, expressed as a number in the range 0-63";
+                }
+                leaf forwarding-class {
+                    type forwarding-class;
+                    description
+                      "The forwarding class to which the DSCP value is mapped";
+                }
+                leaf drop-probability {
+                    srl_nokia-ext:first-released "20.12.1";
+                    type drop-probability;
+                    description
+                      "The drop probability to which the DSCP value is mapped";
+                }
+            }
+        }
+    }
+
+    grouping mpls-tc-classifier {
+        list mpls-traffic-class-policy {
+        if-feature "srl-feat:mpls-qos";
+            key name;
+            leaf name {
+                type srl_nokia-comm:name;
+                description
+                  "User-configured name for an MPLS traffic-class classification policy
+                   
+                   The name 'default' is reserved for the system default MPLS TC classifier.";
+            }
+            list traffic-class {
+                key value;
+                leaf value {
+                    type traffic-class;
+                    description
+                      "A single traffic-class value";
+                }
+                leaf forwarding-class {
+                    type forwarding-class;
+                    description
+                      "The forwarding class to which the traffic-class value is mapped";
+                }
+            }
+        }
+    }
+
+    grouping qos-rewrite-top {
+        description
+          "Top-level grouping for traffic marking (rewrite) policies";
+
+        container rewrite-rules {
+            srl_nokia-ext:first-released "19.11.1";
+            uses dscp-rewrite;
+            uses mpls-tc-rewrite;
+        }
+    }
+
+    grouping dscp-rewrite {
+        list dscp-policy {
+            key name;
+            leaf name {
+                type srl_nokia-comm:name;
+                description
+                  "User-configured name for a DSCP rewrite policy.";
+            }
+            list map {
+                key "forwarding-class";
+                leaf forwarding-class {
+                    type forwarding-class;
+                    description
+                      "The forwarding-class value";
+                }
+                list drop-probability {
+                    srl_nokia-ext:first-released "20.12.1";
+                    key drop-probability;
+                    leaf drop-probability {
+                        type drop-probability;
+                        description
+                            "A drop probability level within the FC for which a different remarking is desired.";
+                    }
+                    leaf dscp {
+                        mandatory true;
+                        type union {
+                            type uint8 {
+                                range "0..63";
+                            }
+                            type dscp-name;
+                        }
+                        description
+                            "The DSCP marking to be used for this specific drop-probability";
+                    }
+                }
+                leaf dscp {
+                    mandatory true;
+                    type union {
+                        type uint8 {
+                            range "0..63";
+                        }
+                        type dscp-name;
+                    }
+                    description
+                        "The DSCP marking to be used for all packets associated with the FC, except those with a drop-probability-specific override.";
+                }
+            }
+        }
+    }
+
+    grouping mpls-tc-rewrite {
+    list mpls-traffic-class-policy {
+            if-feature "srl-feat:mpls-qos";
+            key name;
+            leaf name {
+                type srl_nokia-comm:name;
+                description
+                  "User-configured name for an MPLS traffic-class rewrite policy.";
+            }
+            list map {
+                key "forwarding-class";
+                leaf forwarding-class {
+                    type forwarding-class;
+                    description
+                      "The forwarding-class value";
+                }
+                leaf traffic-class {
+                    type traffic-class;
+                    description
+                      "The MPLS traffic class value to mark the packet with";
+                }
+            }
+        }
+    }
+
+    grouping interface-qos {
+        container qos {
+            if-feature "srl-feat:jericho2 or srl-feat:platform-7220-d2 or srl-feat:platform-7220-d3 or srl-feat:tomahawk3";
+            srl_nokia-ext:first-released "19.11.1";
+            presence
+              "Enables configuration of QoS parameters for the interface";
+            must "starts-with(../name, 'ethernet') or starts-with(../name, 'lag')" {
+                error-message "QoS does not apply to this interface type";
+            }
+            must "not(../breakout-mode)" {
+              error-message "QoS does not apply when breakout-mode is enabled";
+            }
+            container output {
+                description
+                  "Container for QoS configuration that applies to outbound traffic through the port or LAG";
+                container scheduler {
+                    srl_nokia-ext:first-released "20.12.1";
+                    description
+                      "Output traffic scheduler options";
+                    list tier {
+                        max-elements 1;
+                        description
+                          "List of output traffic scheduler tiers or levels";
+                        key level;
+                        leaf level {
+                            type scheduler-level;
+                            must ". = 1" {
+                                error-message
+                                  "Only one scheduler level supported";
+                            }
+                        }
+                        list node {
+                            max-elements 12;
+                            description
+                              "List of scheduler nodes at the specified scheduler level";
+                            key node-number;
+                            leaf node-number {
+                                description
+                                  "An identifier of the scheduler node. Within a scheduler tier, higher-numbered nodes are served before lower-numbererd nodes.";
+                                type scheduler-node-id;
+                            }
+                            leaf strict-priority {
+                                description
+                                  "A true value configures the node for strict priority scheduling, whether or not a weight is also configured.  When set to false the node is serviced using DWRR, even if the node does not have a configured weight; in this case the default weight value of 1 is used.";
+                                type boolean;
+                            }
+                            leaf weight {
+                                description
+                                  "The DWRR weight assigned to the scheduler node";
+                                type uint8 {
+                                    range "1..127";
+                                }
+                                default 1;
+                            }
+                        } // node
+                    } // tier
+                } // scheduler   
+                list unicast-queue {
+                    srl_nokia-ext:first-released "19.11.1";
+                    description
+                      "List of unicast queues";
+                    key "queue-id";
+                    leaf queue-id {
+                        type srl_nokia-comm:queue-index;
+                        description
+                          "The queue identifier
+                           
+                           For unicast traffic on all platforms there is a one-to-one mapping between queue-id and forwarding class. fc0 traffic always use queue-id 0, fc1 traffic always uses queue-id 1, etc.";
+                    }
+                    leaf-list forwarding-class {
+                        config false;
+                        type forwarding-class;
+                        description
+                            "The list of forwarding classes that map to this queue.";
+                    }
+                    container active-queue-management {
+                        config false;
+                        srl_nokia-ext:first-released "20.12.1";
+                        list wred-slope {
+                            description
+                              "List of WRED slopes.";
+                            key "traffic-type drop-probability";
+                            leaf traffic-type {
+                                description
+                                  "The traffic type to which the WRED slope applies.";
+                                type enumeration {
+                                    enum "tcp" {
+                                        description
+                                          "Refers to IPv4/IPv6 packets with a protocol/next-header indicating a value of 6.";
+                                    }
+                                    enum "non-tcp" {
+                                        description
+                                          "Refers to all packets that are not IPv4/IPv6 packets with a protocol/next-header indicating a value of 6.";
+                                    }
+                                    enum "all" {
+                                        description
+                                          "Refers to all traffic, whether it is TCP or non-TCP.";
+                                    }
+                                }
+                            }
+                            leaf drop-probability {
+                                description
+                                  "The drop probability to which the WRED slope applies.";
+                                type drop-probability;
+                            }
+                            leaf slope-enabled {
+                                description
+                                    "Reads true if the slope is enabled.
+                                    
+                                    A disabled slope has min-threshold-bytes = max-threshold-bytes = max-probability = 0";
+                                type boolean;
+                            }
+                            leaf min-threshold-bytes {
+                                type uint32;
+                                units "bytes";
+                                description
+                                  "The queue depth in bytes that corresponds to the WRED mininum threshold parameter.";
+                            }
+                            leaf max-threshold-bytes {
+                                type uint32;
+                                units "bytes";
+                                description
+                                  "The queue depth in bytes that corresponds to the WRED maximum threshold parameter.";
+                            }
+                            leaf max-probability {
+                                type srl_nokia-comm:percentage;
+                                description
+                                  "The maximum probability of dropping a packet (at or above the max-threshold).
+                                  
+                                  On 7250 IXR systems there can be a significant difference between the configured value and the operational value.";
+                            }
+                        }
+                        list ecn-slope {
+                            description
+                              "List of ECN slopes.";
+                            key "ecn-drop-probability";
+                            leaf ecn-drop-probability {
+                                description
+                                  "The drop probability to which the ECN slope applies.";
+                                type ecn-drop-probability;
+                            }
+                            leaf slope-enabled {
+                                description
+                                    "Reads true if the slope is enabled.
+                                    
+                                    A disabled slope has min-threshold-bytes = max-threshold-bytes = max-probability = 0";
+                                type boolean;
+                            }
+                            leaf min-threshold-bytes {
+                                type uint32;
+                                units "bytes";
+                                description
+                                  "The queue depth in bytes that corresponds to the ECN mininum threshold parameter.";
+                            }
+                            leaf max-threshold-bytes {
+                                type uint32;
+                                units "bytes";
+                                description
+                                  "The queue depth in bytes that corresponds to the ECN maximum threshold parameter.";
+                            }
+                            leaf max-probability {
+                                type srl_nokia-comm:percentage;
+                                description
+                                  "The maximum probability of marking a packet (at or above the max-threshold).
+                                  
+                                  On 7250 IXR systems there can be a significant difference between the configured value and the operational value.";
+                            }
+                        } // ecn-slope
+                    } // active-queue-management
+                    container queue-depth {
+                        config false;
+                        srl_nokia-ext:first-released "20.12.1";
+                        leaf maximum-burst-size {
+                            type uint32;
+                            units "bytes";
+                            description
+                              "Maximum queue depth in bytes.";
+                        }
+                        /* leaf committed-burst-size {
+                         *     type uint32;
+                         *     units "bytes";
+                         *     description
+                         *         "Committed queue depth in bytes.";
+                         } */
+                        leaf last-high-threshold-time {
+                            description
+                              "The last time the queue depth exceeded the high-threshold in a rising direction.";
+                            type srl_nokia-comm:date-and-time;
+                        }
+                        leaf high-threshold-bytes {
+                            type uint32;
+                            units "bytes";
+                            description
+                              "The operational hardware value of the high threshold in bytes.";
+                        }
+                    } // queue-depth
+                    container scheduling {
+                        description
+                            "Container for queue scheduling parameters";
+                        leaf peak-rate-percent {
+                            srl_nokia-ext:first-released "20.6.1";
+                            type uint8 {
+                                range "1..100";
+                            }
+                            default 100;
+                            description
+                              "The maximum percentage of port bandwidth that is available to the traffic in this unicast queue. The default is 100.";
+                        }
+                        leaf peak-rate-bps {
+                            srl_nokia-ext:first-released "20.6.1";
+                            config false;
+                            type uint64;
+                            description
+                              "The actual/operational peak rate in bits per second.";
+                        }
+                        leaf strict-priority {
+                            if-feature "srl-feat:jericho2";
+                            type boolean;
+                            default true;
+                            description
+                              "When set to true the unicast queue is serviced as a strict priority queue, regardless of whether a weight is configured or its value. When set to false the unicast queue is serviced using WRR, even if the queue does not have a configured weight; in this case the default weight value of 1 is used.";
+                        }
+                        leaf weight {
+                            srl_nokia-ext:first-released "20.6.1";
+                            if-feature "srl-feat:jericho2";
+                            type uint8 {
+                                range "1..255";
+                            }
+                            default 1;
+                            description
+                              "Configures the relative weight of a DWRR queue.";
+                        }
+                        leaf scheduler-node {
+                            srl_nokia-ext:first-released "20.12.1";
+                            config false;
+                            description
+                              "The scheduler node to which the unicast queue is connected. The mappings are fixed and not user-configurable.
+                               
+                               J2:
+                               queue-id 0-7 -> node 1
+                               
+                               TD3 (D2/D3):
+                               queue-id 0 -> node 0
+                               queue-id 1 -> node 1
+                               queue-id 2 -> node 2
+                               queue-id 3 -> node 3
+                               queue-id 4 -> node 4
+                               queue-id 5 -> node 5
+                               queue-id 6 -> node 6
+                               queue-id 7 -> node 7
+                               
+                               TH3:
+                               queue-id 0 -> node 1
+                               queue-id 1 -> node 2
+                               queue-id 2 -> node 4
+                               queue-id 3 -> node 5
+                               queue-id 4 -> node 7
+                               queue-id 5 -> node 8
+                               queue-id 6 -> node 10
+                               queue-id 7 -> node 11";
+                            type leafref {
+                                path "../../../scheduler/tier/node/node-number";
+                            }
+                        }
+                    } // scheduling
+                    leaf template {
+                        srl_nokia-ext:first-released "20.12.1";
+                        if-feature "srl-feat:platform-7220-d2 or srl-feat:platform-7220-d3 or srl-feat:platform-7220-h2 or srl-feat:platform-7220-h3";
+                        type leafref {
+                            path "/srl_nokia-qos:qos/srl_nokia-qos:queue-templates/srl_nokia-qos:queue-template/srl_nokia-qos:name";
+                        }
+                        description
+                          "The name of a queue-template to apply to the unicast queue.
+                          
+                          If a queue has no queue-template, the default queue-template is applied. The user cannot modify the default queue-template.";
+                    }
+                    leaf voq-template {
+                        srl_nokia-ext:first-released "20.12.1";
+                        if-feature "srl-feat:jericho2";
+                        type leafref {
+                            path "/srl_nokia-qos:qos/srl_nokia-qos:queue-templates/srl_nokia-qos:queue-template/srl_nokia-qos:name";
+                        }
+                        description
+                          "The name of a queue-template to apply to the set of associated VOQs.
+                          
+                          If a queue has no voq-template, the default queue-template is applied";
+                    }
+                } // unicast-queue
+                list multicast-queue {
+                    srl_nokia-ext:first-released "20.12.1";
+                    description
+                      "List of multicast queues";
+                    key "queue-id";
+                    leaf queue-id {
+                        type srl_nokia-comm:queue-index;
+                        description
+                          "The queue identifier
+
+                           For J2 and TD3 there is a one-to-one mapping between queue-id and forwarding class. fc0 traffic always use queue-id 0, fc1 traffic always uses queue-id 1, etc.
+
+                           For TH3 the multicast queue-id range is limited to 0-3 and the mapping is as follows:
+                           fc0+1 -> queue-id 0
+                           fc2+3 -> queue-id 1
+                           fc4+5 -> queue-id 2
+                           fc6+7 -> queue-id 3";
+                    }
+                    leaf-list forwarding-class {
+                        config false;
+                        type forwarding-class;
+                        description
+                            "The list of forwarding classes that map to this queue.";
+                    }
+                    container queue-depth {
+                        config false;
+                        leaf maximum-burst-size {
+                            type uint32;
+                            units "bytes";
+                            description
+                              "Maximum queue depth in bytes.";
+                        }
+                        /* leaf committed-burst-size {
+                         *     type uint32;
+                         *     units "bytes";
+                         *     description
+                         *         "Committed queue depth in bytes.";
+                         } */
+                        leaf last-high-threshold-time {
+                            description
+                              "The last time the queue depth exceeded the high-threshold in a rising direction.";
+                            type srl_nokia-comm:date-and-time;
+                        }
+                    } // queue-depth
+                    container scheduling {
+                        description
+                            "Container for queue scheduling parameters";
+                        leaf peak-rate-percent {
+                            if-feature "srl-feat:platform-7220-d2 or srl-feat:platform-7220-d3 or srl-feat:platform-7220-h2 or srl-feat:platform-7220-h3";
+                            type uint8 {
+                                range "1..100";
+                            }
+                            default 100;
+                            description
+                              "The maximum percentage of port bandwidth that is available to the traffic in this multicast queue. The default is 100.";
+                        }
+                        leaf peak-rate-bps {
+                            config false;
+                            type uint64;
+                            description
+                              "The actual/operational peak rate in bits per second.";
+                        }
+                        leaf scheduler-node {
+                            config false;
+                            description
+                              "The scheduler node to which the multicast queue is connected. The mappings are fixed and not user-configurable.
+                               
+                               J2:
+                               queue-id 0-7 -> node 0
+                               
+                               TD3 (D2/D3):
+                               queue-id 0 -> node 0
+                               queue-id 1 -> node 1
+                               queue-id 2 -> node 2
+                               queue-id 3 -> node 3
+                               queue-id 4 -> node 4
+                               queue-id 5 -> node 5
+                               queue-id 6 -> node 6
+                               queue-id 7 -> node 7
+                               
+                               TH3:
+                               queue-id 4 -> node 0
+                               queue-id 5 -> node 3
+                               queue-id 6 -> node 6
+                               queue-id 7 -> node 9";
+                            type leafref {
+                                path "../../../scheduler/tier/node/node-number";
+                            }
+                        }
+                    } // scheduling
+                    leaf template {
+                        if-feature "srl-feat:platform-7220-d2 or srl-feat:platform-7220-d3";
+                        type leafref {
+                            path "/srl_nokia-qos:qos/srl_nokia-qos:queue-templates/srl_nokia-qos:queue-template/srl_nokia-qos:name";
+                        }
+                        description
+                          "The name of a queue-template to apply to the multicast queue. The active-queue-management container must not be present in order to apply the template. Also the high-threshold-bytes configuration in this template is ignored.";
+                    }
+                } // multicast-queue
+            } // output
+        } // qos
+    }
+
+    grouping queue-stats {
+        container queue-statistics {
+            srl_nokia-ext:first-released "19.11.1";
+          if-feature "srl-feat:jericho2 or srl-feat:platform-7220-d2 or srl-feat:platform-7220-d3 or srl-feat:tomahawk3";
+            config false;
+            list unicast-queue {
+                description
+                  "List of unicast queues.";
+                key "queue-id";
+                leaf queue-id {
+                    type srl_nokia-comm:queue-index;
+                    description
+                        "The queue identifier
+                        
+                        For unicast traffic on all platforms there is a one-to-one mapping between queue-id and forwarding class. fc0 traffic always use queue-id 0, fc1 traffic always uses queue-id 1, etc.";
+                }
+                leaf last-clear {
+                    type srl_nokia-comm:date-and-time-delta;
+                    description
+                      "Timestamp of the last time the statistics associated with this unicast queue were cleared";
+                }
+                leaf transmitted-packets {
+                    type srl_nokia-comm:zero-based-counter64;
+                    description
+                      "Number of packets transmitted by the unicast queue, including transit traffic and locally originated traffic.";
+                }
+                leaf transmitted-octets {
+                    type srl_nokia-comm:zero-based-counter64;
+                    description
+                      "Number of octets transmitted by the unicast queue.";
+                }
+                leaf final-dropped-packets {
+                    type srl_nokia-comm:zero-based-counter64;
+                    description
+                      "Number of packets dropped by the unicast queue.
+                       
+                       On 7250-IXR (Jericho2-based) systems unicast packet drops related to egress port congestion should show up in the VOQ stats and not in this statistic.";
+                }
+                leaf final-dropped-octets {
+                    type srl_nokia-comm:zero-based-counter64;
+                    description
+                      "Number of octets dropped by the unicast queue.
+                      
+                      On 7250-IXR (Jericho2-based) systems unicast packet drops related to egress port congestion should show up in the VOQ stats and not in this statistic.";
+                }
+                list virtual-output-queue {
+                    if-feature "srl-feat:jericho2";
+                    description
+                      "List of virtual output queues that can send traffic to this egress queue. The list always has one entry for each IMM slot in the chassis, even if one or more slots are empty.";
+                    key slot;
+                    leaf slot {
+                        type uint8 {
+                            range "1..8";
+                        }
+                        description
+                          "The slot identifier for the virtual output queue.";
+                    }
+                    container queue-depth {
+                        config false;
+                        srl_nokia-ext:first-released "21.6.1";
+                        leaf last-high-threshold-time {
+                            description
+                              "The last time the depth of either VOQ associated with this slot exceeded the high-threshold in a rising direction.";
+                            type srl_nokia-comm:date-and-time;
+                        }
+                        leaf high-threshold-bytes {
+                            type uint32;
+                            units "bytes";
+                            description
+                              "The operational hardware value of the high threshold in bytes.";
+                        }
+                    } // queue-depth
+                    container forwarded-packets {
+                        srl_nokia-ext:first-released "20.12.1";
+                        leaf low-drop-probability {
+                            type srl_nokia-comm:zero-based-counter64;
+                            description
+                            "The number of unicast packets transmitted from the VOQ to the egress queue that were classified as low drop-probability. This reads 0 when the IMM associated with the VOQ is not inserted and it resets to 0 whenever the IMM associated with the VOQ is removed.";
+                        }
+                        leaf medium-drop-probability {
+                            type srl_nokia-comm:zero-based-counter64;
+                            description
+                            "The number of unicast packets transmitted from the VOQ to the egress queue that were classified as medium drop-probability. This reads 0 when the IMM associated with the VOQ is not inserted and it resets to 0 whenever the IMM associated with the VOQ is removed.";
+                        }
+                        leaf high-drop-probability {
+                            type srl_nokia-comm:zero-based-counter64;
+                            description
+                            "The number of unicast packets transmitted from the VOQ to the egress queue that were classified as high drop-probability. This reads 0 when the IMM associated with the VOQ is not inserted and it resets to 0 whenever the IMM associated with the VOQ is removed.";
+                        }
+                    }
+                    container forwarded-octets {
+                        srl_nokia-ext:first-released "20.12.1";
+                        leaf low-drop-probability {
+                            type srl_nokia-comm:zero-based-counter64;
+                            description
+                            "The number of octets in unicast packets transmitted from the VOQ to the egress queue that were classified as low drop-probability. This reads 0 when the IMM associated with the VOQ is not inserted and it resets to 0 whenever the IMM associated with the VOQ is removed.";
+                        }
+                        leaf medium-drop-probability {
+                            type srl_nokia-comm:zero-based-counter64;
+                            description
+                            "The number of octets in unicast packets transmitted from the VOQ to the egress queue that were classified as medium drop-probability. This reads 0 when the IMM associated with the VOQ is not inserted and it resets to 0 whenever the IMM associated with the VOQ is removed.";
+                        }
+                        leaf high-drop-probability {
+                            type srl_nokia-comm:zero-based-counter64;
+                            description
+                            "The number of octets in unicast packets transmitted from the VOQ to the egress queue that were classified as high drop-probability. This reads 0 when the IMM associated with the VOQ is not inserted and it resets to 0 whenever the IMM associated with the VOQ is removed.";
+                        }
+                    }
+                    container dropped-packets {
+                        srl_nokia-ext:first-released "20.12.1";
+                        leaf low-drop-probability {
+                            type srl_nokia-comm:zero-based-counter64;
+                            description
+                            "The number of unicast packets dropped in the VOQ due to the congestion at the egress port/queue that were classified as low drop-probability. This reads 0 when the IMM associated with the VOQ is not inserted and it resets to 0 whenever the IMM associated with the VOQ is removed.";
+                        }
+                        leaf medium-drop-probability {
+                            type srl_nokia-comm:zero-based-counter64;
+                            description
+                            "The number of unicast packets dropped in the VOQ due to the congestion at the egress port/queue that were classified as medium drop-probability. This reads 0 when the IMM associated with the VOQ is not inserted and it resets to 0 whenever the IMM associated with the VOQ is removed.";
+                        }
+                        leaf high-drop-probability {
+                            type srl_nokia-comm:zero-based-counter64;
+                            description
+                            "The number of unicast packets dropped in the VOQ due to the congestion at the egress port/queue that were classified as high drop-probability. This reads 0 when the IMM associated with the VOQ is not inserted and it resets to 0 whenever the IMM associated with the VOQ is removed.";
+                        }
+                    }
+                    container dropped-octets {
+                        srl_nokia-ext:first-released "20.12.1";
+                        leaf low-drop-probability {
+                            type srl_nokia-comm:zero-based-counter64;
+                            description
+                            "The number of octets in unicast packets dropped in the VOQ due to the congestion at the egress port/queue that were classified as low drop-probability. This reads 0 when the IMM associated with the VOQ is not inserted and it resets to 0 whenever the IMM associated with the VOQ is removed.";
+                        }
+                        leaf medium-drop-probability {
+                            type srl_nokia-comm:zero-based-counter64;
+                            description
+                            "The number of octets in unicast packets dropped in the VOQ due to the congestion at the egress port/queue that were classified as medium drop-probability. This reads 0 when the IMM associated with the VOQ is not inserted and it resets to 0 whenever the IMM associated with the VOQ is removed.";
+                        }
+                        leaf high-drop-probability {
+                            type srl_nokia-comm:zero-based-counter64;
+                            description
+                            "The number of octets in unicast packets dropped in the VOQ due to the congestion at the egress port/queue that were classified as high drop-probability. This reads 0 when the IMM associated with the VOQ is not inserted and it resets to 0 whenever the IMM associated with the VOQ is removed.";
+                        }
+                    }
+                } // virtual-output-queue
+            } // unicast-queue
+            list multicast-queue {
+                description
+                  "List of multicast queues.";
+                key "queue-id";
+                leaf queue-id {
+                    type srl_nokia-comm:queue-index;
+                    description
+                        "The queue identifier
+
+                        For J2 and TD3 there is a one-to-one mapping between queue-id and forwarding class. fc0 traffic always use queue-id 0, fc1 traffic always uses queue-id 1, etc.
+
+                        For TH3 the multicast queue-id range is limited to 0-3 and the mapping is as follows:
+                        fc0+1 -> queue-id 0
+                        fc2+3 -> queue-id 1
+                        fc4+5 -> queue-id 2
+                        fc6+7 -> queue-id 3";
+                }
+                leaf last-clear {
+                    type srl_nokia-comm:date-and-time-delta;
+                    description
+                      "Timestamp of the last time the statistics associated with this multicast queue were cleared";
+                }
+                leaf transmitted-packets {
+                    type srl_nokia-comm:zero-based-counter64;
+                    description
+                      "Number of packets transmitted by the multicast queue.";
+                }
+                leaf transmitted-octets {
+                    type srl_nokia-comm:zero-based-counter64;
+                    description
+                      "Number of octets transmitted by the multicast queue.";
+                }
+                leaf final-dropped-packets {
+                    type srl_nokia-comm:zero-based-counter64;
+                    description
+                      "Number of packets dropped by the multicast queue.";
+                }
+                leaf final-dropped-octets {
+                    type srl_nokia-comm:zero-based-counter64;
+                    description
+                      "Number of octets dropped by the multicast queue.";
+                }
+            }
+        }
+    }
+
+    grouping subinterface-qos {
+        container qos {
+            srl_nokia-ext:first-released "19.11.1";
+            if-feature "srl-feat:jericho2 or srl-feat:platform-7220-d2 or srl-feat:platform-7220-d3 or srl-feat:tomahawk3";
+            container input {
+                container classifiers {
+                    leaf ipv4-dscp {
+                        if-feature "srl-feat:jericho2";
+                        type leafref {
+                            path "/srl_nokia-qos:qos/srl_nokia-qos:classifiers/srl_nokia-qos:dscp-policy/srl_nokia-qos:name";
+                        }
+                        description
+                          "Reference to the name of a DSCP classifier policy that applies only to IPv4 traffic.";
+                    }
+                    leaf ipv6-dscp {
+                        if-feature "srl-feat:jericho2";
+                        type leafref {
+                            path "/srl_nokia-qos:qos/srl_nokia-qos:classifiers/srl_nokia-qos:dscp-policy/srl_nokia-qos:name";
+                        }
+                        description
+                          "Reference to the name of a DSCP classifier policy that applies only to IPv6 traffic.";
+                    }
+                    leaf dscp {
+                        srl_nokia-ext:first-released "20.6.1";
+                        if-feature "srl-feat:platform-7220-d2 or srl-feat:platform-7220-d3 or srl-feat:tomahawk3";
+                        type leafref {
+                            path "/srl_nokia-qos:qos/srl_nokia-qos:classifiers/srl_nokia-qos:dscp-policy/srl_nokia-qos:name";
+                        }
+                        description
+                          "Reference to the name of a DSCP classifier policy that applies to both IPv4 and IPv6 traffic.";
+                    }
+
+                   leaf mpls-traffic-class {
+                       if-feature "srl-feat:mpls-qos";
+                       type leafref {
+                           path "/srl_nokia-qos:qos/srl_nokia-qos:classifiers/srl_nokia-qos:mpls-traffic-class-policy/name";
+                       }            
+                       description 
+                         "Reference to the name of an MPLS traffic-class classifier policy";
+                   }
+                }
+            }
+            container output {
+                srl_nokia-ext:first-released "19.11.1";
+                container rewrite-rules {
+                    leaf ipv4-dscp {
+                        if-feature "srl-feat:jericho2";
+                        type leafref {
+                            path "/srl_nokia-qos:qos/srl_nokia-qos:rewrite-rules/srl_nokia-qos:dscp-policy/srl_nokia-qos:name";
+                        }
+                        description
+                          "Reference to the name of a DSCP rewrite-rule policy that applies only to IPv4 traffic.";
+                    }
+                    leaf ipv6-dscp {
+                        if-feature "srl-feat:jericho2";
+                        type leafref {
+                            path "/srl_nokia-qos:qos/srl_nokia-qos:rewrite-rules/srl_nokia-qos:dscp-policy/srl_nokia-qos:name";
+                        }
+                        description
+                          "Reference to the name of a DSCP rewrite-rule policy that applies only to IPv6 traffic.";
+                    }
+                    leaf dscp {
+                        srl_nokia-ext:first-released "20.6.1";
+                        if-feature "srl-feat:platform-7220-d2 or srl-feat:platform-7220-d3 or srl-feat:tomahawk3";
+                        type leafref {
+                            path "/srl_nokia-qos:qos/srl_nokia-qos:rewrite-rules/srl_nokia-qos:dscp-policy/srl_nokia-qos:name";
+                        }
+                        description
+                          "Reference to the name of a DSCP rewrite-rule policy that applies to both IPv4 and IPv6 traffic.";
+                        must "../../../../srl_nokia-if:type != 'srl_nokia-if:bridged'" {
+                            error-message "rewrite-rules not allowed with type bridged";
+                        }
+                    }
+
+                    leaf mpls-traffic-class {
+                        if-feature "srl-feat:mpls-qos";
+                        type leafref {
+                          path "/srl_nokia-qos:qos/srl_nokia-qos:rewrite-rules/srl_nokia-qos:mpls-traffic-class-policy/name";
+                        }
+                        description
+                           "Reference to the name of an MPLS traffic-class rewrite-rule policy";
+                    }
+                }
+            }
+        }
+    }
+
+    uses qos-top;
+  
+    augment "/srl_nokia-if:interface" {
+        uses interface-qos;
+        uses queue-stats;
+    }
+  
+    augment "/srl_nokia-if:interface/srl_nokia-if:subinterface" {
+        uses subinterface-qos;
+    }
+}

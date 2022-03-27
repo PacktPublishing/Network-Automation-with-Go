@@ -1,0 +1,81 @@
+module srl_nokia-tunnel-interfaces-vxlan-interface-bridge-table-multicast-destinations {
+  yang-version 1.1;
+
+  // namespace
+
+  namespace "urn:srl_nokia/tunnel-interface/vxlan-interface/bridge-table/multicast-destinations";
+  prefix srl_nokia-tunnel-if-vxlan-if-bt-multicast-destinations;
+
+  // import some basic types
+  import srl_nokia-common {
+    prefix srl_nokia-comm;
+  }
+  import srl_nokia-tunnel-interfaces {
+    prefix srl_nokia-tunnel-if;
+  }
+  import srl_nokia-extensions {
+    prefix srl_nokia-ext;
+  }
+
+  description
+    "Model for bridge-table multicast destinations on the vxlan-interface";
+
+  // typedef statements
+
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+
+  grouping bridge-table-vxlan-interface-multicast-destinations-destination-top {
+    list destination {
+      key "vtep vni";
+      leaf vtep {
+        srl_nokia-ext:show-importance high;
+        type srl_nokia-comm:ip-address;
+        description
+          "The IP address that identifies the remote VXLAN Termination Endpoint (VTEP).";
+      }
+      leaf vni {
+        type uint32 {
+          range "1..16777215";
+        }
+        srl_nokia-ext:show-importance "high";
+        description 
+          "VXLAN Network Identifier of the destination.";
+      }
+      leaf multicast-forwarding {
+        srl_nokia-ext:show-importance "high";
+        type srl_nokia-comm:multicast-type;
+        description
+          "The type of multicast data forwarded by this vxlan destination.";
+      }
+      leaf destination-index {
+        type uint64;
+        srl_nokia-ext:show-importance "high";
+        description
+          "A system-wide unique identifier of this vxlan destination object (system allocated).";
+      }
+      leaf not-programmed-reason {
+        srl_nokia-ext:show-importance "high";
+        type enumeration {
+          enum "no-destination-index";
+          enum "multicast-limit";
+        }
+        description 
+           "The reason why the destination is not programmed in the floodlist";
+      }
+    }
+  }
+
+  grouping bridge-table-vxlan-interface-multicast-destinations-top {
+    container multicast-destinations {
+      config false;
+      uses bridge-table-vxlan-interface-multicast-destinations-destination-top;
+    }
+  }
+
+  augment "/srl_nokia-tunnel-if:tunnel-interface/srl_nokia-tunnel-if:vxlan-interface/srl_nokia-tunnel-if:bridge-table" {
+    uses bridge-table-vxlan-interface-multicast-destinations-top;
+  }
+}

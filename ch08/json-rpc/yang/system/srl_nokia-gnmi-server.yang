@@ -1,0 +1,298 @@
+module srl_nokia-gnmi-server {
+  yang-version 1.1;
+  namespace "urn:srl_nokia/gnmi-server";
+  prefix srl-gnmi-server;
+
+  import srl_nokia-common {
+    prefix srl-comm;
+  }
+  import srl_nokia-system {
+    prefix srl-system;
+  }
+  import srl_nokia-network-instance {
+    prefix srl-netinst;
+  }
+  import srl_nokia-tls {
+    prefix srl-tls;
+  }
+  import srl_nokia-extensions {
+    prefix srl-ext;
+  }
+
+  description
+    "This module defines configuration and operational state data related to the gnmi server.";
+
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+  grouping gnmi-common {
+    leaf admin-state {
+      type srl-comm:admin-state;
+      srl-ext:show-importance "high";
+      default "disable";
+      description
+        "Administratively enable or disable the gNMI server";
+    }
+    leaf oper-state {
+      config false;
+      type srl-comm:oper-state;
+      srl-ext:show-importance "high";
+      description
+        "Details if the gNMI server is operationally available";
+    }
+    leaf use-authentication {
+      type boolean;
+      srl-ext:show-importance "high";
+      default "true";
+      description
+        "Enable or disable the use of username/password authentication for every gNMI request";
+    }
+  }
+
+  grouping gnmi-socket {
+    container unix-socket {
+      description
+        "Top-level container for configuration and state related to unix sockets";
+      uses gnmi-common;
+      leaf socket-path {
+        srl-ext:show-importance "high";
+        config false;
+        type string;
+        description
+          "Path to the unix socket used by gNMI";
+      }
+      leaf tls-profile {
+        type leafref {
+          path "/srl-system:system/srl-tls:tls/srl-tls:server-profile/srl-tls:name";
+        }
+        srl-ext:show-importance "high";
+        description
+          "Reference to the TLS profile to use on the gNMI unix socket server
+
+          If none is specified, then TLS is not used.";
+      }
+    }
+  }
+
+  grouping gnmi-netinst {
+    list network-instance {
+      description
+        "List of network instances to run a gNMI server in";
+      key "name";
+      uses gnmi-common;
+      leaf name {
+        type leafref {
+          path "/srl-netinst:network-instance/srl-netinst:name";
+        }
+        must 'not(/srl-netinst:network-instance[srl-netinst:name=current()]/srl-netinst:type = "srl-netinst:mac-vrf")' {
+          error-message "gNMI server cannot be started in a network-instance of type 'mac-vrf'";
+        }
+        description
+          "Reference to a configured network instance";
+      }
+      leaf-list source-address {
+        type srl-comm:ip-address;
+        default "::";
+        description
+          "List of IP addresses the gNMI server will listen on within the network instance";
+      }
+      leaf port {
+        type srl-comm:port-number;
+        srl-ext:show-importance "high";
+        default "57400";
+        description
+          "Port the gNMI server will listen on for incoming connections";
+      }
+      leaf tls-profile {
+        mandatory true;
+        type leafref {
+          path "/srl-system:system/srl-tls:tls/srl-tls:server-profile/srl-tls:name";
+        }
+        srl-ext:show-importance "high";
+        description
+          "Reference to the TLS profile to use on the gNMI server";
+      }
+    }
+  }
+
+  grouping gnmi-traceoptions {
+    description
+      "Top-level grouping for gNMI trace options";
+    leaf-list trace-options {
+      description
+        "gNMI trace options";
+      type enumeration {
+        enum request;
+        enum response;
+        enum common;
+      }
+    }
+  }
+
+  grouping gnmi-server-top {
+    container gnmi-server {
+      description
+        "Configures the gNMI server access API";
+      leaf admin-state {
+        type srl-comm:admin-state;
+        default "disable";
+        srl-ext:show-importance "high";
+        description
+          "Globally enable or disable the gNMI server
+           Disabling this will disable all gNMI servers.";
+      }
+      uses gnmi-traceoptions;
+      uses gnmi-netinst;
+      uses gnmi-socket;
+      leaf timeout {
+        type uint16 {
+          range "0..65535";
+        }
+        default "7200";
+        srl-ext:show-importance "low";
+        units "seconds";
+        description
+          "Set the idle timeout in seconds on gNMI connections";
+      }
+      leaf rate-limit {
+        type uint16 {
+          range "0..65535";
+        }
+        srl-ext:show-importance "low";
+        default "60";
+        description
+          "Set a limit on the number of connection attempts per minute";
+      }
+      leaf session-limit {
+        type uint16 {
+          range "0..65535";
+        }
+        srl-ext:show-importance "low";
+        default "20";
+        description
+          "Set a limit on the number of simultaneous active gNMI sessions";
+      }
+      leaf commit-confirmed-timeout {
+        srl-ext:first-released "20.6.1";
+        type uint32 {
+          range "0..86400";
+        }
+        default "0";
+        srl-ext:show-importance "low";
+        units "seconds";
+        description
+          "Number of seconds to wait for confirmation. A value of 0 means commit confirmed is not used";
+      }
+      leaf commit-save {
+        srl-ext:first-released "21.3.1";
+        type boolean;
+        default false;
+        srl-ext:show-importance "low";
+        description
+          "Specifies whether to save startup configuration after every successful commit";
+      }
+      leaf include-defaults-in-config-only-responses {
+        srl-ext:first-released "20.6.4";
+        type boolean;
+        default false;
+        srl-ext:show-importance "low";
+        description
+            "Specifies whether to include field default values in get/subscribe responses when
+             using configuration only datastore (for example running/intended datastore)";
+      }
+      list subscription {
+        config false;
+        description
+          "List of subscriptions";
+        key "id";
+        leaf id {
+          type uint32 {
+            range "0..4294967295";
+          }
+          description
+            "System generated ID for for the subscription";
+        }
+        leaf user {
+          type string;
+          srl-ext:show-importance "high";
+          description
+            "Authenticated username for the subscription";
+        }
+        leaf user-agent {
+          type string;
+          srl-ext:show-importance "low";
+          description
+            "User agent used for the subscription";
+        }
+        leaf remote-host {
+          type srl-comm:ip-address;
+          srl-ext:show-importance "high";
+          description
+            "Remote host of the subscription";
+        }
+        leaf remote-port {
+          type srl-comm:port-number;
+          srl-ext:show-importance "high";
+          description
+            "Remote port of the subscription";
+        }
+        leaf-list paths {
+          type string;
+          srl-ext:show-importance "low";
+          description
+            "List of paths being subscribed to";
+        }
+        leaf sample-interval {
+          type uint64;
+          srl-ext:show-importance "low";
+          units "seconds";
+          description
+            "Time in seconds to provide updates to the remote host, set to 0 for all subscription modes except SAMPLE";
+        }
+        leaf mode {
+          type enumeration {
+            enum ON_CHANGE {
+              value 1;
+            }
+            enum SAMPLE {
+              value 2;
+            }
+            enum TARGET_DEFINED {
+              value 3;
+            }
+            enum POLL {
+              value 4;
+            }
+            enum ONCE {
+              value 5;
+            }
+          }
+          srl-ext:show-importance "low";
+          description
+            "Subscription mode (ON_CHANGE, SAMPLE, TARGET_DEFINED, POLL, ONCE)";
+        }
+        leaf start-time {
+          type srl-comm:date-and-time-delta;
+          srl-ext:show-importance "high";
+          description
+            "Time of the subscription creation";
+        }
+      }
+    }
+  }
+
+  augment "/srl-system:system" {
+    srl-ext:first-released "19.11.1";
+    uses gnmi-server-top;
+  }
+}

@@ -1,0 +1,453 @@
+module srl_nokia-interfaces-vlans {
+  yang-version 1.1;
+
+  // namespace
+  namespace "urn:srl_nokia/interfaces/vlans";
+
+  prefix "srl_nokia-if-vlan";
+
+  import srl_nokia-features { prefix srl_nokia-feat; }
+  import srl_nokia-interfaces { prefix srl_nokia-if; }
+
+  description
+    "Model for managing VLANs
+
+     This model describes management of VLAN parameters under SRL Interfaces";
+
+  // identity statements
+
+  revision 2021-06-30 {
+    description
+      "SRLinux 21.6.1";
+  }
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+  identity TPID_TYPES {
+    description
+      "Base identity for TPID values that can be matched or that override
+       the VLAN ethertype value";
+  }
+
+  identity TPID_0X8100 {
+    base TPID_TYPES;
+    description
+      "Default TPID value for 802.1q single-tagged VLANs.";
+  }
+
+  identity TPID_0X88A8 {
+    base TPID_TYPES;
+    description
+      "TPID value for 802.1ad provider bridging, QinQ or
+       stacked VLANs.";
+  }
+
+  identity TPID_0X9100 {
+    base TPID_TYPES;
+    description
+      "Alternate TPID value.";
+  }
+
+  identity TPID_0X9200 {
+    base TPID_TYPES;
+    description
+      "Alternate TPID value.";
+  }
+
+  identity TPID_ANY {
+    base TPID_TYPES;
+    description
+      "A wildcard that matches any of the generally used TPID values
+       for singly- or multiply-tagged VLANs. Equivalent to matching
+       any of TPID_0X8100, TPID_0X88A8, TPID_0X9100 and TPID_0x9200.
+       This value is only applicable where the TPID of a packet is
+       being matched.";
+  }
+
+  // typedef statements
+
+  typedef vlan-id {
+    type uint16 {
+      range 1..4094;
+    }
+    description
+      "Type definition representing a single-tagged VLAN";
+  }
+
+	typedef vlan-stack-action {
+    type enumeration {
+      enum PUSH {
+        description
+          "Push a VLAN onto the VLAN stack.";
+      }
+      enum POP {
+        description
+          "Pop a VLAN from the VLAN stack.";
+      }
+      enum SWAP {
+        description
+          "Swap the VLAN at the top of the VLAN stack.";
+      }
+      enum PUSH-PUSH {
+        description
+          "Push a VLAN onto the VLAN stack.";
+      }
+      enum POP-POP {
+        description
+          "Pop a VLAN from the VLAN stack.";
+      }
+      enum PUSH-SWAP {
+        description
+          "Push & SWAP a VLAN onto the VLAN stack.";
+      }
+    }
+    description
+      "Operations that can be performed on a VLAN stack.";
+  }
+
+  grouping vlan-single-tagged-params {
+    description
+      "match criteria for a single tag";
+    leaf vlan-id {
+      type union {
+        type vlan-id;
+        type enumeration {
+          enum "any" { if-feature srl_nokia-feat:bridged; }
+        } 
+      }
+      description
+        "VLAN identifier for single-tagged packets.";
+      must "(../../../../../vlan-tagging = true())" {
+        error-message "vlan-id only configurable if vlan-tagging enabled on parent interface";
+      }
+      must "string(.) != 'any' or (../../../../srl_nokia-if:type = 'srl_nokia-if:bridged')" {
+        error-message "vlan-id any only configurable on bridged subinterface";
+      }
+    }
+  }
+
+  grouping vlan-single-tagged-list-params {
+    description
+      "Specifies single-tagged packets with a list of VLAN identifiers.";
+
+    leaf-list vlan-ids {
+      type vlan-id;
+      description
+        "VLAN identifiers for single-tagged packets.";
+    }
+  }
+
+  grouping vlan-single-tagged-range-params {
+    description
+      "Specifies single-tagged packets with a list of VLAN identifiers.";
+
+    leaf-list low-vlan-id {
+      type vlan-id;
+      description
+        "The low-value VLAN identifier in a range for single-tagged
+         packets. The range is matched inclusively.";
+    }
+    leaf-list high-vlan-id {
+      type vlan-id;
+      description
+        "The high-value VLAN identifier in a range for single-tagged
+         packets. The range is matched inclusively.";
+    }
+  }
+
+  grouping vlan-double-tagged-params {
+  	description
+  		"match criteria for a double tag";
+  	leaf inner-vlan-id {
+  		type vlan-id;
+      	description
+      		"VLAN identifier for single-tagged packets.";
+  	}
+  	leaf outer-vlan-id {
+  		type vlan-id;
+      	description
+      		"VLAN identifier for single-tagged packets.";
+  	}
+  }
+
+  grouping vlan-double-tagged-inner-list-params {
+  	description
+  		"match criteria for a double tag";
+  	leaf-list inner-vlan-ids {
+  		type vlan-id;
+      	description
+      		"Inner VLAN identifiers for double-tagged packets.";
+  	}
+  	leaf outer-vlan-id {
+  		type vlan-id;
+      	description
+      		"Outer VLAN identifier for double-tagged packets.";
+  	}
+  }
+
+  grouping vlan-double-tagged-outer-list-params {
+  	description
+  		"match criteria for a double tag";
+  	leaf inner-vlan-id {
+  		type vlan-id;
+      	description
+      		"Inner VLAN identifier for double-tagged packets.";
+  	}
+  	leaf-list outer-vlan-ids {
+  		type vlan-id;
+      	description
+      		"Outer VLAN identifiers for double-tagged packets.";
+  	}
+  }
+
+  grouping vlan-double-tagged-inner-range-params {
+  	description
+  		"match criteria for a double tag using an Inner range of values";
+  	leaf inner-low-vlan-id {
+  		type vlan-id;
+      	description
+            "The inner low-value VLAN identifier in a range for single-tagged packets. The range is matched inclusively.";
+  	}
+  	leaf inner-high-vlan-id {
+  		type vlan-id;
+      	description
+            "The inner high-value VLAN identifier in a range for single-tagged packets. The range is matched inclusively.";
+  	}
+  	leaf outer-vlan-id {
+  		type vlan-id;
+      	description
+      		"Outer VLAN identifiers for double-tagged packets.";
+  	}
+  }
+
+  grouping vlan-double-tagged-outer-range-params {
+  	description
+  		"match criteria for a double tag using an outer range of values";
+  	leaf inner-vlan-id {
+  		type vlan-id;
+      	description
+      		"Inner VLAN identifiers for double-tagged packets.";
+  	}
+  	leaf outer-low-vlan-id {
+  		type vlan-id;
+      	description
+            "The outer low-value VLAN identifier in a range for single-tagged packets. The range is matched inclusively.";
+  	}
+  	leaf outer-high-vlan-id {
+  		type vlan-id;
+      	description
+            "The outer high-value VLAN identifier in a range for single-tagged packets. The range is matched inclusively.";
+  	}
+  }
+
+  grouping vlan-double-tagged-inner-outer-range-params {
+  	description
+  		"match criteria for a double tag packer using an inner and outer range of values";
+  	leaf inner-low-vlan-id {
+  		type vlan-id;
+      	description
+            "The inner low-value VLAN identifier in a range for single-tagged packets. The range is matched inclusively.";
+  	}
+  	leaf inner-high-vlan-id {
+  		type vlan-id;
+      	description
+            "The inner high-value VLAN identifier in a range for single-tagged packets. The range is matched inclusively.";
+  	}
+  	leaf outer-low-vlan-id {
+  		type vlan-id;
+      	description
+            "The outer low-value VLAN identifier in a range for single-tagged packets. The range is matched inclusively.";
+  	}
+  	leaf outer-high-vlan-id {
+  		type vlan-id;
+      	description
+            "The outer high-value VLAN identifier in a range for single-tagged packets. The range is matched inclusively.";
+  	}
+  }
+
+  grouping vlan-match-top {
+    description
+      "Top-level configuration and state for VLAN parameters";
+
+    container encap {
+      description
+        "VLAN match parmeters for the associated subinterface.";
+
+  		container single-tagged {
+        presence "Match single-tagged packets with a specific vlan-id.";
+  		  description
+          "When  present, tagged frames with a specific, non-zero, outer VLAN ID are associated to the subinterface. (The outer VLAN-ID tag is considered service delimiting and it is stripped at ingress and restored/added on egress.).";
+
+  			uses vlan-single-tagged-params;
+  		}
+      container untagged {
+        if-feature srl_nokia-feat:bridged;
+        presence "Match untagged packets.";
+        description
+          "When  present, untagged frames and VLAN ID 0 priority tagged frames are associated to the subinterface when it belongs to an interface with vlan-tagging enabled.";
+        must "not(../single-tagged)" {
+          error-message "untagged and single-tagged cannot be configured together";
+        }
+        must "(../../../../vlan-tagging = true())" {
+          error-message "untagged only configurable if vlan-tagging enabled on parent interface";
+        }
+        must "(../../../srl_nokia-if:type = 'srl_nokia-if:bridged')" {
+          error-message "untagged only allowed with type bridged";
+        }
+      }
+  		/* container single-tagged-list {
+  			description
+          "Match single-tagged packets with a list of VLAN identifiers.";
+
+  			uses vlan-single-tagged-list-params;
+  		}
+  		container single-tagged-range {
+  			description
+          "Match a single-tagged packets with a range of VLAN identifiers.";
+
+  			uses vlan-single-tagged-range-params;
+  		}
+  		container double-tagged {
+  			description
+          "Match a double-tagged packets with a single set of VLAN identifiers.";
+
+  			uses vlan-double-tagged-params;
+  		}
+  		container double-tagged-inner-list {
+  			description
+  				"Match a double-tagged packets with a list of inner VLAN identifiers.";
+  			uses vlan-double-tagged-inner-list-params;
+  		}
+  		container double-tagged-outer-list {
+  			description
+  				"Match a double-tagged packets with a list of outer VLAN identifiers.";
+  			uses vlan-double-tagged-outer-list-params;
+  		}
+  		container double-tagged-inner-range {
+  			description
+  				"Match a double-tagged packets with a range of inner VLAN identifiers.";
+  			uses vlan-double-tagged-inner-range-params;
+  		}
+  		container double-tagged-outer-range {
+  			description
+  				"Match a double-tagged packets with a range of outer VLAN identifiers.";
+  			uses vlan-double-tagged-outer-range-params;
+  		}
+  		container double-tagged-inner-outer-range {
+  			description
+  				"Match a double-tagged packets with a range of inner & outer VLAN identifiers.";
+  			uses vlan-double-tagged-inner-outer-range-params;
+  		} */
+	  }
+  }
+
+  grouping vlan-ingress-mapping-top {
+    description
+      "Configuration for VLAN ingress mapping parameters";
+
+    container ingress-mapping {
+      leaf vlan-stack-action {
+      	type vlan-stack-action;
+      	description
+        	"The action to take on the VLAN stack of a packet. This is
+         	optionally used in conjunction with adjacent leaves to override
+         	the values of the action.";
+    	}
+
+    	leaf vlan-id {
+      	type vlan-id;
+      	description
+        	"Optionally specifies a fixed VLAN identifier that is used by the
+         	action configured in 'vlan-stack-action'. For example, if the action
+         	is 'PUSH' then this VLAN identifier is added to the the stack.
+         	This value must be non-zero if the 'vlan-stack-action' is one of
+         	'PUSH' or 'SWAP'.";
+    	}
+
+    	leaf tpid {
+      	type identityref {
+        	base TPID_TYPES;
+      	}
+      	description
+        	"Optionally override the tag protocol identifier field (TPID) that
+         	is used by the action configured by 'vlan-stack-action' when
+         	modifying the VLAN stack.";
+    	}
+  	}
+	}
+
+	grouping vlan-egress-mapping-top {
+    description
+      "Configuration for VLAN egress mapping parameters";
+
+    container egress-mapping {
+      leaf vlan-stack-action {
+      	type vlan-stack-action;
+      	description
+        	"The action to take on the VLAN stack of a packet. This is
+         	optionally used in conjunction with adjacent leaves to override
+         	the values of the action.";
+    	}
+
+    	leaf vlan-id {
+      	type vlan-id;
+      	description
+        	"Optionally specifies a fixed VLAN identifier that is used by the
+         	action configured in 'vlan-stack-action'. For example, if the action
+         	is 'PUSH' then this VLAN identifier is added to the the stack.
+         	This value must be non-zero if the 'vlan-stack-action' is one of
+         	'PUSH' or 'SWAP'.";
+    	}
+
+    	leaf tpid {
+      	type identityref {
+        	base TPID_TYPES;
+      	}
+      	description
+        	"Optionally override the tag protocol identifier field (TPID) that
+         	is used by the action configured by 'vlan-stack-action' when
+         	modifying the VLAN stack.";
+    	}
+		}
+	}
+
+  grouping vlan-subinterface-top {
+    description
+      "Top-level configuration and state for VLAN parameters per subinterface";
+    container vlan {
+      description
+        "Parameters for VLAN definition under SRL interfaces.";
+			uses vlan-match-top;
+			/* uses vlan-ingress-mapping-top; */
+			/* uses vlan-egress-mapping-top; */
+		}
+	}
+
+  grouping vlan-interface-top {
+    description
+      "Top-level configuration and state for VLAN parameters per port";
+    leaf vlan-tagging {
+      description
+        "When set to true the interface is allowed to accept frames with one or more VLAN tags";
+      type boolean;
+      must "not(../breakout-mode)" {
+        error-message "vlan-tagging not configurable when breakout-mode is enabled";
+      }
+      // default false;
+      // vlan-tagging is not applicable for all interfaces, so default can not be applied here
+    }
+  }
+
+	augment "/srl_nokia-if:interface/srl_nokia-if:subinterface" {
+    uses vlan-subinterface-top;
+  }
+  augment "/srl_nokia-if:interface" {
+    uses vlan-interface-top;
+  }
+}

@@ -1,0 +1,42 @@
+module srl_nokia-tunnel {
+  yang-version 1.1;
+
+  // namespace
+  namespace "urn:srl_nokia/tunnel";
+  prefix "srl_nokia-tunnel";
+
+  import srl_nokia-common {
+    prefix srl_nokia-comm;
+  }
+  import srl_nokia-features {
+    prefix srl-feat;
+  }
+  import srl_nokia-extensions {
+    prefix srl_nokia-ext;
+  }
+
+  description
+    "Model for tunnels in SRLinux.";
+
+  // typedef statements
+
+  // groupings 
+
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+
+  grouping tunnel-top { 
+    description 
+      "Top-level configuration and state for the tunnel table.";
+    container tunnel {
+        if-feature "srl-feat:vxlan";
+      srl_nokia-ext:first-released "20.10.1";
+      description
+        "This model collects all config and state aspects of the tunnel table
+         in SRLinux.";
+    }
+  }
+  uses tunnel-top;
+}

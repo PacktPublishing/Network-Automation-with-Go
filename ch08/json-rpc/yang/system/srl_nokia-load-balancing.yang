@@ -1,0 +1,111 @@
+module srl_nokia-load-balancing {
+  yang-version 1.1;
+  namespace "urn:srl_nokia/load-balancing";
+  prefix srl_nokia-lb;
+
+  import srl_nokia-extensions {
+    prefix srl_nokia-ext;
+  }
+  import srl_nokia-system {
+    prefix srl-system;
+  }
+  import srl_nokia-features {
+    prefix srl_nokia-feat;
+  }
+
+  description
+    "This module defines configuration and operational state data related to ECMP and other load-balancing options.";
+
+  revision 2021-06-30 {
+    description
+      "SRLinux 21.6.1";
+  }
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+  grouping generic-load-balancing {
+    container load-balancing {
+      description "Adjust system-wide ECMP load balancing options.";
+      container hash-options {
+        must "destination-address = source-address" {
+            error-message "Destination address and source address hashing cannot be set differently on this platform";
+            srl_nokia-ext:if-feature srl_nokia-features:jericho2;
+        }
+        must "destination-port = source-port" {
+            error-message "Destination address and source port hashing cannot be set differently on this platform";
+            srl_nokia-ext:if-feature srl_nokia-features:jericho2;
+        }
+
+        description
+          "Container for packet header fields and other inputs used in hashing calculations";
+        leaf hash-seed {
+          type uint16;
+          default "0";
+          description
+            "A configured hash seed to override the default value of 0
+
+             Different routers can be configured with different hash-seed values to minimize traffic polarization effects. This hash-seed is used by all hash-related CRC calculations including those take IP header fields, those that take Ethernet header fields and those that take MPLS labels.";
+        }
+        leaf destination-address {
+          description
+            "Include the destination IP address in the hash calculation";
+          type boolean;
+          default "true";
+        }
+        leaf destination-port {
+          description
+            "Include the destination TCP/UDP port number in the hash calculation if the packet is an unfragmented IP packet carrying a TCP/UDP payload";
+          type boolean;
+          default "true";
+        }
+        leaf ipv6-flow-label {
+          if-feature "srl_nokia-feat:ipv6-flow-label-hash-key";
+          description
+            "Include the IPv6 flow label in the hash calculation if the packet is an IPv6 packet
+
+             It is expected that the IPv6 flow label value is written by the server or other host originating the flow and not changed by any intermediate switch or router.";
+          type boolean;
+          default "false";
+        }
+        leaf protocol {
+          description
+            "Include the IP protocol number in the hash calculation. For an IPv6 packet this is protocol value in the next-header field of the last extension header.";
+          type boolean;
+          default "true";
+        }
+        leaf source-address {
+          description
+            "Include the source IP address in the hash calculation";
+          type boolean;
+          default "true";
+        }
+        leaf source-port {
+          description
+            "Include the source TCP/UDP port number in the hash calculation if the packet is an unfragmented IP packet carrying a TCP/UDP payload";
+          type boolean;
+          default "true";
+        }
+        leaf vlan {
+          if-feature "srl_nokia-feat:trident3 or srl_nokia-feat:tomahawk3";
+          description
+            "Include the received VLAN ID in the hash calculation";
+          type boolean;
+          default "true";
+        }
+        leaf mpls-label-stack {
+          if-feature "srl_nokia-feat:future-21-6-3";
+          description
+            "Include the received labels (terminated and non-terminated) in the hash calculation";
+          type boolean;
+          default "false";
+        }
+      }
+    }
+  }
+
+  augment "/srl-system:system" {
+    uses generic-load-balancing;
+  }
+}

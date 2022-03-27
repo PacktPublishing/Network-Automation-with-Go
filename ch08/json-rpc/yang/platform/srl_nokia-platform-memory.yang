@@ -1,0 +1,68 @@
+module srl_nokia-platform-memory {
+  yang-version 1.1;
+
+  // namespace
+  namespace "urn:srl_nokia/platform-memory";
+  prefix srl_nokia-platform-memory;
+
+  import srl_nokia-platform {
+    prefix srl-platform;
+  }
+  import srl_nokia-platform-control {
+    prefix srl-platform-control;
+  }
+  import srl_nokia-common {
+    prefix srl-comm;
+  }
+
+  description
+    "This module defines configuration and operational state data related to system memory.";
+
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+  grouping memory-state-top {
+    description
+      "Operational state data for system memory";
+    leaf physical {
+      type uint64;
+      units "bytes";
+      description
+        "Total physical memory available on this component";
+    }
+    leaf reserved {
+      type uint64;
+      units "bytes";
+      description
+        "Memory reserved for system use";
+    }
+    leaf free {
+      type uint64;
+      units "bytes";
+      description
+        "Memory available for system use";
+    }
+    leaf utilization {
+      type srl-comm:percentage;
+      description
+        "Total memory utilized";
+    }
+  }
+
+  grouping memory-top {
+    description
+      "Top-level grouping for system memory state";
+    container memory {
+      description
+        "Top-level container for system memory state";
+      config false;
+      uses memory-state-top;
+    }
+  }
+
+  augment "/srl-platform:platform/srl-platform-control:control" {
+    uses memory-top;
+  }
+}

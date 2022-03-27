@@ -1,0 +1,189 @@
+module srl_nokia-tunnel-interfaces-vxlan-interface-bridge-table-unicast-destinations {
+  yang-version 1.1;
+
+  // namespace
+
+  namespace "urn:srl_nokia/tunnel-interface/vxlan-interface/bridge-table/unicast-destinations";
+  prefix srl_nokia-tunnel-if-vxlan-if-bt-unicast-destinations;
+
+  // import some basic types
+  import srl_nokia-common {
+    prefix srl_nokia-comm;
+  }
+  import srl_nokia-tunnel-interfaces {
+    prefix srl_nokia-tunnel-if;
+  }
+  import srl_nokia-extensions {
+    prefix srl_nokia-ext;
+  }
+
+  description
+    "Model for bridge-table unicast destinations on the vxlan-interface";
+
+  // typedef statements
+
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+
+  grouping bridge-table-mac-table-top {
+    container mac-table {
+      config false;
+      list mac {
+        key "address";
+        description "macs learnt on the bridging instance";
+        leaf address {
+          type srl_nokia-comm:mac-address;
+        }
+
+        leaf type {
+          type srl_nokia-comm:mac-type;
+          srl_nokia-ext:show-importance "high";
+          description
+            "the type of the mac installed in the fib.";
+        }
+
+        leaf last-update {
+          type srl_nokia-comm:date-and-time-delta;
+          srl_nokia-ext:show-importance "high";
+          description
+            "The date and time of the last update of this mac";
+        }
+
+        leaf not-programmed-reason {
+          srl_nokia-ext:show-importance "high";
+          type enumeration {
+            enum "mac-limit";
+            enum "failed-on-slots";
+            enum "no-destination-index";
+          }
+          description 
+             "The reason why the mac is not programmed";
+        }
+        leaf-list failed-slots {
+          srl_nokia-ext:show-importance "high";
+          type uint8 {
+            range "1..8";
+          }
+          description
+            "The list of slot IDs corresponding to the linecards that did not successfully program the mac";
+        }
+      }
+    }  
+  }
+
+  grouping bridge-table-statistics-top {
+    container statistics {
+      config false;
+      leaf active-entries {
+        type srl_nokia-comm:zero-based-counter64;
+        description
+          "The total number of entries that are active on the sub-interface.";
+        srl_nokia-ext:show-importance "high";
+      }
+      leaf total-entries {
+        type srl_nokia-comm:zero-based-counter64;
+        description
+          "The total number of macs, active and inactive, on the sub-interface.";
+        srl_nokia-ext:show-importance "high";
+      }
+      leaf failed-entries {
+        type srl_nokia-comm:zero-based-counter64;
+        description
+          "The total number of macs, which have not been programmed on atleast one slot";
+        srl_nokia-ext:show-importance "high";
+      }
+      list mac-type {
+        key "type";
+        description
+          "the type of the mac on the sub-interface.";
+        leaf type {
+          type srl_nokia-comm:mac-type;
+          srl_nokia-ext:show-importance "high";
+        }
+        leaf active-entries {
+          type srl_nokia-comm:zero-based-counter64;
+          description
+            "The total number of entries of this type on the sub-interface";
+          srl_nokia-ext:show-importance "high";
+        }
+        leaf total-entries {
+          type srl_nokia-comm:zero-based-counter64;
+          description
+            "The total number of macs of this type , active and inactive, on the sub-interface.";
+          srl_nokia-ext:show-importance "high";
+        }
+        leaf failed-entries {
+          type srl_nokia-comm:zero-based-counter64;
+          description
+            "The total number of macs of this type, which have not been programmed on atleast one slot";
+          srl_nokia-ext:show-importance "high";
+        }
+      }
+    }
+  }
+
+  grouping bridge-table-vxlan-interface-unicast-destinations-es-destination-top {
+    list es-destination {
+      config false;
+      key "esi";
+      leaf esi {
+        type srl_nokia-comm:esi;
+        srl_nokia-ext:show-importance "high";
+        description
+          "The 10-byte Ethernet Segment Identifier of the ethernet segment.
+           ESI-0 or MAX-ESI values are not allowed.";
+      }
+      leaf destination-index {
+        type uint64;
+        srl_nokia-ext:show-importance "high";
+        description
+          "A system-wide unique identifier of this vxlan destination object (system allocated).";
+      }
+      uses bridge-table-statistics-top;
+      uses bridge-table-mac-table-top;
+    }
+  }
+
+  grouping bridge-table-vxlan-interface-unicast-destinations-destination-top {
+    list destination {
+      config false;
+      key "vtep vni";
+      leaf vtep {
+        srl_nokia-ext:show-importance high;
+        type srl_nokia-comm:ip-address;
+        description
+          "The IP address that identifies the remote VXLAN Termination Endpoint (VTEP).";
+      }
+      leaf vni {
+        type uint32 {
+          range "1..16777215";
+        }
+        srl_nokia-ext:show-importance "high";
+        description 
+          "VXLAN Network Identifier of the destination.";
+      }
+      leaf destination-index {
+        type uint64;
+        srl_nokia-ext:show-importance "high";
+        description
+          "A system-wide unique identifier of this vxlan destination object (system allocated).";
+      }
+      uses bridge-table-statistics-top;
+      uses bridge-table-mac-table-top;
+    }
+  }
+
+  grouping bridge-table-vxlan-interface-unicast-destinations-top {
+    container unicast-destinations {
+      config false;
+      uses bridge-table-vxlan-interface-unicast-destinations-destination-top;
+      uses bridge-table-vxlan-interface-unicast-destinations-es-destination-top;
+    }
+  }
+
+  augment "/srl_nokia-tunnel-if:tunnel-interface/srl_nokia-tunnel-if:vxlan-interface/srl_nokia-tunnel-if:bridge-table" {
+    uses bridge-table-vxlan-interface-unicast-destinations-top;
+  }
+}

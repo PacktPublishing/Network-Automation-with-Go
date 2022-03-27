@@ -1,0 +1,97 @@
+module srl_nokia-aggregate-routes {
+
+    yang-version 1.1;
+
+    // namespace
+    namespace "urn:srl_nokia/aggregate-routes";
+
+    prefix "srl_nokia-aggregate-routes";
+
+    import srl_nokia-common { prefix srl_nokia-comm; }
+    import srl_nokia-network-instance { prefix srl_nokia-netinst; }
+    import srl_nokia-policy-types { prefix srl_nokia-pol-types; }
+
+    description
+        "This yang file gives a description of aggregate route configuration.";
+
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+    grouping aggregate-route-top {
+        container aggregate-routes {
+            presence "Configure Aggregate Routes";
+            list route {
+                max-elements 16384;
+                key "prefix";
+                leaf prefix {
+                    type srl_nokia-comm:ip-prefix;
+                    must "../../../srl_nokia-netinst:type != 'srl_nokia-netinst:host'" {
+                        error-message "Aggregate routes not supported with network instance of type host";
+                    }
+                }
+                leaf admin-state {
+                    type srl_nokia-comm:admin-state;
+                    default "enable";
+                    description
+                        "This leaf contains the configured, desired state of the aggregate prefix.";
+                }
+                leaf installed {
+                    config false;
+                    type boolean;
+                    description
+                      "If set to true, this indicates that the aggregate route was installed into the datapath. If this is false then there are 2 possible reasons:
+                      (a) the admin-state is disable
+                      (b) there is another IP route for the same prefix that has a superior preference";
+                }
+                leaf generate-icmp {
+                    type boolean;
+                    description
+                        "When set to true the router generares ICMP unreachable messages for packets matching the aggregate route (and not a more specific route).";
+                }
+                leaf summary-only {
+                    type boolean;
+                    default "false";
+                    description
+                        "When set to true the router blocks the advertisement of all contributing
+                         routes of this aggregate route in dynamic protocols such as BGP.";
+                }
+                container aggregator {
+                    leaf address {
+                        type srl_nokia-comm:ipv4-address;
+                        description
+                            "Specifies the aggregator's IP address.";
+                    }
+                    leaf as-number {
+                        description
+                            "Specifies the aggregator's ASN";
+                        type srl_nokia-comm:as-number {
+                            range "1..4294967295";
+                        }
+                    }
+                }
+                container communities {
+                    leaf-list add {
+                        type union {
+                            type srl_nokia-pol-types:bgp-std-community-type;
+                            type srl_nokia-pol-types:bgp-std-community-regexp-type;
+                            type srl_nokia-pol-types:bgp-std-community-well-known-type;
+                            type srl_nokia-pol-types:bgp-large-community-type;
+                            type srl_nokia-pol-types:bgp-large-community-regexp-type;
+                        }
+                        ordered-by user;
+                        max-elements 12;
+                    }
+                }
+            }
+        }
+    }
+    augment "/srl_nokia-netinst:network-instance" {
+        uses aggregate-route-top;
+    }
+}

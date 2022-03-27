@@ -1,0 +1,47 @@
+module srl_nokia-tools-icmp {
+  yang-version 1.1;
+  namespace "urn:srl_nokia/tools-icmp";
+  prefix srl_nokia-tools-icmp;
+
+  import srl_nokia-tools-network-instance { prefix srl_nokia-tools-netinst; }
+
+  description
+    "YANG model for ICMP (statistics related) operational commands";
+
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+
+  grouping icmp-tools-top {
+    container icmp {
+      container statistics {
+        description
+        "ICMP version 4 statistics";
+        leaf clear {
+          type empty;
+          description
+            "Resets all the YANG state counters under network-instance/icmp/statistics to zero";
+        }
+      }
+    }
+    container icmp6 {
+      container statistics {
+        description
+        "ICMP version 6 statistics";
+        leaf clear {
+          type empty;
+          description
+            "Resets all the YANG state counters under network-instance/icmp6/statistics to zero";
+        }
+      }
+    }
+  }
+  augment "/srl_nokia-tools-netinst:network-instance" {
+      uses icmp-tools-top;
+  }
+}

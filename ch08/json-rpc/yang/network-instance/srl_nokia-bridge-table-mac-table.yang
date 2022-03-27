@@ -1,0 +1,151 @@
+module srl_nokia-bridge-table-mac-table {
+
+  yang-version "1.1";
+
+  // namespace
+  namespace "urn:srl_nokia/network-instance/bridge-table/mac-table";
+
+  prefix "srl_nokia-bridge-table-mac-table";
+
+  import srl_nokia-common { prefix srl_nokia-comm; }
+  import srl_nokia-network-instance { prefix srl_nokia-netinst; }
+  import srl_nokia-extensions { prefix srl_nokia-ext; }
+
+  description
+    "This yang file gives a description of bridge table configuration.";
+
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+
+  grouping bridge-table-mac-table-top {
+    container mac-table {
+      config false;
+      list mac {
+        key "address";
+        description "macs learnt on the bridging instance";
+        leaf address {
+          type srl_nokia-comm:mac-address;
+        }
+
+        leaf destination-type {
+          type srl_nokia-comm:destination-type ;
+          srl_nokia-ext:show-importance "high";
+          description
+            "the type of the destination the mac installed against in the fdb.";
+        }
+
+        leaf destination-index {
+          type uint64;
+          srl_nokia-ext:show-importance "high";
+          description
+            "A system-wide unique identifier of a subinterface object (system allocated).";
+        }
+
+        leaf type {
+          type srl_nokia-comm:mac-type;
+          srl_nokia-ext:show-importance "high";
+          description
+            "the type of the mac installed in the fib.";
+        }
+
+        leaf last-update {
+          type srl_nokia-comm:date-and-time-delta;
+          srl_nokia-ext:show-importance "high";
+          description
+            "The date and time of the last update of this mac";
+        }
+
+        leaf not-programmed-reason {
+          type enumeration {
+            enum "mac-limit";
+            enum "failed-on-slots";
+            enum "no-destination-index";
+          }
+          description 
+             "The reason why the mac is not programmed";
+        }
+        leaf-list failed-slots {
+          type uint8 {
+            range "1..8";
+          }
+          description
+            "The list of slot IDs corresponding to the linecards that did not successfully program the mac";
+        }
+        leaf destination {
+          type string;
+          srl_nokia-ext:show-importance "high";
+          description
+            "the name of the destination where the mac is programmed against.";
+        }  
+        leaf is-protected {
+          type boolean;
+          srl_nokia-ext:show-importance "high";
+          description
+            "Indicates if the mac is protected in the hardware.";
+        }
+      }
+    }  
+  }
+
+  grouping mac-table-statistics {
+    container statistics {
+      config false;
+      leaf active-entries {
+        type srl_nokia-comm:zero-based-counter64;
+        description
+          "The total number of entries that are active in the mac-table.";
+        srl_nokia-ext:show-importance "high";
+      }
+      leaf total-entries {
+        type srl_nokia-comm:zero-based-counter64;
+        description
+          "The total number of macs, active and inactive, that are present in the mac-table.";
+        srl_nokia-ext:show-importance "high";
+      }
+      leaf failed-entries {
+        type srl_nokia-comm:zero-based-counter64;
+        description
+          "The total number of macs, which have not been programmed on atleast one slot";
+        srl_nokia-ext:show-importance "high";
+      }
+      list mac-type {
+        key "type";
+        description
+          "the type of the mac installed in the fib.";
+        leaf type {
+          type srl_nokia-comm:mac-type;
+          srl_nokia-ext:show-importance "high";
+        }
+        leaf active-entries {
+          type srl_nokia-comm:zero-based-counter64;
+          description
+            "The total number of entries of this type that are active in the mac-table.";
+          srl_nokia-ext:show-importance "high";
+        }
+        leaf total-entries {
+          type srl_nokia-comm:zero-based-counter64;
+          description
+            "The total number of macs of this type , active and inactive, that are present in the mac-table.";
+          srl_nokia-ext:show-importance "high";
+        }
+        leaf failed-entries {
+          type srl_nokia-comm:zero-based-counter64;
+          description
+            "The total number of macs of this type, which have not been programmed on atleast one slot";
+          srl_nokia-ext:show-importance "high";
+        }
+      }
+    }
+  }
+
+  augment "/srl_nokia-netinst:network-instance/srl_nokia-netinst:bridge-table" {
+    uses bridge-table-mac-table-top;
+    uses mac-table-statistics;
+  }
+}

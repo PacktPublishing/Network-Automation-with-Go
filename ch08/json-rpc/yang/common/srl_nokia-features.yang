@@ -1,0 +1,259 @@
+module srl_nokia-features {
+  yang-version 1.1;
+  namespace "urn:srl_nokia/features";
+  prefix srl_nokia-feat;
+
+  description
+    "YANG module detailing SRLinux features";
+
+  // features - alphabetical
+
+  revision 2021-06-30 {
+    description
+      "SRLinux 21.6.1";
+  }
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+
+  feature anycast-gw {
+    description
+      "Support for bridged feature and anycast-gw configuration on interface";
+  }
+
+  feature bridged {
+    description
+      "Support for MAC-VRF services";
+  }
+
+  feature chassis {
+    description
+      "The platform is in a chassis configuration";
+  }
+
+  feature evpn {
+    description
+      "Support for EVPN";
+  }
+
+  feature evpn-mh-pref-alg {
+    description
+      "Support for EVPN Multi-Homing with preference based DF election";
+  }
+
+  feature evpn-mh-single-active {
+    description
+      "Support for EVPN Single Active Multi-Homing";
+  }
+
+  feature fixed {
+    description
+      "The platform is in a fixed configuration, i.e. non-chassis platforms";
+  }
+
+  feature future-0-0 {
+    description
+      "Only true in 0.0 stream, false in other streams. The feature is for an unknown future release.";
+  }
+
+  feature future-21-6 {
+    description
+      "Only true in 0.0 stream, false in other streams. The feature is for the 21.6 release. Once the release stream exists this flag will be removed.";
+  }
+
+  feature future-21-6-2 {
+    description
+      "Only true in 0.0 stream, false in other streams. The feature is for the 21.6.2 release. Once the release stream exists this flag will be removed from 0.0. Once 21.6.1 has been released this flag will be removed from 21.6.";
+  }
+
+  feature future-21-6-3 {
+    description
+      "Only true in 0.0 stream, false in other streams. The feature is for the 21.6.3 release. Once the release stream exists this flag will be removed from 0.0. Once 21.6.2 has been released this flag will be removed from 21.6.";
+  }
+
+  feature future-21-11 {
+    description
+      "Only true in 0.0 stream, false in other streams. The feature is for the 21.11 release. Once the release stream exists this flag will be removed.";
+  }
+
+  feature gribi {
+    if-feature future-0-0;
+    description
+      "Support for gRPC Routing Information Base Interface";
+  }
+
+  feature ipv6-flow-label-hash-key {
+    if-feature future-21-6;
+    description
+        "Include the IPv6 flow label in the hash calculation for IPv6 packet";
+  }
+
+  feature isis-maint-mode {
+    if-feature future-21-11;
+    description
+      "Support for isis maintainance mode";
+  }
+
+  feature isis-mt {
+    if-feature future-21-11;
+    description
+      "Support for isis multi-topology";
+  }
+
+  feature lacp-fallback {
+    description
+      "Support for link aggregation control protocol fallback";
+  }
+
+  feature label-management {
+    if-feature future-21-6;
+    description
+      "Support for mpls label management";
+  }
+
+  feature lag {
+    description
+      "Support for link aggregation groups";
+  }
+
+  feature ldp {
+    if-feature future-21-6-3;
+    description
+      "Support for label distribution protocol";
+  }
+
+  feature mirroring {
+    if-feature future-21-6;
+    description
+      "Support for mirroring (SPAN/ERSPAN)";
+  }
+
+  feature mpls {
+    description
+      "Support for MPLS";
+  }
+
+  feature mpls-qos {
+    if-feature future-21-6;
+    description
+      "Support for MPLS QoS";
+  }
+
+  feature port-breakout {
+    if-feature future-21-6-2;
+    description
+      "Support for ethernet port breakout (port connector)";
+  }
+
+  feature port-speed-1t {
+    description
+      "Support for 1T Ethernet ports";
+  }
+
+  feature port-speed-200g {
+    description
+      "Support for 200G Ethernet ports";
+  }
+
+  feature port-speed-50g {
+    description
+      "Support for 50G Ethernet ports";
+  }
+
+  feature ra-guard {
+    if-feature "future-21-6";
+    description
+      "Support for ra guard";
+  }
+
+  feature reload-delay {
+    description
+      "Support for interface reload-delay timers";
+  }
+
+  feature segment-routing {
+    if-feature future-21-11;
+    description
+      "Support for segment routing using the MPLS dataplane";
+  }
+
+  feature service-authorization {
+    if-feature future-21-6;
+    description
+      "Support for authorizing local users to a set of services";
+  }
+
+  feature storm-control {
+    if-feature future-21-6;
+    description
+      "Support for storm control";
+  }
+
+  feature traffic-engineering {
+    if-feature future-21-11;
+    description
+      "Support for TE DB, BGP-LS and TE advertisement by IGPs";
+  }
+
+  feature tx-flow-control {
+    description
+      "Support for transmitting Ethernet flow control (PAUSE) frames";
+  }
+
+  feature vrrp {
+    if-feature future-0-0;
+    description
+      "Support for VRRP";
+  }
+
+  feature vxlan {
+    description
+      "Support for VXLAN";
+  }
+
+  feature vxlan-destination-groups {
+    description
+      "Support for VXLAN destination groups";
+  }
+
+  feature warm-reboot {
+    description
+      "Support for warm reboot";
+  }
+
+  // chipsets - alphabetical
+
+  feature jericho2;
+
+  feature tomahawk3;
+
+  feature trident3;
+
+  // platforms - alphabetical
+
+  feature platform-7220-d1; // 7220 IXR-D1
+
+  feature platform-7220-d2; // 7220 IXR-D2
+
+  feature platform-7220-d3; // 7220 IXR-D3
+
+  feature platform-7220-h2; // 7220 IXR-H2
+
+  feature platform-7220-h3; // 7220 IXT-H3
+
+  feature platform-7250-ixr; // 7250 IXR-6/10
+
+  feature platform-7250-j2;  // J2 pizza
+
+  feature platform-crimson;  // crimson pizza
+
+  // switch architecture role - alphabetical
+
+  feature spine;
+
+}

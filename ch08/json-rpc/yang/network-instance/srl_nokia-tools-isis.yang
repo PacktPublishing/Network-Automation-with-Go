@@ -1,0 +1,99 @@
+module srl_nokia-tools-isis {
+    yang-version 1.1;
+    namespace "urn:srl_nokia/tools-isis";
+    prefix srl_nokia-tools-isis;
+
+    import srl_nokia-common {
+        prefix srl_nokia-comm;
+    }
+    import srl_nokia-tools-network-instance {
+        prefix srl_nokia-tools-netinst;
+    }
+
+    description
+      "Model for ISIS operational commands";
+
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+
+    typedef isis-level {
+        description
+          "Specifies the IS-IS Level.";
+        type enumeration {
+            enum L1 {
+                description
+                  "This enum describes ISIS level 1";
+            }
+            enum L2 {
+                description
+                  "This enum describes ISIS level 2";
+            }
+            enum L1L2 {
+                description
+                  "This enum describes ISIS level 1-2";
+            }
+        }
+    }
+
+    grouping isis-tools-top {
+        container isis {
+            presence
+              "Send operational commands to ISIS manager";
+            list instance {
+                max-elements 1;
+                description
+                  "List of IS-IS protocol instances associated with this network-instance. Only a single instance is supported for now";
+
+                key "name";
+
+                leaf name {
+                    description
+                      "The name of the IS-IS instance";
+                    type srl_nokia-comm:name;
+                }
+
+                container link-state-database {
+                    description
+                      "The ISIS link state database";
+                    leaf clear {
+                        type empty;
+                        description
+                          "Clear the contents of the LSDB.";
+                    }
+                }
+                list interface {
+                    description
+                      "List of IS-IS interfaces";
+
+                    key "interface-name";
+
+                    leaf interface-name {
+                        type srl_nokia-comm:subinterface-all;
+                        description
+                          "Reference to a specific subinterface of the form <interface-name>.<subinterface-index>";
+                    }
+                    container adjacencies {
+                        leaf clear {
+                            type empty;
+                            description
+                              "Reset all of the adjacencies on this interface";
+                        }
+                    }
+                }
+                container statistics {
+                    leaf clear {
+                        type empty;
+                        description
+                          "Reset all of the IS-IS instance statistics to zero.";
+                    }
+                }
+            }
+        }
+    }
+
+    augment "/srl_nokia-tools-netinst:network-instance/srl_nokia-tools-netinst:protocols" {
+        uses isis-tools-top;
+    }
+}

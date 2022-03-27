@@ -1,0 +1,198 @@
+module srl_nokia-icmp {
+  yang-version 1.1;
+  namespace "urn:srl_nokia/icmp";
+  prefix srl_nokia-icmp;
+
+  import srl_nokia-common {
+    prefix srl_nokia-comm;
+  }
+
+  description
+    "A model for ICMP statistics of a network instance.";
+
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+  grouping icmp-top {
+    container icmp {
+      config false;
+      container statistics {
+        config false;
+        description
+          "ICMP version 4 statistics";
+        container total {
+          description
+            "Aggregate statistics, counting all ICMP message types";
+          leaf in-packets {
+            type srl_nokia-comm:zero-based-counter64;
+            description
+              "The total number of ICMPv4 messages that the network instance received and extracted successfully to the CPM. Note that this counter includes all those counted by in-error-packets.";
+          }
+          leaf in-error-packets {
+            type srl_nokia-comm:zero-based-counter64;
+            description
+              "The number of ICMPv4 messages that the network instance received and extracted successfully to the CPM but when they arrived they were determined to have ICMP-specific errors (bad ICMP checksums, bad length, etc.)";
+          }
+          leaf out-packets {
+            type srl_nokia-comm:zero-based-counter64;
+            description
+              "The total number of ICMPv4 messages that the network instance attempted to send.  Note that this counter includes all those counted by out-error-packets.";
+          }
+          leaf out-error-packets {
+            type srl_nokia-comm:zero-based-counter64;
+            description
+              "The number of ICMPv4 messages that this network instance did not send due to issues such as fragmentation required but not supported.";
+          }
+        }
+        list type {
+          key "name";
+          leaf name {
+            type enumeration {
+              enum echo-reply {
+                value 0;
+              }
+              enum dest-unreachable {
+                value 3;
+              }
+              enum redirect {
+                value 5;
+              }
+              enum echo {
+                value 8;
+              }
+              enum rtr-advertisement {
+                value 9;
+              }
+              enum rtr-selection {
+                value 10;
+              }
+              enum time-exceeded {
+                value 11;
+              }
+              enum param-problem {
+                value 12;
+              }
+              enum timestamp {
+                value 13;
+              }
+              enum timestamp-reply {
+                value 14;
+              }
+            }
+          }
+          leaf in-packets {
+            type srl_nokia-comm:zero-based-counter64;
+            description
+              "The total number of ICMPv4 messages of this type that the network instance received and extracted successfully to the CPM.";
+          }
+          leaf out-packets {
+            type srl_nokia-comm:zero-based-counter64;
+            description
+              "The total number of ICMPv4 messages of this type that the network instance attempted to send.";
+          }
+        }
+        leaf last-clear {
+          type srl_nokia-comm:date-and-time-delta;
+          description
+            "Timestamp of the last time the interface counters were cleared.";
+        }
+      }
+    }
+  }
+
+  grouping icmp6-top {
+    container icmp6 {
+      config false;
+      container statistics {
+        config false;
+        description
+          "ICMP version 6 statistics";
+        container total {
+          description
+            "Aggregate statistics, counting all ICMP message types";
+          leaf in-packets {
+            type srl_nokia-comm:zero-based-counter64;
+            description
+              "The total number of ICMPv6 messages that the network instance received and extracted successfully to the CPM. Note that this counter includes all those counted by in-error-packets.";
+          }
+          leaf in-error-packets {
+            type srl_nokia-comm:zero-based-counter64;
+            description
+              "The number of ICMPv6 messages that the network instance received and extracted successfully to the CPM but when they arrived they were determined to have ICMP-specific errors (bad ICMP checksums, bad length, etc.)";
+          }
+          leaf out-packets {
+            type srl_nokia-comm:zero-based-counter64;
+            description
+              "The total number of ICMPv6 messages that the network instance attempted to send.  Note that this counter includes all those counted by out-error-packets.";
+          }
+          leaf out-error-packets {
+            type srl_nokia-comm:zero-based-counter64;
+            description
+              "The number of ICMPv6 messages that this network instance did not send due to issues such as fragmentation required but not supported.";
+          }
+        }
+        list type {
+          key "name";
+          leaf name {
+            type enumeration {
+              enum dest-unreachable {
+                value 1;
+              }
+              enum packet-too-big {
+                value 2;
+              }
+              enum time-exceeded {
+                value 3;
+              }
+              enum param-problem {
+                value 4;
+              }
+              enum echo-request {
+                value 128;
+              }
+              enum echo-reply {
+                value 129;
+              }
+              enum rtr-solicitation {
+                value 133;
+              }
+              enum rtr-advertisement {
+                value 134;
+              }
+              enum nbr-solicitation {
+                value 135;
+              }
+              enum nbr-advertisement {
+                value 136;
+              }
+              enum redirect {
+                value 137;
+              }
+            }
+          }
+          leaf in-packets {
+            type srl_nokia-comm:zero-based-counter64;
+            description
+              "The total number of ICMPv6 messages of this type that the network instance received and extracted successfully to the CPM.";
+          }
+          leaf out-packets {
+            type srl_nokia-comm:zero-based-counter64;
+            description
+              "The total number of ICMPv6 messages of this type that the network instance attempted to send.";
+          }
+        }
+        leaf last-clear {
+          type srl_nokia-comm:date-and-time-delta;
+          description
+            "Timestamp of the last time the interface counters were cleared.";
+        }
+      }
+    }
+  }
+}

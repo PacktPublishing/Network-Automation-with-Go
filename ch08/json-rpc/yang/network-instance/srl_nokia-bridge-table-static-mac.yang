@@ -1,0 +1,56 @@
+module srl_nokia-bridge-table-static-mac {
+
+  yang-version 1.1;
+
+  // namespace
+  namespace "urn:srl_nokia/network-instance/bridge-table/static-mac";
+  prefix "srl_nokia-bridge-table-static-mac";
+
+  import srl_nokia-common { prefix srl_nokia-comm; }
+  import srl_nokia-extensions { prefix srl_nokia-ext; }
+  import srl_nokia-network-instance { prefix srl_nokia-netinst; }
+  
+  description
+    "This yang file gives a description of bridge table static-mac configuration.";
+
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+
+  grouping bridge-table-static-mac-top {
+    container static-mac {
+      list mac {
+        key "address";
+        description "static macs configured on the bridging instance";
+        leaf address {
+          type srl_nokia-comm:mac-address;
+          srl_nokia-ext:show-importance "high";
+        }
+        leaf destination {
+          type union { 
+            type enumeration { 
+              enum "blackhole" {
+                value 0;
+              }
+            }
+            type leafref { 
+              path "../../../../srl_nokia-netinst:interface/srl_nokia-netinst:name"; 
+            } 
+          }
+          mandatory "true";
+          must ". = 'blackhole' or (../../../../srl_nokia-netinst:interface[srl_nokia-netinst:name=current()] and not(starts-with(.,'irb')))" {
+              error-message "Must be blackhole or existing network-instance ethernet interface or lag name";
+          }
+          srl_nokia-ext:show-importance "high";
+          description
+            "the destination where the mac is programmed against.";
+        }
+      }
+    }
+  }
+
+  augment "/srl_nokia-netinst:network-instance/srl_nokia-netinst:bridge-table" {
+    uses bridge-table-static-mac-top;
+  }
+}

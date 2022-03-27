@@ -1,0 +1,1610 @@
+module srl_nokia-interfaces {
+  yang-version 1.1;
+  namespace "urn:srl_nokia/interfaces";
+  prefix srl_nokia-if;
+
+  // import some basic types
+
+  import srl_nokia-common {
+    prefix srl_nokia-comm;
+  }
+  import srl_nokia-features {
+    prefix srl_nokia-feat;
+  }
+  import srl_nokia-if-ip {
+    prefix srl_nokia-if-ip;
+  }
+  import srl_nokia-if-mpls {
+    prefix srl_nokia-if-mpls;
+  }
+  import srl_nokia-extensions {
+    prefix srl_nokia-ext;
+  }
+  import srl_nokia-interfaces-bridge-table {
+    prefix srl_nokia-if-bt;
+  }
+
+  description
+    "Model for managing network interfaces and subinterfaces.
+
+    This model reuses data items defined in the IETF YANG model for
+    interfaces described by RFC 7223";
+
+  revision 2021-06-30 {
+    description
+      "SRLinux 21.6.1";
+  }
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+  identity si-type {
+    description
+      "base type for subinterface types.";
+  }
+
+  identity routed {
+    base si-type;
+    description
+      "indicates subinterface is used in a routed context";
+  }
+
+  identity bridged {
+    if-feature srl_nokia-feat:bridged;
+    base si-type;
+    description
+      "indicates subinterface is used in a bridged context";
+  }
+
+  identity local-mirror-dest {
+    if-feature srl_nokia-feat:mirroring;
+    base si-type;
+    description
+      "indicates subinterface is used in a mirroring destination SPAN context";
+  }
+
+  // typedef statements
+
+  typedef port-oper-down-reason {
+    type enumeration {
+      enum "port-admin-disabled";
+      enum "mda-admin-disabled";
+      enum "transceiver-laser-disabled";
+      enum "loopback";
+      enum "port-not-present";
+      enum "mda-not-present";
+      enum "transceiver-not-present";
+      enum "phy-initializing";
+      enum "lower-layer-down";
+     // enum "auto-negotiation-mismatch";
+      enum "port-mtu-resource-exceeded";
+      enum "unsupported-speed";
+      enum "invalid-transceiver-fec";
+      enum "other";
+      enum "fabric-availability";
+      enum "no-active-links";
+      enum "min-link-threshold";
+      enum "port-9-12-speed-mismatch";
+      enum "lag-resource-exceeded";
+      enum "lag-member-resource-exceeded";
+      enum "standby-signaling";
+      enum "interface-hold-time-up-active";
+      enum "interface-reload-timer-active";
+      enum "connector-down";
+    }
+  }
+
+  typedef subif-oper-down-reason {
+    type enumeration {
+      enum "admin-disabled";
+      enum "port-down";
+      enum "ip-mtu-resource-exceeded"; // currently can't happen for l2-mtu 
+      enum "mpls-mtu-resource-exceeded";
+      enum "ip-mtu-too-large";
+      enum "mpls-mtu-too-large";
+      enum "l2-mtu-too-large";
+      enum "no-ip-config";
+      enum "ip-mtu-larger-than-oper-mac-vrf-mtu";
+      enum "irb-mac-address-not-programmed";
+      enum "missing-xdp-state";
+      enum "no-underlay-egress-next-hop-resources";
+      enum "other";
+    }
+  }
+
+  typedef transceiver-oper-state {
+    type enumeration {
+      enum "up";
+      enum "down";
+      enum "not-present";
+    }
+  }
+
+  typedef interface-id {
+    type string;
+    description
+      "User-defined identifier for an interface, generally used to name a interface reference. The id can be arbitrary but a useful convention is to use a combination of base interface name and subinterface index.";
+  }
+
+  // grouping statements
+
+  grouping interface-common-config {
+    description
+      "Configuration data nodes common to physical interfaces and subinterfaces";
+    leaf description {
+      type srl_nokia-comm:description;
+      description
+        "A user-configured description of the interface";
+      reference "RFC 2863: The Interfaces Group MIB - ifAlias";
+    }
+  }
+
+  grouping interface-phys-config {
+    description
+      "Configuration data for physical interfaces";
+    uses interface-common-config;
+    leaf admin-state {
+      srl_nokia-ext:show-importance high;
+      type srl_nokia-comm:admin-state;
+      default "enable";
+      description
+        "The configured, desired state of the interface";
+      reference "RFC 2863: The Interfaces Group MIB - ifAdminStatus";
+      must "((. = 'enable') and starts-with(../srl_nokia-if:name, 'system0')) or not(starts-with(../srl_nokia-if:name, 'system0'))" {
+        error-message "admin-state must be enable";
+      }
+    }
+    container breakout-mode {
+      if-feature "srl_nokia-feat:port-breakout";
+      presence "Configures the connector for breakout mode";
+      description
+        "Configuration of breakout options";
+      must "re-match(../srl_nokia-if:name, 'ethernet-1/[3-9]') or re-match(../srl_nokia-if:name, 'ethernet-1/1[0-9]') or re-match(../srl_nokia-if:name, 'ethernet-1/2[0-9]')or re-match(../srl_nokia-if:name, 'ethernet-1/3[0-3]')" {
+        error-message "Breakout not supported for this port or at this level";
+      }
+      leaf num-channels {
+        config false;
+        description
+          "The number of channels (breakout ports) supported by this connector.
+          
+          This is not configurable because the only supported value is 4.";
+        type uint8 {
+          range "1..10";
+        }
+      }
+      leaf channel-speed {
+        config false;
+        description
+          "The speed of each channel (breakout port).
+          
+          This is not configurable because the only supported value is 25G.";
+        type enumeration {
+          enum "10G";
+          enum "25G";
+          enum "50G";
+          enum "100G";
+        }
+      }
+    } //breakout-mode
+    leaf mtu {
+      type uint16 {
+          range "1500..9500";
+          // srl_nokia-ext:output-flavor with-units;
+      }
+      units bytes;
+      description
+        "Port MTU in bytes including ethernet overhead but excluding 4-bytes FCS
+
+        If a transmitted packet exceeds this size it is dropped.
+
+        The default value for ethernet-x interfaces is taken from /system/mtu/default-port-mtu. For the mgmt0 and mgmt0-standby interfaces the default is 1514 bytes, but the value can be changed for each interface individually. Port MTU is not configurable for loopback interfaces.
+
+        The 7220 IXR-D1, 7220 IXR-D2, 7220 IXR-D3, 7220 IXR-H2, and 7220 IXR-H3 systems support a maximum port MTU of 9412 bytes.
+        
+        Each 7250 IXR IMM supports a maximum of 8 different port MTU values. 7220 IXR systems do not have any limit on the maximum number of different port MTU values.";
+      must "not(../breakout-mode)" {
+        error-message "mtu not configurable when breakout-mode is enabled";
+      }
+    }
+    leaf loopback-mode {
+      type boolean;
+      description
+        "When loopback-mode is set to true the port loops back packets that come in via the port";
+      // TO-DO: must not be a mgmt0, mgmt0-standby, loN, or system0 interface
+      must "(. = false())" {
+        error-message "loopback-mode not supported";
+      }
+      must "not(../breakout-mode)" {
+        error-message "loopback-mode not configurable when breakout-mode is enabled";
+      }
+    }
+  }
+
+  grouping power-levels {
+    container input-power {
+      config false;
+      leaf latest-value {
+        type decimal64 {
+          fraction-digits 2;
+        }
+        description
+          "The current value of the optical Rx power in dBm";
+      }
+      leaf high-alarm-condition {
+        type boolean;
+        description
+          "Set to true whenever the Rx power is above the high-alarm-threshold and set to false whenever the Rx power is below the high-alarm-threshold";
+      }
+      leaf high-alarm-threshold {
+        type decimal64 {
+          fraction-digits 2;
+        }
+        description
+          "Read from the installed transceiver";
+      }
+      leaf low-alarm-condition {
+        type boolean;
+        description
+          "Set to true whenever the Rx power is below the low-alarm-threshold and set to false whenever the Rx power is above the low-alarm-threshold";
+      }
+      leaf low-alarm-threshold {
+        type decimal64 {
+          fraction-digits 2;
+        }
+        description
+          "Read from the installed transceiver";
+      }
+      leaf high-warning-condition {
+        type boolean;
+        description
+          "Set to true whenever the Rx power is above the high-warning-threshold and set to false whenever the Rx power is below the high-warning-threshold";
+      }
+      leaf high-warning-threshold {
+        type decimal64 {
+          fraction-digits 2;
+        }
+        description
+          "Read from the installed transceiver";
+      }
+      leaf low-warning-condition {
+        type boolean;
+        description
+          "Set to true whenever the Rx power is below the low-warning-threshold and set to false whenever the Rx power is above the low-warning-threshold";
+      }
+      leaf low-warning-threshold {
+        type decimal64 {
+          fraction-digits 2;
+        }
+        description
+          "Read from the installed transceiver";
+      }
+    }
+    container output-power {
+      config false;
+      leaf latest-value {
+        type decimal64 {
+          fraction-digits 2;
+        }
+        description
+          "The current value of the optical Tx power in dBm";
+      }
+      leaf high-alarm-condition {
+        type boolean;
+        description
+          "Set to true whenever the Tx power is above the high-alarm-threshold and set to false whenever the Tx power is below the high-alarm-threshold";
+      }
+      leaf high-alarm-threshold {
+        type decimal64 {
+          fraction-digits 2;
+        }
+        description
+          "Read from the installed transceiver";
+      }
+      leaf low-alarm-condition {
+        type boolean;
+        description
+          "Set to true whenever the Tx power is below the low-alarm-threshold and set to false whenever the Tx power is above the low-alarm-threshold";
+      }
+      leaf low-alarm-threshold {
+        type decimal64 {
+          fraction-digits 2;
+        }
+        description
+          "Read from the installed transceiver";
+      }
+      leaf high-warning-condition {
+        type boolean;
+        description
+          "Set to true whenever the Tx power is above the high-warning-threshold and set to false whenever the Tx power is below the high-warning-threshold";
+      }
+      leaf high-warning-threshold {
+        type decimal64 {
+          fraction-digits 2;
+        }
+        description
+          "Read from the installed transceiver";
+      }
+      leaf low-warning-condition {
+        type boolean;
+        description
+          "Set to true whenever the Tx power is below the low-warning-threshold and set to false whenever the Tx power is above the low-warning-threshold";
+      }
+      leaf low-warning-threshold {
+        type decimal64 {
+          fraction-digits 2;
+        }
+        description
+          "Read from the installed transceiver";
+      }
+    }
+    container laser-bias-current {
+      config false;
+      leaf latest-value {
+        type decimal64 {
+          fraction-digits 3;
+        }
+        description
+          "The current value of the laser bias current in mA";
+      }
+      leaf high-alarm-condition {
+        type boolean;
+        description
+          "Set to true whenever the laser bias current is above the high-alarm-threshold and set to false whenever the laser bias current is below the high-alarm-threshold";
+      }
+      leaf high-alarm-threshold {
+        type decimal64 {
+          fraction-digits 3;
+        }
+        description
+          "Read from the installed transceiver";
+      }
+      leaf low-alarm-condition {
+        type boolean;
+        description
+          "Set to true whenever the laser bias current is below the low-alarm-threshold and set to false whenever the laser bias current is above the low-alarm-threshold";
+      }
+      leaf low-alarm-threshold {
+        type decimal64 {
+          fraction-digits 3;
+        }
+        description
+          "Read from the installed transceiver";
+      }
+      leaf high-warning-condition {
+        type boolean;
+        description
+          "Set to true whenever the laser bias current is above the high-warning-threshold and set to false whenever the laser bias current is below the high-warning-threshold";
+      }
+      leaf high-warning-threshold {
+        type decimal64 {
+          fraction-digits 3;
+        }
+        description
+          "Read from the installed transceiver";
+      }
+      leaf low-warning-condition {
+        type boolean;
+        description
+          "Set to true whenever the laser bias current is below the low-warning-threshold and set to false whenever the laser bias current is above the low-warning-threshold";
+      }
+      leaf low-warning-threshold {
+        type decimal64 {
+          fraction-digits 3;
+        }
+        description
+          "Read from the installed transceiver";
+      }
+    }
+  }
+
+  grouping subinterface-config {
+    description
+      "Configuration data for subinterfaces";
+    uses interface-common-config;
+    leaf admin-state {
+      srl_nokia-ext:show-importance high;
+      type srl_nokia-comm:admin-state;
+      default "enable";
+      description
+        "The configured, desired state of the subinterface";
+      reference "RFC 2863: The Interfaces Group MIB - ifAdminStatus";
+      must "((. = 'enable') and starts-with(../../srl_nokia-if:name, 'system0')) or not(starts-with(../../srl_nokia-if:name, 'system0'))" {
+        error-message "admin-state must be enable";
+      }
+    }
+
+    leaf ip-mtu {
+      type uint16 {
+        range "1280..9486";
+      }
+      units bytes;
+      description
+        "IP MTU of the subinterface in bytes, including the IP header but excluding Ethernet encapsulation
+
+        IP MTU specifies the maximum sized IPv4 or IPv6 packet that can be transmitted on the subinterface. If an IPv4 or IPv6 packet exceeds this size it is dropped and this may result in the generation of an ICMP error message back to the source.
+        
+        The default IP MTU for a subinterface is taken from /system/mtu/default-ip-mtu.  For the mgmt0 and mgmt0-standby subinterfaces the default is the associated interface MTU minus the Ethernet encapsulation overhead.
+        
+        The IP MTU is not configurable for subinterfaces of loopback interfaces.
+
+        The 7220 IXR-D1, 7220 IXR-D2, 7220 IXR-D3, 7220 IXR-H2, and 7220 IXR-H3 systems support a maximum IP MTU of 9398 bytes.
+        
+        Each 7250 IXR IMM supports a maximum of 4 different IP MTU values. 7220 IXR systems do not have any limit on the maximum number of different IP MTU values.";
+      must "not (starts-with(../../srl_nokia-if:name, 'system') or starts-with(../../srl_nokia-if:name, 'lo'))" {
+        error-message "ip-mtu not supported on this interface";
+      }
+      must "(../type != 'srl_nokia-if:bridged') and (../type != 'srl_nokia-if:local-mirror-dest')" {
+        error-message "ip-mtu not allowed with type bridged or type local-mirror-dest";
+      }
+    }
+    leaf l2-mtu {
+      if-feature srl_nokia-feat:bridged;
+      type uint16 {
+        range "1500..9500";
+      }
+      units bytes;
+      description
+        "Layer-2 MTU of the subinterface in bytes, including the Ethernet header and VLAN tags, and excluding 4-bytes FCS.
+
+        L2 MTU specifies the maximum sized Ethernet frame that can be transmitted on the subinterface. If a frame exceeds this size it is discarded. If the l2-mtu of the subinterface exceeds the port-mtu of the associated 
+        interface, the subinterface will remain operationally down.
+
+        The default value for a subinterface is taken from /system/mtu/default-l2-mtu. The L2 MTU is only configurable for bridged subinterfaces.
+
+        The 7220 IXR-D1, 7220 IXR-D2, 7220 IXR-D3, 7220 IXR-H2, and 7220 IXR-H3 systems support a maximum L2 MTU of 9412 bytes.";
+      must "(starts-with(../../srl_nokia-if:name, 'ethernet') or starts-with(../../srl_nokia-if:name, 'lag'))" {
+        error-message "l2-mtu not supported on this interface";
+      }
+      must "../type = 'srl_nokia-if:bridged'" {
+        error-message "l2-mtu only allowed with type bridged";
+      }
+    }
+    leaf mpls-mtu {
+      if-feature "srl_nokia-feat:future-21-6-3";
+      type uint16 {
+        range "1284..9496";
+      }
+      units bytes;
+      description
+        "MPLS MTU of the subinterface in bytes, including the transmitted label stack.
+
+        MPLS MTU specifies the maximum sized MPLS packet that can be transmitted on the subinterface. If an MPLS packet containing any payload exceeds this size then it is dropped. If the payload of the dropped packet is IPv4 or IPv6 then this may also result in the generation of an ICMP error message that is either tunneled or sent back to the source.
+        
+        The default MPLS MTU for a subinterface is taken from /system/mtu/default-mpls-mtu.
+        
+        The MPLS MTU is not configurable for subinterfaces of loopback interfaces.
+        
+        Each 7250 IXR IMM supports a maximum of 4 different MPLS MTU values.";
+      must "not (starts-with(../../srl_nokia-if:name, 'system') or starts-with(../../srl_nokia-if:name, 'lo') or starts-with(../../srl_nokia-if:name, 'mgmt'))" {
+        error-message "mpls-mtu not supported on this interface";
+      }
+      must "(../type != 'srl_nokia-if:bridged') and (../type != 'srl_nokia-if:local-mirror-dest')" {
+        error-message "mpls-mtu not allowed with type bridged or type local-mirror-dest";
+      }
+    }
+  }
+
+  grouping subinterface-top {
+    description
+      "Subinterface data for logical interfaces associated with a given interface";
+    list subinterface {
+      max-elements 4095;
+      key "index";
+      description
+        "The list of subinterfaces (logical interfaces) associated with a physical interface";
+      leaf index {
+        type uint32 {
+          range "0..9999";
+        }
+        description
+          "The index of the subinterface, or logical interface number";
+        must "((. = 0) and starts-with(../../srl_nokia-if:name, 'system0')) or not(starts-with(../../srl_nokia-if:name, 'system0'))" {
+          error-message "subinterface index must be 0 for system0 interface";
+        }
+      }
+      leaf type {
+        type identityref {
+          base si-type;
+        }
+        // default "routed";
+        description
+          "The value of this leaf indicates the context in which the 
+           ethernet subinterface will be used in";
+        must "not (starts-with(../../srl_nokia-if:name, 'system') or starts-with(../../srl_nokia-if:name, 'lo') or starts-with(../../srl_nokia-if:name, 'irb') or starts-with(../../srl_nokia-if:name, 'mgmt'))" {
+          error-message "type not supported on this interface";
+        }
+      }
+      uses subinterface-config;
+      leaf name {
+        config false;
+        type string;
+        description
+          "The system assigned name of the subinterface. It is formed by taking the base interface name and appending a dot (.) and the subinterface index number. For example, ethernet-2/1.0";
+      }
+      leaf ifindex {
+        config false;
+        type uint32;
+        description
+          "System-wide persistent unique ifIndex assigned to the subinterface";
+      }
+      leaf oper-state {
+        srl_nokia-ext:show-importance high;
+        config false;
+        type enumeration {
+          enum "up";
+          enum "down";
+        }
+        description
+          "The operational state of the subinterface";
+        // Corresponds to ifOperStatus from the IFMIB.
+      }
+      leaf oper-down-reason {
+        config false;
+        srl_nokia-ext:show-importance "high";
+        type subif-oper-down-reason;
+        description
+          "The first (and possibly only) reason for the subinterface being operationally down";
+      }
+      leaf last-change {
+        config false;
+        type srl_nokia-comm:date-and-time-delta;
+        description
+          "The date and time of the most recent change to the subinterface state";
+        // Corresponds to ifLastChange from the IF-MIB.
+      }
+      uses srl_nokia-if-ip:ipv4-top;
+      uses srl_nokia-if-ip:ipv6-top;
+      uses srl_nokia-if-mpls:mpls-top;
+      uses srl_nokia-if-ip:anycast-gw-top;
+      uses srl_nokia-if-ip:subinterface-statistics;
+      uses srl_nokia-if-bt:bridge-table-top;
+    }
+  }
+
+  grouping interface-top {
+    description
+      "Top-level grouping for interface configuration and operational state data";
+    list interface {
+      key "name";
+      description
+        "The list of named interfaces on the device.";
+
+      leaf name {
+        type srl_nokia-comm:interface-all;
+        description
+          "The name of the interface
+
+          Valid options are:
+          irb<N>, N=0..255
+          lag<N>, N=1..128 [note1]
+          lo<N>, N=0..255
+          mgmt0
+          mgmt0-standby
+          ethernet-<slot>/<port>
+          ethernet-<slot>/<mda>/<port>
+          system0
+
+          <slot>=slot number {1,2,3,..}
+          <mda>=mda id {a,b,c,d}
+          <port>=port id {1,2,3,..}
+
+          [note1] N=1..32 for 7220-D1, 7220-D2, 7220-D3. N=1..127 for 7220-H2, 7220-H3.";
+        }
+      uses interface-phys-config;
+      leaf ifindex {
+        config false;
+        type uint32;
+        description
+          "System-wide persistent unique ifIndex assigned to the interface";
+      }
+      leaf oper-state {
+        srl_nokia-ext:show-importance high;
+        config false;
+        type enumeration {
+          enum "up";
+          enum "down";
+        }
+        description
+          "The operational state of the interface";
+      }
+      leaf oper-down-reason {
+        config false;
+        srl_nokia-ext:show-importance "high";
+        type port-oper-down-reason;
+        description
+          "The first (and possibly only) reason for the port being operationally down";
+      }
+      leaf last-change {
+        config false;
+        type srl_nokia-comm:date-and-time-delta;
+        description
+          "The date and time of the most recent change to the interface state";
+        // Corresponds to ifLastChange from the IF-MIB.
+      }
+      container statistics {
+        srl_nokia-ext:delivery-node-override true;
+        srl_nokia-ext:stream-mode sample=5;
+        config false;
+        leaf in-octets {
+          type srl_nokia-comm:zero-based-counter64;
+          description
+            "Corresponds to ifHCInOctets from the IFMIB.";
+        }
+        leaf in-unicast-packets {
+          type srl_nokia-comm:zero-based-counter64;
+          description
+            "Corresponds to ifHCInUcastPkts from the IF-MIB.";
+        }
+        leaf in-broadcast-packets {
+          type srl_nokia-comm:zero-based-counter64;
+          description
+            "Corresponds to ifHCInBroadcastPkts from the IF-MIB.";
+        }
+        leaf in-multicast-packets {
+          type srl_nokia-comm:zero-based-counter64;
+          description
+            "Corresponds to ifHCInMulticastPkts from the IF-MIB.";
+        }
+        leaf in-discarded-packets {
+          if-feature "srl_nokia-feat:trident3 or srl_nokia-feat:tomahawk3";
+          type srl_nokia-comm:zero-based-counter64;
+          description
+            "Corresponds to ifInDiscards from the IFMIB.
+            
+            This counts the number of IP packets discarded due to VLAN mismatch, unknown dest MAC or drop by system-filter drop action.";
+        }
+        leaf in-error-packets {
+          type srl_nokia-comm:zero-based-counter64;
+          description
+            "Corresponds to ifInErrors from the IF-MIB.";
+        }
+        /* leaf in-unknown-protos {
+          type srl_nokia-comm:zero-based-counter64;
+          description
+            "Corresponds to ifInUnknownProtos from the IF-MIB.";
+        } */
+        leaf in-fcs-error-packets {
+          type srl_nokia-comm:zero-based-counter64;
+          description
+            "Ingress FCS errors.";
+        }
+        leaf out-octets {
+          type srl_nokia-comm:zero-based-counter64;
+          description
+            "Corresponds to ifHCOutOctetsfrom the IF-MIB.";
+        }
+        leaf out-mirror-octets {
+           if-feature "srl_nokia-feat:platform-7220-d2 or srl_nokia-feat:platform-7220-d3";
+          type srl_nokia-comm:zero-based-counter64;
+          description
+            "This counts the number of outgoing mirrored octets";
+        }
+        leaf out-unicast-packets {
+          type srl_nokia-comm:zero-based-counter64;
+          description
+            "Corresponds to ifHCOutUcastPktsfrom the IF-MIB.";
+        }
+        leaf out-broadcast-packets {
+          type srl_nokia-comm:zero-based-counter64;
+          description
+            "Corresponds to ifHCOutBroadcastPkts from the IF-MIB.";
+        }
+        leaf out-multicast-packets {
+          type srl_nokia-comm:zero-based-counter64;
+          description
+            "Corresponds to ifHCOutMulticastPkts from the IF-MIB.";
+        }
+        leaf out-discarded-packets {
+          type srl_nokia-comm:zero-based-counter64;
+          description
+            "Corresponds to ifOutDiscards from the IF-MIB.
+
+            On Jericho2 systems this counts packets dropped by an egress IP ACL of any of the port's subinterfaces.";
+        }
+        leaf out-error-packets {
+          type srl_nokia-comm:zero-based-counter64;
+          description
+            "Corresponds to ifOutErrors from the IF-MIB.";
+        }
+        leaf out-mirror-packets {
+          if-feature "srl_nokia-feat:platform-7220-d2 or srl_nokia-feat:platform-7220-d3";
+          type srl_nokia-comm:zero-based-counter64;
+          description
+            "This counts the number of outgoing mirrored packets";
+        }
+        leaf carrier-transitions {
+          type srl_nokia-comm:zero-based-counter64;
+          description
+            "Number of times the interface state has transitioned from down to up since the time the device restarted or the last clear.";
+        }
+        leaf last-clear {
+          type srl_nokia-comm:date-and-time-delta;
+          description
+            "Timestamp of the last time the interface counters were cleared.";
+        }
+      }
+      container traffic-rate {
+        config false;
+        description
+          "Container for traffic rate statistics";
+        leaf in-bps {
+          type uint64;
+          description
+            "The ingress bandwidth utilization of the port, updated every 10 seconds";
+        }
+        leaf out-bps {
+          type uint64;
+          description
+            "The egress bandwidth utilization of the port, updated every 10 seconds";
+        }
+      }
+      container transceiver {
+        leaf tx-laser {
+          type boolean;
+          description
+            "Enable (true) or disable (false) the transmit laser of the transceiver.
+
+            When read from state this leaf always returns false (even if the configured value is true) when the Ethernet port is a copper/RJ45 port.
+
+            Default is true (for interfaces that support transceivers).";
+          must "not(../../breakout-mode)" {
+            error-message "tx-laser not configurable when breakout-mode is enabled";
+          }
+        }
+        leaf oper-state {
+          config false;
+          type transceiver-oper-state;
+          description
+            "The operational state of the transceiver.
+            
+            This leaf always returns not-present when the Ethernet port is a copper/RJ45 port.";
+        }
+        leaf ddm-events {
+          type boolean;
+          description
+            "When set to true, log events and state related to the Digital Diagnostic Monitoring (DDM) capabilities of the transceiver are generated and populated.
+
+            When set to false, no DDM-related log events and state are generated and populated for this port/transceiver.
+
+            When read from state this leaf always returns false (even if the configured value is true) when the Ethernet port is a copper/RJ45 port.";
+          must "not(../../breakout-mode)" {
+            error-message "ddm-events not configurable when breakout-mode is enabled";
+          }
+        }
+        leaf forward-error-correction {
+            type enumeration {
+                enum "disabled";
+                enum "rs-528";
+                enum "rs-544";
+                enum "base-r" {
+                  description "BASE-R FEC algorithm for 25GbE interfaces (also known as fire-code).";
+                }
+                enum "rs-108" {
+                  description "Reed Solomon FEC algorithm for 25GbE interfaces.";
+                }
+            }
+            // default "none";
+            description
+                "The forward error correction algorithm to use on the optical channel. The same FEC algorithm must be used at both ends of a link.
+                
+                25G interfaces support disabled, base-r rs-108 and rs-528; configuring other (incompatible) options will bring the port down. The FEC requirement for a 25G interface depends on the cable type. A CA-N DAC cable has a loss specification that requires no FEC. A CA-S DAC cable requires base-r FEC at a minimum. A CA-L DAC cable requires the stronger rs-108 Reed Solomon FEC.
+                
+                100G interfaces support disabled and rs-528; configuring other (incompatible) options will bring the port down.
+                
+                400G interfaces require rs-544; configuring other (unsupported) options will bring the port down.";
+          must "not(../../breakout-mode)" {
+            error-message "forward-error-correction not configurable when breakout-mode is enabled";
+          }
+        }
+        leaf form-factor {
+          config false;
+          type enumeration {
+            enum CFP2 {
+              value 1;
+            }
+            enum CFP2-ACO {
+              value 2;
+            }
+            enum CFP4 {
+              value 3;
+            }
+            enum QSFP {
+              value 4;
+            }
+            enum QSFPplus {
+              value 5;
+            }
+            enum QSFP28 {
+              value 6;
+            }
+            enum QSFPDD {
+              value 7;
+            }
+            enum SFP {
+              value 8;
+            }
+            enum SFPplus {
+              value 9;
+            }
+            enum Non-pluggable {
+              value 10;
+            }
+            enum Other {
+              value 11;
+            }
+            enum SFP28 {
+              value 12;
+            }
+          }
+          description
+            "Specifies the transceiver form factor associated with the port.";
+          // (NOTE - may not be complete)
+        }
+        leaf ethernet-pmd {
+          config false;
+          type string;
+          description
+            "Specifies the Ethernet compliance code of the transceiver associated with the port.";
+        }
+        leaf connector-type {
+          config false;
+          type enumeration {
+            enum SC {
+              value 1;
+            }
+            enum FC-STYLE1-COPPER {
+              value 2;
+            }
+            enum FC-STYLE2-COPPER {
+              value 3;
+            }
+            enum BNC-OR-TNC {
+              value 4;
+            }
+            enum FC-COAX {
+              value 5;
+            }
+            enum FIBER-JACK {
+              value 6;
+            }
+            enum LC {
+              value 7;
+            }
+            enum MT-RJ {
+              value 8;
+            }
+            enum MU {
+              value 9;
+            }
+            enum SG {
+              value 10;
+            }
+            enum OPTICAL-PIGTAIL {
+              value 11;
+            }
+            enum MPO-1x12 {
+              value 12;
+            }
+            enum MPO-2x16 {
+              value 13;
+            }
+            enum HSSDC {
+              value 14;
+            }
+            enum COPPER-PIGTAIL {
+              value 15;
+            }
+            enum RJ45 {
+              value 16;
+            }
+            enum no-separable-connector {
+              value 17;
+            }
+            enum MXC-2x16 {
+              value 18;
+            }
+            enum CS-OPTICAL-CONNECTOR {
+              value 19;
+            }
+            enum SN-OPTICAL-CONNECTOR {
+              value 20;
+            }
+            enum MPO-2x12 {
+              value 21;
+            }
+            enum MPO-1x16 {
+              value 22;
+            }
+            enum unknown {
+              value 23;
+            }
+          }
+          description
+            "Specifies the fiber connector type of the transceiver associated with the port.";
+        }
+        leaf vendor {
+          config false;
+          type string;
+          description
+            "Name of the transceiver vendor.";
+        }
+        leaf vendor-part-number {
+          config false;
+          type string;
+          description
+            "Vendor's part number for the transceiver.";
+        }
+        leaf vendor-revision {
+          config false;
+          type string;
+          description
+            "Vendor's revision number for the transceiver.";
+        }
+        leaf serial-number {
+          config false;
+          type string;
+          description
+            "Transceiver serial number.";
+        }
+        leaf date-code {
+          config false;
+          type string;
+          description
+            "Transceiver date code.";
+        }
+        leaf fault-condition {
+          config false;
+          type boolean;
+          description
+            "Indicates if a fault condition exists in the transceiver.";
+        }
+        leaf wavelength {
+          config false;
+          type decimal64 {
+            fraction-digits 2;
+          }
+          description
+            "Wavelength of the transmitting laser in nanometers";
+        }
+        container temperature {
+          config false;
+          leaf latest-value {
+            type srl_nokia-comm:temperature;
+            description
+              "The current temperature of the transceiver module in degrees Celsius";
+          }
+          leaf high-alarm-condition {
+            type boolean;
+            description
+              "Set to true whenever the temperature is above the high-alarm-threshold and set to false whenever the temperature is below the high-alarm-threshold";
+          }
+          leaf high-alarm-threshold {
+            type srl_nokia-comm:temperature;
+            description
+              "Read from the installed transceiver";
+          }
+          leaf low-alarm-condition {
+            type boolean;
+            description
+              "Set to true whenever the temperature is below the low-alarm-threshold and set to false whenever the temperature is above the low-alarm-threshold";
+          }
+          leaf low-alarm-threshold {
+            type srl_nokia-comm:temperature;
+            description
+              "Read from the installed transceiver";
+          }
+          leaf high-warning-condition {
+            type boolean;
+            description
+              "Set to true whenever the temperature is above the high-warning-threshold and set to false whenever the temperature is below the high-warning-threshold";
+          }
+          leaf high-warning-threshold {
+            type srl_nokia-comm:temperature;
+            description
+              "Read from the installed transceiver";
+          }
+          leaf low-warning-condition {
+            type boolean;
+            description
+              "Set to true whenever the temperature is below the low-warning-threshold and set to false whenever the temperature is above the low-warning-threshold";
+          }
+          leaf low-warning-threshold {
+            type srl_nokia-comm:temperature;
+            description
+              "Read from the installed transceiver";
+          }
+        }
+        container voltage {
+          config false;
+          leaf latest-value {
+            type decimal64 {
+              fraction-digits 4;
+            }
+            description
+              "The current voltage reading of the transceiver module (in Volts)";
+          }
+          leaf high-alarm-condition {
+            type boolean;
+            description
+              "Set to true whenever the module voltage is above the high-alarm-threshold and set to false whenever the module voltage is below the high-alarm-threshold";
+          }
+          leaf high-alarm-threshold {
+            type decimal64 {
+              fraction-digits 4;
+            }
+            description
+              "Read from the installed transceiver";
+          }
+          leaf low-alarm-condition {
+            type boolean;
+            description
+              "Set to true whenever the module voltage is below the low-alarm-threshold and set to false whenever the module voltage is above the low-alarm-threshold";
+          }
+          leaf low-alarm-threshold {
+            type decimal64 {
+              fraction-digits 4;
+            }
+            description
+              "Read from the installed transceiver";
+          }
+          leaf high-warning-condition {
+            type boolean;
+            description
+              "Set to true whenever the module voltage is above the high-warning-threshold and set to false whenever the module voltage is below the high-warning-threshold";
+          }
+          leaf high-warning-threshold {
+            type decimal64 {
+              fraction-digits 4;
+            }
+            description
+              "Read from the installed transceiver";
+          }
+          leaf low-warning-condition {
+            type boolean;
+            description
+              "Set to true whenever the module voltage is below the low-warning-threshold and set to false whenever the module voltage is above the low-warning-threshold";
+          }
+          leaf low-warning-threshold {
+            type decimal64 {
+              fraction-digits 4;
+            }
+            description
+              "Read from the installed transceiver";
+          }
+        }
+        uses power-levels;
+        list channel {
+          config false;
+          description
+            "List of physical channels supported by the transceiver that are associated with this particular port";
+          key "index";
+          leaf index {
+            type uint8 {
+              range "1..10";
+            }
+            description
+              "Index of the physical channel or lane";
+          }
+          leaf wavelength {
+            config false;
+            type decimal64 {
+              fraction-digits 2;
+            }
+            description
+              "Wavelength of the transmitting laser in nanometers";
+          }
+          uses power-levels;
+        }
+      }
+      container ethernet {
+        leaf aggregate-id {
+          if-feature srl_nokia-feat:lag;
+          description
+            "lag interface with which this interface is associated.";
+          type leafref {
+              path "/srl_nokia-if:interface/srl_nokia-if:name";
+          }
+          // NOTE: the reason why must "../../field" can't be used, is because 0 or false, even when explicitly
+          // configured, will satisfy the condition. Instead an explicit test of true/false or 0 is needed which
+          // will only pass if the field is unset.
+          must "not(../../qos)" {
+            error-message "qos configuration is not supported on LAG member ports";
+          }         
+          must "not(true() = ../../loopback-mode or false() = ../../loopback-mode)" {
+            error-message "loopback-mode and aggregate-id can not be configured together";
+          }
+          must "not(../../mtu >= 0)" {
+            error-message "mtu and aggregate-id can not be configured together";
+          }
+          must "not(true() = ../../vlan-tagging or false() = ../../vlan-tagging)" {
+            error-message "vlan-tagging and aggregate-id can not be configured together";
+          }
+          must "not(../../ethernet/duplex-mode)" {
+            error-message "duplex-mode and aggregate-id can not be configured together";
+          }
+          must "not(true() = ../../ethernet/flow-control/receive or false() = ../../ethernet/flow-control/receive)" {
+            error-message "flow-control receive and aggregate-id can not be configured together";
+          }
+          must "not(true() = ../../ethernet/flow-control/transmit or false() = ../../ethernet/flow-control/transmit)" {
+            error-message "flow-control transmit and aggregate-id can not be configured together";
+          }
+          must "/srl_nokia-if:interface[srl_nokia-if:name=.]/lag/member-speed" {
+            error-message "member-speed must be configured on associated aggregate-id interface";
+          }
+          must "not(../../breakout-mode)" {
+            error-message "aggregate-id not configurable when breakout-mode is enabled";
+          }
+          must "not(../../ethernet/standby-signaling)" {
+            error-message "standby-signaling and aggregate-id cannot be configured together";
+          }
+        }
+        leaf auto-negotiate {
+          if-feature srl_nokia-feat:platform-7220-d1;
+          type boolean;
+          must "re-match(../../srl_nokia-if:name, 'ethernet-1/[1-9]') or re-match(../../srl_nokia-if:name, 'ethernet-1/[1-3][0-9]') or re-match(../../srl_nokia-if:name, 'ethernet-1/4[0-8]')" {
+              error-message "auto-negotiation not supported on this interface";
+          }
+          description
+            "When set to true the interface uses auto-negotiation for speed, duplex and flow-control settings.
+
+            When set to false, the transmission parameters are specified manually.";
+          must "not(../../breakout-mode)" {
+            error-message "auto-negotiate not configurable when breakout-mode is enabled";
+          }
+        }
+        leaf duplex-mode {
+          if-feature srl_nokia-feat:platform-7220-d1;
+          type enumeration {
+            enum "full";
+            enum "half";
+          }
+          must "re-match(../../srl_nokia-if:name, 'ethernet-1/[1-9]') or re-match(../../srl_nokia-if:name, 'ethernet-1/[1-3][0-9]') or re-match(../../srl_nokia-if:name, 'ethernet-1/4[0-8]')" {
+              error-message "duplex-mode not supported on this interface";
+          }
+          must "not(../../breakout-mode)" {
+            error-message "duplex-mode not configurable when breakout-mode is enabled";
+          }
+          description
+            "When auto-negotiate is true, this sets the duplex mode that will be advertised to the peer.  When auto-negotiate is false, this directly sets the duplex mode of the interface.";
+        }
+        container flow-control {
+          leaf receive {
+            type boolean;
+            // default false;
+            must "starts-with(../../../srl_nokia-if:name, 'mgmt') or starts-with(../../../srl_nokia-if:name, 'ethernet') or starts-with(../../../srl_nokia-if:name, 'lag')" {
+              error-message "flow-control receive not supported on this interface";
+            }
+            must "not(../../../breakout-mode)" {
+              error-message "flow-control receive not configurable when breakout-mode is enabled";
+            }
+            description
+              "When this is true PAUSE frames received on this interface are accepted and processed, and, if auto-negotiation is enabled it also causes the capability to receive PAUSE frames to be signaled to the peer (applicable only to ports 1-48 of the 7220 IXR-D1 and to mgmt0 and mgmt0-standby ports).
+              
+              When this is false PAUSE frames received on this interface are ignored, and, if auto-negotiation is enabled it causes the capability to receive PAUSE frames to be signaled to the peer as non-support (applicable only to ports 1-48 of the 7220 IXR-D1 and to mgmt0 and mgmt0-standby ports)";
+          }
+          leaf transmit {
+            if-feature srl_nokia-feat:tx-flow-control;
+            type boolean;
+            // default false;
+            must "starts-with(../../../srl_nokia-if:name, 'ethernet') or starts-with(../../../srl_nokia-if:name, 'lag')" {
+              error-message "flow-control transmit not supported on this interface";
+            }
+            must "not(../../../breakout-mode)" {
+              error-message "flow-control transmit not configurable when breakout-mode is enabled";
+            }
+            description
+              "Enables/disables the sending of PAUSE frames.
+              
+              If auto-negotiation is enabled (applicable only to ports 1-48 of the 7220 IXR-D1 and to mgmt0 and mgmt0-standby ports) PAUSE frames are sent to the peer only if the peer advertised support for PAUSE frames.";
+          }
+        }
+        leaf lacp-port-priority {
+          if-feature srl_nokia-feat:lacp-fallback;
+          type uint16;
+          // default 32768;
+          must "starts-with(../../srl_nokia-if:name, 'ethernet')" {
+              error-message "lacp-port-priority not supported on this interface";
+          }
+          must "not(../../breakout-mode)" {
+            error-message "lacp-port-priority not configurable when breakout-mode is enabled";
+          }
+          description
+            "Configure the port priority for LACP.  This value is used to  determine which port should be activated with LACP fallback mode. Lower values are more preferred.";
+        }       
+        leaf port-speed {
+          srl_nokia-ext:show-importance "high";
+          type enumeration {
+            // speed 1G is common to all platforms as the mgmt port supports it
+            enum "10M" {
+              if-feature "srl_nokia-feat:platform-7220-d1";
+            }
+            enum "100M" {
+              if-feature "srl_nokia-feat:platform-7220-d1";
+            }
+            enum "1G";
+            enum "10G" {
+              if-feature "srl_nokia-feat:platform-7250-j2 or srl_nokia-feat:platform-7220-d1 or srl_nokia-feat:platform-7220-d2 or srl_nokia-feat:platform-7220-d3 or srl_nokia-feat:platform-7220-h3";
+            }
+            enum "25G" {
+              if-feature "srl_nokia-feat:platform-7220-d2 or (srl_nokia-feat:port-breakout and srl_nokia-feat:platform-7220-d3)";
+            }
+            enum "40G" {
+              if-feature "srl_nokia-feat:platform-7250-ixr or srl_nokia-feat:platform-7220-d2 or srl_nokia-feat:platform-7220-d3 or srl_nokia-feat:platform-7220-h3 or srl_nokia-feat:platform-crimson";
+            }
+            enum "50G" {
+              if-feature "srl_nokia-feat:port-speed-50g";
+            }
+            enum "100G" {
+              if-feature "srl_nokia-feat:platform-7250-ixr or srl_nokia-feat:platform-7220-d2 or srl_nokia-feat:platform-7220-d3 or srl_nokia-feat:platform-7220-h2 or srl_nokia-feat:platform-7220-h3 or srl_nokia-feat:platform-crimson";
+            }
+            enum "200G" {
+              if-feature "srl_nokia-feat:port-speed-200g";
+            }
+            enum "400G" {
+              if-feature "srl_nokia-feat:platform-7250-ixr or srl_nokia-feat:platform-7250-j2 or srl_nokia-feat:platform-7220-h3 or srl_nokia-feat:platform-crimson";
+            }
+            enum "1T" {
+              if-feature "srl_nokia-feat:port-speed-1t";
+            }
+          }
+          must "(starts-with(../../srl_nokia-if:name, 'ethernet'))" {
+            error-message "port speed not configurable on this interface";
+          }
+          must "not(../../breakout-mode)" {
+            error-message "port-speed not configurable when breakout-mode is enabled";
+          }
+          description
+            "The speed of the port or channel
+            
+            The default speed of a port (when there is no configured value and auto-negotiation is disabled or unsupported) depends on the platform and port/connector number as follows:
+            
+            mgmt0 and mgmt0-standby ports: 1G
+            J2 IMM ports 1-32:  100G
+            J2 IMM ports 33-36: 100G
+            7220-D1 ports 1-48: 1G
+            7220-D1 ports 49-52: 10G
+            7220-D2 ports 1-48: 25G
+            7220-D2 ports 49-56: 100G
+            7220-D3 ports 1-2: 10G
+            7220-D3 ethernet-1/[3-34]: 100G
+            7220-D3 ethernet-1/[3-33]/n: 25G
+            7220-H2 ports 1-128: 100G
+            7220-H3 ports 1-2: 10G
+            7220-H3 ports 3-34: 400G
+            
+            Supported speeds:
+            mgmt0 and mgmt0-standby ports: 1G
+            J2 IMM ports 1-32: 40G, 100G [note1]
+            J2 IMM ports 33-36: 40G, 100G, 400G
+            7220-D1 ports 1-48: 10M, 100M, 1G
+            7220-D1 ports 49-52: 10G
+            7220-D2 ports 1-48: 1G, 10G, 25G [note2]
+            7220-D2 ports 49-56: 40G, 100G
+            7220-D3 ports 1-2: 10G
+            7220-D3 ethernet-1/[3-34]: 40G, 100G
+            7220-D3 ethernet-1/[3-33]/n: 25G
+            7220-H2 ports 1-128: 100G
+            7220-H3 ports 1-2: 10G
+            7220-H3 ports 3-34: 40G, 100G, 400G
+            
+            [note1] Ports 9-12 cannot operate at different port speeds (some at 40G and others at 100G). The required speed of ports 9-12 is based on the port-speed of the lowest-numbered configured port in this block; if any higher-numbered port in the block is configured with a different port speed that port will not come up.
+            
+            [note2] If one port in each consecutive group of 4 ports (1-4, 5-8, .. , 45-48) is 25G the other 3 ports must also be 25G. If one port in each consecutive group of 4 ports (1-4, 5-8, .. , 45-48) is 1G or 10G the other 3 ports must also be 1G or 10G.
+            
+            7250 IXR details:
+            If the interface corresponds to a connector that has no installed transceiver then the value is accepted without any checking or restriction, and info from state will display the configured value.  Otherwise if the configured port-speed is NOT supported by the installed transceiver the port is forced operationally down.";
+        }
+
+        leaf hw-mac-address {
+          config false;
+          type srl_nokia-comm:mac-address;
+          description
+            "The MAC address associated with the port";
+        }
+
+        leaf physical-medium {
+          config false;
+          type enumeration {
+            enum "1000BASE-T";
+          }
+          description
+            "Indicates the PHY supported by the RJ45 port.
+            
+            If the port is supported by a SFP, QSFP+, QSFP28 or QSFP-DD transceiver no value is populated in this leaf.";
+        }
+        leaf standby-signaling {
+          if-feature srl_nokia-feat:evpn-mh-single-active;
+          type enumeration {
+            enum "power-off";
+            enum "lacp";
+          }
+          must "starts-with(../../srl_nokia-if:name, 'ethernet') or starts-with(../../srl_nokia-if:name, 'lag')" {
+            error-message "standby-signaling not supported on this interface";
+          } 
+          must "((. = 'lacp') and (../../lag/lag-type = 'lacp')) or (. != 'lacp')" {
+            error-message "lacp-based standby-signaling supported only on lacp enabled lag interfaces";
+          }
+          must "not(../../breakout-mode)" {
+            error-message "standby-signaling not configurable when breakout-mode is enabled";
+          }
+          description
+            "Indicates the standby-signaling used in the interface.
+            
+             An application using a port-based redundancy mechanism will trigger the standby signaling on the ethernet
+             interface if the interface is selected as standby.";
+        }
+        leaf reload-delay {
+          if-feature srl_nokia-feat:reload-delay;
+          type uint32 {
+            range "1..86400";
+          }
+          units seconds;
+          description 
+            "Configure reload-delay timer for Ethernet interfaces.
+            
+             The reload-delay timer starts when the associated XDP interface state is learned. While the timer is 
+             running, the interface transceiver laser is disabled to avoid attracting traffic from the connected 
+             device at the other end of the interface. The reload-delay timer should be used in multi-homing 
+             interfaces and be set to a value long enough to allow the system to recover all the network protocols 
+             upon reboot, before start attracting traffic from the multi-homed device.";
+          must "starts-with(../../srl_nokia-if:name, 'ethernet')" {
+            error-message "reload-delay not supported on this interface";
+          } 
+          must "not(../../breakout-mode)" {
+            error-message "reload-delay not configurable when breakout-mode is enabled";
+          }
+        }
+        leaf reload-delay-expires {
+          if-feature srl_nokia-feat:reload-delay;
+          config false;
+          type srl_nokia-comm:date-and-time-delta;
+          description "The remaining time until the reload-delay expires and the interface can go operationally up.";
+        }
+        container hold-time {
+          if-feature srl_nokia-feat:future-21-11;
+          presence "Configures the hold-time values";
+          must "starts-with(../../srl_nokia-if:name, 'ethernet')" {
+            error-message "hold-time not supported on this interface";
+          } 
+          must "not(../../breakout-mode)" {
+            error-message "hold-time not configurable when breakout-mode is enabled";
+          }
+          description "Configure interface hold timers for Ethernet interfaces";
+          leaf up {
+            type uint32 {
+              range "1..86400";
+            }
+            units seconds;
+            description 
+              "Holds link up events for the configured time.
+
+               The hold-time up behavior is triggered with any event that tries to bring up the ethernet interface 
+               (interface admin-state enable, a reboot, etc). While the hold-time up is running, the transceiver 
+               laser will be enabled, however the higher layers will not be notified that the interface is 
+               operationally up until the timer expires.";
+          }
+          leaf up-expires {
+            config false;
+            type srl_nokia-comm:date-and-time-delta;
+            description "The remaining time until the hold-time up expires and the interface comes up.";
+          }
+          leaf down {
+            type uint32 {
+              range "1..86400";
+            }
+            units seconds;
+            description 
+              "Holds link down events for the configured time.
+              
+               The hold-time down behavior is triggered with events that try to bring the ethernet interface 
+               down and can change quickly. It is not triggered with an admin-state disable event or interface 
+               disable due to other internal reasons (such as fabric unavailability). When running, the 
+               interface will not be brought down till the timer expires. The typical use of the hold-time down 
+               is to provide stability and avoid the protocols to advertise/withdraw messages if there are 
+               flapping optics. The hold-time down is aborted if the user does admin-state disable or if the 
+               interface is disabled due to other internal reasons that prevent the traffic to be forwarded
+               on the interface.";
+          }
+          leaf down-expires {
+            config false;
+            type srl_nokia-comm:date-and-time-delta;
+            description "The remaining time until the hold-time down expires and the interface goes operationally down.";
+          }
+        }
+        container storm-control {
+          if-feature srl_nokia-feat:storm-control;
+          presence "Configures the storm-control parameters";
+          must "starts-with(../../srl_nokia-if:name, 'ethernet')" {
+            error-message "storm-control not supported on this interface";
+          }
+          must "not(../../breakout-mode)" {
+            error-message "storm-control not configurable when breakout-mode is enabled";
+          }
+          leaf units {
+            type enumeration {
+              enum "kbps";
+              enum "percentage";
+            }
+            default "percentage";
+            description "Units of storm-control policer in kbps or percentage of the interface bandwidth";
+          }
+          leaf broadcast-rate {
+            must "not(../units = 'percentage' and (. >100))" {
+              error-message "The valid percentage range is between 0% and 100%";
+            }
+            type uint32 {
+              range "0..1000000000";
+            }
+            description "The maximum rate allowed for ingress broadcast frames on the interface";
+          }
+          leaf multicast-rate {
+            must "not(../units = 'percentage' and (. >100))" {
+              error-message "The valid percentage range is between 0% and 100%";
+            }
+            type uint32 {
+              range "0..1000000000";
+            }
+            description "The maximum rate allowed for ingress multicast frames on the interface";
+          }
+          leaf unknown-unicast-rate {
+            must "not(../units = 'percentage' and (. >100))" {
+              error-message "The valid percentage range is between 0% and 100%";
+            }
+            type uint32 {
+              range "0..1000000000";
+            }
+            description "The maximum rate allowed for ingress unknown unicast frames on the interface";
+          }
+          leaf operational-broadcast-rate {
+            config false;
+            type uint32;
+            units "kbps";
+            description "The operational maximum rate for ingress broadcast frames programmed on the interface";
+          }
+          leaf operational-multicast-rate {
+            config false;
+            type uint32;
+            units "kbps";
+            description "The operational maximum rate for ingress multicast frames programmed on the interface";
+          }
+          leaf operational-unknown-unicast-rate {
+            config false;
+            type uint32;
+            units "kbps";
+            description "The operational maximum rate for ingress unknown unicast frames programmed on the interface";
+          }
+        }
+        container statistics {
+          config false;
+          /* leaf in-mac-control-frames {
+            type srl_nokia-comm:zero-based-counter64;
+            description
+              "Number of MAC layer control frames received on the interface.";
+          } */
+          leaf in-mac-pause-frames {
+            type srl_nokia-comm:zero-based-counter64;
+            description
+              "Number of MAC layer PAUSE frames received on the interface.";
+          }
+          leaf in-oversize-frames {
+            type srl_nokia-comm:zero-based-counter64;
+            description
+              "Number of oversize frames received on the interface (i.e. frames that exceed the operational port MTU)";
+          }
+          leaf in-jabber-frames {
+            type srl_nokia-comm:zero-based-counter64;
+            description
+              "Number of jabber frames received on the interface. Jabber frames are typically defined as oversize frames which also have a bad CRC.";
+          }
+          leaf in-fragment-frames {
+            type srl_nokia-comm:zero-based-counter64;
+            description
+              "Number of fragment frames received on the interface.";
+          }
+          leaf in-crc-error-frames {
+            type srl_nokia-comm:zero-based-counter64;
+            description
+              "Number of receive error events due to FCS/CRC check failure.";
+          }
+          /* leaf out-mac-control-frames {
+            type srl_nokia-comm:zero-based-counter64;
+            description
+              "Number of MAC layer control frames sent on the interface.";
+          } */
+          leaf out-mac-pause-frames {
+            type srl_nokia-comm:zero-based-counter64;
+            description
+              "Number of MAC layer PAUSE frames sent on the interface.";
+          }
+          leaf in-64b-frames {
+            type srl_nokia-comm:zero-based-counter64;
+            description
+              "Number of received Ethernet frames that are exactly 64 bytes in length";
+          }
+          leaf in-65b-to-127b-frames {
+            type srl_nokia-comm:zero-based-counter64;
+            description
+              "Number of received Ethernet frames that are 65-127 bytes in length";
+          }
+          leaf in-128b-to-255b-frames {
+            type srl_nokia-comm:zero-based-counter64;
+            description
+              "Number of received Ethernet frames that are 128-255 bytes in length";
+          }
+          leaf in-256b-to-511b-frames {
+            type srl_nokia-comm:zero-based-counter64;
+            description
+              "Number of received Ethernet frames that are 256-511 bytes in length";
+          }
+          leaf in-512b-to-1023b-frames {
+            type srl_nokia-comm:zero-based-counter64;
+            description
+              "Number of received Ethernet frames that are 512-1023 bytes in length";
+          }
+          leaf in-1024b-to-1518b-frames {
+            type srl_nokia-comm:zero-based-counter64;
+            description
+              "Number of received Ethernet frames that are 1024-1518 bytes in length";
+          }
+          leaf in-1519b-or-longer-frames {
+            type srl_nokia-comm:zero-based-counter64;
+            description
+              "Number of received Ethernet frames that are 1519 bytes or longer";
+          }
+          leaf out-64b-frames {
+            type srl_nokia-comm:zero-based-counter64;
+            description
+              "Number of transmitted Ethernet frames that are exactly 64 bytes in length";
+          }
+          leaf out-65b-to-127b-frames {
+            type srl_nokia-comm:zero-based-counter64;
+            description
+              "Number of transmitted Ethernet frames that are 65-127 bytes in length";
+          }
+          leaf out-128b-to-255b-frames {
+            type srl_nokia-comm:zero-based-counter64;
+            description
+              "Number of transmitted Ethernet frames that are 128-255 bytes in length";
+          }
+          leaf out-256b-to-511b-frames {
+            type srl_nokia-comm:zero-based-counter64;
+            description
+              "Number of transmitted Ethernet frames that are 256-511 bytes in length";
+          }
+          leaf out-512b-to-1023b-frames {
+            type srl_nokia-comm:zero-based-counter64;
+            description
+              "Number of transmitted Ethernet frames that are 512-1023 bytes in length";
+          }
+          leaf out-1024b-to-1518b-frames {
+            type srl_nokia-comm:zero-based-counter64;
+            description
+              "Number of transmitted Ethernet frames that are 1024-1518 bytes in length";
+          }
+          leaf out-1519b-or-longer-frames {
+            type srl_nokia-comm:zero-based-counter64;
+            description
+              "Number of transmitted Ethernet frames that are 1519 bytes or longer";
+          }
+          leaf last-clear {
+            type srl_nokia-comm:date-and-time-delta;
+            description
+              "Timestamp of the last time the MAC counters were cleared.";
+          }
+        }
+      }
+      uses subinterface-top;
+    }
+  }
+
+  uses interface-top;
+}

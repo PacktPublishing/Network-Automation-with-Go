@@ -1,0 +1,128 @@
+module srl_nokia-tools-ospf {
+  yang-version 1.1;
+  namespace "urn:srl_nokia/tools-ospf";
+  prefix srl_nokia-tools-ospf;
+
+  import ietf-yang-types {
+    prefix yang;
+  }
+  import srl_nokia-common {
+    prefix srl_nokia-comm;
+  }
+  import srl_nokia-tools-network-instance {
+    prefix srl_nokia-tools-netinst;
+  }
+  import srl_nokia-ospf-types {
+    prefix srl_nokia-ospf-types;
+  }
+
+  description
+    "Model for OSPF operational commands";
+
+  revision 2021-06-30 {
+    description
+      "SRLinux 21.6.1";
+  }
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+
+  grouping ospf-tools-top {
+    container ospf {
+      presence "Send operational commands to OSPF manager";
+      list instance {
+        max-elements 1;
+        description
+          "List of OSPF protocol instances associated with this network-instance. Only a single instance is supported for now";
+        key "name";
+        leaf name {
+          description
+            "The name of the OSPF instance";
+          type srl_nokia-comm:name;
+        }
+        container link-state-database {
+          description
+            "The OSPF link state database";
+          leaf clear {
+            type empty;
+            description
+              "Clear the contents of the LSDB.";
+          }
+        }
+        container neighbors {
+          description
+            "Container for OSPF neighbors tools";
+          leaf clear {
+            type empty;
+            description
+              "Clear all OSPF neighbors";
+          }
+          list neighbor {
+            key "neighbor-id";
+            leaf neighbor-id {
+              description
+                "The neighbor's ip-address in case of OSPFv2, the router-id otherwise";
+              type yang:dotted-quad;
+            }
+            leaf clear {
+              type empty;
+              description
+                "Reset this neighbor in the OSPF instance";
+            }
+          }
+        }
+        list area {
+          description
+            "List of OSPF area";
+          key "area-id";
+          leaf area-id {
+            type srl_nokia-ospf-types:ospf-area-identifier;
+          }
+          list interface {
+            description
+              "List of OSPF interfaces";
+            key "interface-name";
+            leaf interface-name {
+              type srl_nokia-comm:subinterface-all;
+              description
+                "Reference to a specific subinterface of the form <interface-name>.<subinterface-index>";
+            }
+            container neighbors {
+              leaf clear {
+                type empty;
+                description
+                  "Reset all of the adjacencies on this interface";
+              }
+            }
+          }
+        }
+        container statistics {
+          leaf clear {
+            type empty;
+            description
+              "Reset all of the OSPF instance statistics to zero.";
+          }
+        }
+        container overload {
+          leaf clear {
+            type empty;
+            description
+              "Reset OSPF instance overload status.";
+          }
+        }
+        container manual-spf {
+          leaf run {
+            type empty;
+            description
+              "Run a SPF calculation.";
+          }
+        }
+      }
+    }
+  }
+
+  augment "/srl_nokia-tools-netinst:network-instance/srl_nokia-tools-netinst:protocols" {
+    uses ospf-tools-top;
+  }
+}

@@ -1,0 +1,2052 @@
+module srl_nokia-ospf {
+  yang-version 1.1;
+  namespace "urn:srl_nokia/ospf";
+  prefix srl_nokia-ospf;
+
+  import ietf-yang-types {
+    prefix yang;
+  }
+  import srl_nokia-common {
+    prefix srl_nokia-comm;
+  }
+  import srl_nokia-system {
+    prefix srl_nokia-system;
+  }
+  import srl_nokia-keychains {
+    prefix srl_nokia-keychains;
+  }
+  import srl_nokia-network-instance {
+    prefix srl_nokia-netinst;
+  }
+  import srl_nokia-routing-policy {
+    prefix srl-rpol;
+  }
+  import srl_nokia-ospf-types {
+    prefix srl_nokia-ospf-types;
+  }
+  import srl_nokia-traffic-engineering {
+    prefix srl_nokia-te;
+  }
+  import srl_nokia-features {
+    prefix srl-feat;
+  }
+  import srl_nokia-ldp {
+    prefix srl_nokia-ldp;
+  }
+  include srl_nokia-ospf-lsdb;
+  include srl_nokia-ospfv3-lsas;
+
+  description
+    "This yang file models configuration and state of the OSPF protocol";
+
+  // Groupings
+
+  revision 2021-06-30 {
+    description
+      "SRLinux 21.6.1";
+  }
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+
+  grouping ospf-interface-key {
+    leaf interface-name {
+      description
+        "Router logical interface name.";
+      type leafref {
+        // ref to names of net-instance interfaces
+        path "../../../../../../srl_nokia-netinst:interface/srl_nokia-netinst:name";
+        // path:
+        // net-inst/protocols/ospf/instance/area/interface/interface-name
+      }
+    }
+  }
+
+  grouping ospf-neighbor-statistics {
+    container statistics {
+      leaf events {
+        description
+          "the value of events indicates the number of times this neighbor relationship has changed state, or an error has occurred.";
+        type yang:counter32;
+      }
+      leaf bad-nbr-states {
+        config false;
+        description
+          "the value of bad-nbr-states indicates the total number of OSPF packets received when the neighbor state was not expecting to receive this packet type since admin-state was last set to 'enabled'.";
+        type yang:counter32;
+      }
+      leaf lsa-install-failed {
+        config false;
+        description
+          "the value of lsa-install-failed indicates the total number of times an LSA could not be installed into the LSDB due to a resource allocation issue since admin-state was last set to 'enabled'.";
+        type yang:counter32;
+      }
+      leaf bad-seq-nums {
+        config false;
+        description
+          "the value of bad-seq-nums indicates the total number of times when a database description packet was received with a sequence number mismatch since admin-state was last set to 'enabled'.";
+        type yang:counter32;
+      }
+      leaf bad-mtu {
+        config false;
+        description
+          "the value of bad-MT-us indicates the total number of times when the MTU in a received database description packet was larger than the MTU of the receiving interface since admin-state was last set to 'enabled'.";
+        type yang:counter32;
+      }
+      leaf bad-packets {
+        config false;
+        description
+          "the value of bad-packets indicates the total number of times when an LS update was received with an illegal LS type or an option mismatch since admin-state was last set to 'enabled'.";
+        type yang:counter32;
+      }
+      leaf lsa-not-in-lsdbs {
+        config false;
+        description
+          "the value of lsa-not-in-lsdbs indicates the total number of times when an LS request was received for an LSA not installed in the LSDB of this router since admin-state was last set to 'enabled'.";
+        type yang:counter32;
+      }
+      leaf option-mismatches {
+        config false;
+        description
+          "the value of option-mismatches indicates the total number of times when a LS update was received with an option mismatch since admin-state was last set to 'enabled'.";
+        type yang:counter32;
+      }
+      leaf duplicates {
+        config false;
+        description
+          "the value of duplicates indicates the total number of times when a duplicate database description packet was received during the exchange state since admin-state was last set to 'enabled'.";
+        type yang:counter32;
+      }
+      leaf num-restarts {
+        config false;
+        description
+          "the value of num-restarts indicates the number of times the neighbor has attempted restart.";
+        type yang:counter32;
+      }
+    }
+  }
+
+  grouping ospf-neighbor-state {
+    list neighbor {
+      config false;
+      description
+        "List of neighbors associated with this OSPF interface";
+      key "router-id";
+      leaf router-id {
+        description
+          "The router-id advertised by the neighbor";
+        type yang:dotted-quad;
+      }
+      leaf address {
+        description
+          "the value of address indicates the IP address of the neighbor associated with the local link.";
+        type srl_nokia-comm:ip-address-with-zone;
+      }
+      leaf priority {
+        description
+          "Router priority advertised by neighbor";
+        type uint8;
+      }
+      leaf dead-time {
+        description
+          "The remaining number of seconds remaining in the neighbor's dead time interval";
+        type uint32;
+      }
+      leaf designated-router {
+        description
+          "Advertised designated router";
+        type yang:dotted-quad;
+      }
+      leaf backup-designated-router {
+        description
+          "Advertised backup designated router";
+        type yang:dotted-quad;
+      }
+      leaf optional-capabilities {
+        description
+          "Advertised Optional Capabilities";
+        type yang:hex-string;
+      }
+      leaf last-established-time {
+        description
+          "Time then OSPF neighbor was last established";
+        type srl_nokia-comm:timeticks64;
+      }
+      leaf adjacency-state {
+        description
+          "Current OSPF Neighbor state";
+        type identityref {
+          base srl_nokia-ospf-types:ospf-neighbor-state;
+        }
+      }
+      leaf state-changes {
+        description
+          "total numer of OSPF state changes";
+        type uint32;
+      }
+      leaf retransmission-queue-length {
+        type uint32;
+      }
+      leaf restart-helper-status {
+        description
+          "the value of restart-helper-status indicates whether the router is acting as a graceful restart helper for the neighbor.";
+        type enumeration {
+          enum not-helping {
+            value 1;
+          }
+          enum helping {
+            value 2;
+          }
+        }
+      }
+      leaf restart-helper-age {
+        description
+          "the value of restart-helper-age indicates the remaining time in the current OSPF graceful restart interval, if the router is acting as a restart helper for the neighbor.";
+        type int32 {
+          range "0..1800";
+        }
+        units "seconds";
+      }
+      leaf restart-helper-exit-rc {
+        description
+          "the value of restart-helper-exit-rc indicates the outcome of the last attempt at acting as a graceful restart helper for the neighbor. none no restart has yet been attempted. in-progress A restart attempt is currently underway. completed the last restart completed successfully. timed-out the last restart timed out. topology-changed the last restart was aborted due to a topology change.";
+        type enumeration {
+          enum none {
+            value 1;
+          }
+          enum in-progress {
+            value 2;
+          }
+          enum completed {
+            value 3;
+          }
+          enum timed-out {
+            value 4;
+          }
+          enum topology-changed {
+            value 5;
+          }
+          enum bfd-down {
+            value 6;
+          }
+        }
+      }
+      leaf last-restart-time {
+        description
+          "the value of last-restart-time indicates the last time the neighbor attempted restart.";
+        type yang:date-and-time;
+      }
+      leaf restart-reason {
+        description
+          "the value of restart-reason indicates the OSPF neighbor's graceful restart reason.";
+        type srl_nokia-ospf-types:restart-reason-type;
+      }
+      leaf up-time {
+        description
+          "the value of up-time indicates the uninterrupted time, in hundredths of seconds, the adjacency to this neighbour has been up.";
+        type int32 {
+          range "0..2147483647";
+        }
+        units "centiseconds";
+      }
+      leaf last-event-time {
+        description
+          "the value of last-event-time indicates the value of sys-up-time when the last event occurred that affected the adjacency to the neighbour.";
+        type yang:date-and-time;
+      }
+      uses ospf-neighbor-statistics;
+    }
+  }
+
+  grouping ospf-lsdb-tracing-config {
+    container lsdb {
+      presence "Enable the tracing of OSPF LSDB Events";
+      description
+        "Trace OSPF LSDB events
+        Only one type can be enabled at a time";
+      leaf type{
+        type enumeration {
+          enum "all" {
+            value 0;
+            description
+              "Enable tracing of all LSDB events";
+          }
+          enum "router" {
+            value 1;
+            description
+              "Enable tracing of LSDB router LSA events";
+          }
+          enum "network" {
+            value 2;
+            description
+              "Enable tracing of OSPF LSDB network LSA events";
+          }
+          enum "summary" {
+            value 3;
+            description
+              "Enable tracing of OSPF LSDB summary LSA events";
+          }
+          enum "nssa" {
+            value 4;
+            description
+              "Enable tracing of OSPF LSDB NSSA LSA events";
+          }
+          enum "external" {
+            value 5;
+            description
+              "Enable tracing of OSPF LSDB events for External LSA";
+          }
+          enum "opaque" {
+            value 6;
+            description
+              "Enable tracing of OSPF LSDB events involving opaque LSA";
+          }
+          enum "inter-area-prefix" {
+            value 7;
+            description
+              "Enable tracing of OSPF LSDB events for inter-area prefixes";
+          }
+          enum "inter-area-router" {
+            value 8;
+            description
+              "Enable tracing of OSPF LSDB events for inter-area routers";
+          }
+          enum "intra-area-prefix" {
+            value 9;
+            description
+              "Enable tracing of OSPF LSDB events for intra-area prefixes";
+          }
+        }
+      }
+      leaf router-id {
+        type srl_nokia-comm:ipv4-address;
+        must 'current() != "0.0.0.0"' {
+          error-message "Router-id 0.0.0.0 not allowed";
+        }
+      }
+      leaf link-state-id {
+        type srl_nokia-comm:ipv4-address;
+      }
+    } // end lsdb
+  }
+
+  grouping ospf-packet-tracing-config {
+    container packet{
+      presence "Enable the tracing of OSPF packets";
+      description
+        "Trace OSPF Packet types
+        Only one type can be enabled at a time";
+      leaf type{
+        type enumeration {
+          enum "all" {
+            value 0;
+            description
+              "Enable tracing of all OSPF packets";
+          }
+          enum "hello" {
+            value 1;
+            description
+              "Enable tracing of OSPF Hello packets";
+          }
+          enum "dbdescr" {
+            value 2;
+            description
+              "Enable tracing of OSPF database Descriptor packets";
+          }
+          enum "ls-request" {
+            value 3;
+            description
+              "Enable tracing of OSPF link-state request packets";
+          }
+          enum "ls-update" {
+            value 4;
+            description
+              "Enable tracing of OSPF link-state update packets";
+          }
+          enum "ls-ack" {
+            value 5;
+            description
+              "Enable tracing of OSPF link-state Ack packets";
+          }
+        }
+      }  // end type
+      leaf modifier {
+        type enumeration {
+          enum "ingress" {
+            value 0;
+            description
+              "To enable tracing for the packets which are received.";
+          }
+          enum "egress" {
+            value 1;
+            description
+              "To enable tracing for the sent packets.";
+          }
+          enum "in-and-egress" {
+            value 2;
+            description
+              "To enable tracing for both sent and received packets";
+          }
+          enum "drop" {
+            value 3;
+            description
+              "To enable tracing for the sent packets.";
+          }
+        }
+      } // end modifier
+      leaf detail {
+        type empty;
+        description
+          "To enable detailed tracing. Includes both received and sent packets.";
+      }
+    }
+  }
+
+  grouping ospf-adjacencies-tracing-config {
+    leaf adjacencies {
+      type empty;
+      description
+        "Enable tracing all BGP events.";
+    }
+  }
+
+  grouping ospf-interfaces-tracing-config {
+    leaf interfaces {
+      type empty;
+      description
+        "Enable tracing all interface events.";
+    }
+  }
+
+  grouping ospf-graceful-restart-tracing-config {
+    leaf graceful-restart {
+      type empty;
+      description
+        "Enable tracing all graceful-restart events.";
+    }
+  }
+
+  grouping ospf-misc-tracing-config {
+    leaf misc {
+      type empty;
+      description
+        "Enable tracing all Config events.";
+    }
+  }
+
+  grouping ospf-interface-trace-options {
+    container trace-options {
+      description
+        "Enter the trace-options context";
+      container trace {
+        description
+          "Tracing parameter flags";
+
+        uses ospf-adjacencies-tracing-config;
+        uses ospf-interfaces-tracing-config;
+        uses ospf-packet-tracing-config;
+      }
+    }
+  } // grouping ospf-interface-trace-options
+
+  grouping ospf-interface-config {
+    leaf advertise-router-capability {
+      type boolean;
+      default "true";
+      description
+        "Allow router advertisement capabilities";
+    }
+    leaf admin-state {
+      type srl_nokia-comm:admin-state;
+      default "enable";
+      description
+        "Administrative state of the OSPF";
+    }
+    leaf advertise-subnet {
+      type boolean;
+      default "true";
+      description
+        "Advertise point-to-point interfaces as subnet routes";
+      must "((../../../version = 'srl_nokia-ospf-types:ospf-v2') or (. = true()))" {
+          error-message "For OSPFv3 the advertise-subnet must be true";
+      }
+    }
+    leaf interface-type {
+      type srl_nokia-ospf-types:interface-type;
+      //sros-ext:immutable;
+      description
+        "Interface type to broadcast or point-to-point";
+    }
+    leaf lsa-filter-out {
+      type srl_nokia-ospf-types:lsa-filter-out;
+      default "none";
+      description
+        "LSA flooding reduction";
+    }
+    leaf metric {
+      type srl_nokia-ospf-types:ospf-metric;
+      description
+        "Explicit route cost metric that is applied to the interface";
+    }
+    leaf mtu {
+      type uint32 {
+        range "512..9486";
+      }
+      description
+        "MTU for the OSPF to use on the interface. For OSPFv3 this must be minimum 1280.
+         If the MTU defined here exceeds the actual IP-MTU of the interface, then the
+         IP-MTU of the interface is used.";
+      must "((../../../version = 'srl_nokia-ospf-types:ospf-v2') or (current() >= 1280))" {
+          error-message "For OSPFv3 the MTU must be at least 1280";
+        }
+    }
+    leaf passive {
+      description
+        "Allow interface to be advertised as an OSPF interface without running the OSPF protocol";
+      type boolean;
+    }
+    leaf priority {
+      description
+        "Priority of the interface to apply in the designated router election on the subnet";
+      type uint16 {
+        range "0..255";
+      }
+      default "1";
+    }
+    leaf hello-interval {
+      type uint32 {
+        range "1..65535";
+      }
+      units "seconds";
+      default "10";
+      description
+        "Time between OSPF Hellos of this interface";
+    }
+    leaf dead-interval {
+      type uint32 {
+        range "2..65535";
+      }
+      units "seconds";
+      default "40";
+      description
+        "Time OSPF waits without receiving Hello packets before declaring a neighbor down";
+    }
+    leaf retransmit-interval {
+      type uint32 {
+        range "1..1800";
+      }
+      units "seconds";
+      default "5";
+      description
+        "Time before OSPF retransmits an unacknowledged LSA to a neighbor";
+    }
+    leaf transit-delay {
+      type uint32 {
+        range "1..1800";
+      }
+      units "seconds";
+      default "1";
+      description
+        "Time required to transmit an LSA on the interface, virtual link, or sham link";
+    }
+    container authentication {
+      description
+        "Container with authentication options that apply to all peers in this peer-group";
+      leaf keychain {
+        description
+          "Reference to a keychain. The keychain type must be ospf";
+        type leafref {
+          path "/srl_nokia-system:system/srl_nokia-keychains:authentication/srl_nokia-keychains:keychain/srl_nokia-keychains:name";
+        }
+        must '/srl_nokia-system:system/srl_nokia-keychains:authentication/srl_nokia-keychains:keychain[srl_nokia-keychains:name = current()]'
+           + '/srl_nokia-keychains:type = "ospf"' {
+          error-message "Only keychain of type ospf can be assigned";
+        }
+        must "(../../../../version = 'srl_nokia-ospf-types:ospf-v2')" {
+          error-message "Authentication keychain not supported on ospf-v3";
+        }
+      }
+    }
+    container failure-detection {
+      description
+        "Options related to methods of detecting BGP session failure";
+      leaf enable-bfd {
+        description
+          "Enables the use of BFD for livliness detection";
+        type boolean;
+        default "false";
+      }
+    }
+    uses ospf-interface-trace-options;
+
+    uses ospf-neighbor-state;
+  } // ospf-interface-config
+
+  grouping ospf-interface-state {
+    leaf type {
+      config false;
+      description
+        "the value of type indicates the operational OSPF interface type.";
+      type srl_nokia-ospf-types:interface-type;
+    }
+    leaf oper-state {
+      config false;
+      description
+        "the OSPF interface state.";
+      type enumeration {
+        enum down {
+          value 1;
+        }
+        enum loopback {
+          value 2;
+        }
+        enum waiting {
+          value 3;
+        }
+        enum point-to-point {
+          value 4;
+        }
+        enum designated-router {
+          value 5;
+        }
+        enum backup-designated-router {
+          value 6;
+        }
+        enum other-designated-router {
+          value 7;
+        }
+      }
+    }
+    leaf dr-id {
+      config false;
+      description
+        "the value of DR-id indicates the router ID of the designated router.";
+      type yang:dotted-quad;
+    }
+    leaf bdr-id {
+      config false;
+      description
+        "the value of BDR-id indicates the router ID of the backup designated router.";
+      type yang:dotted-quad;
+    }
+    leaf last-enabled-time {
+      config false;
+      description
+        "the value of last-enabled-time indicates the sys-up-time value when ospf-if-admin-stat was last set to enabled (1) to run the ospf on this interface.";
+      type yang:date-and-time;
+    }
+    leaf neighbor-count {
+      config false;
+      description
+        "The total number of OSPF neighbors adjacent on this interface, in a state of INIT or greater, since admin-state was last set to 'enabled'.";
+      type yang:gauge32;
+    }
+    leaf local-ip-address {
+      config false;
+      description
+        "the value of local-ip-address indicates the IP address of this OSPF interface.";
+      type srl_nokia-comm:ip-address;
+    }
+    leaf link-lsa-cksum-sum {
+      config false;
+      description
+        "the value of link-lsa-cksum-sum indicates the 32-bit unsigned sum of the link-scope link-state advertisements' LS checksums contained in this link's link-state database. the sum can be used to determine if there has been a change in a router's link-state database, and to compare the link state database of two routers.";
+      type srl_nokia-comm:hex-number;
+    }
+    leaf link-lsa-count {
+      config false;
+      description
+        "the value of link-lsa-count indicates the total number of link-scope link-state advertisements in this link's link-state database.";
+      type yang:gauge32;
+    }
+  } // ospf-interface-state
+
+  grouping ospf-interface-statistics {
+    leaf events {
+      config false;
+      description
+        "the value of events indicates the number of times this OSPF interface has changed its state, or an error has occurred.";
+      type yang:counter32;
+    }
+    leaf last-event-time {
+      config false;
+      description
+        "the value of last-event-time indicates the value of sys-up-time when an event was last associated with this OSPF interface.";
+      type srl_nokia-comm:date-and-time;
+    }
+  } // ospf-interface-statistics
+
+  grouping ospf-interface-lsa-totals {
+    container lsa-totals {
+      config false;
+      description
+          "The number of LSAs of each type in this interface's database";
+      leaf link-opaque-lsa {
+        description
+        "The number of link opaque LSAs in this interface's database.";
+        type yang:gauge32;
+      }
+      leaf link-lsa {
+        description
+        "The number of link LSAs in this interface's database.";
+        type yang:gauge32;
+      }
+      leaf e-link-lsa {
+        description
+        "The number of extended link LSAs in this interface's database.";
+        type yang:gauge32;
+      }
+      leaf router-info-lsa {
+        description
+          "The number of link scoped router information LSAs in this interface's AS database.";
+        type yang:gauge32;
+      }
+    }
+  } // ospf-interface-lsa-totals
+
+  grouping ospf-interface-packet-counts {
+    container packets {
+      config false;
+      description
+        "Packet counters";
+      leaf tx-total {
+        config false;
+        description
+          "The total number of OSPF packets transmitted since admin-state was last set to 'enabled'.";
+        type yang:counter32;
+      }
+      leaf tx-hello {
+        config false;
+        description
+          "The total number of OSPF hello packets transmitted since admin-state was last set to 'enabled'.";
+        type yang:counter32;
+      }
+      leaf tx-db-description {
+        config false;
+        description
+          "The total number of OSPF database description packets transmitted since admin-state was last set to 'enabled'.";
+        type yang:counter32;
+      }
+      leaf tx-ls-request {
+        config false;
+        description
+          "The total number of OSPF link state requests (LS-rs)transmitted since admin-state was last set to 'enabled'.";
+        type yang:counter32;
+      }
+      leaf tx-ls-update {
+        config false;
+        description
+          "The total number of OSPF link state updates (LS-us) transmitted since admin-state was last set to 'enabled'.";
+        type yang:counter32;
+      }
+      leaf tx-ls-ack {
+        config false;
+        description
+          "The total number of OSPF link state acknowledgements transmitted since admin-state was last set to 'enabled'.";
+        type yang:counter32;
+      }
+      leaf rx-total {
+        config false;
+        description
+          "The total number of OSPF packets received since admin-state was last set to 'enabled'.";
+        type yang:counter32;
+      }
+      leaf rx-hello {
+        config false;
+        description
+          "The total number of OSPF hello packets received since admin-state was last set to 'enabled'.";
+        type yang:counter32;
+      }
+      leaf rx-db-description {
+        config false;
+        description
+          "The total number of OSPF database description packets received since admin-state was last set to 'enabled'.";
+        type yang:counter32;
+      }
+      leaf rx-ls-request {
+        config false;
+        description
+          "The total number of link state requests (LS-rs) received since admin-state was last set to 'enabled'.";
+        type yang:counter32;
+      }
+      leaf rx-ls-update {
+        config false;
+        description
+          "The total number of link state updates (LS-us) received since admin-state was last set to 'enabled'.";
+        type yang:counter32;
+      }
+      leaf rx-ls-ack {
+        config false;
+        description
+          "The total number of link state acknowledgements received since admin-state was last set to 'enabled'.";
+        type yang:counter32;
+      }
+      leaf discarded {
+        config false;
+        description
+          "The total number of OSPF packets discarded since admin-state was last set to 'enabled'.";
+        type yang:counter32;
+      }
+      leaf retransmits {
+        config false;
+        description
+          "The total number of OSPF retransmits since admin-state was last set to 'enabled'.";
+        type yang:counter32;
+      }
+    }
+    container bad-packets {
+      config false;
+      description
+        "Bad packets counters";
+      leaf bad-version {
+        config false;
+        description
+          "The total number of OSPF packets received with bad OSPF version numbers since admin-state was last set to 'enabled'.";
+        type yang:counter32;
+      }
+      leaf bad-network {
+        config false;
+        description
+          "The total number of OSPF packets received with invalid network or mask since admin-state was last set to 'enabled'.";
+        type yang:counter32;
+      }
+      leaf bad-area {
+        config false;
+        description
+          "The total number of OSPF packets received with an area mismatch since admin-state was last set to 'enabled'.";
+        type yang:counter32;
+      }
+      leaf bad-dest-address {
+        config false;
+        description
+          "The total number of OSPF packets received with the incorrect IP destination address since admin-state was last set to 'enabled'.";
+        type yang:counter32;
+      }
+      leaf bad-neighbors {
+        config false;
+        description
+          "The total number of OSPF packets received where the neighbor information does not match the information this router has for the neighbor since admin-state was last set to 'enabled'.";
+        type yang:counter32;
+      }
+      leaf bad-packet-type {
+        config false;
+        description
+          "The total number of OSPF packets received with an invalid OSPF packet type since admin-state was last set to 'enabled'.";
+        type yang:counter32;
+      }
+      leaf bad-length {
+        config false;
+        description
+          "The total number of OSPF packets received with a total length not equal to the length given in the packet itself since admin-state was last set to 'enabled'.";
+        type yang:counter32;
+      }
+      leaf bad-hello-interval {
+        config false;
+        description
+          "the value of bad-hello-intervals indicates the total number of OSPF packets received where the hello interval given in packet was not equal to that configured on this interface since admin-state was last set to 'enabled'.";
+        type yang:counter32;
+      }
+      leaf bad-dead-interval {
+        config false;
+        description
+          "The total number of OSPF packets received where the dead interval given in the packet was not equal to that configured on this interface since admin-state was last set to 'enabled'.";
+        type yang:counter32;
+      }
+      leaf bad-options {
+        config false;
+        description
+          "The total number of OSPF packets received with an option that does not match those configured for this interface or area since admin-state was last set to 'enabled'.";
+        type yang:counter32;
+      }
+      leaf bad-checksum {
+        config false;
+        description
+          "The count of LS-as received with bad checksums.";
+        type yang:counter32;
+      }
+      leaf bad-auth-type {
+        config false;
+        description
+          "The total number of OSPF packets received with an invalid authorization type since admin-state was last set to 'enabled'.";
+        type yang:counter32;
+      }
+      leaf auth-failures {
+        config false;
+        description
+          "The total number of OSPF packets received with an invalid authorization key since admin-state was last set to 'enabled'.";
+        type yang:counter32;
+      }
+      leaf bad-virtual-link {
+        config false;
+        description
+          "The total number of OSPF packets received that are destined to a virtual link that does not exist since admin-state was last set to 'enabled'.";
+        type yang:counter32;
+      }
+    }
+  } // ospf-interface-packet-counts
+
+  grouping ospf-area-structure {
+    leaf advertise-router-capability {
+      type boolean;
+      default "true";
+      description
+        "Allow router advertisement capabilities";
+    }
+    leaf blackhole-aggregate {
+      description
+        "Enables the creation of a blackhole for generated aggregates";
+      type boolean;
+      default true;
+    }
+    leaf export-policy {
+      must "(../area-id != '0.0.0.0')" {
+        error-message "Export-policy is not allowed in area 0.0.0.0";
+      }
+      description
+        "Apply an export policy when summarizing from this area to other areas.. 
+         Summary LSAs for prefixes matching the policy will still be in the linkstate 
+         database but are not flooded.";
+      type leafref {
+        path "/srl-rpol:routing-policy/srl-rpol:policy/srl-rpol:name";
+      }
+    }
+    container stub {
+      presence "Configure this area as an OSPF stub area";
+      must 'not(../nssa)' {
+        error-message "OSPF Area can not be configured as NSSA and stub simultaneously";
+      }
+      must "(../area-id != '0.0.0.0')" {
+        error-message "OSPF backbone Area can not be configured as stub";
+      }
+      leaf default-metric {
+        description
+          "Defines the default OSPF metric for associated stub area";
+        type uint16 {
+          range "1..max";
+        }
+        default 1;
+      }
+      leaf summaries {
+        description
+          "Enables sending summary (type 3) advertisements into a stub area or Not
+           So Stubby Area (NSSA) on an Area Border Router (ABR)";
+        type boolean;
+        default true;
+      }
+    }
+    container nssa {
+      presence "Configure this area as an OSPF NSSA area";
+      must "(../area-id != '0.0.0.0')" {
+        error-message "OSPF backbone Area can not be configured as NSSA";
+      }
+      description
+        "This command creates the context to configure the associated OSPF or OSPF3
+         area as Not So Stubby Area (NSSA).
+
+         NSSAs are similar to stub areas in that no external routes are imported into
+         the area from other OSPF areas. The major difference between a stub area and
+         an NSSA is an NSSA has the capability to flood external routes that it
+         learns throughout its area and via an ABR to the entire OSPF or OSPF3 domain.";
+      leaf redistribute-external {
+        description
+          "Enables the redistribution of external routes into the Not So Stubby Area
+           (NSSA) or an NSSA area border router (ABR) that is exporting the routes
+           into non-NSSA areas";
+        type boolean;
+        default "true";
+      }
+      leaf summaries {
+        description
+          "Enables sending summary (type 3) advertisements into a stub area or Not
+           So Stubby Area (NSSA) on an Area Border Router (ABR)";
+        type boolean;
+        default "true";
+      }
+      list area-range {
+        key "ip-prefix-mask";
+        description
+          "Enter the area-range context";
+        leaf ip-prefix-mask {
+          type srl_nokia-comm:ip-prefix;
+          description
+            "ip-prefix with host bits set to  0";
+          must "not (contains(.,':') and (../../../../version = 'srl_nokia-ospf-types:ospf-v2'))" {
+            error-message "This OSPF instance supports only IPv4 addres-range";
+          }
+          must "not (contains(.,':') and (../../../../version = 'srl_nokia-ospf-types:ospf-v3') and (../../../../address-family = 'srl_nokia-ospf-types:ipv4-unicast'))" {
+            error-message "This OSPF instance supports only IPv4 addres-range";
+          }
+          must "not (contains(.,'.') and (../../../../version = 'srl_nokia-ospf-types:ospf-v3') and (../../../../address-family = 'srl_nokia-ospf-types:ipv6-unicast'))" {
+            error-message "This OSPF instance supports only IPv6 addres-range";
+          }
+        }
+        leaf advertise {
+          type boolean;
+          default "true";
+          description
+            "Advertise summarized range of addresses to other areas";
+        }
+      } // area-range list
+      container originate-default-route {
+        presence "Enable/disable generation of default route and its LSA type (3 or 7) into the NSSA";
+        description
+          "Enter the originate-default-route context";
+        leaf type-nssa {
+          type boolean;
+          default "false";
+          description
+            "Generate a default route using NSSA-LSA type";
+        }
+        leaf adjacency-check {
+          type boolean;
+          default "true";
+          description
+            "Default route to remove if there is no adjacency";
+        }
+      } // container originate-default-route  
+    } // container nssa
+    list area-range {
+      key "ip-prefix-mask";
+      description
+        "Enter the area-range context";
+      leaf ip-prefix-mask {
+        type srl_nokia-comm:ip-prefix;
+        description
+          "ip-prefix with host bits set to  0";
+        must "not (contains(.,':') and (../../../version = 'srl_nokia-ospf-types:ospf-v2'))" {
+          error-message "This OSPF instance supports only IPv4 addres-range";
+        }
+        must "not (contains(.,':') and (../../../version = 'srl_nokia-ospf-types:ospf-v3') and (../../../address-family = 'srl_nokia-ospf-types:ipv4-unicast'))" {
+          error-message "This OSPF instance supports only IPv4 addres-range";
+        }
+        must "not (contains(.,'.') and (../../../version = 'srl_nokia-ospf-types:ospf-v3') and (../../../address-family = 'srl_nokia-ospf-types:ipv6-unicast'))" {
+          error-message "This OSPF instance supports only IPv6 addres-range";
+        }
+      }
+      leaf advertise {
+        type boolean;
+        default "true";
+        description
+          "Advertise summarized range of addresses to other areas";
+      }
+    } // area-range list
+    uses srl_nokia-te:igp-area-level-tedb {
+      if-feature srl-feat:traffic-engineering;
+    }
+  }
+
+  grouping ospf-global-timers {
+    container timers {
+      description
+        "Enter the timers context";
+      leaf incremental-spf-wait {
+        type uint32 {
+          range "0..1000";
+        }
+        default "1000";
+        description
+          "Delay time before an incremental SPF calculation is started";
+      }
+      leaf lsa-accumulate {
+        type uint32 {
+          range "0..1000";
+        }
+        default "1000";
+        description
+          "Delay time for accumulating multiple LSAs before advertising them to neighbors";
+      }
+      leaf lsa-arrival {
+        type uint32 {
+          range "0..600000";
+        }
+        default "1000";
+        description
+          "Minimum delay between receipt of the same LSAs arriving from neighbors";
+      }
+      leaf redistribute-delay {
+        type uint32 {
+          range "0..1000";
+        }
+        default "1000";
+        description
+          "Hold down timer for external routes that are redistributed in OSPF";
+      }
+      container lsa-generate {
+        description
+          "Enter the lsa-generate context";
+        leaf max-lsa-wait {
+          type uint32 {
+            range "10..600000";
+          }
+          units "milliseconds";
+          default "5000";
+          description
+            "Maximum time between two consecutive occurrences of an LSA being generated";
+        }
+        leaf lsa-initial-wait {
+          type uint32 {
+            range "10..600000";
+          }
+          units "milliseconds";
+          default "5000";
+          description
+            "First waiting period between link state advertisements LSA originates";
+        }
+        leaf lsa-second-wait {
+          type uint32 {
+            range "10..600000";
+          }
+          units "milliseconds";
+          default "5000";
+          description
+            "Hold time between the first and second LSA generation";
+        }
+      } // container lsa-generate}
+      container spf-wait {
+        description
+          "Enter the spf-wait context";
+        leaf spf-max-wait {
+          type uint32 {
+            range "10..120000";
+          }
+          units "milliseconds";
+          default "10000";
+          description
+            "Maximum interval between two consecutive SPF calculations";
+        }
+        leaf spf-initial-wait {
+          type uint32 {
+            range "10..100000";
+          }
+          units "milliseconds";
+          default "1000";
+          description
+            "Initial SPF calculation delay after a topology change";
+        }
+        leaf spf-second-wait {
+          type uint32 {
+            range "10..100000";
+          }
+          units "milliseconds";
+          default "1000";
+          description
+            "Hold time between the first and second SPF calculation";
+        }
+      } // container spf-wait
+    } // container timers
+  }
+
+  grouping ospf-spf-tracing-config {
+    container spf {
+      presence
+        "Enable tracing all SPF events.";
+      leaf dest-address {
+        type srl_nokia-comm:ip-address;
+      }
+    }
+  }
+
+  grouping ospf-routes-tracing-config {
+    container routes {
+      presence
+        "Enable tracing all route events.";
+      leaf dest-address {
+        type srl_nokia-comm:ip-address;
+      }
+    }
+  }
+
+  grouping ospf-global-trace-options {
+    container trace-options {
+      description
+        "Enter the trace-options context";
+      container trace {
+        description
+          "Tracing parameter flags";
+        uses ospf-adjacencies-tracing-config;
+        uses ospf-graceful-restart-tracing-config;
+        uses ospf-interfaces-tracing-config;
+        uses ospf-spf-tracing-config;
+        uses ospf-routes-tracing-config;
+        uses ospf-misc-tracing-config;
+        uses ospf-packet-tracing-config;
+        uses ospf-lsdb-tracing-config;
+      }
+    }
+  } // grouping ospf-global-trace-options
+
+  grouping ospf-global-top {
+    description
+      " OSPF v2 Global parameters";
+    leaf admin-state {
+      description
+        "Used to administratively enable or disable the OSPF instance";
+      type srl_nokia-comm:admin-state;
+      default "disable";
+    }
+    leaf version {
+      mandatory true;
+      description
+        "The version that this ospf instance supports.";
+      type identityref {
+        base srl_nokia-ospf-types:ospf-version;
+      }
+      must "not(. = 'srl_nokia-ospf-types:ospf-v3'
+              and ../address-family != 'srl_nokia-ospf-types:ipv4-unicast'
+              and ../address-family != 'srl_nokia-ospf-types:ipv6-unicast' )" {
+        error-message "ospf-v3 must have address family defined";
+      }
+    }
+    leaf address-family {
+      description
+        "The address family that this instance supports.
+         Only valid for OSPFv3.";
+      type identityref {
+        base srl_nokia-ospf-types:ospfv3-address-family;
+      }
+      must "not(../version = 'srl_nokia-ospf-types:ospf-v2')" {
+        error-message "ospf-v2 does not support address-family";
+      }
+    }
+    leaf instance-id {
+      description 
+        "The OSPF multi instance identity as defined in RFC6549 or RFC5838. 
+         Supported values are:
+           For OSPFv2 it is between 0 and 31, default is 0.
+           For OSPFv3 address-family ipv6-unicast it is between 0 and 31,
+           default is 0.
+           For OSPFv3 address-family ipv4-unicast it is between 64 and 95,
+           default is 64.";
+      type uint32 {
+        range 0..255;
+      }
+      must "not(../version = 'srl_nokia-ospf-types:ospf-v2' and . > 31)" {
+        error-message "ospf-v2 instance-id must be 0..31";
+      }
+      must "not(../address-family = 'srl_nokia-ospf-types:ipv6-unicast' and . > 31)" {
+        error-message "ospf-v3 address-family ipv6-unicast must have instance-id 0..31";
+      }
+      must "not(../address-family = 'srl_nokia-ospf-types:ipv4-unicast' and (. < 64 or . > 95))" {
+        error-message "ospf-v3 address-family ipv4-unicast must have instance-id 64..95";
+      }
+    }
+    leaf router-id {
+      type yang:dotted-quad;
+      must 'current() != "0.0.0.0"' {
+          error-message "Router-id 0.0.0.0 not allowed";
+        }
+    }
+    leaf max-ecmp-paths {
+      description
+        "The maximum number of ECMP next-hops to program into the FIB
+         for every IP prefix";
+      type srl_nokia-ospf-types:ospf-ecmp;
+      default "1";
+    }
+    leaf advertise-router-capability {
+      description
+        "Scope to advertise router-capability.";
+      type enumeration {
+        enum false {
+          value 0;
+        }
+        enum link {
+          value 1;
+        }
+        enum area {
+          value 2;
+        }
+        enum as {
+          value 3;
+        }
+      }
+    }
+    leaf export-policy {
+      description
+        "Apply an export policy to redistribute routes into OSPF";
+      type leafref {
+        path "/srl-rpol:routing-policy/srl-rpol:policy/srl-rpol:name";
+      }
+    }
+    container asbr {
+      presence "Configure the router as an ASBR (Autonomous System Boundary Router)";
+      description
+        "Configure the router as an ASBR (Autonomous System Boundary Router)";
+      leaf trace-path {
+        type union {
+          type int32 {
+            range "0..31";
+          }
+          type enumeration {
+            enum none {
+              value -1;
+            }
+          }
+        }
+        default "none";
+        must "not(string(.) != 'none'  and ../../version = 'srl_nokia-ospf-types:ospf-v3')" {
+          error-message "ospf-v3 does not support asbr trace-path";
+        }
+        description
+          "Domain identity";
+      }
+    }
+    container export-limit {
+      presence "Maximum number of routes (prefixes) that can be exported into OSPF from the route table";
+      description
+        "Enter the export-limit context";
+      leaf number {
+        type uint32 {
+          range "1..max";
+        }
+        mandatory true;
+        description
+          "Maximum number of routes or prefixes to be exported into IGP instance from route table";
+      }
+      leaf log-percent {
+        type uint32 {
+          range "1..100";
+        }
+        description
+          "Export limit at which warning a log message and SNMP notification are sent";
+      }
+    }
+    leaf external-preference {
+      description
+        "Configure the route preference associated with OSPF external routes";
+      type uint8;
+      default "150";
+    }
+    container external-db-overflow {
+      presence "Limit on number of AS-external-LSAs in LSDB and wait time before processing these if limit is exceeded";
+      leaf interval {
+        description
+          "";
+        type uint32 {
+          range "0..2147483647";
+        }
+        default "0";
+        units "seconds";
+      }
+      leaf limit {
+        type uint32 {
+          range "0..2147483647";
+        }
+        default "0";
+      }
+    }
+    container graceful-restart {
+      description
+        "Container for options related to OSPF graceful restart";
+      leaf helper-mode {
+        description
+          "Enable or disable the OSPF graceful restart helper function
+           When this leaf is set, the local system supports retaining
+           forwarding information during a neighbor router's restart.";
+        type boolean;
+        default "false";
+      }
+      leaf strict-lsa-checking {
+        description
+          "";
+        type boolean;
+        default "false";
+      }
+    }
+    leaf reference-bandwidth {
+      description
+        "Configures the reference bandwidth that provides the basis for
+         interface metrics based on link Bandwidth
+
+         If the reference bandwidth is defined, then the cost is calculated
+         using the following formula:
+            cost = reference-bandwidth / bandwidth
+
+         When a large reference-bandwidth value is configured, a metric
+         calculation may result in a value higher than the supported protocol
+         cost value. If this occurs, OSPF automatically reverts to the
+         maximum configurable cost metric.";
+      type uint64 {
+        range "1..8000000000";
+      }
+      default "400000000";
+      units "kbps";
+    }
+    leaf preference {
+      description
+        "Sets the route prefence for OSPF sourced routes";
+      type uint8 {
+        range "1..255";
+      }
+      default "10";
+    }
+    container overload {
+      leaf active {
+        type boolean;
+        default "false";
+      }
+      leaf overload-include-ext-1 {
+        type boolean;
+        default "false";
+      }
+      leaf overload-include-ext-2 {
+        type boolean;
+        default "false";
+      }
+      leaf overload-include-stub {
+        type boolean;
+        default "false";
+      }
+      container overload-on-boot {
+        presence "Configure Overload-on-boot";
+        leaf timeout {
+          type uint32 {
+            range "60..1800"; 
+          }
+          default "60";
+          units "seconds";
+        }
+      }
+      container rtr-adv-lsa-limit {
+        leaf log-only {
+          type boolean;
+        }
+        leaf max-lsa-count {
+          type uint32 {
+            range "1..4294967295";
+          }
+        }
+        leaf overload-timeout {
+          type uint16 {
+            range "1..1800";
+          }
+        }
+        leaf warning-threshold {
+          type srl_nokia-comm:percentage;
+          default "0";
+        }
+      }
+    }
+    uses ospf-global-timers;
+    uses ospf-global-trace-options;
+    uses srl_nokia-te:igp-instance-te-advertisement {
+      if-feature srl-feat:traffic-engineering;
+    }
+    uses srl_nokia-te:protocol-instance-tedb {
+      if-feature srl-feat:traffic-engineering;
+    }
+  } //ospf-global-top
+
+  grouping ospf-as-lsa-totals {
+    container lsa-totals {
+      config false;
+      description
+        "The number of LSAs of each type in this instance's AS database";
+      leaf as-external-lsa {
+        description
+          "The number of AS External LSAs in this instance's AS database.";
+        type yang:gauge32;
+      }
+      leaf e-as-external-lsa {
+        description
+          "The number of extended AS External LSAs in this instance's AS database.";
+        type yang:gauge32;
+      }
+      leaf as-opaque-lsa {
+        description
+          "The number of AS opaque LSAs in this instance's AS database.";
+        type yang:gauge32;
+      }
+      leaf router-info-lsa {
+        description
+          "The number of AS scoped router information LSAs in this instance's AS database.";
+        type yang:gauge32;
+      }
+    }
+  } // ospf-as-lsa-totals
+
+  grouping ospf-global-state {
+    leaf oper-state {
+      config false;
+      description
+        "Used to report operational state of the OSPF instance";
+      type srl_nokia-comm:admin-state;
+    }
+    leaf last-disabled-reason {
+      config false;
+      description
+        "Reason why the disabled state was entered the last time.";
+      type string {
+        length "0..20";
+      }
+    }
+    leaf area-border-router {
+      config false;
+      description
+        "This indicates whether this router is an area border router.";
+      type boolean;
+    }
+    leaf as-border-router {
+      config false;
+      description
+        "This indicates whether this router is an AS border router.";
+      type boolean;
+    }
+    leaf backbone-router {
+      config false;
+      description
+        "This indicates whether or not this router is configured as an OSPF back bone router.";
+      type boolean;
+    }
+    leaf overload-state {
+      config false;
+      description
+        "the value of overload-oper-state indicates whether or not the OSPF application is presently in overload state or not.";
+      type enumeration {
+        enum overload {
+          value 1;
+        }
+        enum no-overload {
+          value 2;
+        }
+      }
+    }
+    leaf overload-rem-interval {
+      config false;
+      description
+        "the value of overload-rem-interval indicates the time for which the system will be in overload state if OSPF is in overload state. the value of 0 implies that the system is indefinitely in overload state.";
+      type int32 {
+        range "0..65535";
+      }
+      units "seconds";
+    }
+    leaf last-overload-entered-time {
+      config false;
+      description
+        "the value of last-overload-entrd-time indicates the time at which the system last went into overload state.";
+      type srl_nokia-comm:date-and-time;
+    }
+    leaf last-overload-exit-time {
+      config false;
+      description
+        "the value of last-overload-exit-time indicates the time at which the system last came out of overload state.";
+      type srl_nokia-comm:date-and-time;
+    }
+    leaf last-overload-enter-code {
+      config false;
+      description
+        "the value of last-overload-enter-code indicates the condition which caused OSPF to get into overload.";
+      type enumeration {
+        enum none {
+          value 1;
+        }
+        enum spf-failed {
+          value 2;
+        }
+        enum boot-overload {
+          value 3;
+        }
+        enum manual-overload {
+          value 4;
+        }
+        enum sfm-overload {
+          value 5;
+        }
+        enum fib-add-fail {
+          value 6;
+        }
+        enum rtm-add-fail {
+          value 7;
+        }
+        enum rtr-adv-lsa-limit {
+          value 8;
+        }
+      }
+    }
+    leaf last-overload-exit-code {
+      config false;
+      description
+        "the value of last-overload-exit-code indicates the reason why OSPF came out of overload state the last time, since reset.";
+      type enumeration {
+        enum none {
+          value 1;
+        }
+        enum bgp-sig-recv {
+          value 2;
+        }
+        enum timer-expired {
+          value 3;
+        }
+        enum manual-exit {
+          value 4;
+        }
+        enum sfm-overload-done {
+          value 5;
+        }
+      }
+    }
+    leaf overflow {
+      config false;
+      description
+        "The value of in-overflow-state indicates the current overflow state (true/false).
+         This overflow state occurs when the number of non-default AS-external-LS-as
+         entries exceed the link-state database capability.";
+      type boolean;
+    }
+    leaf last-overflow-entered-time {
+      config false;
+      description
+        "The value of last-ovrflw-entered-time indicates the value of sys-up-time the last time we entered overflow state. this overflow state occurs when the number of non-default AS-external-LS-as entries exceed the link-state database capability.";
+      type srl_nokia-comm:date-and-time;
+    }
+    leaf last-overflow-exit-time {
+      config false;
+      description
+        "the value of last-overflow-exit-time indicates the value of sys-up-time the last time we exited overflow state. this overflow state occurs when the number of non-default AS-external-LS-as entries exceed the link-state database capability.";
+      type srl_nokia-comm:date-and-time;
+    }
+    leaf opaque-lsa-support {
+      config false;
+      description
+        "the value of opaque-lsa-support indicates the router's support for opaque LSA types. this object is valid only when version is 'version2'.";
+      reference
+        "the OSPF opaque LSA option";
+      type boolean;
+    }
+    leaf last-enabled-time {
+      config false;
+      description
+        "the value of last-enabled-time indicates the value of sys-up-time when admin-state was last set to 'enabled'. when admin-state is set to 'disabled', the OSPF counters are stopped when admin-state is reset to 'enabled', the counters are reset to zero.";
+      type srl_nokia-comm:date-and-time;
+    }
+    leaf routes-submitted {
+      config false;
+      description
+        "the value of routes-submitted indicates the number of routes submitted to the route table manager (RTM) by this instance of OSPF.";
+      type yang:gauge32;
+    }
+    leaf total-exported-routes {
+      config false;
+      description
+        "the value of total-exported-routes indicates the total number of routes exported into OSPF from the route table manager when an export policy is configured. value of total-exported-routes would be 0 when no export policy is configured.";
+      type yang:gauge32;
+    }
+    leaf ovld-lsa-limit-rem-interval {
+      config false;
+      description
+        "the value of ovld-lsa-limit-rem-interval indicates the remaining time in seconds for which the system will be in overload state due to advertising router LSA limit exceeded. the value of 0 implies that the system is either not in overload or indefinitely in overload state.";
+      type int32 {
+        range "0..65535";
+      }
+      units "seconds";
+    }
+    leaf new-lsas-originated {
+      config false;
+      description
+        "The number of new link-state advertisements that have been originated. This number is incremented each time the router originates a new LSA.";
+      type yang:counter32;
+    }
+    leaf new-lsas-received {
+      config false;
+      description
+        "The number of link-state advertisements received determined to be new instantiations. This number does not include newer instantiations of self-originated link-state advertisements.";
+      type yang:counter32;
+    }
+    leaf extern-lsa-count {
+      config false;
+      description
+        "the value of extern-lsa-count indicates the number of external LS-as (LS type 0x4005) in the link-state database";
+      type yang:gauge32;
+    }
+    leaf extern-lsa-cksum-sum {
+      config false;
+      description
+        "the value of extern-lsa-cksum-sum indicates the 32-bit unsigned sum of the LS checksums of the external link-state advertisements contained in the link-state database. This sum can be used to determine if there has been a change in a router's link state database, and to compare the link-state database of two routers.";
+      type srl_nokia-comm:hex-number;
+    }
+    container spf {
+      config false;
+      description
+        "SPF related information";
+      leaf full-spf-runs {
+        config false;
+        description
+          "The total number of times that complete SPF has been run on the router since OSPF was last enabled.";
+        type yang:counter32;
+      }
+      leaf ext-spf-runs {
+        config false;
+        description
+          "The total number of times that only the external portion of the SPF has been run since OSPF was last enabled.";
+        type yang:counter32;
+      }
+      leaf incremental-inter-spf-runs {
+        config false;
+        description
+          "The total number of incremental SPF runs triggered by new or updated inter-area prefix or inter-area router LS-as.";
+        type yang:counter32;
+      }
+      leaf incremental-ext-spf-runs {
+        config false;
+        description
+          "The total number of incremental SPF runs triggered by new or updated external LS-as.";
+        type yang:counter32;
+      }
+      leaf spf-attempts-failed {
+        config false;
+        description
+          "The number of times an attempt to run SPF has failed because SPF runs have been stopped as a result of insufficient memory resources.";
+        type yang:counter32;
+      }
+      leaf max-spf-run-interval {
+        config false;
+        description
+          "the value of max-spf-run-interval indicates the maximum time, in hundredths of seconds, used to perform a total SPF calculation.";
+        type int32 {
+          range "0..2147483647";
+        }
+        units "centiseconds";
+      }
+      leaf min-spf-run-interval {
+        config false;
+        description
+          "the value of min-spf-run-interval indicates the minimum time, in hundredths of seconds, used to perform a total SPF calculation.";
+        type int32 {
+          range "0..2147483647";
+        }
+        units "centiseconds";
+      }
+      leaf avg-spf-run-interval {
+        config false;
+        description
+          "the value of avg-spf-run-interval indicates the average time, in hundredths of seconds, of all the total SPF calculations performed by this OSPF router.";
+        type int32 {
+          range "0..2147483647";
+        }
+        units "centiseconds";
+      }
+      container last-full-spf {
+        config false;
+        description
+          "Information about the last full SPF run";
+        leaf run-time {
+          config false;
+          description
+            "the value of last-full-spf-run-time indicates the time at which the system last performed a full dijkstra (SPF) run.";
+          type srl_nokia-comm:date-and-time;
+        }
+        leaf total-time {
+          config false;
+          description
+            "Time it toook, in hundredths of seconds, to complete the last SPF run completely.";
+          type int32 {
+            range "0..2147483647";
+          }
+          units "centiseconds";
+        }
+        leaf intra-spf-time {
+          config false;
+          description
+            "Time it toook, in hundredths of seconds, to complete the intra-area SPF calculations.";
+          type int32 {
+            range "0..2147483647";
+          }
+          units "centiseconds";
+        }
+        leaf inter-spf-time {
+          config false;
+          description
+            "Time it toook, in hundredths of seconds, to complete the inter-area SPF calculations.";
+          type int32 {
+            range "0..2147483647";
+          }
+          units "centiseconds";
+        }
+        leaf extern-spf-time {
+          config false;
+          description
+            "Time it toook, in hundredths of seconds, to complete the external LSA calculations.";
+          type int32 {
+            range "0..2147483647";
+          }
+          units "centiseconds";
+        }
+        leaf rtm-update-time {
+          config false;
+          description
+            "Time it toook, in hundredths of seconds, to complete the RTM updates.";
+          type int32 {
+            range "0..2147483647";
+          }
+          units "centiseconds";
+        }
+      }
+      container last-ext-spf {
+        config false;
+        description
+          "Information about the last external SPF run";
+        leaf run-time {
+          config false;
+          description
+            "the value of last-ext-spf-run-time indicates the value of sys-up-time when the external OSPF dijkstra (SPF) was last run.";
+          type srl_nokia-comm:date-and-time;
+        }
+        leaf interval {
+          config false;
+          description
+            "the value of ext-spf-run-interval indicates the time, in hundredths of seconds, used to perform the most recent total external (not incremental) SPF calculation.";
+          type int32 {
+            range "0..2147483647";
+          }
+          units "centiseconds";
+        }
+      }
+    }
+  } //ospf-global-state
+
+  grouping ospf-area-state {
+    leaf full-spf-runs {
+      config false;
+      description
+        "The total number of times that complete SPF has been run on the router since OSPF was last enabled.";
+      type yang:counter32;
+    }
+    leaf last-spf-run-time {
+      config false;
+      description
+        "The sys-up-time when intra-area SPF was last run on this area.";
+      type yang:date-and-time;
+    }
+    leaf area-bdr-rtr-count {
+      config false;
+      description
+        "The total number of area border routers reachable within this area.";
+      type yang:gauge32;
+    }
+    leaf as-bdr-rtr-count {
+      config false;
+      description
+        "The total number of autonomous system border routers reachable within this area.";
+      type yang:gauge32;
+    }
+    leaf active-interfaces {
+      config false;
+      description
+        "The number of active interfaces in this area.";
+      type uint32;
+    }
+    container lsa-totals {
+      config false;
+      description
+        "The number of LSAs of each type in this area's database";
+      leaf router-lsa {
+        config false;
+        description
+          "The number of router LSAs in this area's link-state database.";
+        type yang:gauge32;
+      }
+      leaf e-router-lsa {
+        config false;
+        description
+          "The number of OSPFv3 E-router LSAs in this area's link-state database.";
+        type yang:gauge32;
+      }
+      leaf network-lsa {
+        config false;
+        description
+          "The number of network LSAs in this area's link-state database.";
+        type yang:gauge32;
+      }
+      leaf e-network-lsa {
+        config false;
+        description
+          "The number of OSPFv3 E-network LSAs in this area's link-state database.";
+        type yang:gauge32;
+      }
+      leaf network-summary-lsa {
+        config false;
+        description
+          "The number of network summary LSAs in this area's link-state database.";
+        type yang:gauge32;
+      }
+      leaf asbr-summary-lsa {
+        config false;
+        description
+          "The number of ASBR summary LSAs in this area's link-state database.";
+        type yang:gauge32;
+      }
+      leaf nssa-lsa {
+        config false;
+        description
+          "The number of NSSA LSAs in this area's link-state database.";
+        type yang:gauge32;
+      }
+      leaf e-nssa-lsa {
+        config false;
+        description
+          "The number of OSPFv3 E-NSSA LSAs in this area's link-state database.";
+        type yang:gauge32;
+      }
+      leaf area-opaque-lsa {
+        config false;
+        description
+          "The number of NSSA LSAs in this area's link-state database.";
+        type yang:gauge32;
+      }
+      leaf inter-area-prefix-lsa {
+        config false;
+        description
+          "The number of OSPFv3 inter-area-prefix LSAs in this area's link-state database.";
+        type yang:gauge32;
+      }
+      leaf e-inter-area-prefix-lsa {
+        config false;
+        description
+          "The number of OSPFv3 E-inter-area-prefix LSAs in this area's link-state database.";
+        type yang:gauge32;
+      }
+      leaf inter-area-router-lsa {
+        config false;
+        description
+          "The number of OSPFv3 inter-area-router LSAs in this area's link-state database.";
+        type yang:gauge32;
+      }
+      leaf e-inter-area-router-lsa {
+        config false;
+        description
+          "The number of OSPFv3 E-inter-area-router LSAs in this area's link-state database.";
+        type yang:gauge32;
+      }
+      leaf intra-area-prefix-lsa {
+        config false;
+        description
+          "The number of OSPFv3 intra-area-prefix LSAs in this area's link-state database.";
+        type yang:gauge32;
+      }
+      leaf e-intra-area-prefix-lsa {
+        config false;
+        description
+          "The number of OSPFv3 E-intra-area-prefix LSAs in this area's link-state database.";
+        type yang:gauge32;
+      }
+      leaf router-info-lsa {
+        config false;
+        description
+          "The number of OSPFv3 router-info LSAs in this area's link-state database.";
+        type yang:gauge32;
+      }
+      leaf unknown-lsa {
+        config false;
+        description
+          "The number of unknown LSA advertisements in this area's link-state database.";
+        type yang:gauge32;
+      }
+      leaf total {
+        config false;
+        description
+          "The number of area scope LSAs within this area.";
+        type yang:gauge32;
+      }
+      leaf total-lsa-cksum-sum {
+        config false;
+        description
+          "The 32-bit unsigned sum of the area scope LSA checksums contained in this area's link-state database. The sum can be used to determine if there has been a change in a router's link-state database, and to compare the link-state database of two routers.";
+        type srl_nokia-comm:hex-number;
+      }
+    }
+    container lsa-filter-totals {
+      config false;
+      description
+        "The number of LSAs not sent due to area policy.";
+      leaf export-filtered {
+        config false;
+        description
+          "The number of LSAs not sent due to area export policy.";
+        type yang:gauge32;
+      }
+      leaf import-filtered {
+        config false;
+        description
+          "The number of LSAs not sent due to area import policy.";
+        type yang:gauge32;
+      }
+    }
+  }
+      
+  grouping ospf-top {
+    description
+      "Top-level OSPF configuration and operational state";
+    container ospf {
+      presence "Configure OSPF";
+      description
+        "Top-level configuration and operational state for
+         Open Shortest Path First (OSPF)";
+      must "not(../../srl_nokia-netinst:type = 'srl_nokia-netinst:mac-vrf')" {
+        error-message "OSPF configuration is not possible on network-instance of type mac-vrf ";
+      }
+      must "not(../../srl_nokia-netinst:type = 'srl_nokia-netinst:host')" {
+        error-message "OSPF configuration is not possible on network-instance of type host";
+      }
+      list instance {
+        max-elements 3;
+        description
+          "List of OSPF protocol instances associated with this
+           network-instance.";
+        key "name";
+        leaf name {
+          description
+            "The name of the OSPF instance";
+          type srl_nokia-comm:name;
+        }
+        uses ospf-global-top;
+        uses ospf-global-state;
+        uses ospf-as-lsa-totals;
+        uses ospf-as-lsdb-structure;
+        uses srl_nokia-ldp:ldp-sync-global-config;
+
+        must './router-id != default or (../../../router-id != default and ../../../router-id != "0.0.0.0")' {
+          error-message "Must have router-id defined in network-instance or in ospf-instance andit can not be 0.0.0.0";
+        }
+
+        list area {
+          key "area-id";
+          description
+            "The OSPF areas within which the local system exists";
+          leaf area-id {
+            type srl_nokia-ospf-types:ospf-area-identifier;
+            description
+              "the area identifier as a dotted-quad.";
+          }
+          uses ospf-area-structure;
+          uses ospf-area-state;
+          list interface {
+            description
+              "List of OSPF interfaces";
+            key "interface-name";
+            uses ospf-interface-key;
+            uses ospf-interface-config;
+            uses ospf-interface-state;
+            uses ospf-interface-statistics;
+            uses ospf-interface-packet-counts;
+            uses ospf-interface-lsa-totals;
+            uses ospf-link-lsdb-structure;
+            uses srl_nokia-ldp:ldp-sync-interface;
+            must 'dead-interval >= (2 * hello-interval)' {
+              error-message "The dead-interval must be at least twice the hello-interval";
+            }
+          }
+          uses ospf-area-lsdb-structure;
+        }
+      }
+    }
+  }
+
+  augment "/srl_nokia-netinst:network-instance/srl_nokia-netinst:protocols" {
+    uses ospf-top;
+  }
+}

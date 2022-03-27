@@ -1,0 +1,308 @@
+module srl_nokia-configuration {
+  yang-version 1.1;
+  namespace "urn:srl_nokia/configuration";
+  prefix srl-config;
+
+  import srl_nokia-system {
+    prefix srl-system;
+  }
+  import srl_nokia-common {
+    prefix srl-comm;
+  }
+  import srl_nokia-extensions {
+    prefix srl-ext;
+  }
+
+  description
+    "This module defines configuration and operational state data related to the system configuration.";
+
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+  typedef commit-status {
+    type enumeration {
+      enum validating;
+      enum publishing;
+      enum unconfirmed;
+      enum checkpoint;
+      enum save;
+      enum complete;
+      enum reverting;
+      enum failed;
+    }
+  }
+
+  typedef candidate-type {
+    type enumeration {
+      enum shared;
+      enum private;
+    }
+  }
+
+  grouping configuration-state-commits-top {
+    description
+      "State data related to configuration transactions";
+    list commit {
+      config false;
+      description
+        "List of configuration transactions";
+      key "id";
+      leaf id {
+        type uint32;
+        description
+          "System identifier for the commit";
+      }
+      leaf type {
+        type candidate-type;
+        srl-ext:show-importance "high";
+        description
+          "Type of configuration candidate the commit was triggered from";
+      }
+      leaf name {
+        type srl-comm:name;
+        srl-ext:show-importance "high";
+        description
+          "Name of the configuration candidate the commit was triggered from";
+      }
+      leaf status {
+        type commit-status;
+        srl-ext:show-importance "high";
+        description
+          "Current status of the commit";
+      }
+      leaf comment {
+        type string;
+        srl-ext:show-importance "high";
+        description
+          "Operator provided comment associated with this commit";
+      }
+      leaf username {
+        type srl-comm:username;
+        srl-ext:show-importance "high";
+        description
+          "User that started the commit";
+      }
+      leaf started {
+        type srl-comm:date-and-time-delta;
+        srl-ext:show-importance "high";
+        description
+          "Start date and time of the commit";
+      }
+      leaf ended {
+        type srl-comm:date-and-time-delta;
+        srl-ext:show-importance "high";
+        description
+          "End date and time of the commit
+
+          This field is not populated if the commit is in progress";
+      }
+    }
+  }
+
+  grouping configuration-state-candidates-top {
+    description
+      "State data related to configuration candidates";
+    list candidate {
+      config false;
+      description
+        "List of configuration candidates currently active";
+      key "name";
+      leaf name {
+        type srl-comm:name;
+        description
+          "Name of the configuration candidate";
+      }
+      leaf type {
+        type candidate-type;
+        srl-ext:show-importance "high";
+        description
+          "Type of configuration candidate";
+      }
+      leaf username {
+        type srl-comm:username;
+        srl-ext:show-importance "high";
+        description
+          "User that started the configuration session";
+      }
+      leaf started {
+        type srl-comm:date-and-time-delta;
+        srl-ext:show-importance "high";
+        description
+          "Start date and time of the configuration session";
+      }
+    }
+  }
+
+  grouping configuration-state-sessions-top {
+    description
+      "State data related to configuration sessions";
+    list session {
+      config false;
+      description
+        "List of configuration sessions currently active";
+      key "id";
+      leaf id {
+        type uint32;
+        description
+          "System generated ID for the configuration session";
+      }
+      leaf type {
+        type candidate-type;
+        srl-ext:show-importance "high";
+        description
+          "Type of configuration session";
+      }
+      leaf name {
+        type srl-comm:name;
+        srl-ext:show-importance "high";
+        description
+          "Name of the candidate the session is active on
+
+          Set to 'default' if a non-named candidate is active";
+      }
+      leaf exclusive {
+        type boolean;
+        srl-ext:show-importance "high";
+        description
+          "Details if this session is running in exclusive mode";
+      }
+      leaf username {
+        type srl-comm:username;
+        srl-ext:show-importance "high";
+        description
+          "User that started the configuration session";
+      }
+      leaf started {
+        type srl-comm:date-and-time-delta;
+        srl-ext:show-importance "high";
+        description
+          "Start date and time of the configuration session";
+      }
+    }
+  }
+
+  grouping configuration-config-top {
+    description
+      "Configuration data related to checkpoints";
+    leaf max-checkpoints {
+      type uint8 {
+        range "1..255";
+      }
+      default "10";
+      description
+        "The number of checkpoints kept by the system";
+    }
+    leaf max-candidates {
+      srl-ext:first-released "20.6.1";
+      type uint8 {
+        range "1..255";
+      }
+      default "10";
+      description
+        "The maximum number of combined private and shared candidates";
+    }
+    leaf idle-timeout {
+      srl-ext:first-released "20.6.1";
+      type uint16;
+      default "10080";
+      units "minutes";
+      description
+        "The idle timeout of configuration candidates
+
+        After this period of no activity, the candidate is emptied and removed from the system.";
+    }
+    leaf auto-checkpoint {
+      srl-ext:first-released "20.12.1";
+      type boolean;
+      default false;
+      description
+        "Configuration checkpoint will be automatically created after every successful commit (if set to true).";
+    }
+  }
+
+  grouping configuration-state-checkpoints-top {
+    description
+      "State data related to checkpoints";
+    list checkpoint {
+      config false;
+      description
+        "List of current checkpoints present in the system";
+      key "id";
+      leaf id {
+        type uint8;
+        description
+          "System generated ID for the checkpoint";
+      }
+      leaf name {
+        type srl-comm:checkpoint-name;
+        srl-ext:show-importance "high";
+        description
+          "User provided name of the checkpoint";
+      }
+      leaf comment {
+        type string;
+        srl-ext:show-importance "high";
+        description
+          "User provided annotations associated with the checkpoint";
+      }
+      leaf created {
+        type srl-comm:date-and-time-delta;
+        srl-ext:show-importance "high";
+        description
+          "Date and time this checkpoint was created";
+      }
+      leaf version {
+        type string;
+        description
+          "System version that the checkpoint was generated on";
+      }
+      leaf username {
+        type srl-comm:username;
+        srl-ext:show-importance "high";
+        description
+          "Username that created this checkpoint";
+      }
+      leaf size {
+        type uint64;
+        description
+          "Size of the checkpoint configuration file";
+        units "bytes";
+      }
+    }
+  }
+
+  grouping configuration-top {
+    container configuration {
+      description
+        "Top-level container for configuration and state data related to the system configuration";
+      leaf last-change {
+        config false;
+        type srl-comm:date-and-time-delta;
+        description
+          "Date and time of the last successful commit
+
+          Set to the time the configuration was loaded by management server, so is refreshed at boot time.";
+      }
+      uses configuration-config-top;
+      uses configuration-state-checkpoints-top;
+      uses configuration-state-sessions-top;
+      uses configuration-state-candidates-top;
+      uses configuration-state-commits-top;
+    }
+  }
+
+  augment "/srl-system:system" {
+    srl-ext:first-released "19.11.1";
+    uses configuration-top;
+  }
+}

@@ -1,0 +1,59 @@
+module srl_nokia-tools-platform-redundancy {
+  yang-version 1.1;
+  namespace "urn:srl_nokia/tools-platform-redundancy";
+  prefix srl_nokia-tools-platform-redundancy;
+
+  import srl_nokia-tools-platform {
+    prefix srl-tools-platform;
+  }
+  import srl_nokia-features {
+    prefix srl-feat;
+  }
+
+  description
+    "Model for operational commands for platform redundancy.";
+
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+  grouping tools-redundancy-top {
+    container redundancy {
+      description
+        "Top-level container for redundancy operational commands";
+      container switchover {
+        presence "Trigger a switchover of the cpm";
+        description
+          "Trigger a redundancy switchover to the other control module";
+      }
+      container synchronize {
+        description
+          "Top-level container for manual synchronization activies";
+        leaf system {
+          type empty;
+          description
+            "Force a synchronization of the system-required data between the active control module and the standby
+               
+             This synchronizes images, configuration, checkpoints, and other system-required data";
+        }
+        leaf overlay {
+          type empty;
+          description
+            "Force a synchronization of the overlay filesystem between the active control module and the standby
+               
+             This synchronizes all non-excluded directories in the overlay filesystem";
+        }
+      }
+    }
+  }
+
+  augment "/srl-tools-platform:platform" {
+    if-feature "srl-feat:chassis";
+    uses tools-redundancy-top;
+  }
+}

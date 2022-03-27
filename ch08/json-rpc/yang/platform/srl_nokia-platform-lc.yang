@@ -1,0 +1,136 @@
+module srl_nokia-platform-lc {
+  yang-version 1.1;
+
+  // namespace
+
+  namespace "urn:srl_nokia/platform-lc";
+  prefix srl_nokia-platform-lc;
+
+  import srl_nokia-platform {
+    prefix srl-platform;
+  }
+  import srl_nokia-extensions {
+    prefix srl-ext;
+  }
+  import srl_nokia-common {
+    prefix srl-comm;
+  }
+  import srl_nokia-features {
+    prefix srl-feat;
+  }
+
+  description
+    "This module defines configuration and operational state data related to line cards.";
+
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+  grouping fabric-state {
+    srl-ext:stream-mode sample=5;
+    description
+      "Grouping for linecard/forwarding-complex fabric availability and utilization state";
+    leaf availability {
+      config false;
+      type srl-comm:percentage;
+      description
+        "Details the percentage bandwidth available to the fabric for the line card";
+    }
+    leaf utilization-ingress {
+      config false;
+      type srl-comm:gauge64;
+      description
+        "Provides the linecard bandwidth utilization into the switch fabric";
+    }
+    leaf utilization-egress {
+      config false;
+      type srl-comm:gauge64;
+      description
+        "Provides the linecard bandwidth utilization from the switch fabric";
+    }
+  }
+
+  grouping linecard-top {
+    description
+      "Grouping for linecard configuration and state";
+    list linecard {
+      description
+        "Top-level container for linecard configuration and state";
+      key "slot";
+      leaf slot {
+        type uint8 {
+          range "1..8";
+        }
+        description
+          "Numeric identifier for the linecard";
+      }
+      uses srl-platform:component-common-config-top {
+        if-feature "srl-feat:chassis";
+      }
+      uses srl-platform:component-common-state-top;
+      leaf type {
+        config false;
+        type string;
+        srl-ext:show-importance "high";
+        description
+          "Linecard type, as translated from the components EEPROM";
+      }
+      list forwarding-complex {
+        description
+          "List of forwarding complexes on the linecard";
+        key "name";
+        leaf name {
+          type enumeration {
+            enum 0;
+          }
+          description
+            "The identifier of the forwarding complex";
+        }
+        container fabric {
+            srl-ext:first-released "20.6.1";
+            srl-ext:delivery-node-override true;
+            description
+              "Top-level container for fabric configuration and state";
+            if-feature "srl-feat:chassis";
+            uses fabric-state;
+        }
+        list pipeline {
+          if-feature srl-feat:tomahawk3;
+          description
+            "List of pipelines that make up one forwarding complex.";
+          key index;
+          leaf index {
+            type uint8 {
+              range "0..7";
+            }
+            description
+              "The pipeline number.";
+          }
+        }
+      }
+      uses srl-platform:component-common-state-sw;
+      uses srl-platform:component-locator {
+        if-feature "srl-feat:chassis";
+      }
+      uses srl-platform:component-power-state-top {
+        if-feature "srl-feat:chassis";
+      }
+      uses srl-platform:component-temperature-state-top {
+        if-feature "srl-feat:chassis";
+      }
+    }
+  }
+
+  augment "/srl-platform:platform" {
+    uses linecard-top;
+  }
+}

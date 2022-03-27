@@ -1,0 +1,38 @@
+module srl_nokia-bridge-table {
+  yang-version 1.1;
+  // namespace
+  namespace "urn:srl_nokia/network-instance/bridge-table";
+  prefix "srl_nokia-bridge-table";
+  description
+    "This yang file gives a description of bridge table configuration.";
+
+// groupings
+
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+
+  grouping bridge-table-top {
+    description
+      "Top-level grouping containing the bridge-table model.";
+    leaf discard-unknown-dest-mac {
+      type boolean;
+      default "false";
+      description 
+        "Discard frames with unknown destination mac addresses. The source mac address of the discarded 
+         frame is learned as long as the mac is valid, mac-learning is enabled, and the number of entries 
+         has not reached the maximum-entries threshold.";
+    }
+    leaf protect-anycast-gw-mac  {
+      type boolean;
+      default "false";
+      description 
+        "Protect anycast gateway mac's installed in the FDB, when this mac-vrf is part of an IRB.";
+    }
+  }
+}

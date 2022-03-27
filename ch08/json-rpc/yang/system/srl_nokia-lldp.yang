@@ -1,0 +1,674 @@
+module srl_nokia-lldp {
+  yang-version 1.1;
+  namespace "urn:srl_nokia/lldp";
+  prefix srl_nokia-lldp;
+
+  import srl_nokia-lldp-types {
+    prefix nokia-lldp-types;
+  }
+  import srl_nokia-interfaces {
+    prefix srl_nokia-if;
+  }
+  import srl_nokia-system {
+    prefix srl-system;
+  }
+  import srl_nokia-network-instance {
+    prefix srl_nokia-netinst;
+  }
+  import srl_nokia-common {
+    prefix srl-comm;
+  }
+
+  description
+    "This module defines configuration and operational state data
+     for the LLDP protocol.";
+
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+  grouping lldp-common-counters {
+    description
+      "Definition of global and per-interface counters";
+    leaf frame-in {
+      type srl-comm:zero-based-counter64;
+      description
+        "The number of LLDP frames received";
+    }
+    leaf frame-out {
+      type srl-comm:zero-based-counter64;
+      description
+        "The number of LLDP frames transmitted";
+    }
+    leaf frame-error-in {
+      type srl-comm:zero-based-counter64;
+      description
+        "The number of LLDP frames received with errors";
+    }
+    leaf frame-discard {
+      type srl-comm:zero-based-counter64;
+      description
+        "The number of LLDP frames received and discarded";
+    }
+    leaf tlv-discard {
+      type srl-comm:zero-based-counter64;
+      description
+        "The number of TLV frames received and discarded";
+    }
+    leaf tlv-unknown {
+      type srl-comm:zero-based-counter64;
+      description
+        "The number of frames received with unknown TLV";
+    }
+    leaf last-clear {
+      type srl-comm:date-and-time-delta;
+      description
+        "Indicates the last time the counters were cleared";
+    }
+  }
+
+  grouping lldp-global-counters {
+    description
+      "Definition of global LLDP counters";
+    uses lldp-common-counters;
+    leaf tlv-accepted {
+      type srl-comm:zero-based-counter64;
+      description
+        "The number of valid TLVs received.";
+    }
+    leaf entries-aged-out {
+      type srl-comm:zero-based-counter64;
+      description
+        "The number of entries aged out due to timeout.";
+    }
+  }
+
+  grouping lldp-interface-counters {
+    description
+      "Definition of per-interface LLDP counters";
+    uses lldp-common-counters;
+    leaf frame-error-out {
+      type srl-comm:zero-based-counter64;
+      description
+        "The number of frame transmit errors on the interface";
+    }
+  }
+
+  typedef base-subinterface-ref {
+    type leafref {
+      path "/srl_nokia-if:interface/srl_nokia-if:subinterface/srl_nokia-if:name";
+    }
+    description
+      "Reusable type for by-name reference to a base subinterface.";
+  }
+
+  grouping lldp-system-info-config {
+    description
+      "Configuration data for system-level local and remote LLDP information";
+    leaf system-name {
+      config false;
+      type string {
+        length "0..255";
+      }
+      description
+        "The systems administratively assigned name
+
+         The system name field shall contain an alpha-numeric string
+         that indicates the system's administratively assigned name.
+         The system name should be the system's fully qualified domain
+         name.";
+    }
+    leaf system-description {
+      config false;
+      type string {
+        length "0..255";
+      }
+      description
+        "Field detailing system description, including name and versions
+
+         The system description field shall contain an alpha-numeric
+         string that is the textual description of the network entity.
+         The system description should include the full name and
+         version identification of the system's hardware type,
+         software operating system, and networking software.";
+    }
+    leaf chassis-id {
+      config false;
+      type string;
+      description
+        "The Chassis ID is a mandatory TLV which identifies the
+         chassis component of the endpoint identifier associated with
+         the transmitting LLDP agent";
+    }
+    leaf chassis-id-type {
+      config false;
+      type nokia-lldp-types:chassis-id-type;
+      default "MAC_ADDRESS";
+      description
+        "The source for the chassis identifier string
+
+         It is an enumerator defined by the LldpChassisIdSubtype object
+         from IEEE 802.1AB MIB.";
+    }
+    list management-address {
+      key "subinterface";
+      description
+        "List of subinterfaces to source management addresses from
+
+         This list is sent in the management address TLV by LLDP.";
+      leaf subinterface {
+        type srl-comm:subinterface-all;
+        must "/srl_nokia-if:interface[srl_nokia-if:name=substring-before(current(), '.')]/srl_nokia-if:subinterface[srl_nokia-if:index=substring-after(current(), '.')]" {
+            error-message "Must be an existing subinterface name";
+        }
+        description
+          "Reference to the subinterface to source management addresses";
+      }
+      leaf-list type {
+        type nokia-lldp-types:management-address-type;
+        description
+          "Types of addresses sent in the management address TLV
+
+           The enumerated value for the network address type
+           identified in this TLV. This enumeration is defined in the
+           'Assigned Numbers' RFC [RFC3232] and the
+           ianaAddressFamilyNumbers object.";
+      }
+    }
+  }
+
+  grouping lldp-system-info-state {
+    description
+      "Operational state data reported for the local and remote systems";
+  }
+
+  grouping lldp-neighbor-config {
+    description
+      "Configuration data for LLDP neighbors";
+  }
+
+  grouping lldp-neighbor-state {
+    description
+      "Operational state data for LLDP neighbors";
+    leaf id {
+      type string;
+      description
+        "System generated identifier for the remote neighbor";
+    }
+    leaf first-message {
+      type srl-comm:date-and-time-delta;
+      description
+        "Date and time of the first message from neighbor";
+    }
+    leaf last-update {
+      type srl-comm:date-and-time-delta;
+      description
+        "Date and time of the last update from neighbor";
+    }
+    leaf system-name {
+      config false;
+      type string {
+        length "0..255";
+      }
+      description
+        "The administratively assigned name of the remote neighbor
+
+         The system name field shall contain an alpha-numeric string
+         that indicates the system's administratively assigned name.
+         The system name should be the system's fully qualified domain
+         name. If implementations support IETF RFC 3418, the sysName
+         object should be used for this field.";
+    }
+    leaf system-description {
+      config false;
+      type string {
+        length "0..255";
+      }
+      description
+        "The system description of the remote neighbor
+
+         The system description field shall contain an alpha-numeric
+         string that is the textual description of the network entity.
+         The system description should include the full name and
+         version identification of the system's hardware type,
+         software operating system, and networking software. If
+         implementations support IETF RFC 3418, the sysDescr object
+         should be used for this field.";
+    }
+    leaf chassis-id {
+      config false;
+      type string;
+      description
+        "The chassis ID of the remote neighbor
+
+         The Chassis ID is a mandatory TLV which identifies the
+         chassis component of the endpoint identifier associated with
+         the transmitting LLDP agent";
+    }
+    leaf chassis-id-type {
+      config false;
+      type nokia-lldp-types:chassis-id-type;
+      default "MAC_ADDRESS";
+      description
+        "The type of identifier used in the chassis-id field
+
+         This field identifies the format and source of the chassis
+         identifier string. It is an enumerator defined by the
+         LldpChassisIdSubtype object from IEEE 802.1AB MIB.";
+    }
+    leaf port-id {
+      type nokia-lldp-types:string-or-binary;
+      description
+        "The Port ID of the remote neighbor
+
+         The Port ID is a mandatory TLV which identifies the port
+         component of the endpoint identifier associated with the
+         transmitting LLDP agent. If the specified port is an IEEE
+         802.3 Repeater port, then this TLV is optional.";
+    }
+    leaf port-id-type {
+      type nokia-lldp-types:port-id-type;
+      description
+        "The type of identifier used in the port-id field
+
+         This field identifies the format and source of the port
+         identifier string. It is an enumerator defined by the
+         PtopoPortIdType object from RFC2922.";
+      reference
+        "RFC2922";
+    }
+    leaf port-description {
+      type string;
+      description
+        "The description of the port referenced in the port-id field
+
+         The binary string containing the actual port identifier for
+         the port which this LLDP PDU was transmitted. The source and
+         format of this field is defined by PtopoPortId from
+         RFC2922.";
+      reference
+        "RFC2922";
+    }
+    list management-address {
+      key "address";
+      description
+        "List of management addresses received from the remote LLDP neighbor";
+      leaf address {
+        type string;
+        description
+          "The management address received from the remote LLDP neighbor
+
+           The Management Address is a mandatory TLV which identifies a
+           network address associated with the LLDP agent, which
+           can be used to reach the agent on the port identified in the
+           Port ID TLV.";
+      }
+      leaf type {
+        type nokia-lldp-types:management-address-type;
+        description
+          "The type of management address referenced in the address field
+
+           The enumerated value for the network address type
+           identified in this TLV. This enumeration is defined in the
+           'Assigned Numbers' RFC [RFC3232] and the
+           ianaAddressFamilyNumbers object.";
+      }
+    }
+    container bgp-auto-discovery {
+      presence "Configure BGP auto discovery";
+      description
+        "Enclosing container for BGP auto discovery";
+      leaf-list bgp-peer-addresses {
+        type string;
+        description
+          "List of IP address learned from neighbor for BGP auto discovery";
+      }
+      leaf group-id {
+        type uint32;
+        description
+          "A four byte integer to send on outgoing LLDPDUs, this value can be used on the remote
+           end to do peer group association. This sub-TLV is not sent by default";
+      }
+    }
+  }
+
+  grouping lldp-capabilities-config {
+    description
+      "Configuration data for LLDP capabilities";
+  }
+
+  grouping lldp-capabilities-state {
+    description
+      "Operational state data for LLDP capabilities";
+    leaf name {
+      type string;
+      description
+        "Name of the system capability advertised by the neighbor
+
+         Capabilities are represented in a bitmap that defines the
+         primary functions of the system. The capabilities are
+         defined in IEEE 802.1AB.";
+      reference
+        "IEEE 802.1AB";
+    }
+    leaf enabled {
+      type boolean;
+      description
+        "Indicates whether the corresponding system capability is enabled on the neighbor";
+      reference
+        "Sec 8.5.8.2 of IEEE 802.1AB-2009";
+    }
+  }
+
+  grouping lldp-capabilities-top {
+    description
+      "Top-level grouping for LLDP capabilities";
+    list capability {
+      config false;
+      key "name";
+      description
+        "List of LLDP system capabilities advertised by the neighbor";
+      uses lldp-capabilities-state;
+    }
+  }
+
+  grouping lldp-custom-tlv-config {
+    description
+      "Configuration data for custom LLDP TLVs";
+  }
+
+  grouping lldp-custom-tlv-state {
+    description
+      "Operational state data for custom LLDP TLVs";
+    leaf type {
+      type int32;
+      description
+        "The integer value identifying the type of information
+         contained in the value field.";
+    }
+    leaf oui {
+      type string;
+      description
+        "The organizationally unique identifier field from the custom TLV
+
+         This field shall contain the organization's OUI as defined in
+         Clause 9 of IEEE Std 802. The high-order octet is 0 and the
+         low-order 3 octets are the SMI Network Management Private Enterprise
+         Code of the Vendor in network byte order, as defined in the
+         'Assigned Numbers' RFC [RFC3232].";
+      reference
+        "RFC3232";
+    }
+    leaf oui-subtype {
+      type string;
+      description
+        "The subtype value defined by the OUI for this custom TLV
+
+         The organizationally defined subtype field shall contain a
+         unique subtype value assigned by the defining organization.";
+    }
+    // TODO: consider making this string type
+    leaf value {
+      type binary;
+      description
+        "A variable-length octet-string containing the value for this TLV";
+    }
+  }
+
+  grouping lldp-custom-tlv-top {
+    description
+      "Top-level grouping for custom LLDP TLVs";
+    list custom-tlv {
+      config false;
+      key "type oui oui-subtype";
+      description
+        "List of custom LLDP TLVs from a neighbor";
+      uses lldp-custom-tlv-state;
+    }
+  }
+
+  grouping lldp-neighbor-top {
+    description
+      "Top-level grouping for the LLDP neighbor list";
+    list neighbor {
+      config false;
+      key "id";
+      description
+        "List of LLDP neighbors on this interface";
+      uses lldp-system-info-state;
+      uses lldp-neighbor-state;
+      uses lldp-custom-tlv-top;
+      uses lldp-capabilities-top;
+    }
+  }
+
+  grouping lldp-bgp-auto-discovery-interface {
+    description
+      "Top-level grouping for LLDP BGP auto discovery per interface";
+    container bgp-auto-discovery {
+      presence "Configure LLDP BGP auto discovery";
+      description
+        "Configuration and state related to LLDP BGP auto discovery on the interface";
+      leaf admin-state {
+        type srl-comm:admin-state;
+        default "enable";
+        description
+          "Enable or disable LLDP BGP auto discovery on this interface";
+      }
+      leaf-list peering-address {
+        type srl-comm:ip-address;
+        description
+          "List of IP addresses to be sent for BGP auto discovery
+
+           Default values for this sub-TLV is to populate the addresses
+           of the first subinterface of the interface the LLDPDU is being
+           generated from, along with a unicast AFI/SAFI for IPv4 if an IPv4
+           address exists, and/or IPv6 if an IPv6 address exists.
+
+           If neither of these exist in the system, LLDP will not add the TLV
+           to outgoing LLDPDUs, unless the peering-address is manually configured
+           on a per-LLDP-port basis.";
+      }
+      leaf group-id {
+        type uint32;
+        description
+          "A four byte integer to send on outgoing LLDPDUs
+
+           This value can be used on the remote end to do peer group association.
+           This sub-TLV is not sent by default.";
+      }
+    }
+  }
+
+  typedef base-interface-ref {
+    type leafref {
+      path "/srl_nokia-if:interface/srl_nokia-if:name";
+    }
+    description
+      "Reusable type for by-name reference to a base interface
+       This type may be used in cases where ability to reference
+       a subinterface is not required.";
+  }
+
+  grouping lldp-interface-config {
+    description
+      "Configuration data for LLDP on each interface";
+    leaf name {
+      type base-interface-ref;
+      description
+        "Reference to the LLDP Ethernet interface";
+    }
+    leaf admin-state {
+      type srl-comm:admin-state;
+      default "enable";
+      description
+        "Enable or disable LLDP on the interface";
+    }
+    uses lldp-bgp-auto-discovery-interface;
+  }
+
+  grouping lldp-interface-state {
+    description
+      "Operational state data for LLDP on each interface";
+    leaf oper-state {
+      type srl-comm:oper-state;
+      config false;
+      description
+        "Details the operational state of LLDP on the interface";
+    }
+    container statistics {
+      presence "State LLDP counters";
+      config false;
+      description
+        "LLDP counters on each interface";
+      uses lldp-interface-counters;
+    }
+  }
+
+  grouping lldp-interface-top {
+    description
+      "Top-level grouping for LLDP interfaces";
+    list interface {
+      key "name";
+      description
+        "List of interfaces on which LLDP can be enabled";
+      uses lldp-interface-config;
+      uses lldp-interface-state;
+      uses lldp-neighbor-top;
+    }
+  }
+
+  grouping lldp-bgp-auto-discovery-top {
+    description
+      "Top-level grouping for global BGP auto discovery";
+    container bgp-auto-discovery {
+      presence "Configure LLDP BGP auto discovery";
+      description
+        "Top-level container for global LLDP BGP auto discovery";
+      leaf admin-state {
+        type srl-comm:admin-state;
+        default "disable";
+        description
+          "Enable or disable LLDP BGP auto discovery at the system level
+
+           Setting this to disable will override any per-interface LLDP
+           BGP autodiscovery configuration";
+      }
+      leaf-list network-instance {
+        type leafref {
+          path "/srl_nokia-netinst:network-instance/srl_nokia-netinst:name";
+        }
+        description
+          "List of network instances to enable LLDP BGP auto discovery in
+
+           Default is to run LLDP BGP auto discovery in all network instances";
+      }
+      leaf group-id {
+        type uint32;
+        description
+          "A four byte integer to send on outgoing LLDPDUs
+
+           This value can be used on the remote end to do peer group association.
+           This sub-TLV is not sent by default";
+      }
+    }
+  }
+
+  grouping lldp-config {
+    description
+      "Global LLDP configuration";
+    leaf admin-state {
+      type srl-comm:admin-state;
+      default "enable";
+      description
+        "Enable or disable LLDP at the system level";
+    }
+    leaf hello-timer {
+      type uint64;
+      default "30";
+      units "seconds";
+      description
+        "System level hello timer for the LLDP protocol";
+    }
+    leaf hold-multiplier {
+      type uint8;
+      default "4";
+      description
+        "System level hold multiplier, used to define neighbor aging
+
+         This field defines how many hellos need to be missed before
+         a neighbor is aged out.
+
+         This field also is used along with the 'hello-timer' field
+         to define the TTL TLV in outgoing LLDPDUs.";
+    }
+    uses lldp-bgp-auto-discovery-top;
+    /* - Phase 2 features.
+    leaf-list suppress-tlv-advertisement {
+        type identityref {
+            base nokia-lldp-types:LLDP_TLV;
+        }
+        description
+            "Indicates whether the local system should suppress the
+            advertisement of particular TLVs with the LLDP PDUs that it
+            transmits. Where a TLV type is specified within this list, it
+            should not be included in any LLDP PDU transmitted by the
+            local agent.";
+    }
+     */
+  }
+
+  grouping lldp-state {
+    description
+      "Operational state data for global LLDP parameters";
+    container statistics {
+      presence "State global LLDP counters";
+      config false;
+      description
+        "Global LLDP counters";
+      uses lldp-global-counters;
+    }
+  }
+
+  grouping lldp-traceoptions {
+    description
+      "Top-level grouping for LLDP trace options";
+    leaf-list trace-options {
+      description
+        "LLDP trace options";
+      type enumeration {
+        enum received;
+        enum transmitted;
+        enum common;
+      }
+    }
+  }
+
+  grouping lldp-top {
+    description
+      "Top-level grouping for LLDP model";
+    container lldp {
+      presence "Configure LLDP";
+      description
+        "Top-level container for LLDP configuration and state data";
+      uses lldp-traceoptions;
+      uses lldp-config;
+      uses lldp-system-info-config;
+      uses lldp-state;
+      uses lldp-interface-top;
+    }
+  }
+
+  augment "/srl-system:system" {
+    uses lldp-top;
+  }
+}

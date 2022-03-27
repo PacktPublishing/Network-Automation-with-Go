@@ -1,0 +1,133 @@
+module srl_nokia-snmp-trace {
+  yang-version 1.1;
+
+  // namespace
+
+  namespace "urn:srl_nokia-snmp-trace";
+  prefix srl_nokia-snmp-trace;
+
+  description
+    "This module defines SNMP trace options";
+
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+  identity snmp-trace-option {
+    description
+      "Base identity for SNMP trace options";
+  }
+
+  identity agentx {
+    base snmp-trace-option;
+  }
+
+  identity disman {
+    base snmp-trace-option;
+  }
+
+  identity dumpv {
+    base snmp-trace-option;
+  }
+
+  identity dumph {
+    base snmp-trace-option;
+  }
+
+  identity exec {
+    base snmp-trace-option;
+  }
+
+  identity init_mib {
+    base snmp-trace-option;
+  }
+
+  identity mib_init {
+    base snmp-trace-option;
+  }
+
+  identity mteTrigger {
+    base snmp-trace-option;
+  }
+
+  identity parse-file {
+    base snmp-trace-option;
+  }
+
+  identity parse-mibs {
+    base snmp-trace-option;
+  }
+
+  identity perl {
+    base snmp-trace-option;
+  }
+
+  identity read_config {
+    base snmp-trace-option;
+  }
+
+  identity recv {
+    base snmp-trace-option;
+  }
+
+  identity run {
+    base snmp-trace-option;
+  }
+
+  identity smux {
+    base snmp-trace-option;
+  }
+
+  identity snmp {
+    base snmp-trace-option;
+  }
+
+  identity snmpd {
+    base snmp-trace-option;
+  }
+
+  identity snmptls {
+    base snmp-trace-option;
+  }
+
+  identity snmptrapd {
+    base snmp-trace-option;
+  }
+
+  identity snmpusm {
+    base snmp-trace-option;
+  }
+
+  identity snmpv3 {
+    base snmp-trace-option;
+  }
+
+  identity tls {
+    base snmp-trace-option;
+  }
+
+  identity transport {
+    base snmp-trace-option;
+  }
+
+  identity trap {
+    base snmp-trace-option;
+  }
+
+  identity usm {
+    base snmp-trace-option;
+  }
+
+  identity usmUser {
+    base snmp-trace-option;
+  }
+
+  identity vacm {
+    base snmp-trace-option;
+  }
+
+  identity versioninfo {
+    base snmp-trace-option;
+  }
+}

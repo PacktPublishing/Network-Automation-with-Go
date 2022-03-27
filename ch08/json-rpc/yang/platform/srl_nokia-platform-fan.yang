@@ -1,0 +1,83 @@
+module srl_nokia-platform-fan {
+  yang-version 1.1;
+
+  // namespace
+
+  namespace "urn:srl_nokia/platform-fan";
+  prefix srl_nokia-platform-fan;
+
+  import srl_nokia-platform {
+    prefix srl-platform;
+  }
+  import srl_nokia-extensions {
+    prefix srl-ext;
+  }
+  import srl_nokia-common {
+    prefix srl-comm;
+  }
+  import srl_nokia-features {
+    prefix srl-feat;
+  }
+
+  description
+    "This module defines configuration and operational state data related to fans.";
+
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+  grouping fan-state-top {
+    description
+      "Grouping for fan module state";
+    leaf id {
+      type uint8 {
+        range "1..255";
+      }
+      description
+        "Numeric identifier for the fan tray";
+    }
+    leaf type {
+      type string;
+      srl-ext:show-importance "high";
+      description
+        "Fan tray type, as translated from the components EEPROM";
+    }
+    leaf speed {
+      srl-ext:delivery-node-override true;
+      srl-ext:stream-mode sample=5;
+      type srl-comm:percentage;
+      description
+        "The current speed of the fan tray";
+    }
+  }
+
+  grouping fan-top {
+    description
+      "Grouping for fan module configuration and state";
+    list fan-tray {
+      config false;
+      key "id";
+      description
+        "Top-level container for fan module configuration and state";
+      uses fan-state-top;
+      uses srl-platform:component-common-state-top;
+      uses srl-platform:component-locator;
+      uses srl-platform:component-power-state-top {
+        if-feature "srl-feat:chassis";
+      }
+    }
+  }
+
+  augment "/srl-platform:platform" {
+    uses fan-top;
+  }
+}

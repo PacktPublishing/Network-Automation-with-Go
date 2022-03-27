@@ -1,0 +1,109 @@
+module srl_nokia-ssh {
+  yang-version 1.1;
+
+  // namespace
+
+  namespace "urn:srl_nokia/ssh";
+  prefix srl_nokia-ssh;
+
+  import srl_nokia-system {
+    prefix srl-system;
+  }
+  import srl_nokia-network-instance {
+    prefix srl_nokia-netinst;
+  }
+  import srl_nokia-common {
+    prefix srl_nokia-comm;
+  }
+
+  description
+    "This module defines SSH configuration";
+
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+  grouping network-instance-entry-config {
+    leaf admin-state {
+      type srl_nokia-comm:admin-state;
+      description
+        "Enables the SSH server in this network-instance";
+    }
+    leaf-list source-address {
+      type srl_nokia-comm:ip-address;
+      description
+        "List of IP addresses for the SSH server to listen on within the network-instance";
+    }
+    leaf timeout {
+      type uint16;
+      units "seconds";
+      default "0";
+      description
+        "Set the idle timeout in seconds on SSH connections";
+    }
+    leaf rate-limit {
+      type uint8;
+      default "20";
+      description
+        "Set a limit on the number of unauthenticated sessions to the SSH server
+         after this number is met, the server will start dropping connection attempts";
+    }
+  }
+
+  grouping network-instance-entry-state {
+    leaf oper-state {
+      type srl_nokia-comm:oper-state;
+      config false;
+      description
+        "Details the operational state of the SSH server";
+    }
+    leaf protocol-version {
+      type uint8;
+      config false;
+      description
+        "Protocol version in use by the SSH server";
+    }
+  }
+
+  grouping network-instance-entry {
+    leaf name {
+      type leafref {
+        path "/srl_nokia-netinst:network-instance/srl_nokia-netinst:name";
+      }
+      must 'not(/srl_nokia-netinst:network-instance[srl_nokia-netinst:name=current()]/srl_nokia-netinst:type = "srl_nokia-netinst:mac-vrf")' {
+        error-message "SSH server cannot be started in a network-instance of type 'mac-vrf'";
+      }
+      description
+        "Reference to a configured network-instance";
+    }
+    uses network-instance-entry-config;
+    uses network-instance-entry-state;
+  }
+
+  grouping network-instance-interface {
+    list network-instance {
+      description
+        "List of network-instances to run an SSH server in";
+      key "name";
+      uses network-instance-entry;
+    }
+  }
+
+  grouping ssh-top {
+    container ssh-server {
+      description
+        "Top-level container for SSH server configuration and state";
+      presence "Configure SSH server";
+      uses network-instance-interface;
+    }
+  }
+
+  augment "/srl-system:system" {
+    uses ssh-top;
+  }
+}

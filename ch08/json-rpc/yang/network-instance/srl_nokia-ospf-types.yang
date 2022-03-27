@@ -1,0 +1,853 @@
+module srl_nokia-ospf-types {
+  yang-version 1.1;
+  prefix srl_nokia-ospf-types;
+  namespace "urn:srl_nokia/ospf-types";
+
+  import ietf-yang-types {
+    prefix yang;
+  }
+
+  description
+    "This yang file contains common OSPFv2 and -v3 types and identities";
+
+  // typedef statements
+
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+
+  typedef address-family {
+    description
+      "Address family type.";
+    type enumeration {
+      enum ipv4-unicast {
+        value 0;
+        description
+          "The prefix contained within the Extended Prefix LSA is an IPv4
+           unicast prefix";
+      }
+    }
+  }
+
+  typedef ospf-ecmp {
+    description
+      "This type defines the range of IS-IS max-ecmp-paths";
+    type uint8 {
+      range "1..64";
+    }
+  }
+
+  typedef ospf-area-identifier {
+    description
+      "OSPFv2 Area Identifier";
+    type yang:dotted-quad {
+      pattern '[0-9\.]*';
+      pattern '(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])\.){3}'
+            + '([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])'
+            + '(%[\p{N}\p{L}]+)?';
+    }
+  }
+
+  typedef ospf-metric {
+    type uint16;
+    description
+      "A common type that can be utilised to express an OSPF metric";
+  }
+
+  typedef ospf-metric-large {
+    type uint32;
+    description
+      "A common type that can be utilised to express a 24- or 32-bits OSPF metric";
+  }
+
+  typedef interface-type {
+    description
+      "Interface type.";
+    type enumeration {
+      enum broadcast {
+        value 1;
+      }
+      //enum "non-broadcast"                { value 2; }
+      enum point-to-point {
+        value 3;
+      }
+    }
+  }
+
+  typedef lsa-filter-out {
+    type enumeration {
+      enum none {
+        value 0;
+      }
+      enum all {
+        value 1;
+      }
+      enum except-own-rtrlsa {
+        value 2;
+      }
+      enum except-own-rtrlsa-and-defaults {
+        value 3;
+      }
+    }
+    description
+      "Configure LSA flooding reduction";
+  }
+
+  typedef restart-reason-type {
+    description
+      "the value of restart-reason indicates the OSPF neighbor's graceful restart reason.";
+    type union {
+      type uint32 {
+        range "4..max";
+      }
+      type enumeration {
+        enum unknown {
+          value 0;
+        }
+        enum sw-restart {
+          value 1;
+        }
+        enum sw-reload {
+          value 2;
+        }
+        enum switch-red {
+          value 3;
+        }
+      }
+    }
+  }
+
+  // identities
+
+  identity ospf-version {
+    description
+      "Base identity for the OSPF protocol version.";
+  }
+
+  identity ospf-v2 {
+    base ospf-version;
+    description
+      "Version 2 of the OSPF protocol";
+    reference
+      "RFC2328";
+  }
+
+  identity ospf-v3 {
+    base ospf-version;
+    description
+      "Version 3 of the OSPF protocol";
+    reference
+      "RFC5340";
+  }
+
+  identity ospfv3-address-family {
+    description
+      "Base identity for the OSPFv3 address family.";
+  }
+
+  identity ipv6-unicast {
+    base ospfv3-address-family;
+    description
+      "IPv6 unicast address family";
+    reference
+      "RFC5838";
+  }
+
+  identity ipv4-unicast {
+    base ospfv3-address-family;
+    description
+      "IPv4 unicast address family";
+    reference
+      "RFC5838";
+  }
+
+  identity ospf-lsa-type {
+    description
+      "Base identity for an OSPF LSA type. This identity is intended
+       to be used across both OSPFv2 and OSPFv3. Identity values that
+       correspond to only one OSPF version are marked as such.";
+  }
+
+  identity router-lsa {
+    base ospf-lsa-type;
+    description
+      "Type 1 - router-lsa. An LSA originated by each router within
+       the area describing the state and cost of the router's links
+       in the area.";
+    reference
+      "RFC2328";
+  }
+
+  identity network-lsa {
+    base ospf-lsa-type;
+    description
+      "Type 2 - network-lsa. An LSA originated for each broadcast and
+       non-broadcast multiple access (NBMA) in the area. This LSA is
+       originated by the designated router.";
+    reference
+      "RFC2328";
+  }
+
+  identity summary-ip-network-lsa {
+    base ospf-lsa-type;
+    description
+      "Type 3 - summary-ip-network-lsa. An LSA originated by area
+       border routers describing inter-area destinations. This LSA type
+       is used when the destination is an IP network";
+    reference
+      "RFC2328";
+  }
+
+  identity summary-asbr-lsa {
+    base ospf-lsa-type;
+    description
+      "Type 4 - summary-asbr-lsa. An LSA originated by an area border
+       router describing inter-area destinations. This LSA type is used
+       when the destination is an AS boundary router.";
+    reference
+      "RFC2328";
+  }
+
+  identity as-external-lsa {
+    base ospf-lsa-type;
+    description
+      "Type 5 - as-external-lsa. This LSA type is used to describe
+       destinations external to the autonomous system, and is
+       originated by an AS boundary router (ASBR).";
+    reference
+      "RFC2328";
+  }
+
+  identity nssa-as-external-lsa {
+    base ospf-lsa-type;
+    description
+      "Type 7 - nssa-as-external-lsa. This LSA type is used by
+       systems within a not-so-stubby-area (NSSA) to inject external
+       prefixes into the LSDB. They are translated to Type 5 LSAs
+       at an ABR device.";
+    reference
+      "RFC3101";
+  }
+
+  identity ospfv2-link-scope-opaque-lsa {
+    base ospf-lsa-type;
+    description
+      "Type 9 - ospfv2-link-scope-opaque-lsa. This LSA type is used
+       in OSPFv2 to distribute arbitrary information via the OSPF
+       protocol. The contents is specific to the application defining
+       the Opaque Type specified within the LSDB. LSAs with Type 9 have
+       a scope of the link that they are being transmitted on (and the
+       associated network or subnetwork).";
+    reference
+      "RFC5250";
+  }
+
+  identity ospfv2-area-scope-opaque-lsa {
+    base ospf-lsa-type;
+    description
+      "Type 10 - ospfv2-area-scope-opaque-lsa. This LSA type is used
+       in OSPFv2 to distribute arbitrary information via the OSPF
+       protocol. The contents is specific to the application defining
+       the Opaque Type specified within the LSDB. LSAs with Type 10 have
+       a scope of the area that they are transmitted within.";
+    reference
+      "RFC5250";
+  }
+
+  identity ospfv2-as-scope-opaque-lsa {
+    base ospf-lsa-type;
+    description
+      "Type 11 - ospfv2-as-scope-opaque-lsa. This LSA type is used
+       in OSPFv2 to distribute arbitrary information via the OSPF
+       protocol. The contents is specific to the application defining
+       the Opaque Type specified within the LSDB. LSAs with Type 11
+       have a scope of the autonomous system that they are transmitted
+       within.";
+    reference
+      "RFC5250";
+  }
+
+  identity ospfv3-lsa-type {
+    base ospf-lsa-type;
+  }
+
+  identity ospfv3-router-lsa {
+    base ospfv3-lsa-type;
+    reference
+      "RFC5340";
+  }
+
+  identity ospfv3-network-lsa {
+    base ospfv3-lsa-type;
+    reference
+      "RFC5340";
+  }
+
+  identity ospfv3-inter-area-prefix-lsa {
+    base ospfv3-lsa-type;
+    reference
+      "RFC5340";
+  }
+
+  identity ospfv3-inter-area-router-lsa {
+    base ospfv3-lsa-type;
+    reference
+      "RFC5340";
+  }
+
+  identity ospfv3-as-external-lsa {
+    base ospfv3-lsa-type;
+    reference
+      "RFC5340";
+  }
+
+  identity ospfv3-nssa-as-external-lsa {
+    base ospfv3-lsa-type;
+    reference
+      "RFC5340";
+  }
+
+  identity ospfv3-link-lsa {
+    base ospfv3-lsa-type;
+    reference
+      "RFC5340";
+  }
+
+  identity ospfv3-intra-area-prefix-lsa {
+    base ospfv3-lsa-type;
+    reference
+      "RFC5340";
+  }
+
+  identity ospfv3-router-information-lsa {
+    base ospfv3-lsa-type;
+    reference
+      "RFC7770";
+  }
+
+  identity ospfv3-lsa-option {
+    description
+      "Base identity for OSPF LSA options flags.";
+  }
+
+  identity ospfv3-lsa-af-bit {
+    base ospfv3-lsa-option;
+    description
+      "AF bit, when set, the router supports OSPFv3 Address
+       Families as in RFC5838.";
+  }
+
+  identity ospfv3-lsa-dc-bit {
+    base ospfv3-lsa-option;
+    description
+      "DC bit, when set, the router supports demand circuits.";
+  }
+
+  identity ospfv3-lsa-r-bit {
+    base ospfv3-lsa-option;
+    description
+      "R bit, when set, the originator is an active router.";
+  }
+
+  identity ospfv3-lsa-n-bit {
+    base ospfv3-lsa-option;
+    description
+      "N bit, when set, the router is attached to an NSSA";
+  }
+
+  identity ospfv3-lsa-e-bit {
+    base ospfv3-lsa-option;
+    description
+      "E bit, this bit describes the way AS-external LSAs
+       are flooded";
+  }
+
+  identity ospfv3-lsa-v6-bit {
+    base ospfv3-lsa-option;
+    description
+      "V6 bit, if clear, the router/link should be excluded
+       from IPv6 routing calculation";
+  }
+
+  identity ospfv3-prefix-option {
+    description
+      "Base identity for OSPFv3 Prefix Options.";
+  }
+
+  identity ospfv3-prefix-nu-bit {
+    base ospfv3-prefix-option;
+    description
+      "NU Bit, when set, the prefix should be excluded
+       from IPv6 unicast calculations.";
+  }
+
+  identity ospfv3-prefix-la-bit {
+    base ospfv3-prefix-option;
+    description
+      "LA bit, when set, the prefix is actually an IPv6
+       interface address of the Advertising Router.";
+  }
+
+  identity ospfv3-prefix-p-bit {
+    base ospfv3-prefix-option;
+    description
+      "P bit, when set, the NSSA area prefix should be
+       translated to an AS External LSA and advertised
+       by the translating NSSA Border Router.";
+  }
+
+  identity ospfv3-prefix-dn-bit {
+    base ospfv3-prefix-option;
+    description
+      "DN bit, when set, the inter-area-prefix LSA or
+       AS-external LSA prefix has been advertised as an
+       L3VPN prefix.";
+  }
+
+  identity router-lsa-types {
+    description
+      "Sub-types of the router LSA";
+  }
+
+  identity router-lsa-p2p {
+    base router-lsa-types;
+    description
+      "The LSA represents a point-to-point connection to another
+       router";
+  }
+
+  identity router-lsa-transit-network {
+    base router-lsa-types;
+    description
+      "The LSA represents a connection to a transit network";
+  }
+
+  identity router-lsa-stub-network {
+    base router-lsa-types;
+    description
+      "The LSA represents a connection to a stub network";
+  }
+
+  identity router-lsa-virtual-link {
+    base router-lsa-types;
+    description
+      "The LSA represents a virtual link connection";
+  }
+
+  identity ospf-neighbor-state {
+    description
+      "The state of an adjacency between the local system and a remote
+       device";
+  }
+
+  identity down {
+    base ospf-neighbor-state;
+    description
+      "The initial state of a neighbor, indicating that no recent
+       information has been received from the neighbor.";
+    reference
+      "RFC2328";
+  }
+
+  identity attempt {
+    base ospf-neighbor-state;
+    description
+      "Utilised for neighbors that are attached to NBMA networks, it
+       indicates that no information has been recently received from
+       the neighbor but that Hello packets should be directly sent
+       to that neighbor.";
+    reference
+      "RFC2328";
+  }
+
+  identity init {
+    base ospf-neighbor-state;
+    description
+      "Indicates that a Hello packet has been received from the
+       neighbor but bi-directional communication has not yet been
+       established. That is to say that the local Router ID does
+       not appear in the list of neighbors in the remote system's
+       Hello packet.";
+    reference
+      "RFC2328";
+  }
+
+  identity two-way {
+    base ospf-neighbor-state;
+    description
+      "Communication between the local and remote system is
+       bi-directional such that the local system's Router ID is listed
+       in the received remote system's Hello packet.";
+    reference
+      "RFC2328";
+  }
+
+  identity exstart {
+    base ospf-neighbor-state;
+    description
+      "An adjacency with the remote system is being formed. The local
+       system is currently transmitting empty database description
+       packets in order to establish the master/slave relationship for
+       the adjacency.";
+    reference
+      "RFC2328";
+  }
+
+  identity exchange {
+    base ospf-neighbor-state;
+    description
+      "The local and remote systems are currently exchanging database
+       description packets in order to determine which elements of
+       their local LSDBs are out of date.";
+    reference
+      "RFC2328";
+  }
+
+  identity loading {
+    base ospf-neighbor-state;
+    description
+      "The local system is sending Link State Request packets to the
+       remote system in order to receive the more recently LSAs that
+       were discovered during the Exchange phase of the procedure
+       establishing the adjacency.";
+    reference
+      "RFC2328";
+  }
+
+  identity full {
+    base ospf-neighbor-state;
+    description
+      "The neighboring routers are fully adjacent such that both
+       LSDBs are synchronized. The adjacency will appear in Router and
+       Network LSAs";
+    reference
+      "RFC2328";
+  }
+
+  identity ospf-network-type {
+    description
+      "Types of network that OSPF should consider attached to an
+       interface";
+  }
+
+  identity point-to-point-network {
+    base ospf-network-type;
+    description
+      "A interface that connects two routers.";
+    reference
+      "RFC2328";
+  }
+
+  identity broadcast-network {
+    base ospf-network-type;
+    description
+      "An interface that supports >2 attached routers which has the
+       ability to address all connected systems via a single
+       (broadcast) address.";
+  }
+
+  identity non-broadcast-network {
+    base ospf-network-type;
+    description
+      "An interface that supports >2 attached rotuers which does not
+       have the ability to address all connected systems with a
+       broadcast address.";
+  }
+
+  // OSPF_OPAQUE_LSA_TYPE
+
+  identity ospf-opaque-lsa-type {
+    description
+      "This identity is the base used for opaque LSA types. The values
+       that extend this base are those that are described in the IANA
+       OSPF Opaque Link-State Advertisements (LSA) Option Types registry";
+  }
+
+  identity traffic-engineering {
+    base ospf-opaque-lsa-type;
+    description
+      "The Traffic Engineering LSA. This type is used only with area-scope
+       Opaque LSAs - and is used to describe routers, point-to-point links
+       and connections to multi-access networks for traffic engineering
+       purposes.";
+    reference
+      "RFC3630";
+  }
+
+  identity grace-lsa {
+    base ospf-opaque-lsa-type;
+    description
+      "Grace LSAs are announced by a system undergoing graceful-restart.
+       A system that is attempting an OSPF graceful restart announces
+       Grace-LSAs with a specified grace period, indicating the intention
+       to have completed an restart within the specified period.";
+    reference
+      "RFC3623";
+  }
+
+  identity router-information {
+    base ospf-opaque-lsa-type;
+    description
+      "The Router Information LSA is used by an OSPFv2 system to announce
+       optional capabilities of the local system, over and above those that
+       are included within the OSPF hello message field.  The flooding scope
+       of the LSA can be link-, area-, or AS-wide (i.e., the LSA type can
+       be 9, 10 or 11).";
+    reference
+      "RFC7770";
+  }
+
+  identity ospfv2-extended-prefix {
+    base ospf-opaque-lsa-type;
+    description
+      "The Extended Prefix LSA is used in OSPFv2 to carry a set of attributes
+       that are to be associated with a prefix that is advertised in OSPF. The
+       attributes are carried as one or more TLV tuples. The flooding scope
+       of the LSA can be link-, area-, or AS-wide as specified by the
+       advertising system. The flooding scope of the LSA may exceed the scope
+       of the corresponding prefix.";
+    reference
+      "RFC7684";
+  }
+
+  identity ospfv2-extended-link {
+    base ospf-opaque-lsa-type;
+    description
+      "The Extended Link LSA is used in OSPFv2 to carry a set of attributes
+       that are to be associated with a link that is advertised in OSPF. The
+       link attributes are carried as one or more TLV tuples. The flooding
+       scope of the link LSA is area-local - i.e., it is carried in a Type 10
+       opaque LSA.";
+    reference
+      "RFC7684";
+  }
+
+  // ROUTER LINK TYPE
+
+  identity ospfv2-router-link-type {
+    description
+      "OSPFv2 Router Link Types as per the IANA registry defined in
+       RFC2740";
+  }
+
+  identity point-to-point-link {
+    base ospfv2-router-link-type;
+    description
+      "The link is a point-to-point connection to another router";
+  }
+
+  identity transit-network-link {
+    base ospfv2-router-link-type;
+    description
+      "The link is a connection to a transit network";
+  }
+
+  identity stub-network-link {
+    base ospfv2-router-link-type;
+    description
+      "The link is a connection to a stub network";
+  }
+
+  identity virtual-link {
+    base ospfv2-router-link-type;
+    description
+      "The link is a virtual connection to another router";
+  }
+
+  // OSPFv2 EXTENDED PREFIX
+
+  identity ospfv2-extended-prefix-subtlv-type {
+    description
+      "Sub-TLVs of the OSPFv2 Extended Prefix LSA as defined by
+       RFC7684";
+  }
+
+  identity extended-prefix-range {
+    base ospfv2-extended-prefix-subtlv-type;
+    description
+      "The attributes being described relate to a range of prefixes";
+  }
+
+  identity prefix-sid {
+    base ospfv2-extended-prefix-subtlv-type;
+    description
+      "The TLV describes a Segment Routing Prefix Segment Identifier
+       associated with a prefix";
+  }
+
+  identity sid-label-binding {
+    base ospfv2-extended-prefix-subtlv-type;
+    description
+      "The TLV describes a binding of a SID to a path to the prefix,
+       which may have associated path characteristics";
+  }
+
+  // OSPFV2_EXTENDED_LINK_SUBTLV_TYPE
+
+  identity ospfv2-extended-link-subtlv-type {
+    description
+      "Sub-TLVs of the Extended Link TLV for OSPFv2";
+  }
+
+  identity adjacency-sid {
+    base ospfv2-extended-link-subtlv-type;
+    description
+      "The extended link sub-TLV indicates an Adjacency SID";
+  }
+
+  // GRACE_LSA_TLV_TYPES
+
+  identity grace-lsa-tlv-types {
+    description
+      "This identity is used as the base for TLVs within the Grace LSA";
+  }
+
+  identity grace-period {
+    base grace-lsa-tlv-types;
+    description
+      "This sub-TLV describes the period for which adjacencies should be
+       maintained with the restarting system";
+  }
+
+  identity grace-restart-reason {
+    base grace-lsa-tlv-types;
+    description
+      "This sub-TLV describes the reason for the OSPF restart of the system
+       that is restarting";
+  }
+
+  identity grace-ip-interface-address {
+    base grace-lsa-tlv-types;
+    description
+      "This sub-TLV specifies the restarting system's IP address on the
+       interface via which it is advertising the Grace LSA";
+  }
+
+  //Router Inferomation (RI) LSA TLV TYPES
+
+  identity ri-lsa-tlv-types {
+    description
+      "This identity is used as the base for the TLVs within the Router
+       Information LSA";
+    reference
+      "RFC7770";
+  }
+
+  identity ri-informational-capabilities {
+    base ri-lsa-tlv-types;
+    description
+      "Informational capabilities of the advertising system";
+    reference
+      "RFC7770";
+  }
+
+  identity ri-functional-capabilities {
+    base ri-lsa-tlv-types;
+    description
+      "Functional capabilities of the advertising system";
+    reference
+      "RFC7770";
+  }
+
+  identity ri-node-admin-tag {
+    base ri-lsa-tlv-types;
+    description
+      "Operator-defined administrative tags associated with the advertising
+       system";
+    reference
+      "RFC7777";
+  }
+
+  identity ri-sr-sid-label-range {
+    base ri-lsa-tlv-types;
+    description
+      "SID or Label ranges for use with segment routing when forwarding to
+       the advertising system";
+    reference
+      "draft-ietf-ospf-segment-routing-extensions";
+  }
+
+  identity ri-sr-algorithm {
+    base ri-lsa-tlv-types;
+    description
+      "The algorithms that are supported for segment routing by the
+       advertising system";
+    reference
+      "draft-ietf-ospf-segment-routing-extensions";
+  }
+
+  identity ospf-path-type {
+    description
+      "Base identity for the OSPF path type of a OSPF route..
+       This is as defined in RFC2328 chapter 1.1 path-type.";
+  }
+
+  identity intra-area {
+    base ospf-path-type;
+    description
+      "The route has path-type intra-area";
+    reference
+      "RFC5838";
+  }
+
+  identity inter-area {
+    base ospf-path-type;
+    description
+      "The route has path-type inter-area";
+    reference
+      "RFC5838";
+  }
+
+  identity type-1-ext {
+    base ospf-path-type;
+    description
+      "The route has path-type type 1 external";
+    reference
+      "RFC5838";
+  }
+
+  identity type-2-ext {
+    base ospf-path-type;
+    description
+      "The route has path-type type 2 external";
+    reference
+      "RFC5838";
+  }
+
+  identity type-1-nssa {
+    base ospf-path-type;
+    description
+      "The route has path-type type 1 NSSA";
+    reference
+      "RFC5838";
+  }
+
+  identity type-2-nssa {
+    base ospf-path-type;
+    description
+      "The route has path-type type 2 NSSA";
+    reference
+      "RFC5838";
+  }
+
+  identity summary-aggregate {
+    base ospf-path-type;
+    description
+      "The route has path-type summary aggregate";
+    reference
+      "RFC5838";
+  }
+
+  identity nssa-aggregate {
+    base ospf-path-type;
+    description
+      "The route has path-type NSSA aggregate";
+    reference
+      "RFC5838";
+  }
+}

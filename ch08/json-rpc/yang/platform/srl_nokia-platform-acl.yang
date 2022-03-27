@@ -1,0 +1,288 @@
+module srl_nokia-platform-acl {
+  yang-version 1.1;
+  namespace "urn:srl_nokia/platform-acl";
+  prefix srl_nokia-platform-acl;
+
+  import srl_nokia-common { prefix srl_nokia-comm; }
+  import srl_nokia-extensions { prefix srl_nokia-ext; }
+  import srl_nokia-platform {prefix srl_nokia-platform; }
+  import srl_nokia-platform-lc {prefix srl_nokia-platform-lc; }
+  import srl_nokia-platform-resource-monitoring {prefix srl_nokia-platform-res-mon; }
+  import srl_nokia-features {prefix srl_feat; }
+
+  description
+    "This module defines configuration and operational state related to ACL and TCAM resources in the system";
+
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+  identity acl-resources {
+    description
+      "Base type for ACL resources";
+  }
+
+  identity input-ipv4-filter-instances {
+    if-feature "srl_feat:jericho2 or srl_feat:tomahawk3";
+    base acl-resources;
+    description
+      "This resource is used every time an IPv4 filter instance is created and applied to ingress traffic on the forwarding complex. Only one instance is used if the subinterface-specific property of the filter is set to output-only; otherwise one instance is used for every subinterface using the IPv4 filter.";
+  }
+
+  identity input-ipv4-filter-instances-routed {
+    if-feature "srl_feat:trident3";
+    base acl-resources;
+    description
+      "This resource is used every time an IPv4 filter instance is created and applied to ingress traffic on routed subinterfaces. Only one instance is used if the subinterface-specific property of the filter is set to output-only; otherwise one instance is used for every routed subinterface using the IPv4 filter.";
+  }
+
+  identity input-ipv4-filter-instances-bridged {
+    if-feature "srl_feat:trident3";
+    base acl-resources;
+    description
+      "This resource is used every time an IPv4 filter instance is created and applied to ingress traffic on bridged subinterfaces. Only one instance is used if the subinterface-specific property of the filter is set to output-only; otherwise one instance is used for every bridged subinterface using the IPv4 filter.";
+  }
+
+  identity input-ipv6-filter-instances {
+    if-feature "srl_feat:jericho2 or srl_feat:tomahawk3";
+    base acl-resources;
+    description
+      "This resource is used every time an IPv6 filter instance is created and applied to ingress traffic on the forwarding complex. Only one instance is used if the subinterface-specific property of the filter is set to output-only; otherwise one instance is used for every subinterface using the IPv6 filter.";
+  }
+
+  identity input-ipv6-filter-instances-routed {
+    if-feature "srl_feat:trident3";
+    base acl-resources;
+    description
+      "This resource is used every time an IPv6 filter instance is created and applied to ingress traffic on routed subinterfaces. Only one instance is used if the subinterface-specific property of the filter is set to output-only; otherwise one instance is used for every routed subinterface using the IPv6 filter.";
+  }
+
+  identity input-ipv6-filter-instances-bridged {
+    if-feature "srl_feat:trident3";
+    base acl-resources;
+    description
+      "This resource is used every time an IPv6 filter instance is created and applied to ingress traffic on bridged subinterfaces. Only one instance is used if the subinterface-specific property of the filter is set to output-only; otherwise one instance is used for every bridged subinterface using the IPv6 filter.";
+  }
+
+  identity tcam-resources {
+    description
+      "Base type for TCAM resources";
+  }
+
+  identity if-input-ipv4 {
+    base tcam-resources;
+    description
+      "Resource pool of TCAM entries used by IPv4 ACLs applied as subinterface-input filers";
+  }
+
+  identity if-output-ipv4 {
+    if-feature srl_feat:jericho2;
+    base tcam-resources;
+    description
+      "Resource pool of TCAM entries used by IPv4 ACLs applied as subinterface-output filers";
+  }
+
+  identity if-input-ipv6 {
+    base tcam-resources;
+    description
+      "Resource pool of TCAM entries used by IPv6 ACLs applied as subinterface-input filers";
+  }
+
+  identity if-output-ipv6 {
+    if-feature srl_feat:jericho2;
+    base tcam-resources;
+    description
+      "Resource pool of TCAM entries used by IPv6 ACLs applied as subinterface-output filers";
+  }
+
+  identity cpm-capture-ipv4 {
+    if-feature srl_feat:jericho2;
+    base tcam-resources;
+    description
+      "Resource pool of TCAM entries used by IPv4 cpm-filter ACLs and capture-filter ACLs";
+  }
+
+  identity cpm-capture-ipv6 {
+    if-feature srl_feat:jericho2;
+    base tcam-resources;
+    description
+      "Resource pool of TCAM entries used by IPv6 cpm-filter ACLs and capture-filter ACLs";
+  }
+
+  identity system-capture-ipv4 {
+    if-feature srl_feat:trident3;
+    base tcam-resources;
+    description
+      "Resource pool of TCAM entries used by IPv4 capture-filter ACLs and IPv4 system-filter ACLs";
+  }
+
+  identity system-capture-ipv6 {
+    if-feature srl_feat:trident3;
+    base tcam-resources;
+    description
+      "Resource pool of TCAM entries used by IPv6 capture-filter ACLs and IPv6 system-filter ACLs";
+  }
+
+  identity capture-ipv4 {
+    if-feature srl_feat:tomahawk3;
+    base tcam-resources;
+    description
+      "Resource pool of TCAM entries used by IPv4 capture-filter ACLs";
+  }
+
+  identity capture-ipv6 {
+    if-feature srl_feat:tomahawk3;
+    base tcam-resources;
+    description
+      "Resource pool of TCAM entries used by IPv6 capture-filter ACLs";
+  }
+
+  identity if-output-cpm-ipv4 {
+    if-feature "srl_feat:trident3 or srl_feat:tomahawk3";
+    base tcam-resources;
+    description
+      "Resource pool of TCAM entries used by IPv4 egress ACLs and cpm-filter ACLs";
+  }
+
+  identity if-output-cpm-ipv6 {
+    if-feature "srl_feat:trident3 or srl_feat:tomahawk3";
+    base tcam-resources;
+    description
+      "Resource pool of TCAM entries used by IPv6 egress ACLs and cpm-filter ACLs";
+  }
+
+  grouping acl-resource-monitoring {
+    container acl {
+      list resource {
+        key name;
+        leaf name {
+          type identityref  {
+            base acl-resources;
+          }
+          description
+            "The name of the ACL resource";
+        }
+        leaf rising-threshold-log {
+          type srl_nokia-comm:percentage;
+          default "90";
+          description
+            "Sets the threshold that triggers the generation of a WARNING log whenever the utilization of the ACL resource in any linecard/complex/core reaches this value in a rising direction";
+        }
+        leaf falling-threshold-log {
+          type srl_nokia-comm:percentage;
+          default "70";
+          description
+            "Sets the threshold that triggers the generation of a NOTICE log whenever the utilization of the ACL resource in any linecard/complex/core falls reaches this value in a falling direction";
+        }
+      }
+    }
+  }
+
+  grouping tcam-resource-monitoring {
+    container tcam {
+      list resource {
+        key name;
+        leaf name {
+          type identityref  {
+            base tcam-resources;
+          }
+          description
+            "The name of the TCAM resource";
+        }
+        leaf rising-threshold-log {
+          type srl_nokia-comm:percentage;
+          default "90";
+          description
+            "Sets the threshold that triggers the generation of a WARNING log whenever the utilization of the TCAM resource in any linecard/complex/core reaches this value in a rising direction";
+        }
+        leaf falling-threshold-log {
+          type srl_nokia-comm:percentage;
+          default "70";
+          description
+            "Sets the threshold that triggers the generation of a NOTICE log whenever the utilization of the TCAM resource in any linecard/complex/core falls reaches this value in a falling direction";
+        }
+      }
+    }
+  }
+
+  grouping acl-utilization {
+    container acl {
+      config false;
+      list resource {
+        srl_nokia-ext:delivery-node-override true;
+        srl_nokia-ext:stream-mode sample=5;
+        key name;
+        leaf name {
+          type identityref  {
+            base acl-resources;
+          }
+          description
+            "The name of the ACL resource";
+        }
+        leaf used {
+          type uint16;
+          description
+            "The number of resources that are in use";
+        }
+        leaf free {
+          type uint16;
+          description
+            "The number of resources that are unused and available";
+        }
+      }
+    }
+  }
+
+  grouping tcam-utilization {
+    container tcam {
+      config false;
+      list resource {
+        srl_nokia-ext:delivery-node-override true;
+        srl_nokia-ext:stream-mode sample=5;
+        key name;
+        leaf name {
+          type identityref  {
+            base tcam-resources;
+          }
+          description
+            "The name of the TCAM resource";
+        }
+        leaf free {
+          type uint32;
+          description
+            "The number of available, unused TCAM entries remaining in this resource pool";
+        }
+        leaf reserved {
+          type uint32;
+          description
+            "The number of TCAM entries that are currently reserved in this resource pool. Reservation happens when a configuration change is committed. Reserved entries may not be programmed yet if the commit has just occurred.";
+        }
+        leaf programmed {
+          type uint32;
+          description
+            "The number of TCAM entries belonging to this resource that are currently programmed into hardware. When the number of programmed entries equals the number of reserved entries HW programming of this resource type has finished.";
+        }
+      }
+    }
+  }
+
+  augment "/srl_nokia-platform:platform/srl_nokia-platform-res-mon:resource-monitoring" {
+    uses acl-resource-monitoring;
+    uses tcam-resource-monitoring;
+
+  }
+
+  augment "/srl_nokia-platform:platform/srl_nokia-platform-lc:linecard/srl_nokia-platform-lc:forwarding-complex" {
+    uses acl-utilization;
+    uses tcam-utilization;
+  }
+}

@@ -1,0 +1,42 @@
+module srl_nokia-system-banner {
+  yang-version 1.1;
+  namespace "urn:srl_nokia/system-banner";
+  prefix srl_nokia-system-banner;
+
+  import srl_nokia-system {
+    prefix srl-system;
+  }
+
+  description
+    "This module defines configuration related system banners";
+
+  revision 2019-11-30 {
+    description
+      "SRLinux 19.11.1";
+  }
+
+  grouping banner-config-top {
+    container banner {
+      description
+        "Contains configuration and state related to system banners";
+      leaf login-banner {
+        type string;
+        description
+          "Banner to display before a user has authenticated";
+      }
+      leaf motd-banner {
+        type string;
+        description
+          "Banner to display after a user has authenticated";
+      }
+    }
+  }
+
+  grouping banner-top {
+    uses banner-config-top;
+  }
+
+  augment "/srl-system:system" {
+    uses banner-top;
+  }
+}

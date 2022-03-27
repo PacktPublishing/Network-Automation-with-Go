@@ -1,0 +1,291 @@
+module srl_nokia-interfaces-ip-dhcp-relay {
+  yang-version 1.1;
+
+  // namespace
+
+  namespace "urn:srl_nokia/interfaces/ip/dhcp/relay";
+  prefix srl_nokia-if-ip-dhcp-relay;
+
+  // import some basic types
+
+  import srl_nokia-interfaces {
+    prefix srl_nokia-if;
+  }
+  import srl_nokia-common {
+    prefix srl_nokia-comm;
+  }
+
+  description
+    "Model for managing DHCP relay and DHCPv6 relay on IP and IRB subinterfaces";
+
+  revision 2021-03-31 {
+    description
+      "SRLinux 21.3.1";
+  }
+  revision 2020-06-30 {
+    description
+      "SRLinux 20.6.1";
+  }
+
+  typedef hostv4 {
+    type union {
+      type srl_nokia-comm:ipv4-address;
+      type srl_nokia-comm:domain-name;
+    }
+    description
+      "The hostv4 type represents either an IPv4 address or a DNS domain name.";
+  }
+
+  typedef hostv6 {
+    type union {
+      type srl_nokia-comm:ipv6-address;
+      type srl_nokia-comm:domain-name;
+    }
+    description
+      "The hostv6 type represents either an IPv6 address or a DNS domain name.";
+  }
+
+  typedef dhcp-relay-v4-agent-oper-down-reason {
+    type enumeration {
+      enum dhcp-relay-admin-down;
+      enum sub-interface-oper-down;
+      enum all-dhcp-servers-unreachable-within-net-instance;
+      enum gi-address-not-matching-relay-sub-interface-ipv4-addresses;
+      enum no-valid-ipv4-address-on-sub-interface;
+    }
+    description
+      "The dhcp-relay-v4-agent-oper-down-reason represents the possible reasons causing DHCPv4 relay agent to go into operational down state";
+  }
+
+  typedef dhcp-relay-v6-agent-oper-down-reason {
+    type enumeration {
+      enum dhcp-relay-admin-down;
+      enum sub-interface-oper-down;
+      enum all-dhcpv6-servers-unreachable-within-net-instance;
+      enum source-address-not-matching-relay-sub-interface-ipv6-addresses;
+      enum no-valid-ipv6-address-on-sub-interface;
+    }
+    description
+      "The dhcp-relay-v6-agent-oper-down-reason represents the possible reasons causing DHCPv6 relay agent to go into operational down state";
+  }
+
+  grouping subinterface-dhcpv4-relay {
+    container dhcp-relay {
+      presence "Performs DHCPv4 relay function";
+      description
+        "Container for options related to DHCPv4 relay";
+      must "not(starts-with(../../../srl_nokia-if:name, 'mgmt') or starts-with(../../../srl_nokia-if:name, 'lo') or starts-with(../../../srl_nokia-if:name, 'system'))" {
+        error-message "dhcp relay is not supported on mgmt, lo, or system interfaces";
+      }
+      leaf admin-state {
+        type srl_nokia-comm:admin-state;
+        default "enable";
+        description
+          "The configurable state of the dhcp relay agent"; // possible values are enable or disable
+      }
+      leaf oper-state {
+        config false;
+        type srl_nokia-comm:oper-state;
+        description
+          "The operational state of the dhcp relay agent"; // possible values are up or down
+      }
+      leaf oper-down-reason {
+        config false;
+        type dhcp-relay-v4-agent-oper-down-reason;
+        description
+          "The reason causing the dhcp relay agent to go into operational down state";
+      }
+      leaf-list option {
+        type enumeration {
+          enum circuit-id {
+            description
+              "Enable option 82 suboption 1 circuit-id into relayed packet towards DHCPv4 server, format=system_name/VRF_instance/sub-interface_id:vlan_id";
+          }
+          enum remote-id {
+            description
+              "Enable option 82 suboption 2 remote-id into relayed packet towards DHCPv4 server, format=client MAC address";
+          }
+        }
+        description
+          "List of option82 suboptions to insert into relayed packet towards DHCPv4 server";
+      }
+      leaf-list server {
+        type hostv4;
+        description
+          "List of the DHCPv4 servers that the DHCPv4 relay function will relay DHCPv4 packets to/from";
+        min-elements 1;
+        max-elements 8;
+      }
+      leaf gi-address {
+        type srl_nokia-comm:ipv4-address;
+        description
+          "IPv4 address to be used as giaddr of the relayed packets towards DHCPv4 servers.
+            This address must be a local IPv4 address configured on sub-interface where DHCPv4 relay is enabled and must be used as gi-address";
+      }
+      leaf use-gi-addr-as-src-ip-addr {
+        type boolean;
+        default false;
+        description
+          "When this is set, the configured giaddress will be used as source ip address.";
+      }
+      container trace-options {
+        description
+          "Container for tracing DHCPv4 relay operations on the subinterface";
+        leaf-list trace {
+          type enumeration {
+            enum messages {
+              description
+                "Capture all DHCPv4 messages sent and received by the subinterface";
+            }
+          }
+          description
+            "List of events to trace";
+        }
+      }
+      container statistics {
+        config false;
+        leaf client-packets-received {
+          type srl_nokia-comm:zero-based-counter64;
+          description
+            "Total received dhcp packets from dhcp client(s) for DHCP Relay";
+        }
+        leaf client-packets-relayed {
+          type srl_nokia-comm:zero-based-counter64;
+          description
+            "Total relayed dhcp packets from dhcp client(s) towards DHCP server(s)";
+        }
+        leaf client-packets-discarded {
+          type srl_nokia-comm:zero-based-counter64;
+          description
+            "Total discarded dhcp packets from dhcp client(s) towards DHCP server(s)";
+        }
+        leaf server-packets-received {
+          type srl_nokia-comm:zero-based-counter64;
+          description
+            "Total received dhcp packets from DHCP server(s) for DHCP Relay";
+        }
+        leaf server-packets-relayed {
+          type srl_nokia-comm:zero-based-counter64;
+          description
+            "Total relayed dhcp packets from DHCP server(s) towards dhcp client(s)";
+        }
+        leaf server-packets-discarded {
+          type srl_nokia-comm:zero-based-counter64;
+          description
+            "Total discarded dhcp packets from DHCP server(s) towards dhcp client(s)";
+        }
+      }
+    }
+  }
+
+  grouping subinterface-dhcpv6-relay {
+    container dhcp-relay {
+      presence "Performs DHCPv6 relay function";
+      description
+        "Container for options related to DHCPv6 relay";
+      must "not(starts-with(../../../srl_nokia-if:name, 'mgmt') or starts-with(../../../srl_nokia-if:name, 'lo') or starts-with(../../../srl_nokia-if:name, 'system'))" {
+        error-message "dhcp relay is not supported on mgmt, lo, or system interfaces";
+      }
+      leaf admin-state {
+        type srl_nokia-comm:admin-state;
+        default "enable";
+        description
+          "The configurable state of the dhcp relay agent"; // possible values are enable or disable
+      }
+      leaf oper-state {
+        config false;
+        type srl_nokia-comm:oper-state;
+        description
+          "The operational state of the dhcp relay agent"; // possible values are up or down
+      }
+      leaf oper-down-reason {
+        config false;
+        type dhcp-relay-v6-agent-oper-down-reason;
+        description
+          "The reason causing the dhcp relay agent to go into operational down state";
+      }
+      leaf-list option {
+        type enumeration {
+          enum interface-id {
+            description
+              "Enable option 18 Interface-Id into relayed packet towards DHCPv6 server, format=system_name/VRF_instance/sub-interface_id:vlan_id";
+          }
+          enum remote-id {
+            description
+              "Enable option 37 Remote Identifier into relayed packet towards DHCPv6 server, format=client MAC address";
+          }
+        }
+        description
+          "List of options to insert into relayed packet towards DHCPv6 server";
+      }
+      leaf-list server {
+        type hostv6;
+        description
+          "List of the DHCPv6 servers that the DHCPv6 relay function will relay DHCPv6 packets to/from";
+        min-elements 1;
+        max-elements 8;
+      }
+      leaf source-address {
+        type srl_nokia-comm:ipv6-address;
+        description
+          "Source IPv6 address of the relayed packets towards DHCPv6 servers
+            this address must be a local IPv6 address configured on sub-interface where DHCPv6 relay is enabled";
+      }
+      container trace-options {
+        description
+          "Container for tracing DHCPv6 relay operations on the subinterface";
+        leaf-list trace {
+          type enumeration {
+            enum messages {
+              description
+                "Capture all DHCPv6 messages sent and received by the subinterface";
+            }
+          }
+          description
+            "List of events to trace";
+        }
+      }
+      container statistics {
+        config false;
+        leaf client-packets-received {
+          type srl_nokia-comm:zero-based-counter64;
+          description
+            "Total received dhcp packets from dhcp client(s) for DHCP Relay";
+        }
+        leaf client-packets-relayed {
+          type srl_nokia-comm:zero-based-counter64;
+          description
+            "Total relayed dhcp packets from dhcp client(s) towards DHCP server(s)";
+        }
+        leaf client-packets-discarded {
+          type srl_nokia-comm:zero-based-counter64;
+          description
+            "Total discarded dhcp packets from dhcp client(s) towards DHCP server(s)";
+        }
+        leaf server-packets-received {
+          type srl_nokia-comm:zero-based-counter64;
+          description
+            "Total received dhcp packets from DHCP server(s) for DHCP Relay";
+        }
+        leaf server-packets-relayed {
+          type srl_nokia-comm:zero-based-counter64;
+          description
+            "Total relayed dhcp packets from DHCP server(s) towards dhcp client(s)";
+        }
+        leaf server-packets-discarded {
+          type srl_nokia-comm:zero-based-counter64;
+          description
+            "Total discarded dhcp packets from DHCP server(s) towards dhcp client(s)";
+        }
+      }
+    }
+  }
+
+  augment "/srl_nokia-if:interface/srl_nokia-if:subinterface/srl_nokia-if:ipv4" {
+    uses subinterface-dhcpv4-relay;
+  }
+
+  augment "/srl_nokia-if:interface/srl_nokia-if:subinterface/srl_nokia-if:ipv6" {
+    uses subinterface-dhcpv6-relay;
+  }
+}
