@@ -11,7 +11,7 @@ encoding: "json_ietf"
 
 # path: "/interfaces/interface[name=\"Loopback0\"]/subinterfaces/subinterface[index=0]/openconfig-if-ip:ipv4/addresses/address[ip=\"198.51.100.0\"]/config"
 # value: '{"ip": "198.51.100.0", "prefix-length": 32}'
-path: "/interfaces/interface[name=\"Loopback0\"]/subinterfaces/subinterface[index=0]"
-value: '{"openconfig-if-ip:ipv4":{"addresses":{"address":{"ip":"198.51.100.0","config":{"ip":"198.51.100.0","prefix-length":32}}}}}'
+path: "/interfaces/interface[name=\"Loopback0\"]/subinterfaces/subinterface[index=0]/openconfig-if-ip:ipv4"
+value: '{"addresses":{"address":{"ip":"198.51.100.0","config":{"ip":"198.51.100.0","prefix-length":32}}}}'
 
 
