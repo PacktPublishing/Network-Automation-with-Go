@@ -34,7 +34,7 @@
 - prefix: ""
   encoding: "json_ietf"
   path: "/network-instance[name=default]/protocols/bgp"
-  value: '{"autonomous-system": 65001,"router-id": "198.51.100.0", "ipv4-unicast": {"admin-state": "enable"}}'
+  value: '{"autonomous-system": 65000,"router-id": "198.51.100.0", "ipv4-unicast": {"admin-state": "enable"}}'
 
 - prefix: ""
   encoding: "json_ietf"
