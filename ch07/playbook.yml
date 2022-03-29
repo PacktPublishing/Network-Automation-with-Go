@@ -15,7 +15,7 @@
          config: "{{ interface }}"
       - name: Configure BGP
         arista.eos.eos_bgp_global:
-         state: purged
+         state: replaced
          config: "{{ bgp }}"
      when: ('eos' in group_names)
 
