@@ -1,0 +1,218 @@
+[
+    {
+      "identifier": "openconfig-policy-types:BGP",
+      "name": "default",
+      "config": {
+        "identifier": "openconfig-policy-types:BGP",
+        "name": "default"
+      },
+      "state": {
+        "identifier": "openconfig-policy-types:BGP",
+        "name": "default"
+      },
+      "bgp": {
+        "global": {
+          "config": {
+            "as": 65000,
+            "router-id": "198.51.100.0"
+          },
+          "state": {
+            "as": 65000,
+            "router-id": "198.51.100.0",
+            "total-paths": 0,
+            "total-prefixes": 0
+          },
+          "afi-safis": {
+            "afi-safi": [
+              {
+                "afi-safi-name": "openconfig-bgp-types:IPV4_UNICAST",
+                "config": {
+                  "afi-safi-name": "openconfig-bgp-types:IPV4_UNICAST",
+                  "enabled": true
+                },
+                "state": {
+                  "afi-safi-name": "openconfig-bgp-types:IPV4_UNICAST",
+                  "enabled": true,
+                  "total-paths": 0,
+                  "total-prefixes": 0
+                },
+                "route-selection-options": {
+                  "state": {
+                    "always-compare-med": false,
+                    "ignore-as-path-length": false,
+                    "external-compare-router-id": false,
+                    "enable-aigp": true,
+                    "ignore-next-hop-igp-metric": false
+                  }
+                },
+                "use-multiple-paths": {
+                  "ebgp": {
+                    "state": {
+                      "maximum-paths": 1
+                    }
+                  },
+                  "ibgp": {
+                    "state": {
+                      "maximum-paths": 1
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "confederation": {
+            "state": {
+              "enabled": false
+            }
+          },
+          "graceful-restart": {
+            "state": {
+              "enabled": false
+            }
+          },
+          "route-selection-options": {
+            "state": {
+              "always-compare-med": false,
+              "ignore-as-path-length": false,
+              "external-compare-router-id": false,
+              "enable-aigp": true
+            }
+          }
+        },
+        "neighbors": {
+          "neighbor": [
+            {
+              "neighbor-address": "192.0.2.1",
+              "config": {
+                "neighbor-address": "192.0.2.1",
+                "peer-as": 65001
+              },
+              "afi-safis": {
+                "afi-safi": [
+                  {
+                    "afi-safi-name": "openconfig-bgp-types:IPV4_UNICAST",
+                    "config": {
+                      "afi-safi-name": "openconfig-bgp-types:IPV4_UNICAST",
+                      "enabled": true
+                    },
+                    "apply-policy": {
+                      "config": {
+                        "import-policy": [
+                          "PERMIT_ALL"
+                        ],
+                        "export-policy": [
+                          "PERMIT_ALL"
+                        ]
+                      },
+                      "state": {
+                        "import-policy": [
+                          "PERMIT_ALL"
+                        ],
+                        "default-import-policy": "ACCEPT_ROUTE",
+                        "export-policy": [
+                          "PERMIT_ALL"
+                        ],
+                        "default-export-policy": "ACCEPT_ROUTE"
+                      }
+                    },
+                    "state": {
+                      "afi-safi-name": "openconfig-bgp-types:IPV4_UNICAST",
+                      "enabled": true,
+                      "active": false,
+                      "prefixes": {
+                        "received": 0,
+                        "sent": 0,
+                        "installed": 0
+                      }
+                    },
+                    "graceful-restart": {
+                      "state": {
+                        "enabled": false,
+                        "received": false,
+                        "advertised": false
+                      }
+                    },
+                    "ipv4-unicast": {
+                      "prefix-limit": {
+                        "state": {
+                          "max-prefixes": 4294967295,
+                          "prevent-teardown": false,
+                          "shutdown-threshold-pct": 75,
+                          "restart-timer": "0"
+                        }
+                      },
+                      "state": {
+                        "send-default-route": false
+                      }
+                    },
+                    "use-multiple-paths": {
+                      "state": {
+                        "enabled": false
+                      }
+                    }
+                  }
+                ]
+              },
+              "timers": {
+                "state": {
+                  "connect-retry": "60",
+                  "hold-time": "180",
+                  "keepalive-interval": "60",
+                  "minimum-advertisement-interval": "30.000",
+                  "negotiated-hold-time": "180"
+                }
+              },
+              "transport": {
+                "state": {
+                  "passive-mode": false,
+                  "local-address": "192.0.2.18",
+                  "remote-address": "192.0.2.1"
+                }
+              },
+              "graceful-restart": {
+                "state": {
+                  "enabled": false,
+                  "peer-restart-time": 0
+                }
+              },
+              "ebgp-multihop": {
+                "state": {
+                  "enabled": false,
+                  "multihop-ttl": 1
+                }
+              },
+              "add-paths": {
+                "state": {
+                  "receive": false
+                }
+              },
+              "state": {
+                "neighbor-address": "192.0.2.1",
+                "enabled": true,
+                "peer-as": 65001,
+                "peer-type": "EXTERNAL",
+                "session-state": "ACTIVE",
+                "last-established": 0,
+                "established-transitions": 0,
+                "messages": {
+                  "sent": {
+                    "UPDATE": "0",
+                    "NOTIFICATION": "0"
+                  },
+                  "received": {
+                    "UPDATE": "0",
+                    "NOTIFICATION": "0"
+                  }
+                },
+                "queues": {
+                  "input": 0,
+                  "output": 0
+                },
+                "dynamically-configured": false
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]

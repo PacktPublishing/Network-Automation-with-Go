@@ -92,74 +92,75 @@ func main() {
 
 		d = yaml.NewDecoder(gdata)
 
-		var data Data
-		err = d.Decode(&data)
+		var info []Data
+		err = d.Decode(&info)
 		check(err)
 
-		////////////////////////////////
-		// Create a GetRequest
-		////////////////////////////////
-		// getReq, err := api.NewGetRequest(
-		// 	api.Path(data.Prefix+data.Path),
-		// 	api.Encoding(data.Encoding))
-		// check(err)
-
-		// fmt.Println(prototext.Format(getReq))
-
-		////////////////////////////////
-		// Send the created gNMI GetRequest to the created target
-		////////////////////////////////
-		// getResp, err := tg.Get(ctx, getReq)
-		// check(err)
-
-		// fmt.Println(prototext.Format(getResp))
-
-		// fmt.Println(data.Value)
-
-		////////////////////////////////
-		// Create an Update gNMI SetRequest
-		////////////////////////////////
-		// setReq, err := api.NewSetRequest(
-		// 	api.Update(
-		// 		api.Path(data.Prefix+data.Path),
-		// 		api.Value(data.Value, data.Encoding)),
-		// )
-
-		////////////////////////////////
-		// Create a Delete gNMI SetRequest
-		////////////////////////////////
-		clean, err := api.NewSetRequest(
-			api.Delete(data.Prefix + data.Path))
-
-		check(err)
-		fmt.Println(prototext.Format(clean))
-
-		////////////////////////////////
-		// Send the Delete gNMI SetRequest to the target
-		////////////////////////////////
-		cleanResp, err := tg.Set(ctx, clean)
-		check(err)
-
-		fmt.Println(prototext.Format(cleanResp))
-
-		////////////////////////////////
-		// Create a Replace gNMI SetRequest
-		////////////////////////////////
-		setReq, err := api.NewSetRequest(
-			api.Replace(
+		for _, data := range info {
+			////////////////////////////////
+			// Create a GetRequest
+			////////////////////////////////
+			getReq, err := api.NewGetRequest(
 				api.Path(data.Prefix+data.Path),
-				api.Value(data.Value, data.Encoding)),
-		)
+				api.Encoding(data.Encoding))
+			check(err)
 
-		check(err)
-		fmt.Println(prototext.Format(setReq))
+			fmt.Println(prototext.Format(getReq))
 
-		////////////////////////////////
-		// Send the Replace gNMI SetRequest to the target
-		////////////////////////////////
-		configResp, err := tg.Set(ctx, setReq)
-		check(err)
+			////////////////////////////////
+			// Send the created gNMI GetRequest to the created target
+			////////////////////////////////
+			getResp, err := tg.Get(ctx, getReq)
+			check(err)
 
-		fmt.Println(prototext.Format(configResp))
+			fmt.Println(prototext.Format(getResp))
+
+			////////////////////////////////
+			// Create an Update gNMI SetRequest
+			////////////////////////////////
+			// setReq, err := api.NewSetRequest(
+			// 	api.Update(
+			// 		api.Path(data.Prefix+data.Path),
+			// 		api.Value(data.Value, data.Encoding)),
+			// )
+
+			////////////////////////////////
+			// Create a Delete gNMI SetRequest
+			////////////////////////////////
+			clean, err := api.NewSetRequest(
+				api.Delete(data.Prefix + data.Path))
+
+			check(err)
+			fmt.Println(prototext.Format(clean))
+
+			////////////////////////////////
+			// Send the Delete gNMI SetRequest to the target
+			////////////////////////////////
+			cleanResp, err := tg.Set(ctx, clean)
+			check(err)
+
+			fmt.Println(prototext.Format(cleanResp))
+
+			////////////////////////////////
+			// Create a Replace gNMI SetRequest
+			////////////////////////////////
+			setReq, err := api.NewSetRequest(
+				api.Replace(
+					api.Path(data.Prefix+data.Path),
+					api.Value(data.Value, data.Encoding)),
+			)
+
+			check(err)
+			fmt.Println(prototext.Format(setReq))
+
+			////////////////////////////////
+			// Send the Replace gNMI SetRequest to the target
+			////////////////////////////////
+			configResp, err := tg.Set(ctx, setReq)
+			check(err)
+
+			fmt.Println(prototext.Format(configResp))
+		}
 	}
+
 }

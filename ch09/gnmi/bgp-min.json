@@ -1,0 +1,61 @@
+[
+    {
+      "identifier": "openconfig-policy-types:BGP",
+      "name": "default",
+      "config": {
+        "identifier": "openconfig-policy-types:BGP",
+        "name": "default"
+      },
+      "bgp": {
+        "global": {
+          "config": {
+            "as": 65000,
+            "router-id": "198.51.100.0"
+          },
+          "afi-safis": {
+            "afi-safi": [
+              {
+                "afi-safi-name": "openconfig-bgp-types:IPV4_UNICAST",
+                "config": {
+                  "afi-safi-name": "openconfig-bgp-types:IPV4_UNICAST",
+                  "enabled": true
+                }
+              }
+            ]
+          }
+        },
+        "neighbors": {
+          "neighbor": [
+            {
+              "neighbor-address": "192.0.2.1",
+              "config": {
+                "neighbor-address": "192.0.2.1",
+                "peer-as": 65001
+              },
+              "afi-safis": {
+                "afi-safi": [
+                  {
+                    "afi-safi-name": "openconfig-bgp-types:IPV4_UNICAST",
+                    "config": {
+                      "afi-safi-name": "openconfig-bgp-types:IPV4_UNICAST",
+                      "enabled": true
+                    },
+                    "apply-policy": {
+                      "config": {
+                        "import-policy": [
+                          "PERMIT_ALL"
+                        ],
+                        "export-policy": [
+                          "PERMIT_ALL"
+                        ]
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
