@@ -51,11 +51,6 @@ module srl_nokia-bridge-table-mac-duplication {
       }
       leaf hold-down-time {
         type union {
-          type enumeration {
-            enum "indefinite" {
-              value 0;
-            }
-          }
           type uint32 {
             range "2..60";
           }
