@@ -2,36 +2,47 @@
   hosts: routers
   gather_facts: true
   vars_files:
-   - eos.cfg
+    - eos.cfg
   vars:
-   data: "{{ lookup('file', 'input.yml') }}"
+    data: "{{ lookup('file', 'input.yml') }}"
+    go: true
 
   tasks:
-   - name: Use Resource modules to configure Arista EOS
-     block:
-      - name: Configure interfaces
-        arista.eos.eos_l3_interfaces:
-         state: merged
-         config: "{{ interface }}"
-      - name: Configure BGP
-        arista.eos.eos_bgp_global:
-         state: replaced
-         config: "{{ bgp }}"
-     when: ('eos' in group_names)
+    - name: Use Resource modules to configure Arista EOS
+      block:
+        - name: Configure IP Routing
+          arista.eos.eos_config:
+            lines: ip routing
 
-   - name: Run NVIDIA Go module on Systems without Go installed
-     go_cumulus:
-      host: localhost
-      user: "{{ ansible_user }}"
-      password: "{{ ansible_password }}"
-      input: "{{ data | string | b64encode }}"
-     when: ('cvx' in group_names)
+        - name: Configure interfaces
+          arista.eos.eos_interfaces:
+            state: merged
+            config: "{{ interface }}"
 
-   - name: Run NVIDIA Go module on Systems with Go installed
-     go_run:
-      host: "{{ inventory_hostname }}"
-      user: "{{ ansible_user }}"
-      password: "{{ ansible_password }}"
-      input: "{{ data | string | b64encode }}"
-     delegate_to: localhost
-     when: ('cvx' in group_names)
+        - name: Configure L3 interfaces
+          arista.eos.eos_l3_interfaces:
+            state: merged
+            config: "{{ l3_interface }}"
+
+        - name: Configure BGP
+          arista.eos.eos_bgp_global:
+            state: replaced
+            config: "{{ bgp }}"
+      when: ('eos' in group_names)
+
+    - name: Run NVIDIA Go module on Systems without Go installed
+      go_cumulus:
+        host: localhost
+        user: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
+        input: "{{ data | string | b64encode }}"
+      when: ('cvx' in group_names) and not go
+
+    - name: Run NVIDIA Go module on Systems with Go installed
+      go_run:
+        host: "{{ inventory_hostname }}"
+        user: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
+        input: "{{ data | string | b64encode }}"
+      delegate_to: localhost
+      when: ('cvx' in group_names) and go
