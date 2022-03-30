@@ -1,0 +1,63 @@
+module arista-vlan-deviations {
+  namespace "http://arista.com/yang/openconfig/network-instance/deviations";
+  prefix arista-vlan-deviations;
+
+  import openconfig-interfaces {
+    prefix oc-if;
+  }
+  import openconfig-vlan {
+    prefix oc-vlan;
+  }
+  import openconfig-vlan-types {
+    prefix oc-vlan-types;
+  }
+  import openconfig-extensions {
+    prefix oc-ext;
+  }
+
+  organization
+    "Arista Networks <http://arista.com/>";
+  contact
+    "Arista Networks, Inc.
+     Product Support";
+  description
+    "This module contains OpenConfig vlan deviations in Arista EOS.
+
+     Copyright (c) 2018 Arista Networks, Inc. All rights reserved.";
+  oc-ext:openconfig-version "1.0.2";
+
+  revision 2020-11-30 {
+    description
+      "Fix errors reported by pyang.";
+    reference
+      "1.0.2";
+  }
+  revision 2019-11-13 {
+    description
+      "Deviate tpid type to handle EOS specific values.";
+    reference
+      "1.0.1";
+  }
+  revision 2018-07-18 {
+    description
+      "Initial deviation file.";
+    reference
+      "1.0.0";
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-if:config/oc-vlan:tpid" {
+    description
+      "EOS allows additional TPID values in the range 0x600-0xFFFF";
+    deviate replace {
+      type union {
+        type identityref {
+          base oc-vlan-types:TPID_TYPES;
+        }
+        type uint16 {
+          range "1536..65535";
+        }
+      }
+      default "oc-vlan-types:TPID_0X8100";
+    }
+  }
+}

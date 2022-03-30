@@ -1,0 +1,87 @@
+module arista-exp-eos-igmpsnooping {
+  yang-version 1;
+  namespace "http://arista.com/yang/experimental/igmpsnooping";
+  prefix igmpsnooping-exp;
+
+  import arista-eos-types {
+    prefix eos-types;
+  }
+  import arista-exp-eos {
+    prefix eos-exp;
+  }
+  import ietf-inet-types {
+    prefix inet;
+  }
+
+  organization
+    "Arista Networks <http://arista.com/>";
+  description
+    "Models for the IGMP Snooping subsystem of Arista EOS
+
+     Copyright (c) 2017 Arista Networks, Inc. All rights reserved.";
+
+  revision 2017-10-23 {
+    description
+      "Initial revision";
+  }
+
+  augment "/eos-exp:arista/eos-exp:eos" {
+    container bridging {
+      container igmpsnooping {
+        container config {
+          description
+            "IGMP Snooping configuration";
+          uses Bridging-IgmpSnooping-Config;
+        }
+      }
+    }
+  }
+
+  grouping Bridging-IgmpSnooping-Config {
+    list vlanConfig {
+      key "vlanId";
+      description
+        "Per VLAN IGMP Snooping configuration";
+      uses Bridging-IgmpSnooping-VlanConfig;
+    }
+  }
+
+  grouping Bridging-IgmpSnooping-IpGroup {
+    description
+      "IGMP Snooping static IP Group configuration";
+    leaf addr {
+      type inet:ipv4-address;
+      description
+        "Multicast Group IP Address";
+    }
+    list intf {
+      key "index";
+      description
+        "List of interfaces interested in multicast IP Group";
+      leaf index {
+        type eos-types:Arnet-IntfId;
+        description
+          "Interface ID";
+      }
+      leaf value {
+        type boolean;
+        description
+          "True if interface ID is in the list";
+      }
+    }
+  }
+
+  grouping Bridging-IgmpSnooping-VlanConfig {
+    description
+      "Contains list of static IGMP Snooping group configurations";
+    list ipGroup {
+      key "addr";
+      uses Bridging-IgmpSnooping-IpGroup;
+    }
+    leaf vlanId {
+      type uint16;
+      description
+        "VLAN ID";
+    }
+  }
+}

@@ -1,0 +1,201 @@
+module arista-bfd-deviations {
+  namespace "http://arista.com/yang/openconfig/bfd/deviations";
+  prefix arista-bfd-deviations;
+
+  import openconfig-bfd {
+    prefix oc-bfd;
+  }
+  import openconfig-extensions {
+    prefix oc-ext;
+  }
+
+  organization
+    "Arista Networks, Inc.";
+  contact
+    "Arista Networks, Inc.
+     Product Support";
+  description
+    "This module contains OpenConfig BFD deviations in Arista EOS.
+
+     Copyright (c) 2018 Arista Networks, Inc. All rights reserved.";
+  oc-ext:openconfig-version "1.0.1";
+
+  revision 2020-11-30 {
+    description
+      "Fix errors reported by pyang.";
+    reference
+      "1.0.1";
+  }
+  revision 2018-08-08 {
+    description
+      "Initial deviations file.";
+    reference
+      "1.0.0";
+  }
+
+  deviation "/oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:config/oc-bfd:enabled" {
+    description
+      "EOS does not support interface level BFD enabled";
+    deviate not-supported;
+  }
+
+  deviation "/oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:config/oc-bfd:local-address" {
+    description
+      "EOS does not support interface level local-address, BFD local address comes from interface IP config";
+    deviate not-supported;
+  }
+
+  deviation "/oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:config/oc-bfd:enable-per-member-link" {
+    description
+      "This leaf is not supported. The OpenConfig bfd model wrongly adds this leaf by comparing
+       the interface type against the OpenConfig interface type IF_AGGREGATE instead of
+       IANA interface type ieee8023adLag";
+    deviate not-supported;
+  }
+
+  deviation "/oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:state/oc-bfd:enable-per-member-link" {
+    description
+      "This leaf is not supported. The OpenConfig bfd model wrongly adds this leaf by comparing
+       the interface type against the OpenConfig interface type IF_AGGREGATE instead of
+       IANA interface type ieee8023adLag";
+    deviate not-supported;
+  }
+
+  deviation "/oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:state/oc-bfd:enabled" {
+    description
+      "EOS does not support interface level BFD enabled";
+    deviate not-supported;
+  }
+
+  deviation "/oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:state/oc-bfd:local-address" {
+    description
+      "EOS does not support interface level local-address, BFD local address comes from interface IP config";
+    deviate not-supported;
+  }
+
+  deviation "/oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:micro-bfd-sessions/oc-bfd:micro-bfd-session/oc-bfd:config/oc-bfd:local-address" {
+    description
+      "EOS does not support member interface level local-address, BFD micro session local address comes from port channel interface IP config";
+    deviate not-supported;
+  }
+
+  deviation "/oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:micro-bfd-sessions/oc-bfd:micro-bfd-session/oc-bfd:config/oc-bfd:remote-address" {
+    description
+      "EOS does not support member interface level remote-address, BFD micro session remote address should be configured on port channel interface";
+    deviate not-supported;
+  }
+
+  deviation "/oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:micro-bfd-sessions/oc-bfd:micro-bfd-session/oc-bfd:state/oc-bfd:local-address" {
+    description
+      "EOS does not support member interface level local-address, BFD micro session local address comes from port channel interface IP config";
+    deviate not-supported;
+  }
+
+  deviation "/oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:micro-bfd-sessions/oc-bfd:micro-bfd-session/oc-bfd:state/oc-bfd:remote-address" {
+    description
+      "EOS does not support member interface level remote-address, BFD micro session remote address should be configured on port channel interface";
+    deviate not-supported;
+  }
+
+  deviation "/oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:micro-bfd-sessions/oc-bfd:micro-bfd-session/oc-bfd:state/oc-bfd:failure-transitions" {
+    description
+      "EOS does not support BFD session failure transitions";
+    deviate not-supported;
+  }
+
+  deviation "/oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:micro-bfd-sessions/oc-bfd:micro-bfd-session/oc-bfd:state/oc-bfd:async/oc-bfd:last-packet-transmitted" {
+    description
+      "EOS does not support BFD session last-packet-transmitted";
+    deviate not-supported;
+  }
+
+  deviation "/oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:micro-bfd-sessions/oc-bfd:micro-bfd-session/oc-bfd:state/oc-bfd:async/oc-bfd:last-packet-received" {
+    description
+      "EOS does not support BFD session last-packet-received";
+    deviate not-supported;
+  }
+
+  deviation "/oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:micro-bfd-sessions/oc-bfd:micro-bfd-session/oc-bfd:state/oc-bfd:async/oc-bfd:transmitted-packets" {
+    description
+      "EOS does not support BFD session transmitted-packets";
+    deviate not-supported;
+  }
+
+  deviation "/oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:micro-bfd-sessions/oc-bfd:micro-bfd-session/oc-bfd:state/oc-bfd:async/oc-bfd:received-packets" {
+    description
+      "EOS does not support BFD session received-packets";
+    deviate not-supported;
+  }
+
+  deviation "/oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:micro-bfd-sessions/oc-bfd:micro-bfd-session/oc-bfd:state/oc-bfd:async/oc-bfd:up-transitions" {
+    description
+      "EOS does not support BFD session up-transitions";
+    deviate not-supported;
+  }
+
+  deviation "/oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:peers/oc-bfd:peer/oc-bfd:state/oc-bfd:failure-transitions" {
+    description
+      "EOS does not support BFD session failure-transitions";
+    deviate not-supported;
+  }
+
+  deviation "/oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:peers/oc-bfd:peer/oc-bfd:state/oc-bfd:echo/oc-bfd:last-packet-transmitted" {
+    description
+      "EOS does not support BFD session last-packet-transmitted";
+    deviate not-supported;
+  }
+
+  deviation "/oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:peers/oc-bfd:peer/oc-bfd:state/oc-bfd:echo/oc-bfd:last-packet-received" {
+    description
+      "EOS does not support BFD session last-packet-received";
+    deviate not-supported;
+  }
+
+  deviation "/oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:peers/oc-bfd:peer/oc-bfd:state/oc-bfd:echo/oc-bfd:transmitted-packets" {
+    description
+      "EOS does not support BFD session transmitted-packets";
+    deviate not-supported;
+  }
+
+  deviation "/oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:peers/oc-bfd:peer/oc-bfd:state/oc-bfd:echo/oc-bfd:received-packets" {
+    description
+      "EOS does not support BFD session received-packets";
+    deviate not-supported;
+  }
+
+  deviation "/oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:peers/oc-bfd:peer/oc-bfd:state/oc-bfd:echo/oc-bfd:up-transitions" {
+    description
+      "EOS does not support BFD session up-transitions";
+    deviate not-supported;
+  }
+
+  deviation "/oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:peers/oc-bfd:peer/oc-bfd:state/oc-bfd:async/oc-bfd:last-packet-transmitted" {
+    description
+      "EOS does not support BFD session last-packet-transmitted";
+    deviate not-supported;
+  }
+
+  deviation "/oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:peers/oc-bfd:peer/oc-bfd:state/oc-bfd:async/oc-bfd:last-packet-received" {
+    description
+      "EOS does not support BFD session last-packet-received";
+    deviate not-supported;
+  }
+
+  deviation "/oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:peers/oc-bfd:peer/oc-bfd:state/oc-bfd:async/oc-bfd:transmitted-packets" {
+    description
+      "EOS does not support BFD session transmitted-packets";
+    deviate not-supported;
+  }
+
+  deviation "/oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:peers/oc-bfd:peer/oc-bfd:state/oc-bfd:async/oc-bfd:received-packets" {
+    description
+      "EOS does not support BFD session received-packets";
+    deviate not-supported;
+  }
+
+  deviation "/oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:peers/oc-bfd:peer/oc-bfd:state/oc-bfd:async/oc-bfd:up-transitions" {
+    description
+      "EOS does not support BFD session up-transitions";
+    deviate not-supported;
+  }
+}

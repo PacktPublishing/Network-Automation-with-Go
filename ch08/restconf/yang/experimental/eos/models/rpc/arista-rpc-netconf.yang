@@ -1,0 +1,51 @@
+module arista-rpc-netconf {
+  namespace "http://arista.com/yang/rpc/netconf";
+  prefix arista-rpc-netconf;
+
+  import ietf-netconf {
+    prefix nc;
+  }
+
+  organization
+    "Arista Networks, Inc.";
+  contact
+    "Arista Networks, Inc.
+     Product Support";
+  description
+    "This module contains NETCONF RPC extensions in Arista EOS.
+     Copyright (c) 2018 Arista Networks, Inc. All rights reserved.";
+
+  revision 2018-01-04 {
+    description
+      "Initial RPC extension definitions.";
+    reference
+      "RFC6241: Network Configuration Protocol (NETCONF)";
+  }
+
+  typedef eos-cli-config-command {
+    type string;
+    description
+      "An EOS CLI configuration command string.";
+  }
+
+  grouping apply-cli-parameters {
+    description
+      "CLI configuration input parameters.";
+    container commands {
+      description
+        "CLI configuration commands.";
+      leaf-list command {
+        type eos-cli-config-command;
+        ordered-by user;
+        description
+          "CLI configuration commands to apply with config data.";
+      }
+    }
+  }
+
+  augment "/nc:edit-config/nc:input" {
+    description
+      "Adds CLI parameters for mixed config/CLI command input.";
+    uses apply-cli-parameters;
+  }
+}

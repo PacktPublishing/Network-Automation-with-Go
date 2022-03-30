@@ -1,0 +1,45 @@
+module arista-eos-types {
+  yang-version 1;
+  namespace "http://arista.com/yang/experimental/eos/eos-types";
+  prefix eos-types;
+
+  organization
+    "Arista Networks <http://arista.com/>";
+  description
+    "Common type definitions for Arista YANG models
+
+     Copyright (c) 2016 Arista Networks, Inc. All rights reserved.";
+
+  revision 2016-10-14 {
+    description
+      "Initial revision";
+  }
+
+  typedef float {
+    type decimal64 {
+      fraction-digits 5;
+    }
+    description
+      "float";
+  }
+
+  typedef sfloat64 {
+    type string;
+    description
+      "String representation of a float64 value";
+  }
+
+  typedef double {
+    type decimal64 {
+      fraction-digits 5;
+    }
+    description
+      "double";
+  }
+
+  typedef Arnet-IntfId {
+    type string;
+    description
+      "Arista Interface ID";
+  }
+}

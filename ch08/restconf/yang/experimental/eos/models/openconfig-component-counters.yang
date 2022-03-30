@@ -1,0 +1,227 @@
+module openconfig-component-counters {
+  yang-version 1;
+  namespace "http://openconfig.net/yang/component-counters";
+  prefix oc-hwcount;
+
+  import openconfig-extensions {
+    prefix oc-ext;
+  }
+  import openconfig-platform {
+    prefix oc-platform;
+  }
+  import openconfig-system-logging {
+    prefix oc-log;
+  }
+  import openconfig-interfaces {
+    prefix oc-if;
+  }
+
+  organization
+    "OpenConfig working group";
+  contact
+    "OpenConfig working group
+     www.openconfig.net";
+  description
+    "This module defines a flexible structure for counters relating to a
+     component of a network system. A component (as per the existing
+     OpenConfig model) is a physical or logical component of the system --
+     including, but not limited, linecards, forwarding chips, and software
+     processes.
+
+     This module defines a well-known set of counters, which can be extended
+     by an implementation to provide arbitrary counter sets that are to be
+     reported by the system.";
+  oc-ext:openconfig-version "0.1.0";
+
+  revision 2019-03-26 {
+    description
+      "Initial model revision.";
+    reference
+      "0.1.0";
+  }
+  oc-ext:regexp-posix;
+  oc-ext:catalog-organization "openconfig";
+  oc-ext:origin "openconfig";
+
+  identity COUNTER_TYPE {
+    description
+      "Base identity for a counter type to be reported. Each counter
+       that is to be reported should define a counter identity which
+       defines the type of counter.";
+  }
+
+  identity NULL_ROUTE {
+    base COUNTER_TYPE;
+    description
+      "A counter that reflects packets that are discarded by the system
+       due to being routed to a null or discard interface.";
+  }
+
+  // TODO(google): Add additional types from
+  // https://docs.google.com/document/d/1GFI_4XfpLGZMVuHPfacE9sXjBcg_y6qkqCwewQCb8c4/edit#heading=h.gd0p1ybuyo64
+
+  identity COUNTER_UNIT {
+    description
+      "Identity describing the units of a counter.";
+  }
+
+  identity BYTES {
+    base COUNTER_UNIT;
+    description
+      "The counter is in units of bytes.";
+  }
+
+  identity PACKETS {
+    base COUNTER_UNIT;
+    description
+      "The counter is in units of packets.";
+  }
+
+  identity CELLS {
+    base COUNTER_UNIT;
+    description
+      "The counter is in units of cells.";
+  }
+
+  typedef counter-family {
+    type enumeration {
+      enum OTHER {
+        description
+          "The counter's family is not described by other categories.";
+      }
+      enum CONGESTION_DROP {
+        description
+          "The counter is related to drops due to congestion within the system.";
+      }
+      enum ERROR_DROP {
+        description
+          "The counter is related to drops due to errors within the system.";
+      }
+      enum FORWARDING_POLICY_DROP {
+        // TODO(robjs, ltd): Is forwarding policy really the right term here, should it be some
+        // routing decision or so?
+        description
+          "The counter is related to a forwarding decision that the system made.";
+      }
+      enum FORWARDING_RATE_EXCEEDED_DROP {
+        description
+          "The counter is related to drops that are caused by a forwarding policy enforcing
+           a rate, e.g., policer/shaper drops.";
+      }
+      enum FORWARDING_MISS_DROP {
+        description
+          "The counter is related to drops that are due to a missing forwarding entry, e.g.,
+           no RIB of LFIB entry.";
+      }
+      enum CAPACITY_EXCEEDED_DROP {
+        description
+          "The drop is related to a capacity limit of the system (e.g., oversubscribed packet
+           processor, DRAM) being exceeded.";
+      }
+    }
+    description
+      "Base identity used to provide a family of counters. Counter families
+       should allow counters to be grouped according to common operational
+       counters of interest.";
+  }
+
+  grouping counters-top {
+    description
+      "Logical grouping for top-level component counters";
+    container counters {
+      description
+        "Counters that are associated with this component. Each counter is
+         uniquely identified by an enumerated value which describes the
+         value that the counter is reporting.";
+      list counter {
+        key "id";
+        config false;
+        description
+          "An individual counter for the component.";
+        leaf id {
+          type leafref {
+            path "../state/id";
+          }
+          description
+            "Reference to the enumerated identifier for this counter.";
+        }
+        container state {
+          config false;
+          description
+            "Operational state relating to a counter.";
+          uses counter-state;
+        }
+      }
+    }
+  }
+
+  grouping counter-state {
+    description
+      "Logical grouping for component counters state";
+    oc-ext:operational;
+    leaf id {
+      //type identityref {
+      //  base COUNTER_TYPE;
+      //}
+      type string;
+      // revert to type identityref, once counter types are defined
+      description
+        "The enumerated identifier for the counter within the system.";
+      oc-ext:telemetry-on-change;
+    }
+    leaf value {
+      type union {
+        type uint64;
+        type int64;
+      }
+      description
+        "The value of the counter.";
+    }
+    leaf family {
+      type counter-family;
+      description
+        "The family of counters this counter belongs to. This should allow
+         grouping of counters into underlying root causes.";
+      oc-ext:telemetry-on-change;
+    }
+    leaf unit {
+      type identityref {
+        base COUNTER_UNIT;
+      }
+      description
+        "The unit of the counter being reported.";
+      oc-ext:telemetry-on-change;
+    }
+    leaf severity {
+      type oc-log:syslog-severity;
+      description
+        "The mapped severity of the counter. This value should be used to
+         indicate the severity of a particular counter increasing where possible.";
+      oc-ext:telemetry-on-change;
+    }
+    // TODO(robjs, ltd): can the input and output port set be subinterfaces, or just
+    // physical interfaces?
+    leaf-list input-ports {
+      type oc-if:base-interface-ref;
+      description
+        "Where a counter can be related to an input set of physical or logical parent
+         interfaces, these interfaces should be listed here. This allows a consumer to
+         retrieve all counter sets that relate to a particular interface.";
+      oc-ext:telemetry-on-change;
+    }
+    leaf-list output-ports {
+      type oc-if:base-interface-ref;
+      description
+        "Where a counter can be related to an output set of physical or logical parent
+         interfaces, these interfaces should be listed here. This allows a consumer to
+         retrieve all counter sets that relate to a particular interface.";
+      oc-ext:telemetry-on-change;
+    }
+  }
+
+  augment "/oc-platform:components/oc-platform:component" {
+    description
+      "Add counters to the components subtree.";
+    uses counters-top;
+  }
+}

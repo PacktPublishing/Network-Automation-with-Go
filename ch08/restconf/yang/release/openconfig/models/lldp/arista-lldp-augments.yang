@@ -1,0 +1,102 @@
+module arista-lldp-augments {
+  namespace "http://arista.com/yang/openconfig/lldp/augments";
+  prefix arista-lldp-augments;
+
+  import openconfig-lldp {
+    prefix oc-lldp;
+  }
+  import openconfig-extensions {
+    prefix oc-ext;
+  }
+
+  organization
+    "Arista Networks, Inc.";
+  contact
+    "Arista Networks, Inc.
+     Product Support";
+  description
+    "This module contains OpenConfig lldp augments in Arista EOS.
+
+     Copyright (c) 2018 Arista Networks, Inc. All rights reserved.";
+  oc-ext:openconfig-version "1.0.1";
+
+  revision 2020-11-30 {
+    description
+      "Fix errors reported by pyang.";
+    reference
+      "1.0.1";
+  }
+  revision 2018-03-06 {
+    description
+      "Initial augment file.";
+    reference
+      "1.0.0";
+  }
+
+  typedef transmit-mode-enum {
+    type enumeration {
+      enum ALL {
+        description
+          "Include address of all interfaces in the TLV";
+      }
+      enum INTERFACE {
+        description
+          "Include the address of configured interface in the TLV";
+      }
+      enum BEST {
+        description
+          "The default option for address in the TLV is 'best'";
+      }
+    }
+    description
+      "Indicates the transmit mode for the management-address TLV.";
+  }
+
+  augment "/oc-lldp:lldp/oc-lldp:config" {
+    description
+      "Add management address data to LLDP configuration.";
+    container management-address {
+      description
+        "Configuration data for management-address TLV of LLDP PDU";
+      leaf network-instance {
+        type string;
+        description
+          "Address of all interfaces or of the configured interface in this network-instance will
+           be included in the management-address TLV of the LLDP PDU depending on the
+           transmit-mode.";
+      }
+      leaf transmit-mode {
+        type transmit-mode-enum;
+        description
+          "Indicates the transmit-mode for the management-address TLV. A value of 'all' indicates
+           that address of all interface in the network-instance are included in the
+           mangement-address TLV. A value of 'interface' indicates that the address of interface
+           identified by the leaf 'interface' is included in the TLV.";
+      }
+      leaf interface {
+        type string;
+        description
+          "Interface whose address in this network-instance will be included in the
+           management-address TLV of the LLDP PDU. This is applicable only if the leaf
+           'transmit-mode' is set to INTERFACE.";
+      }
+    }
+  }
+
+  augment "/oc-lldp:lldp/oc-lldp:interfaces/oc-lldp:interface/oc-lldp:neighbors/oc-lldp:neighbor/oc-lldp:state" {
+    description
+      "Add update and registration time to LLDP state.";
+    leaf last-update-time {
+      type uint64;
+      units "seconds";
+      description
+        "UNIX timestamp of the last update (number of seconds since the Epoch)";
+    }
+    leaf registration-time {
+      type uint64;
+      units "seconds";
+      description
+        "UNIX timestamp of the neighbor registration event (number of seconds since the Epoch)";
+    }
+  }
+}

@@ -1,0 +1,190 @@
+module arista-bfd-notsupported-deviations {
+  namespace "http://arista.com/yang/openconfig/bfd/notsupported-deviations";
+  prefix arista-bfd-notsupported-deviations;
+
+  import openconfig-bfd {
+    prefix oc-bfd;
+  }
+
+  organization
+    "Arista Networks, Inc.";
+  contact
+    "Arista Networks, Inc.
+     Product Support";
+  description
+    "This module contains OpenConfig bfd deviations in Arista EOS.
+     Copyright (c) 2020 Arista Networks, Inc. All rights reserved.";
+
+  revision 2020-02-04 {
+    description
+      "Not-supported deviations file.";
+  }
+
+  deviation "/oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:micro-bfd-sessions/oc-bfd:micro-bfd-session/oc-bfd:config/oc-bfd:member-interface" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:micro-bfd-sessions/oc-bfd:micro-bfd-session/oc-bfd:state/oc-bfd:demand-mode-requested" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:micro-bfd-sessions/oc-bfd:micro-bfd-session/oc-bfd:state/oc-bfd:last-failure-time" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:micro-bfd-sessions/oc-bfd:micro-bfd-session/oc-bfd:state/oc-bfd:local-diagnostic-code" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:micro-bfd-sessions/oc-bfd:micro-bfd-session/oc-bfd:state/oc-bfd:local-discriminator" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:micro-bfd-sessions/oc-bfd:micro-bfd-session/oc-bfd:state/oc-bfd:member-interface" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:micro-bfd-sessions/oc-bfd:micro-bfd-session/oc-bfd:state/oc-bfd:remote-authentication-enabled" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:micro-bfd-sessions/oc-bfd:micro-bfd-session/oc-bfd:state/oc-bfd:remote-control-plane-independent" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:micro-bfd-sessions/oc-bfd:micro-bfd-session/oc-bfd:state/oc-bfd:remote-diagnostic-code" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:micro-bfd-sessions/oc-bfd:micro-bfd-session/oc-bfd:state/oc-bfd:remote-discriminator" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:micro-bfd-sessions/oc-bfd:micro-bfd-session/oc-bfd:state/oc-bfd:remote-minimum-receive-interval" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:micro-bfd-sessions/oc-bfd:micro-bfd-session/oc-bfd:state/oc-bfd:remote-session-state" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:micro-bfd-sessions/oc-bfd:micro-bfd-session/oc-bfd:state/oc-bfd:session-state" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:peers/oc-bfd:peer/oc-bfd:state/oc-bfd:demand-mode-requested" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:peers/oc-bfd:peer/oc-bfd:state/oc-bfd:last-failure-time" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:peers/oc-bfd:peer/oc-bfd:state/oc-bfd:local-address" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:peers/oc-bfd:peer/oc-bfd:state/oc-bfd:local-diagnostic-code" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:peers/oc-bfd:peer/oc-bfd:state/oc-bfd:local-discriminator" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:peers/oc-bfd:peer/oc-bfd:state/oc-bfd:remote-address" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:peers/oc-bfd:peer/oc-bfd:state/oc-bfd:remote-authentication-enabled" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:peers/oc-bfd:peer/oc-bfd:state/oc-bfd:remote-control-plane-independent" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:peers/oc-bfd:peer/oc-bfd:state/oc-bfd:remote-diagnostic-code" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:peers/oc-bfd:peer/oc-bfd:state/oc-bfd:remote-discriminator" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:peers/oc-bfd:peer/oc-bfd:state/oc-bfd:remote-minimum-receive-interval" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:peers/oc-bfd:peer/oc-bfd:state/oc-bfd:remote-session-state" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:peers/oc-bfd:peer/oc-bfd:state/oc-bfd:session-state" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:peers/oc-bfd:peer/oc-bfd:state/oc-bfd:subscribed-protocols" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-bfd:bfd/oc-bfd:interfaces/oc-bfd:interface/oc-bfd:peers/oc-bfd:peer/oc-bfd:state/oc-bfd:echo/oc-bfd:active" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+}

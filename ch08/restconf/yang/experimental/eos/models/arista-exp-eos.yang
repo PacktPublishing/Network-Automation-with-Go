@@ -1,0 +1,21 @@
+module arista-exp-eos {
+  yang-version 1;
+  namespace "http://arista.com/yang/experimental/eos";
+  prefix eos-exp;
+
+  organization
+    "Arista Networks <http://arista.com/>";
+  description
+    "arista/eos containers
+
+     Copyright (c) 2016 Arista Networks, Inc. All rights reserved.";
+
+  revision 2016-11-09 {
+    description
+      "Initial release";
+  }
+
+  container arista {
+    container eos;
+  }
+}

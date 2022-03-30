@@ -1,0 +1,941 @@
+module arista-bgp-deviations {
+  namespace "http://arista.com/yang/openconfig/bgp/deviations";
+  prefix arista-bgp-deviations;
+
+  import openconfig-network-instance {
+    prefix oc-netinst;
+  }
+  import openconfig-policy-types {
+    prefix oc-pol-types;
+  }
+  import openconfig-extensions {
+    prefix oc-ext;
+  }
+
+  organization
+    "Arista Networks, Inc.";
+  contact
+    "Arista Networks, Inc.
+     Product Support";
+  description
+    "This module contains OpenConfig BGP deviations in Arista EOS.
+
+     Copyright (c) 2016 Arista Networks, Inc. All rights reserved.";
+  oc-ext:openconfig-version "1.3.0";
+
+  revision 2021-04-21 {
+    description
+      "Add default values for administrative distances of BGP learned routes to match EOS defaults.";
+    reference
+      "1.3.0";
+  }
+  revision 2021-03-30 {
+    description
+      "Add maximum items constraint for neighbors/peer-groups export-policy.";
+    reference
+      "1.2.0";
+  }
+  revision 2020-12-08 {
+    description
+      "Add range restriction for minimum-advertisement-interval, fix range restriction for hold-time.";
+    reference
+      "1.1.2";
+  }
+  revision 2020-11-30 {
+    description
+      "Fix errors reported by pyang.";
+    reference
+      "1.1.1";
+  }
+  revision 2020-05-27 {
+    description
+      "Removed route-target import/export policy deviations.";
+    reference
+      "1.1.0";
+  }
+  revision 2020-01-07 {
+    description
+      "Fixed default value of minimum-advertisement-interval in deviate delete.";
+    reference
+      "1.0.3";
+  }
+  revision 2020-01-06 {
+    description
+      "Removed unused imports.";
+    reference
+      "1.0.2";
+  }
+  revision 2019-05-25 {
+    description
+      "Add prefixes to identity names in must statements.";
+    reference
+      "1.0.1";
+  }
+  revision 2016-02-01 {
+    description
+      "Initial deviations file.";
+    reference
+      "1.0.0";
+  }
+
+  augment "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:global/oc-netinst:config/oc-netinst:as" {
+    description
+      "The AS number can only be set in the default network-instance";
+  }
+
+  augment "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:ebgp-multihop/oc-netinst:config/oc-netinst:enabled" {
+    description
+      "enabled is not used by EOS. Set multihop-ttl to a non-zero value to enable ebgp-multihop";
+  }
+
+  augment "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:ebgp-multihop/oc-netinst:config/oc-netinst:enabled" {
+    description
+      "enabled is not used by EOS. Set multihop-ttl to a non-zero value to enable ebgp-multihop";
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:config/oc-netinst:peer-type" {
+    description
+      "peer-type is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:config/oc-netinst:peer-type" {
+    description
+      "peer-type is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:as-path-options/oc-netinst:config/oc-netinst:allow-own-as" {
+    description
+      "EOS value is a triState which is represented by the absence of the leaf so this leaf cannot have a default value";
+    deviate delete {
+      default "0";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:as-path-options/oc-netinst:state/oc-netinst:allow-own-as" {
+    description
+      "EOS value is a triState which is represented by the absence of the leaf so this leaf cannot have a default value";
+    deviate delete {
+      default "0";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:as-path-options/oc-netinst:config/oc-netinst:allow-own-as" {
+    description
+      "EOS value is a triState which is represented by the absence of the leaf so this leaf cannot have a default value";
+    deviate delete {
+      default "0";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:as-path-options/oc-netinst:state/oc-netinst:allow-own-as" {
+    description
+      "EOS value is a triState which is represented by the absence of the leaf so this leaf cannot have a default value";
+    deviate delete {
+      default "0";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:global/oc-netinst:use-multiple-paths/oc-netinst:ebgp/oc-netinst:config/oc-netinst:allow-multiple-as" {
+    description
+      "allow-multiple-as is not configurable in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:global/oc-netinst:use-multiple-paths/oc-netinst:ebgp/oc-netinst:state/oc-netinst:allow-multiple-as" {
+    description
+      "allow-multiple-as is not configurable in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:global/oc-netinst:route-selection-options/oc-netinst:config/oc-netinst:enable-aigp" {
+    description
+      "enable-aigp is not configurable in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:global/oc-netinst:route-selection-options/oc-netinst:state/oc-netinst:enable-aigp" {
+    description
+      "enable-aigp is not configurable in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:route-reflector/oc-netinst:config/oc-netinst:route-reflector-cluster-id" {
+    description
+      "EOS does not support per neighbor cluster-id configuration";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:route-reflector/oc-netinst:config/oc-netinst:route-reflector-cluster-id" {
+    description
+      "EOS does not support per peer-group cluster-id configuration";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:timers/oc-netinst:config/oc-netinst:connect-retry" {
+    description
+      "connect-retry is not configurable in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:timers/oc-netinst:state/oc-netinst:connect-retry" {
+    description
+      "connect-retry is not configurable in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:timers/oc-netinst:config/oc-netinst:minimum-advertisement-interval" {
+    description
+      "EOS value is a triState which is represented by the absence of the leaf so this leaf cannot have a default value, also EOS value has a restrictive range.";
+    deviate replace {
+      type decimal64 {
+        fraction-digits 2;
+        range "3..600";
+      }
+    }
+    deviate delete {
+      default "30";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:timers/oc-netinst:state/oc-netinst:minimum-advertisement-interval" {
+    description
+      "EOS value is a triState which is represented by the absence of the leaf so this leaf cannot have a default value";
+    deviate delete {
+      default "30";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:timers/oc-netinst:config/oc-netinst:connect-retry" {
+    description
+      "connect-retry is not configurable in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:timers/oc-netinst:state/oc-netinst:connect-retry" {
+    description
+      "connect-retry is not configurable in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:timers/oc-netinst:config/oc-netinst:minimum-advertisement-interval" {
+    description
+      "EOS value is a triState which is represented by the absence of the leaf so this leaf cannot have a default value, also EOS value has a restrictive range.";
+    deviate replace {
+      type decimal64 {
+        fraction-digits 2;
+        range "3..600";
+      }
+    }
+    deviate delete {
+      default "30";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:timers/oc-netinst:state/oc-netinst:minimum-advertisement-interval" {
+    description
+      "EOS value is a triState which is represented by the absence of the leaf so this leaf cannot have a default value";
+    deviate delete {
+      default "30";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:as-path-options/oc-netinst:config/oc-netinst:disable-peer-as-filter" {
+    description
+      "disable-peer-as-filter is not configurable in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:as-path-options/oc-netinst:state/oc-netinst:disable-peer-as-filter" {
+    description
+      "disable-peer-as-filter is not configurable in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:as-path-options/oc-netinst:config/oc-netinst:disable-peer-as-filter" {
+    description
+      "disable-peer-as-filter is not configurable in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:config/oc-netinst:route-flap-damping" {
+    description
+      "route-flap-damping is not configurable in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:state/oc-netinst:route-flap-damping" {
+    description
+      "route-flap-damping is not configurable in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:as-path-options/oc-netinst:state/oc-netinst:disable-peer-as-filter" {
+    description
+      "disable-peer-as-filter is not configurable in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:transport/oc-netinst:config/oc-netinst:local-address" {
+    description
+      "EOS only supports setting the local-address as an interface name";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:transport/oc-netinst:config/oc-netinst:local-address" {
+    description
+      "EOS only supports setting the local-address as an interface name";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:transport/oc-netinst:config/oc-netinst:mtu-discovery" {
+    description
+      "MTU discovery is implicitly always true in EOS";
+    deviate add {
+      config false;
+    }
+    deviate replace {
+      default "true";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:transport/oc-netinst:config/oc-netinst:mtu-discovery" {
+    description
+      "MTU discovery is implicitly always true in EOS";
+    deviate add {
+      config false;
+    }
+    deviate replace {
+      default "true";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:transport/oc-netinst:state/oc-netinst:mtu-discovery" {
+    description
+      "MTU discovery is implicitly always true in EOS";
+    deviate replace {
+      default "true";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:transport/oc-netinst:state/oc-netinst:mtu-discovery" {
+    description
+      "MTU discovery is implicitly always true in EOS";
+    deviate replace {
+      default "true";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:logging-options/oc-netinst:config/oc-netinst:log-neighbor-state-changes" {
+    description
+      "Neighbor state change logging cannot be configured for a neighbor in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:logging-options/oc-netinst:state/oc-netinst:log-neighbor-state-changes" {
+    description
+      "Neighbor state change logging is not supported for a neighbor in EOS";
+    deviate delete {
+      default "true";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:logging-options/oc-netinst:config/oc-netinst:log-neighbor-state-changes" {
+    description
+      "Neighbor state change logging cannot be configured for a peer-group in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:logging-options/oc-netinst:state/oc-netinst:log-neighbor-state-changes" {
+    description
+      "Neighbor state change logging is not supported for a peer-group in EOS";
+    deviate delete {
+      default "true";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:timers/oc-netinst:config/oc-netinst:hold-time" {
+    description
+      "EOS range restriction and default";
+    deviate replace {
+      type decimal64 {
+        fraction-digits 2;
+        range "0 | 3..7200";
+      }
+    }
+    deviate delete {
+      default "90";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:timers/oc-netinst:config/oc-netinst:keepalive-interval" {
+    description
+      "keepalive interval EOS range restriction and default";
+    deviate replace {
+      type decimal64 {
+        fraction-digits 2;
+        range "0..3600";
+      }
+    }
+    deviate delete {
+      default "30";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:timers/oc-netinst:state/oc-netinst:hold-time" {
+    description
+      "EOS value is a triState which is represented by the absence of the leaf so this leaf cannot have a default value";
+    deviate delete {
+      default "90";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:timers/oc-netinst:state/oc-netinst:keepalive-interval" {
+    description
+      "EOS value is a triState which is represented by the absence of the leaf so this leaf cannot have a default value";
+    deviate delete {
+      default "30";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:timers/oc-netinst:config/oc-netinst:hold-time" {
+    description
+      "hold-time EOS range restriction and default";
+    deviate replace {
+      type decimal64 {
+        fraction-digits 2;
+        range "0 | 3..7200";
+      }
+    }
+    deviate delete {
+      default "90";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:global/oc-netinst:graceful-restart/oc-netinst:config/oc-netinst:restart-time" {
+    description
+      "restart-time EOS range restriction";
+    deviate replace {
+      type uint16 {
+        range "1..3600";
+      }
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:global/oc-netinst:graceful-restart/oc-netinst:config/oc-netinst:stale-routes-time" {
+    description
+      "stale-routes-time EOS range restriction";
+    deviate replace {
+      type decimal64 {
+        fraction-digits 2;
+        range "1..3600";
+      }
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:timers/oc-netinst:config/oc-netinst:keepalive-interval" {
+    description
+      "keepalive interval EOS range restriction and default";
+    deviate replace {
+      type decimal64 {
+        fraction-digits 2;
+        range "0..3600";
+      }
+    }
+    deviate delete {
+      default "30";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:timers/oc-netinst:state/oc-netinst:hold-time" {
+    description
+      "EOS value is a triState which is represented by the absence of the leaf so this leaf cannot have a default value";
+    deviate delete {
+      default "90";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:timers/oc-netinst:state/oc-netinst:keepalive-interval" {
+    description
+      "EOS value is a triState which is represented by the absence of the leaf so this leaf cannot have a default value";
+    deviate delete {
+      default "30";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:global/oc-netinst:route-selection-options/oc-netinst:config/oc-netinst:external-compare-router-id" {
+    description
+      "EOS value is a triStateBool which is represented by the absence of the leaf so this leaf can not have a default value";
+    deviate delete {
+      default "true";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:global/oc-netinst:route-selection-options/oc-netinst:state/oc-netinst:external-compare-router-id" {
+    description
+      "EOS value is a triStateBool which is represented by the absence of the leaf so this leaf can not have a default value";
+    deviate delete {
+      default "true";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:global/oc-netinst:route-selection-options/oc-netinst:config/oc-netinst:ignore-as-path-length" {
+    description
+      "EOS value is a triStateBool which is represented by the absence of the leaf so this leaf can not have a default value";
+    deviate delete {
+      default "false";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:global/oc-netinst:route-selection-options/oc-netinst:state/oc-netinst:ignore-as-path-length" {
+    description
+      "EOS value is a triStateBool which is represented by the absence of the leaf so this leaf can not have a default value";
+    deviate delete {
+      default "false";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:global/oc-netinst:route-selection-options/oc-netinst:config/oc-netinst:advertise-inactive-routes" {
+    description
+      "EOS value is a triStateBool which is represented by the absence of the leaf so this leaf can not have a default value";
+    deviate delete {
+      default "false";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:global/oc-netinst:route-selection-options/oc-netinst:state/oc-netinst:advertise-inactive-routes" {
+    description
+      "EOS value is a triStateBool which is represented by the absence of the leaf so this leaf can not have a default value";
+    deviate delete {
+      default "false";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:global/oc-netinst:route-selection-options/oc-netinst:config/oc-netinst:always-compare-med" {
+    description
+      "EOS value is a triStateBool which is represented by the absence of the leaf so this leaf can not have a default value";
+    deviate delete {
+      default "false";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:global/oc-netinst:route-selection-options/oc-netinst:state/oc-netinst:always-compare-med" {
+    description
+      "EOS value is a triStateBool which is represented by the absence of the leaf so this leaf can not have a default value";
+    deviate delete {
+      default "false";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:global/oc-netinst:route-selection-options/oc-netinst:config/oc-netinst:ignore-next-hop-igp-metric" {
+    description
+      "EOS value is a triStateBool which is represented by the absence of the leaf so this leaf can not have a default value";
+    deviate delete {
+      default "false";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:global/oc-netinst:route-selection-options/oc-netinst:state/oc-netinst:ignore-next-hop-igp-metric" {
+    description
+      "EOS value is a triStateBool which is represented by the absence of the leaf so this leaf can not have a default value";
+    deviate delete {
+      default "false";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:global/oc-netinst:use-multiple-paths/oc-netinst:config/oc-netinst:enabled" {
+    description
+      "Disabling EOS multiple-paths is not supported, multiple-paths is always enabled in EOS";
+    deviate add {
+      config false;
+    }
+    deviate replace {
+      default "true";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:global/oc-netinst:use-multiple-paths/oc-netinst:state/oc-netinst:enabled" {
+    description
+      "Disabling EOS multiple-paths is not supported, multiple-paths is always enabled in EOS";
+    deviate replace {
+      default "true";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:global/oc-netinst:use-multiple-paths/oc-netinst:ebgp/oc-netinst:config/oc-netinst:maximum-paths" {
+    description
+      "EOS's value has an invalid state which is represented by the absence of the leaf so this leaf cannot have a default value";
+    deviate delete {
+      default "1";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:global/oc-netinst:use-multiple-paths/oc-netinst:ebgp/oc-netinst:state/oc-netinst:maximum-paths" {
+    description
+      "EOS's value has an invalid state which is represented by the absence of the leaf so this leaf cannot have a default value";
+    deviate delete {
+      default "1";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:global/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:config/oc-netinst:afi-safi-name" {
+    description
+      "IPV4_UNICAST and IPV6_UNICAST are the only AFI-SAFIs type supported in EOS";
+    deviate add {
+      must "../afi-safi-name = 'IPV4_UNICAST' or ../afi-safi-name = 'IPV6_UNICAST'" {
+        error-message "IPV4_UNICAST and IPV6_UNICAST are the only AFI-SAFIs type supported in EOS";
+      }
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:global/oc-netinst:use-multiple-paths/oc-netinst:ibgp/oc-netinst:config/oc-netinst:maximum-paths" {
+    description
+      "iBGP multiple-paths is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:global/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:use-multiple-paths" {
+    description
+      "Configuring multiple-paths per afi-safi is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:global/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:config/oc-netinst:enabled" {
+    description
+      "EOS value is a triStateBool which is represented by the absence of the leaf so this leaf can not have a default value";
+    deviate delete {
+      default "false";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:global/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:state/oc-netinst:enabled" {
+    description
+      "EOS value is a triStateBool which is represented by the absence of the leaf so this leaf can not have a default value";
+    deviate delete {
+      default "false";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:config/oc-netinst:afi-safi-name" {
+    description
+      "L2VPN_EVPN, IPV4_UNICAST and IPV6_UNICAST are the only AFI-SAFIs type supported in EOS";
+    deviate add {
+      must "../afi-safi-name = 'IPV4_UNICAST' or ../afi-safi-name = 'IPV6_UNICAST' or ../afi-safi-name = 'L2VPN_EVPN'" {
+        error-message "L2VPN_EVPN, IPV4_UNICAST and IPV6_UNICAST are the only AFI-SAFIs type supported in EOS";
+      }
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:config/oc-netinst:enabled" {
+    description
+      "EOS value is a TriStateBool which is represented by the absence of the leaf so this leaf cannot have a default value";
+    deviate delete {
+      default "false";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:state/oc-netinst:enabled" {
+    description
+      "EOS value is a TriStateBool which is represented by the absence of the leaf so this leaf cannot have a default value";
+    deviate delete {
+      default "false";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:config/oc-netinst:afi-safi-name" {
+    description
+      "L2VPN_EVPN, IPV4_UNICAST and IPV6_UNICAST are the only AFI-SAFIs type supported in EOS";
+    deviate add {
+      must "../afi-safi-name = 'IPV4_UNICAST' or ../afi-safi-name = 'IPV6_UNICAST' or ../afi-safi-name = 'L2VPN_EVPN'" {
+        error-message "L2VPN_EVPN, IPV4_UNICAST and IPV6_UNICAST are the only AFI-SAFIs type supported in EOS";
+      }
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:config/oc-netinst:enabled" {
+    description
+      "EOS value is a TriStateBool which is represented by the absence of the leaf so this leaf cannot have a default value";
+    deviate delete {
+      default "false";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:state/oc-netinst:enabled" {
+    description
+      "EOS value is a TriStateBool which is represented by the absence of the leaf so this leaf cannot have a default value";
+    deviate delete {
+      default "false";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:use-multiple-paths" {
+    description
+      "Configuring multiple-paths per afi-safi for a neighbor is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:use-multiple-paths" {
+    description
+      "Configuring multiple-paths per afi-safi for a peer-group is not supported in EOS";
+    deviate not-supported;
+  }
+
+  augment "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:state/oc-netinst:messages/oc-netinst:received/oc-netinst:NOTIFICATION" {
+    description
+      "The number of received NOTIFICATION messages is not exported in EOS";
+  }
+
+  augment "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:state/oc-netinst:messages/oc-netinst:sent/oc-netinst:NOTIFICATION" {
+    description
+      "The number of sent NOTIFICATION messages is not exported in EOS";
+  }
+
+  augment "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:state/oc-netinst:supported-capabilities" {
+    description
+      "The capabilities negotiated as supported with a peer are not exported in EOS";
+  }
+
+  augment "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:state/oc-netinst:active" {
+    description
+      "The value indicating whether a particular AFI-SAFI has been succesfully negotiated with the peer is not exported in EOS";
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:add-paths/oc-netinst:config/oc-netinst:receive" {
+    description
+      "EOS value is a triState which is represented by the absence of the leaf so this leaf cannot have a default value";
+    deviate delete {
+      default "false";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:add-paths/oc-netinst:state/oc-netinst:receive" {
+    description
+      "EOS value is a triState which is represented by the absence of the leaf so this leaf cannot have a default value";
+    deviate delete {
+      default "false";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:add-paths/oc-netinst:config/oc-netinst:receive" {
+    description
+      "EOS value is a triState which is represented by the absence of the leaf so this leaf cannot have a default value";
+    deviate delete {
+      default "false";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:add-paths/oc-netinst:state/oc-netinst:receive" {
+    description
+      "EOS value is a triState which is represented by the absence of the leaf so this leaf cannot have a default value";
+    deviate delete {
+      default "false";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:route-reflector/oc-netinst:config/oc-netinst:route-reflector-client" {
+    description
+      "EOS value is a triState which is represented by the absence of the leaf so this leaf cannot have a default value";
+    deviate delete {
+      default "false";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:route-reflector/oc-netinst:state/oc-netinst:route-reflector-client" {
+    description
+      "EOS value is a triState which is represented by the absence of the leaf so this leaf cannot have a default value";
+    deviate delete {
+      default "false";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:route-reflector/oc-netinst:config/oc-netinst:route-reflector-client" {
+    description
+      "EOS value is a triState which is represented by the absence of the leaf so this leaf cannot have a default value";
+    deviate delete {
+      default "false";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:route-reflector/oc-netinst:state/oc-netinst:route-reflector-client" {
+    description
+      "EOS value is a triState which is represented by the absence of the leaf so this leaf cannot have a default value";
+    deviate delete {
+      default "false";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:transport/oc-netinst:config/oc-netinst:passive-mode" {
+    description
+      "EOS value is a triState which is represented by the absence of the leaf so this leaf cannot have a default value";
+    deviate delete {
+      default "false";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:transport/oc-netinst:state/oc-netinst:passive-mode" {
+    description
+      "EOS value is a triState which is represented by the absence of the leaf so this leaf cannot have a default value";
+    deviate delete {
+      default "false";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:transport/oc-netinst:config/oc-netinst:passive-mode" {
+    description
+      "EOS value is a triState which is represented by the absence of the leaf so this leaf cannot have a default value";
+    deviate delete {
+      default "false";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:transport/oc-netinst:state/oc-netinst:passive-mode" {
+    description
+      "EOS value is a triState which is represented by the absence of the leaf so this leaf cannot have a default value";
+    deviate delete {
+      default "false";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:add-paths/oc-netinst:config/oc-netinst:send-max" {
+    description
+      "Configuring the maximum total number of paths to advertise to neighbors for a single NLRI is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:add-paths/oc-netinst:config/oc-netinst:send-max" {
+    description
+      "Configuring the maximum total number of paths to advertise to neighbors for a single NLRI is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:graceful-restart/oc-netinst:config/oc-netinst:enabled" {
+    description
+      "EOS value is a triState which is represented by the absence of the leaf so this leaf cannot have a default value";
+    deviate delete {
+      default "false";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:graceful-restart/oc-netinst:state/oc-netinst:enabled" {
+    description
+      "EOS value is a triState which is represented by the absence of the leaf so this leaf cannot have a default value";
+    deviate delete {
+      default "false";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:graceful-restart/oc-netinst:config/oc-netinst:enabled" {
+    description
+      "EOS value is a triState which is represented by the absence of the leaf so this leaf cannot have a default value";
+    deviate delete {
+      default "false";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:graceful-restart/oc-netinst:state/oc-netinst:enabled" {
+    description
+      "EOS value is a triState which is represented by the absence of the leaf so this leaf cannot have a default value";
+    deviate delete {
+      default "false";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:ipv4-unicast/oc-netinst:prefix-limit" {
+    description
+      "Configuring the maximum number of prefixes that will be accepted from the neighbor is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:ipv4-unicast/oc-netinst:prefix-limit" {
+    description
+      "Configuring the maximum number of prefixes that will be accepted from the peer-group is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:ipv6-unicast/oc-netinst:prefix-limit" {
+    description
+      "Configuring the maximum number of prefixes that will be accepted from the neighbor is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:ipv6-unicast/oc-netinst:prefix-limit" {
+    description
+      "Configuring the maximum number of prefixes that will be accepted from the peer-group is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:config/oc-netinst:peer-group" {
+    description
+      "In EOS, peer-groups are shared between network-instances and located in the default network-instance";
+    deviate replace {
+      type string;
+    }
+    deviate add {
+      must "../peer-group = /network-instances/network-instance[name='default']/protocols/protocol[name='BGP'][identifier='oc-pol-types:BGP']/bgp/peer-groups/peer-group/config/peer-group-name" {
+        error-message "peer-groups should be shared with the default network-instance";
+      }
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:state/oc-netinst:peer-group" {
+    description
+      "In EOS, peer-groups are shared between network-instances and located in the default network-instance";
+    deviate replace {
+      type string;
+    }
+    deviate add {
+      must "../peer-group = /network-instances/network-instance[name='default']/protocols/protocol[name='BGP'][identifier='oc-pol-types:BGP']/bgp/peer-groups/peer-group/peer-group-name" {
+        error-message "peer-groups should be shared with the default network-instance";
+      }
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:apply-policy/oc-netinst:config/oc-netinst:export-policy" {
+    description
+      "In EOS, only one outbound policy can be applied to per neighbor";
+    deviate add {
+      max-elements 1;
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:apply-policy/oc-netinst:config/oc-netinst:export-policy" {
+    description
+      "In EOS, only one outbound policy can be applied to per peer-group";
+    deviate add {
+      max-elements 1;
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:global/oc-netinst:default-route-distance/oc-netinst:config/oc-netinst:internal-route-distance" {
+    description
+      "In EOS, the default administrative distance for BGP learned routes is 200";
+    deviate add {
+      default "200";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:global/oc-netinst:default-route-distance/oc-netinst:config/oc-netinst:external-route-distance" {
+    description
+      "In EOS, the default administrative distance for BGP learned routes is 200";
+    deviate add {
+      default "200";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:global/oc-netinst:default-route-distance/oc-netinst:state/oc-netinst:internal-route-distance" {
+    description
+      "In EOS, the default administrative distance for BGP learned routes is 200";
+    deviate add {
+      default "200";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:global/oc-netinst:default-route-distance/oc-netinst:state/oc-netinst:external-route-distance" {
+    description
+      "In EOS, the default administrative distance for BGP learned routes is 200";
+    deviate add {
+      default "200";
+    }
+  }
+}

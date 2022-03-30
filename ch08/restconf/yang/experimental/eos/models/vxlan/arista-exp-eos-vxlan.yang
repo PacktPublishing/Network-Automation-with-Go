@@ -1,0 +1,60 @@
+module arista-exp-eos-vxlan {
+  yang-version 1;
+  namespace "http://arista.com/yang/experimental/eos/vxlan";
+  prefix vxlan-exp;
+
+  import openconfig-interfaces {
+    prefix oc-if;
+  }
+  import arista-exp-eos-vxlan-config {
+    prefix vxlan-config-exp;
+  }
+
+  organization
+    "Arista Networks <http://arista.com/>";
+  contact
+    "Arista Networks, Inc.
+     Product Support";
+  description
+    "This module contains OpenConfig VXLAN augments in Arista EOS.
+
+     Copyright (c) 2018 Arista Networks, Inc. All rights reserved.";
+
+  revision 2018-08-01 {
+    description
+      "Initial revision";
+    reference
+      "0.1.0";
+  }
+
+  grouping vxlan-top {
+    description
+      "Top-level VXLAN config and state containers";
+    container arista-vxlan {
+      description
+        "Container for VXLAN configuration
+         and state";
+      container config {
+        description
+          "Configuration data for VXLAN interfaces";
+        uses vxlan-config-exp:vxlan-config;
+        uses vxlan-config-exp:vti-config;
+      }
+      container state {
+        config false;
+        description
+          "State data for VXLAN interfaces";
+        uses vxlan-config-exp:vxlan-config;
+        uses vxlan-config-exp:vti-config;
+      }
+    }
+  }
+
+  augment "/oc-if:interfaces/oc-if:interface" {
+    when "oc-if:config/oc-if:name = 'Vxlan1'";
+    description
+      "Adds additional VXLAN-specific configuration to
+       interfaces model";
+    uses vxlan-top;
+  }
+}

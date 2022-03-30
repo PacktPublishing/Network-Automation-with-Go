@@ -1,0 +1,65 @@
+module arista-lacp-augments {
+  namespace "http://arista.com/yang/openconfig/lacp/augments";
+  prefix arista-lacp-augments;
+
+  import openconfig-lacp {
+    prefix oc-lacp;
+  }
+  import openconfig-extensions {
+    prefix oc-ext;
+  }
+
+  organization
+    "Arista Networks <http://arista.com/>";
+  contact
+    "Arista Networks, Inc.
+     Product Support";
+  description
+    "This module contains OpenConfig LACP augments in Arista EOS.
+
+     Copyright (c) 2017 Arista Networks, Inc. All rights reserved.";
+  oc-ext:openconfig-version "1.0.1";
+
+  revision 2020-11-30 {
+    description
+      "Fix errors reported by pyang.";
+    reference
+      "1.0.1";
+  }
+  revision 2017-09-14 {
+    description
+      "Initial augment file.";
+    reference
+      "1.0.0";
+  }
+
+  typedef selected-enum {
+    type enumeration {
+      enum selected {
+        description
+          "This member interface is in selected state";
+      }
+      enum unselected {
+        description
+          "This member interface is in unselected state";
+      }
+      enum standby {
+        description
+          "This member interface is in standby state";
+      }
+    }
+    description
+      "Member Interface selection state.";
+  }
+
+  augment "/oc-lacp:lacp/oc-lacp:interfaces/oc-lacp:interface/oc-lacp:members/oc-lacp:member/oc-lacp:state" {
+    description
+      "Add selection state to LACP member.";
+    leaf selected {
+      type selected-enum;
+      default "unselected";
+      description
+        "A member interface's selected state, can be one of the following: selected, standby and unselected";
+    }
+  }
+}

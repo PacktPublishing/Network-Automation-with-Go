@@ -1,0 +1,64 @@
+module arista-lldp-notsupported-deviations {
+  namespace "http://arista.com/yang/openconfig/lldp/notsupported-deviations";
+  prefix arista-lldp-notsupported-deviations;
+
+  import openconfig-lldp {
+    prefix oc-lldp;
+  }
+
+  organization
+    "Arista Networks, Inc.";
+  contact
+    "Arista Networks, Inc.
+     Product Support";
+  description
+    "This module contains OpenConfig lldp deviations in Arista EOS.
+     Copyright (c) 2020 Arista Networks, Inc. All rights reserved.";
+
+  revision 2020-02-04 {
+    description
+      "Not-supported deviations file.";
+  }
+
+  deviation "/oc-lldp:lldp/oc-lldp:interfaces/oc-lldp:interface/oc-lldp:neighbors/oc-lldp:neighbor/oc-lldp:capabilities" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-lldp:lldp/oc-lldp:interfaces/oc-lldp:interface/oc-lldp:neighbors/oc-lldp:neighbor/oc-lldp:config" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-lldp:lldp/oc-lldp:interfaces/oc-lldp:interface/oc-lldp:neighbors/oc-lldp:neighbor/oc-lldp:custom-tlvs/oc-lldp:tlv/oc-lldp:config" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-lldp:lldp/oc-lldp:interfaces/oc-lldp:interface/oc-lldp:neighbors/oc-lldp:neighbor/oc-lldp:state/oc-lldp:ttl" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-lldp:lldp/oc-lldp:interfaces/oc-lldp:interface/oc-lldp:state/oc-lldp:counters/oc-lldp:frame-error-out" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-lldp:lldp/oc-lldp:interfaces/oc-lldp:interface/oc-lldp:state/oc-lldp:counters/oc-lldp:last-clear" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-lldp:lldp/oc-lldp:state/oc-lldp:counters" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+}

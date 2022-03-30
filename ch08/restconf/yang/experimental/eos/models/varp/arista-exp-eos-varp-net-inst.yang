@@ -1,0 +1,68 @@
+module arista-exp-eos-varp-net-inst {
+  yang-version 1;
+  namespace "http://arista.com/yang/experimental/eos/varp/net-inst";
+  prefix varp-exp-net-inst;
+
+  import openconfig-yang-types {
+    prefix oc-yang;
+  }
+  import openconfig-network-instance {
+    prefix oc-ni;
+  }
+  import openconfig-network-instance-types {
+    prefix oc-ni-types;
+  }
+
+  organization
+    "Arista Networks <http://arista.com/>";
+  contact
+    "Arista Networks, Inc.
+     Product Support";
+  description
+    "This module contains OpenConfig VARP augments in Arista EOS.
+
+     Copyright (c) 2018 Arista Networks, Inc. All rights reserved.";
+
+  revision 2019-05-22 {
+    description
+      "Change namespace to be different from arista-exp-eos-varp-intf.";
+  }
+  revision 2018-10-01 {
+    description
+      "Initial revision";
+    reference
+      "0.1.0";
+  }
+
+  grouping varp-config {
+    description
+      "System configuration data for VARP";
+    leaf virtual-mac-address {
+      type oc-yang:mac-address;
+      description
+        "Virtual MAC address for the switch. All virtual router IP addresses are
+         mapped to this MAC address.";
+    }
+  }
+
+  augment "/oc-ni:network-instances/oc-ni:network-instance" {
+    when "oc-ni:config/oc-ni:type = 'oc-ni-types:DEFAULT_INSTANCE'";
+    description
+      "System VARP configuration";
+    container arista-varp {
+      description
+        "Top-level container for system VARP configuration and state";
+      container config {
+        description
+          "VARP configuration";
+        uses varp-config;
+      }
+      container state {
+        config false;
+        description
+          "VARP state";
+        uses varp-config;
+      }
+    }
+  }
+}

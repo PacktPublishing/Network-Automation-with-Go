@@ -1,0 +1,371 @@
+module arista-system-augments {
+  namespace "http://arista.com/yang/openconfig/system/augments";
+  prefix arista-system-augments;
+
+  import openconfig-system {
+    prefix oc-sys;
+  }
+  import openconfig-types {
+    prefix oc-types;
+  }
+  import openconfig-inet-types {
+    prefix oc-inet;
+  }
+  import openconfig-extensions {
+    prefix oc-ext;
+  }
+  import openconfig-system-management {
+    prefix oc-sys-mgmt;
+  }
+
+  organization
+    "Arista Networks, Inc.";
+  contact
+    "Arista Networks, Inc.
+     Product Support";
+  description
+    "This module contains OpenConfig system augments in Arista EOS.
+     Copyright (c) 2018 Arista Networks, Inc. All rights reserved.";
+  oc-ext:openconfig-version "1.2.1";
+
+  revision 2021-03-03 {
+    description
+      "Add dscp and access-control-list leafs under grpc-server and grpc-servers.";
+    reference
+      "1.2.1";
+  }
+  revision 2021-01-07 {
+    description
+      "add grpc-servers list node. Add network-instance and name leafs in config and state container";
+    reference
+      "1.1.3";
+  }
+  revision 2021-01-06 {
+    description
+      "Add default value of 'default' to /system/dns/state/network-instance.";
+    reference
+      "1.1.2";
+  }
+  revision 2020-11-30 {
+    description
+      "Fix errors reported by pyang.";
+    reference
+      "1.1.1";
+  }
+  revision 2020-03-09 {
+    description
+      "Add remote-server/(config|state)/arista-ports augmentation";
+    reference
+      "1.1.0";
+  }
+  revision 2018-06-03 {
+    description
+      "Initial augment file.";
+    reference
+      "1.0.0";
+  }
+
+  augment "/oc-sys:system/oc-sys:dns/oc-sys:config" {
+    leaf network-instance {
+      type string;
+      default "default";
+      description
+        "The network instance where the DNS servers are configured.";
+    }
+    description
+      "Add network-instance to each DNS server configuration.";
+  }
+
+  augment "/oc-sys:system/oc-sys:dns/oc-sys:state" {
+    leaf network-instance {
+      type string;
+      default "default";
+      description
+        "The network instance where the DNS servers are configured.";
+    }
+    description
+      "Add network-instance to each DNS server state.";
+  }
+
+  grouping aaa-radius-server-global-config {
+    description
+      "Grouping of AAA RADIUS server global configuration parameters.";
+    leaf retransmit-attempts {
+      type uint8 {
+        range "0..100";
+      }
+      description
+        "Number of times the device may resend a request to the
+         RADIUS server when it is unresponsive";
+    }
+    leaf secret-key {
+      type oc-types:routing-password;
+      description
+        "The unencrypted shared key used between the authentication
+         server and the device.";
+    }
+    leaf timeout {
+      type uint16 {
+        range "1..1000";
+      }
+      units "seconds";
+      description
+        "Set the timeout in seconds on responses from the RADIUS
+         server";
+    }
+  }
+
+  grouping aaa-radius-server-common-top {
+    description
+      "Top level grouping of AAA RADIUS server parameters.";
+    container radius {
+      description
+        "Top level container for RADIUS, including configuration
+         and state data.";
+      container config {
+        description
+          "Configuration data for RADIUS server";
+        uses aaa-radius-server-global-config;
+      }
+      container state {
+        config false;
+        description
+          "Operational state data for RADIUS servers";
+        uses aaa-radius-server-global-config;
+      }
+    }
+  }
+
+  grouping aaa-tacacs-server-global-config {
+    description
+      "Grouping of AAA TACACS server global configuration parameters.";
+    leaf secret-key {
+      type oc-types:routing-password;
+      description
+        "The unencrypted shared key used between the authentication
+         server and the device.";
+    }
+    leaf timeout {
+      type uint16 {
+        range "1..1000";
+      }
+      units "seconds";
+      description
+        "Set the timeout in seconds on responses from the TACACS+
+         server";
+    }
+  }
+
+  grouping aaa-tacacs-server-common-top {
+    description
+      "Top level grouping of AAA TACACS+ server parameters.";
+    container tacacs {
+      description
+        "Top level container for TACACS+, including configuration
+         and state data.";
+      container config {
+        description
+          "Configuration data for TACACS+ server";
+        uses aaa-tacacs-server-global-config;
+      }
+      container state {
+        config false;
+        description
+          "Operational state data for TACACS+ server";
+        uses aaa-tacacs-server-global-config;
+      }
+    }
+  }
+
+  augment "/oc-sys:system/oc-sys:aaa" {
+    container global {
+      description
+        "Top-level container for RADIUS/TACACS+ server global configuration";
+      uses aaa-radius-server-common-top;
+      uses aaa-tacacs-server-common-top;
+    }
+    description
+      "Add RADIUS and TACACS+ configuration to AAA.";
+  }
+
+  typedef accept-mode-enum {
+    type enumeration {
+      enum DISABLED {
+        description
+          "Packets destined for virtual address are not accepted,
+           this is the default behavior";
+      }
+      enum ENABLED {
+        description
+          "Packets destined for virtual address are accepted";
+      }
+    }
+    description
+      "Configure whether packets destined for
+       virtual addresses are accepted even when the virtual
+       address is not owned by the router interface";
+  }
+
+  augment "/oc-sys:system/oc-sys:grpc-server/oc-sys:config" {
+    description
+      "Configuration data for the system gRPC server";
+    leaf network-instance {
+      type string;
+      default "default";
+      description
+        "The L2, L3, or L2+L3 forwarding instances that are
+         configured on the local system";
+    }
+    leaf dscp {
+      type oc-inet:dscp;
+      description
+        "The Differentiated Services Code Point
+         (DSCP) field of the header.";
+    }
+    leaf access-control-list {
+      type string;
+      description
+        "The name of the Access Control List (ACL) set.";
+    }
+  }
+
+  augment "/oc-sys:system/oc-sys:grpc-server/oc-sys:state" {
+    description
+      "Operational state data for the system gRPC server";
+    leaf network-instance {
+      type string;
+      default "default";
+      description
+        "The L2, L3, or L2+L3 forwarding instances that are
+         configured on the local system";
+    }
+    leaf dscp {
+      type oc-inet:dscp;
+      description
+        "The Differentiated Services Code Point
+         (DSCP) field of the header.";
+    }
+    leaf access-control-list {
+      type string;
+      description
+        "The name of the Access Control List (ACL) set.";
+    }
+  }
+
+  augment "/oc-sys:system" {
+    container fhrp {
+      description
+        "EOS First Hop Redundancy Protocol (FHRP)";
+      container config {
+        description
+          "Configuration for EOS FHRP";
+        leaf accept-mode {
+          type accept-mode-enum;
+          default "DISABLED";
+          description
+            "Accept mode for FHRP";
+        }
+      }
+    }
+    description
+      "Add FHRP configuratin to system module.";
+    container grpc-servers {
+      description
+        "Enclosing container for the list of gRPC servers";
+      list grpc-server {
+        key "name";
+        description
+          "Configuration data for the gRPC server";
+        leaf name {
+          type leafref {
+            path "../config/name";
+          }
+          description
+            "A unique name identifying the transport";
+        }
+        container config {
+          description
+            "Configuration data for the system gRPC server";
+          leaf name {
+            type string;
+            description
+              "A unique name identifying the network instance";
+          }
+          leaf network-instance {
+            type string;
+            default "default";
+            description
+              "The L2, L3, or L2+L3 forwarding instances that are
+               configured on the local system";
+          }
+          leaf dscp {
+            type oc-inet:dscp;
+            description
+              "The Differentiated Services Code Point
+               (DSCP) field of the header.";
+          }
+          leaf access-control-list {
+            type string;
+            description
+              "The name of the Access Control List (ACL) set.";
+          }
+          uses oc-sys-mgmt:system-grpc-server-config;
+        }
+        container state {
+          config false;
+          description
+            "Operational state data for the system gRPC server";
+          leaf name {
+            type string;
+            description
+              "A unique name identifying the transport";
+          }
+          leaf network-instance {
+            type string;
+            default "default";
+            description
+              "The L2, L3, or L2+L3 forwarding instances that are
+               configured on the local system.";
+          }
+          leaf dscp {
+            type oc-inet:dscp;
+            description
+              "The Differentiated Services Code Point
+               (DSCP) field of the header.";
+          }
+          leaf access-control-list {
+            type string;
+            description
+              "The name of the Access Control List (ACL) set.";
+          }
+          uses oc-sys-mgmt:system-grpc-server-config;
+        }
+      }
+    }
+  }
+
+  augment "/oc-sys:system/oc-sys:ssh-server/oc-sys:config/oc-sys:timeout" {
+    description
+      "Set the idle timeout in minutes on terminal connections to the system for the protocol with result being displayed in seconds.";
+  }
+
+  augment "/oc-sys:system/oc-sys:logging/oc-sys:remote-servers/oc-sys:remote-server/oc-sys:config" {
+    leaf-list arista-ports {
+      type oc-inet:port-number;
+      description
+        "Sets the destination port numbers for syslog UDP messages to the server.  The default for syslog is 514.";
+    }
+    description
+      "Add port numbers to logging remote-server configuration.";
+  }
+
+  augment "/oc-sys:system/oc-sys:logging/oc-sys:remote-servers/oc-sys:remote-server/oc-sys:state" {
+    leaf-list arista-ports {
+      type oc-inet:port-number;
+      description
+        "Sets the destination port numbers for syslog UDP messages to the server.  The default for syslog is 514.";
+    }
+    description
+      "Add port numbers to logging remote-server state.";
+  }
+}

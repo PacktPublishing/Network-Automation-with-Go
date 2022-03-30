@@ -1,0 +1,140 @@
+module arista-exp-eos-multicast {
+  yang-version 1;
+  namespace "http://arista.com/yang/experimental/multicast";
+  prefix multicast-exp;
+
+  import arista-eos-types {
+    prefix eos-types;
+  }
+  import arista-exp-eos {
+    prefix eos-exp;
+  }
+  import ietf-inet-types {
+    prefix inet;
+  }
+
+  organization
+    "Arista Networks <http://arista.com/>";
+  contact
+    "Arista Networks, Inc.
+     Product Support";
+  description
+    "Models for the static multicast routing subsystem of Arista EOS
+
+     Copyright (c) 2017 Arista Networks, Inc. All rights reserved.";
+
+  revision 2017-10-20 {
+    description
+      "Initial revision";
+    reference
+      "0.0.1";
+  }
+
+  augment "/eos-exp:arista/eos-exp:eos" {
+    description
+      "augment at /arista/eos";
+    container routing {
+      description
+        "Top-level configuration and state for routing";
+      container multicast {
+        description
+          "Top-level configuration and state for multicast";
+        container routeconfig {
+          description
+            "Top-level configuration and state for routeconfig";
+          container static {
+            description
+              "IP Static Multicast Routing Config.";
+            uses McastCommon-StaticMrouteConfigColl;
+          }
+        }
+      }
+    }
+  }
+
+  grouping McastCommon-StaticMrouteConfig {
+    description
+      "grouping for the Static Multicast route Config";
+    list staticMcastRoute {
+      key "key-g key-s";
+      description
+        "Static Multicast Route Key.";
+      leaf key-g {
+        type inet:ip-prefix;
+        description
+          "Multicast Group prefix.";
+      }
+      leaf key-s {
+        type inet:ip-prefix;
+        description
+          "Multicast Source Prefix.";
+      }
+      leaf iif {
+        type eos-types:Arnet-IntfId;
+        description
+          "iif.";
+      }
+      list oifs {
+        key "index";
+        description
+          "list of oifs.";
+        leaf index {
+          type eos-types:Arnet-IntfId;
+          description
+            "interface id.";
+        }
+        leaf value {
+          type boolean;
+          description
+            "true if interface is in oif list.";
+        }
+      }
+      leaf routePriority {
+        type uint8;
+        description
+          "route priority.";
+      }
+      leaf rpaId {
+        type uint16;
+        description
+          "rpa index.";
+      }
+      leaf toCpu {
+        type boolean;
+        description
+          "true if flow needs to be sent to cpu.";
+      }
+    }
+    leaf vrfName {
+      type string;
+      description
+        "vrf name.";
+    }
+  }
+
+  grouping McastCommon-StaticMrouteConfigColl {
+    description
+      "grouping for the Static Multicast Config Collection";
+    list intfConfig {
+      key "index";
+      description
+        "list of interfaces on which static multicast routing is enabled.";
+      leaf index {
+        type eos-types:Arnet-IntfId;
+        description
+          "interface id.";
+      }
+      leaf value {
+        type boolean;
+        description
+          "true if static multicast routing is enabled on interface.";
+      }
+    }
+    list vrfConfig {
+      key "vrfName";
+      description
+        "static multicast routes configured per vrf.";
+      uses McastCommon-StaticMrouteConfig;
+    }
+  }
+}

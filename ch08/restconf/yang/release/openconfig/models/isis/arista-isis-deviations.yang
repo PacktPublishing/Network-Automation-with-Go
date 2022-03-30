@@ -1,0 +1,603 @@
+module arista-isis-deviations {
+  namespace "http://arista.com/yang/openconfig/isis/deviations";
+  prefix arista-isis-deviations;
+
+  import openconfig-network-instance {
+    prefix oc-netinst;
+  }
+  import openconfig-isis-types {
+    prefix oc-isis-types;
+  }
+  import openconfig-extensions {
+    prefix oc-ext;
+  }
+
+  organization
+    "Arista Networks, Inc.";
+  contact
+    "Arista Networks, Inc.
+     Product Support";
+  description
+    "This module contains OpenConfig ISIS deviations in Arista EOS.
+
+     Copyright (c) 2017 Arista Networks, Inc. All rights reserved.";
+
+  oc-ext:openconfig-version "1.2.0";
+
+  revision 2021-04-27 {
+    description
+      "add default value of false to igp-ldp-sync/state/enabled";
+    reference
+      "1.2.0";
+  }
+  revision 2021-04-13 {
+    description
+      "Added support for iid-tlv leaf";
+    reference
+      "1.1.0";
+  }
+  revision 2020-11-30 {
+    description
+      "Fix errors reported by pyang.";
+    reference
+      "1.0.2";
+  }
+  revision 2019-05-14 {
+    description
+      "Added prefixes to identityrefs.";
+    reference
+      "1.0.1";
+  }
+  revision 2017-08-21 {
+    description
+      "Initial deviation file.";
+    reference
+      "1.0.0";
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:global/oc-netinst:config/oc-netinst:authentication-check" {
+    description
+      "Configuration of authentication-check is not supported in EOS, it is always enabled.";
+    deviate add {
+      must "../authentication-check = 'true'" {
+        error-message "Configuration of authentication-check is not supported in EOS, it is always enabled";
+      }
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:global/oc-netinst:config/oc-netinst:net" {
+    description
+      "Configuration of multiple NET is not supported in EOS";
+    deviate add {
+      max-elements 1;
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:global/oc-netinst:config/oc-netinst:net" {
+    description
+      "Both odd and even number of bytes for area address permitted in EOS";
+    deviate replace {
+      type string {
+        pattern '(([a-fA-F0-9]{2}\.([a-fA-F0-9]{4}\.){0,6})|(([a-fA-F0-9]{4}\.){1,6}))'
+              + '([a-fA-F0-9]{4}\.){3}[a-fA-F0-9]{2}';
+      }
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:global/oc-netinst:state/oc-netinst:net" {
+    description
+      "Both odd and even number of bytes for area address permitted in EOS";
+    deviate replace {
+      type string {
+        pattern '(([a-fA-F0-9]{2}\.([a-fA-F0-9]{4}\.){0,6})|(([a-fA-F0-9]{4}\.){1,6}))'
+              + '([a-fA-F0-9]{4}\.){3}[a-fA-F0-9]{2}';
+      }
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:global/oc-netinst:config/oc-netinst:maximum-area-addresses" {
+    description
+      "Configuration of multiple area addresses are not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:global/oc-netinst:state/oc-netinst:maximum-area-addresses" {
+    description
+      "Configuration of multiple area addresses are not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:global/oc-netinst:config/oc-netinst:fast-flooding" {
+    description
+      "fast-flooding is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:global/oc-netinst:state/oc-netinst:fast-flooding" {
+    description
+      "fast-flooding is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:global/oc-netinst:config/oc-netinst:max-ecmp-paths" {
+    description
+      "max-ecmp-paths is only supported per address-family in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:global/oc-netinst:lsp-bit/oc-netinst:overload-bit/oc-netinst:reset-triggers/oc-netinst:reset-trigger" {
+    description
+      "Configuration of multiple reset-triggers for overload-bit is not supported in EOS";
+    deviate add {
+      max-elements 1;
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:global/oc-netinst:lsp-bit/oc-netinst:overload-bit/oc-netinst:reset-triggers/oc-netinst:reset-trigger/oc-netinst:config/oc-netinst:delay" {
+    description
+      "Overload Bit delay range is restricted in EOS";
+    deviate replace {
+      type uint16 {
+        range "1..3600";
+      }
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:global/oc-netinst:reference-bandwidth/oc-netinst:config/oc-netinst:reference-bandwidth" {
+    description
+      "reference-bandwith is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:global/oc-netinst:nsr" {
+    description
+      "NSR is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:global/oc-netinst:graceful-restart/oc-netinst:config/oc-netinst:helper-only" {
+    description
+      "Helper-only is enabled by default in EOS";
+    deviate add {
+      default "true";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:global/oc-netinst:timers/oc-netinst:config/oc-netinst:lsp-lifetime-interval" {
+    description
+      "LSP lifetime interval range is restricted in EOS";
+    deviate replace {
+      type uint16 {
+        range "60..65535";
+      }
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:global/oc-netinst:timers/oc-netinst:config/oc-netinst:lsp-refresh-interval" {
+    description
+      "LSP refresh interval range is restricted in EOS";
+    deviate replace {
+      type uint16 {
+        range "30..65535";
+      }
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:global/oc-netinst:timers/oc-netinst:spf/oc-netinst:config/oc-netinst:spf-hold-interval" {
+    description
+      "SPF hold interval range is restricted in EOS, default is 2000";
+    deviate replace {
+      type uint64 {
+        range "1000..300000";
+      }
+      default "2000";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:global/oc-netinst:timers/oc-netinst:spf/oc-netinst:config/oc-netinst:spf-first-interval" {
+    description
+      "SPF first interval range is restricted in EOS, default is 1000";
+    deviate replace {
+      type uint64 {
+        range "1..300000";
+      }
+    }
+    deviate add {
+      default "1000";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:global/oc-netinst:timers/oc-netinst:spf/oc-netinst:config/oc-netinst:spf-second-interval" {
+    description
+      "SPF second interval range is restricted in EOS, default is 1000";
+    deviate replace {
+      type uint64 {
+        range "1..300000";
+      }
+    }
+    deviate add {
+      default "1000";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:global/oc-netinst:timers/oc-netinst:lsp-generation/oc-netinst:config/oc-netinst:lsp-max-wait-interval" {
+    description
+      "LSP max wait interval range is restricted in EOS, default is 5000";
+    deviate replace {
+      type uint64 {
+        range "1000..300000";
+      }
+    }
+    deviate add {
+      default "5000";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:global/oc-netinst:timers/oc-netinst:lsp-generation/oc-netinst:config/oc-netinst:lsp-first-wait-interval" {
+    description
+      "LSP first wait interval range is restricted in EOS, default is 50";
+    deviate replace {
+      type uint64 {
+        range "1..300000";
+      }
+    }
+    deviate add {
+      default "50";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:global/oc-netinst:timers/oc-netinst:lsp-generation/oc-netinst:config/oc-netinst:lsp-second-wait-interval" {
+    description
+      "LSP second wait interval range is restricted in EOS, default is 50";
+    deviate replace {
+      type uint64 {
+        range "1..300000";
+      }
+    }
+    deviate add {
+      default "50";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:global/oc-netinst:transport/oc-netinst:config/oc-netinst:lsp-mtu-size" {
+    description
+      "Configuration of lsp-mtu-size is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:global/oc-netinst:mpls/oc-netinst:igp-ldp-sync/oc-netinst:config/oc-netinst:enabled" {
+    description
+      "MPLS igp-ldp-sync is disabled by default in EOS";
+    deviate replace {
+      default "false";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:global/oc-netinst:mpls/oc-netinst:igp-ldp-sync/oc-netinst:state/oc-netinst:enabled" {
+    description
+      "MPLS igp-ldp-sync is disabled by default in EOS";
+    deviate replace {
+      default "false";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:global/oc-netinst:mpls/oc-netinst:igp-ldp-sync/oc-netinst:config/oc-netinst:post-session-up-delay" {
+    description
+      "Configuration of igp-ldp-sync post-session-up-delay per IGP is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:global/oc-netinst:igp-shortcuts/oc-netinst:afi/oc-netinst:config/oc-netinst:afi-name" {
+    description
+      "IPv4 is the only AFI type supported for IGP shortcuts in EOS";
+    deviate add {
+      must "../afi-name = 'oc-isis-types:IPV4'" {
+        error-message "IPv4 is the only AFI type supported for IGP shortcuts in EOS";
+      }
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:global/oc-netinst:afi-safi/oc-netinst:af/oc-netinst:config/oc-netinst:safi-name" {
+    description
+      "UNICAST is the only SAFI type supported in EOS";
+    deviate add {
+      must "../safi-name = 'oc-isis-types:UNICAST'" {
+        error-message "UNICAST is the only SAFI type supported in EOS";
+      }
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:global/oc-netinst:afi-safi/oc-netinst:af/oc-netinst:multi-topology/oc-netinst:config" {
+    description
+      "multi-topology is not supported for IPV4 address-family in EOS";
+    deviate add {
+      must "../../afi-name = 'oc-isis-types:IPV6'" {
+        error-message "multi-topology is not supported for IPV4 address-family in EOS";
+      }
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:global/oc-netinst:afi-safi/oc-netinst:af/oc-netinst:config/oc-netinst:metric" {
+    description
+      "metric range is restricted in EOS";
+    deviate replace {
+      type uint32 {
+        range "1..16777214";
+      }
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:levels/oc-netinst:level/oc-netinst:config/oc-netinst:metric-style" {
+    description
+      "Configuration of metric-style is not supported in EOS, it is always WIDE_METRIC";
+    deviate add {
+      must "../metric-style = 'WIDE_METRIC'" {
+        error-message "Configuration of metric-style is not supported in EOS, it is always WIDE_METRIC";
+      }
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:levels/oc-netinst:level/oc-netinst:config/oc-netinst:authentication-check" {
+    description
+      "Configuration of authentication-check is not supported in EOS, it is always enabled.";
+    deviate add {
+      must "../authentication-check = 'true'" {
+        error-message "Configuration of authentication-check is not supported in EOS, it is always enabled";
+      }
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:levels/oc-netinst:level/oc-netinst:route-preference/oc-netinst:config/oc-netinst:external-route-preference" {
+    description
+      "external-route-preference range is restricted in EOS";
+    deviate replace {
+      type uint8 {
+        range "1..255";
+      }
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:levels/oc-netinst:level/oc-netinst:route-preference/oc-netinst:config/oc-netinst:internal-route-preference" {
+    description
+      "internal-route-preference range is restricted in EOS";
+    deviate replace {
+      type uint8 {
+        range "1..255";
+      }
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:config/oc-netinst:hello-padding" {
+    description
+      "Enum LOOSE and DISABLED of type oc-isis-types:hello-padding-type are not supported in EOS";
+    deviate add {
+      must "../hello-padding = 'STRICT' or ../hello-padding = 'ADAPTIVE'" {
+        error-message "Hello Padding must be either STRICT or ADAPTIVE";
+      }
+      default "STRICT";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:afi-safi/oc-netinst:af/oc-netinst:config/oc-netinst:enabled" {
+    description
+      "explicit enable/disable of address-family is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:levels/oc-netinst:level/oc-netinst:packet-counters/oc-netinst:lsp/oc-netinst:state/oc-netinst:processed" {
+    description
+      "lsp packet processed counter is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:levels/oc-netinst:level/oc-netinst:packet-counters/oc-netinst:lsp/oc-netinst:state/oc-netinst:retransmit" {
+    description
+      "lsp packet retransmit counter is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:levels/oc-netinst:level/oc-netinst:packet-counters/oc-netinst:iih/oc-netinst:state/oc-netinst:processed" {
+    description
+      "iih packet processed counter is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:levels/oc-netinst:level/oc-netinst:packet-counters/oc-netinst:iih/oc-netinst:state/oc-netinst:retransmit" {
+    description
+      "iih packet retransmit counter is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:levels/oc-netinst:level/oc-netinst:packet-counters/oc-netinst:ish/oc-netinst:state/oc-netinst:received" {
+    description
+      "ish packet received counter is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:levels/oc-netinst:level/oc-netinst:packet-counters/oc-netinst:ish/oc-netinst:state/oc-netinst:processed" {
+    description
+      "ish packet processed counter is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:levels/oc-netinst:level/oc-netinst:packet-counters/oc-netinst:ish/oc-netinst:state/oc-netinst:dropped" {
+    description
+      "ish packet dropped counter is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:levels/oc-netinst:level/oc-netinst:packet-counters/oc-netinst:ish/oc-netinst:state/oc-netinst:sent" {
+    description
+      "ish packet sent counter is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:levels/oc-netinst:level/oc-netinst:packet-counters/oc-netinst:ish/oc-netinst:state/oc-netinst:retransmit" {
+    description
+      "ish packet retransmit counter is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:levels/oc-netinst:level/oc-netinst:packet-counters/oc-netinst:esh/oc-netinst:state/oc-netinst:received" {
+    description
+      "esh packet received counter is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:levels/oc-netinst:level/oc-netinst:packet-counters/oc-netinst:esh/oc-netinst:state/oc-netinst:processed" {
+    description
+      "esh packet processed counter is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:levels/oc-netinst:level/oc-netinst:packet-counters/oc-netinst:esh/oc-netinst:state/oc-netinst:dropped" {
+    description
+      "esh packet dropped counter is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:levels/oc-netinst:level/oc-netinst:packet-counters/oc-netinst:esh/oc-netinst:state/oc-netinst:sent" {
+    description
+      "esh packet sent counter is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:levels/oc-netinst:level/oc-netinst:packet-counters/oc-netinst:esh/oc-netinst:state/oc-netinst:retransmit" {
+    description
+      "esh packet retransmit counter is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:levels/oc-netinst:level/oc-netinst:packet-counters/oc-netinst:psnp/oc-netinst:state/oc-netinst:processed" {
+    description
+      "psnp packet processed counter is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:levels/oc-netinst:level/oc-netinst:packet-counters/oc-netinst:psnp/oc-netinst:state/oc-netinst:retransmit" {
+    description
+      "psnp packet retransmit counter is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:levels/oc-netinst:level/oc-netinst:packet-counters/oc-netinst:csnp/oc-netinst:state/oc-netinst:processed" {
+    description
+      "csnp packet processed counter is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:levels/oc-netinst:level/oc-netinst:packet-counters/oc-netinst:csnp/oc-netinst:state/oc-netinst:retransmit" {
+    description
+      "csnp packet retransmit counter is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:levels/oc-netinst:level/oc-netinst:packet-counters/oc-netinst:unknown/oc-netinst:state/oc-netinst:received" {
+    description
+      "unknown packet received counter is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:levels/oc-netinst:level/oc-netinst:packet-counters/oc-netinst:unknown/oc-netinst:state/oc-netinst:processed" {
+    description
+      "unknown packet processed counter is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:levels/oc-netinst:level/oc-netinst:packet-counters/oc-netinst:unknown/oc-netinst:state/oc-netinst:dropped" {
+    description
+      "unknown packet dropped counter is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:levels/oc-netinst:level/oc-netinst:packet-counters/oc-netinst:unknown/oc-netinst:state/oc-netinst:sent" {
+    description
+      "unknown packet sent counter is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:levels/oc-netinst:level/oc-netinst:packet-counters/oc-netinst:unknown/oc-netinst:state/oc-netinst:retransmit" {
+    description
+      "unknown packet retransmit counter is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:levels/oc-netinst:level/oc-netinst:timers/oc-netinst:config/oc-netinst:hello-interval" {
+    description
+      "hello-interval range is restricted in EOS";
+    deviate replace {
+      type uint32 {
+        range "1..300";
+      }
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:levels/oc-netinst:level/oc-netinst:timers/oc-netinst:config/oc-netinst:hello-multiplier" {
+    description
+      "hello-multiplier range is restricted in EOS";
+    deviate replace {
+      type uint8 {
+        range "3..100";
+      }
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:levels/oc-netinst:level/oc-netinst:afi-safi/oc-netinst:af/oc-netinst:config/oc-netinst:enabled" {
+    description
+      "explicit enable/disable of address-family is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:levels/oc-netinst:level/oc-netinst:afi-safi/oc-netinst:af/oc-netinst:config/oc-netinst:metric" {
+    description
+      "metric range is restricted in EOS";
+    deviate replace {
+      type union {
+        type uint32 {
+          range "1..16777214";
+        }
+        type enumeration {
+          enum GLOBAL_METRIC {
+            description
+              "When set to GLOBAL_METRIC, metric configured under global afi-safi container will be advertised";
+          }
+        }
+      }
+      default "GLOBAL_METRIC";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:levels/oc-netinst:level/oc-netinst:afi-safi/oc-netinst:af/oc-netinst:segment-routing/oc-netinst:prefix-sids/oc-netinst:prefix-sid/oc-netinst:config/oc-netinst:label-options" {
+    description
+      "Configuration of label-options in not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:timers/oc-netinst:config/oc-netinst:csnp-interval" {
+    description
+      "configuration of csnp-interval is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:timers/oc-netinst:config/oc-netinst:lsp-pacing-interval" {
+    description
+      "configuration of lsp-pacing-interval is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:bfd/oc-netinst:config/oc-netinst:bfd-tlv" {
+    description
+      "configuration of bfd-tlv is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:levels/oc-netinst:level/oc-netinst:adjacencies/oc-netinst:adjacency/oc-netinst:state/oc-netinst:area-address" {
+    description
+      "area-address can vary from 1 to 20 bytes in length";
+    deviate replace {
+      type string {
+        pattern '(([a-fA-F0-9]{2}(\.[a-fA-F0-9]{4}){0,9})|([a-fA-F0-9]{4}(\.[a-fA-F0-9]{4}){0,9}))';
+      }
+    }
+  }
+}

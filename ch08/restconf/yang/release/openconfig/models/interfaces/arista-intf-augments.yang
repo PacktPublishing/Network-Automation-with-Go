@@ -1,0 +1,858 @@
+module arista-intf-augments {
+  namespace "http://arista.com/yang/openconfig/interfaces/augments";
+  prefix arista-intf-augments;
+
+  import openconfig-interfaces {
+    prefix oc-if;
+  }
+  import openconfig-if-ethernet {
+    prefix oc-eth;
+  }
+  import openconfig-if-aggregate {
+    prefix oc-lag;
+  }
+  import openconfig-vlan {
+    prefix oc-vlan;
+  }
+  import iana-if-type {
+    prefix ift;
+  }
+  import openconfig-if-ip {
+    prefix oc-ip;
+  }
+  import openconfig-inet-types {
+    prefix oc-inet;
+  }
+  import openconfig-yang-types {
+    prefix oc-yang;
+  }
+  import openconfig-extensions {
+    prefix oc-ext;
+  }
+
+  organization
+    "Arista Networks <http://arista.com/>";
+  contact
+    "Arista Networks, Inc.
+     Product Support";
+  description
+    "This module contains OpenConfig interface augments in Arista EOS.
+
+     Copyright (c) 2017 Arista Networks, Inc. All rights reserved.";
+  oc-ext:openconfig-version "1.5.0";
+
+  revision 2021-05-21 {
+    description
+      "Add augmentations for HG ethernet speeds.";
+    reference
+      "1.5.0";
+  }
+  revision 2021-01-29 {
+    description
+      "Remove augment for interfaces/interface/ethernet/poe/state/power-class.";
+    reference
+      "1.4.4";
+  }
+  revision 2020-11-30 {
+    description
+      "Fix errors reported by pyang.";
+    reference
+      "1.4.3";
+  }
+  revision 2020-08-10 {
+    description
+      "Use config oc-if:type path to be in accessible tree";
+    reference
+      "1.4.2";
+  }
+  revision 2020-05-13 {
+    description
+      "Remove augmentations for 200G and 400G ethernet speeds, as
+       they are now defined in openconfig-if-ethernet.";
+    reference
+      "1.4.1";
+  }
+  revision 2020-01-07 {
+    description
+      "Add l2protocol-forwarding-profile leaf node.";
+    reference
+      "1.4.0";
+  }
+  revision 2020-01-06 {
+    description
+      "Removed unused imports.";
+    reference
+      "1.3.1";
+  }
+  revision 2019-12-04 {
+    description
+      "Add support for Priority Flow Control(PFC) counters";
+    reference
+      "1.3.0";
+  }
+  revision 2019-11-27 {
+    description
+      "Add poe-supported leaf.";
+    reference
+      "1.2.3";
+  }
+  revision 2019-11-13 {
+    description
+      "Remove arista-tpid augment from oc-if:config in interfaces.";
+    reference
+      "1.2.2";
+  }
+  revision 2019-07-31 {
+    description
+      "Correct oc-if:type path in when statement";
+    reference
+      "1.2.1";
+  }
+  revision 2019-01-20 {
+    description
+      "Add support for reflector interfaces (RFC2544)";
+    reference
+      "1.2.0";
+  }
+  revision 2018-10-02 {
+    description
+      "Add tpid range, trunk groups as interface members. support for
+       50G-1, 100G-2, 200G and 400G ethernet speeds. Config for 1000BASE-T,
+       fec encoding, load-interval and inactive flag for interfaces.";
+    reference
+      "1.1.0";
+  }
+  revision 2017-10-01 {
+    description
+      "Initial augment file.";
+    reference
+      "1.0.0";
+  }
+
+  typedef fallback-enum {
+    type enumeration {
+      enum none {
+        description
+          "Fallback not enabled on this interface";
+      }
+      enum static {
+        description
+          "Static fallback enabled on this interface";
+      }
+      enum individual {
+        description
+          "Individual fallback enabled on this interface";
+      }
+    }
+    description
+      "type definition for fallback on the interface";
+  }
+
+  typedef fallback-state-enum {
+    type enumeration {
+      enum fallbackStateUnconfigured {
+        description
+          "Fallback not enabled on this interface";
+      }
+      enum fallbackStateConfigured {
+        description
+          "Static fallback enabled on this interface";
+      }
+      enum fallbackStateInitialized {
+        description
+          "Individual fallback enabled on this interface";
+      }
+      enum fallbackStateMonitoring {
+        description
+          "Individual fallback enabled on this interface";
+      }
+      enum fallbackStateEnabled {
+        description
+          "Individual fallback enabled on this interface";
+      }
+    }
+    description
+      "type definition for fallback state on the interface";
+  }
+
+  typedef arista-addr-type {
+    type enumeration {
+      enum PRIMARY {
+        description
+          "Primary address type.";
+      }
+      enum SECONDARY {
+        description
+          "Secondary address type.";
+      }
+      enum IPV6 {
+        description
+          "IPv6 address type.";
+      }
+    }
+    description
+      "EOS address type.";
+  }
+
+  augment "/oc-if:interfaces/oc-if:interface/oc-lag:aggregation/oc-lag:config" {
+    leaf fallback {
+      type fallback-enum;
+      description
+        "fallback type on this interface.";
+    }
+    leaf fallback-timeout {
+      type uint16 {
+        range "0..300";
+      }
+      default "90";
+      description
+        "fallback timeout on this interface.";
+    }
+    description
+      "Adds fallback type on this interface.";
+  }
+
+  augment "/oc-if:interfaces/oc-if:interface/oc-lag:aggregation/oc-lag:state" {
+    leaf fallback {
+      type fallback-enum;
+      description
+        "Fallback status on this interface.";
+    }
+    leaf fallback-state {
+      type fallback-state-enum;
+      description
+        "Fallback status on this interface.";
+    }
+    description
+      "Adds fallback state on this interface.";
+  }
+
+  grouping trunkGroupsEOSConfig {
+    leaf-list trunk-groups {
+      type string;
+      description
+        "Set of trunk groups the interface is a member of";
+    }
+    description
+      "grouping of a list of trunk groups";
+  }
+
+  augment "/oc-if:interfaces/oc-if:interface/oc-lag:aggregation/oc-vlan:switched-vlan/oc-vlan:config" {
+    when "../../../oc-if:config/oc-if:type = 'ift:ieee8023adLag'" {
+      description
+        "Active when the interface is a LAG";
+    }
+    uses trunkGroupsEOSConfig;
+    description
+      "Adds trunk group settings to a LAG interface";
+  }
+
+  augment "/oc-if:interfaces/oc-if:interface/oc-eth:ethernet/oc-vlan:switched-vlan/oc-vlan:config" {
+    when "../../../oc-if:config/oc-if:type = 'ift:ethernetCsmacd'" {
+      description
+        "Active when the interface is Ethernet";
+    }
+    uses trunkGroupsEOSConfig;
+    description
+      "Adds trunk group settings to an Ethernet interface";
+  }
+
+  augment "/oc-if:interfaces/oc-if:interface/oc-if:state" {
+    description
+      "Add leaf for tracking inactive interfaces.";
+    leaf inactive {
+      type boolean;
+      description
+        "Interface may be inactive due to configuration.";
+    }
+  }
+
+  augment "/oc-if:interfaces/oc-if:interface/oc-lag:aggregation/oc-lag:config" {
+    leaf mlag {
+      type uint16 {
+        range "1..2000";
+      }
+      description
+        "Configure mlag on this interface.";
+    }
+    description
+      "Add MLAG to LAG configuration parameters.";
+  }
+
+  augment "/oc-if:interfaces/oc-if:interface/oc-if:config" {
+    description
+      "Add leaf for configuring load interval on this interface.";
+    leaf load-interval {
+      type uint16 {
+        range "0..600";
+      }
+      default "300";
+      description
+        "Configure load-interval on this interface.";
+    }
+  }
+
+  augment "/oc-if:interfaces/oc-if:interface/oc-eth:ethernet/oc-eth:config" {
+    description
+      "Add container for configuring FEC encodings on this interface.";
+    container fec-encoding {
+      leaf disabled {
+        type boolean;
+        description
+          "fec-encoding is disabled.";
+      }
+      leaf reed-solomon544 {
+        type boolean;
+        description
+          "reed-solomon544 fec.";
+      }
+      leaf reed-solomon {
+        type boolean;
+        description
+          "reed-solomon fec.";
+      }
+      leaf fire-code {
+        type boolean;
+        description
+          "fire-code fec.";
+      }
+      leaf coherent-fec-encoding {
+        type enumeration {
+          enum COHERENT_DEFAULT {
+            description
+              "coherent default fec.";
+          }
+          enum COHERENT_SD25 {
+            description
+              "coherent SD25 fec.";
+          }
+          enum COHERENT_SD25_BCH {
+            description
+              "coherent SD25_BCH fec.";
+          }
+          enum COHERENT_SD20 {
+            description
+              "coherent SD20 fec.";
+          }
+          enum COHERENT_SD15 {
+            description
+              "coherent SD15 fec.";
+          }
+          enum COHERENT_HD7 {
+            description
+              "coherent HD7 fec.";
+          }
+          enum COHERENT_G709 {
+            description
+              "coherent G709 fec.";
+          }
+        }
+        description
+          "coherent fec encoding.";
+      }
+      description
+        "container for configuring FEC encodings on an interface.";
+    }
+  }
+
+  augment "/oc-if:interfaces/oc-if:interface/oc-eth:ethernet/oc-eth:config" {
+    leaf sfp-1000base-t {
+      type boolean;
+      description
+        "Leaf for tracking whether the advertised modes were configured specifically for a 1000BASE-T interface.";
+    }
+    description
+      "Add a leaf for tracking a 1000BASE-T interface.";
+  }
+
+  identity SPEED_50GB_1LANE {
+    base oc-eth:ETHERNET_SPEED;
+    description
+      "ethernet Speed of 50GB 1 lane.";
+  }
+
+  identity SPEED_100GB_2LANE {
+    base oc-eth:ETHERNET_SPEED;
+    description
+      "ethernet Speed of 100GB 2 lane.";
+  }
+
+  identity SPEED_200GB_4LANE {
+    base oc-eth:ETHERNET_SPEED;
+    description
+      "ethernet Speed of 200GB 4 lane.";
+  }
+
+  identity SPEED_200GB_8LANE {
+    base oc-eth:ETHERNET_SPEED;
+    description
+      "ethernet Speed of 200GB 8 lane.";
+  }
+
+  identity SPEED_HG_11GB {
+    base oc-eth:ETHERNET_SPEED;
+    description
+      "ethernet Speed of HG 11GB 1 lane.";
+  }
+
+  identity SPEED_HG_21GB {
+    base oc-eth:ETHERNET_SPEED;
+    description
+      "ethernet Speed of HG 21GB 2 lane.";
+  }
+
+  identity SPEED_HG_27GB {
+    base oc-eth:ETHERNET_SPEED;
+    description
+      "ethernet Speed of HG 27GB 1 lane.";
+  }
+
+  identity SPEED_HG_42GB {
+    base oc-eth:ETHERNET_SPEED;
+    description
+      "ethernet Speed of HG 42GB 4 lane.";
+  }
+
+  identity SPEED_HG_53GB {
+    base oc-eth:ETHERNET_SPEED;
+    description
+      "ethernet Speed of HG 53GB 2 lane.";
+  }
+
+  identity SPEED_HG_106GB {
+    base oc-eth:ETHERNET_SPEED;
+    description
+      "ethernet Speed of HG 106GB 4 lane.";
+  }
+
+  augment "/oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv4/oc-ip:addresses/oc-ip:address/oc-ip:config" {
+    description
+      "Add leaf to indicate the type of this address.";
+    leaf addr-type {
+      type arista-addr-type;
+      description
+        "Type of the IP address.";
+    }
+  }
+
+  augment "/oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv4/oc-ip:addresses/oc-ip:address/oc-ip:state" {
+    description
+      "Add leaf to indicate the type of this address.";
+    leaf addr-type {
+      type arista-addr-type;
+      description
+        "Type of the IP address.";
+    }
+  }
+
+  augment "/oc-if:interfaces/oc-if:interface/oc-vlan:routed-vlan/oc-ip:ipv4/oc-ip:addresses/oc-ip:address/oc-ip:config" {
+    description
+      "Add leaf to indicate the type of this address.";
+    leaf addr-type {
+      type arista-addr-type;
+      description
+        "Type of the IP address.";
+    }
+  }
+
+  augment "/oc-if:interfaces/oc-if:interface/oc-vlan:routed-vlan/oc-ip:ipv4/oc-ip:addresses/oc-ip:address/oc-ip:state" {
+    description
+      "Add leaf to indicate the type of this address.";
+    leaf addr-type {
+      type arista-addr-type;
+      description
+        "Type of the IP address.";
+    }
+  }
+
+  grouping arista-virtual-addresses {
+    description
+      "VRRP group's virtual-address";
+    list virtual-addresses {
+      key "addr";
+      description
+        "List of VRRP group's virtual addresses.";
+      leaf addr {
+        type leafref {
+          path "../virtual-address/addr";
+        }
+        description
+          "VRRP group's virtual-address";
+      }
+      container virtual-address {
+        description
+          "The address type to indicate the purpose of this address.";
+        leaf addr {
+          type oc-inet:ip-address;
+          description
+            "An virtual address of an VRRP group";
+        }
+        leaf addr-type {
+          type arista-addr-type;
+          description
+            "Type of the IP address.";
+        }
+      }
+    }
+  }
+
+  augment "/oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv4/oc-ip:addresses/oc-ip:address/oc-ip:vrrp/oc-ip:vrrp-group/oc-ip:config" {
+    uses arista-virtual-addresses;
+    description
+      "Add IPv4 virtual addresses to subinterface VRRP group configuration.";
+  }
+
+  augment "/oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv4/oc-ip:addresses/oc-ip:address/oc-ip:vrrp/oc-ip:vrrp-group/oc-ip:state" {
+    uses arista-virtual-addresses;
+    description
+      "Add IPv4 virtual addresses to subinterface VRRP group operational state.";
+  }
+
+  augment "/oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv6/oc-ip:addresses/oc-ip:address/oc-ip:vrrp/oc-ip:vrrp-group/oc-ip:config" {
+    uses arista-virtual-addresses;
+    description
+      "Add IPv6 virtual addresses to subinterface VRRP group configuration.";
+  }
+
+  augment "/oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv6/oc-ip:addresses/oc-ip:address/oc-ip:vrrp/oc-ip:vrrp-group/oc-ip:state" {
+    uses arista-virtual-addresses;
+    description
+      "Add IPv6 virtual addresses to subinterface VRRP group operational state.";
+  }
+
+  augment "/oc-if:interfaces/oc-if:interface/oc-vlan:routed-vlan/oc-ip:ipv4/oc-ip:addresses/oc-ip:address/oc-ip:vrrp/oc-ip:vrrp-group/oc-ip:config" {
+    uses arista-virtual-addresses;
+    description
+      "Add IPv4 virtual addresses to routed VLAN VRRP group configuration.";
+  }
+
+  augment "/oc-if:interfaces/oc-if:interface/oc-vlan:routed-vlan/oc-ip:ipv4/oc-ip:addresses/oc-ip:address/oc-ip:vrrp/oc-ip:vrrp-group/oc-ip:state" {
+    uses arista-virtual-addresses;
+    description
+      "Add IPv4 virtual addresses to routed VLAN VRRP group operational state.";
+  }
+
+  augment "/oc-if:interfaces/oc-if:interface/oc-vlan:routed-vlan/oc-ip:ipv6/oc-ip:addresses/oc-ip:address/oc-ip:vrrp/oc-ip:vrrp-group/oc-ip:config" {
+    uses arista-virtual-addresses;
+    description
+      "Add IPv6 virtual addresses to routed VLAN VRRP group configuration.";
+  }
+
+  augment "/oc-if:interfaces/oc-if:interface/oc-vlan:routed-vlan/oc-ip:ipv6/oc-ip:addresses/oc-ip:address/oc-ip:vrrp/oc-ip:vrrp-group/oc-ip:state" {
+    uses arista-virtual-addresses;
+    description
+      "Add IPv6 virtual addresses to routed VLAN VRRP group operational state.";
+  }
+
+  typedef reflector-direction {
+    type enumeration {
+      enum none {
+        description
+          "Reflector interface direction not configured.";
+      }
+      enum in {
+        description
+          "Reflect on ingress on this interface.";
+      }
+      enum out {
+        description
+          "Reflect on egress on this interface.";
+      }
+    }
+    description
+      "type definition for reflector interface direction.";
+  }
+
+  typedef reflector-mac-action {
+    type enumeration {
+      enum none {
+        description
+          "Reflector interface mac action not configured.";
+      }
+      enum swap {
+        description
+          "Swap source and destination MAC addresses on reflection.";
+      }
+    }
+    description
+      "type definition for reflector interface MAC action.";
+  }
+
+  typedef reflector-hw-status {
+    type enumeration {
+      enum active {
+        description
+          "Reflector interface active.";
+      }
+      enum inactive {
+        description
+          "Reflector interface not active.";
+      }
+    }
+    description
+      "type definition for reflector interface status.";
+  }
+
+  grouping reflector-config {
+    description
+      "Configuration parameters relating to a reflector interface.";
+    leaf direction {
+      type reflector-direction;
+      description
+        "reflector interface direction.";
+    }
+    leaf mac-action {
+      type reflector-mac-action;
+      description
+        "reflector interface MAC action.";
+    }
+  }
+
+  augment "/oc-if:interfaces/oc-if:interface/oc-eth:ethernet" {
+    description
+      "Add container for configuring reflector on this interface.";
+    container reflector {
+      description
+        "Configuration and Operational state parameters associated with the reflector interface.";
+      container config {
+        description
+          "Configuration parameters associated with the reflector interface.";
+        uses reflector-config;
+      }
+      container state {
+        config false;
+        description
+          "Operational state parameters associated with the reflector interface.";
+        uses reflector-config;
+        leaf status {
+          type reflector-hw-status;
+          description
+            "Reflector interface status.";
+        }
+        leaf status-reason {
+          type string;
+          description
+            "Reflector interface status reason.";
+        }
+      }
+    }
+  }
+
+  augment "/oc-if:interfaces/oc-if:interface/oc-eth:ethernet/oc-eth:state" {
+    leaf-list supported-speeds {
+      type string;
+      description
+        "Leaf list containing supported speeds for this interface.
+         Note that if transceiver for this interface is not present, then the supported speed is unknown";
+    }
+    description
+      "Add a list of supported speed values to Ethernet operational state.";
+  }
+
+  grouping arista-fhrp-track-interfaces {
+    description
+      "Grouping for Arista track interface data.";
+    container track-interfaces {
+      description
+        "Arista track interface data.";
+      list track-interface {
+        key "name";
+        description
+          "List of named track interfaces.";
+        leaf name {
+          type leafref {
+            path "../config/name";
+          }
+          description
+            "The track interface.";
+        }
+        container config {
+          description
+            "Configuration parameters for the track interface.";
+          leaf name {
+            type string;
+            description
+              "The name of a track interface";
+          }
+          leaf priority-decrement {
+            type uint8 {
+              range "0..254";
+            }
+            description
+              "Set the value to subtract from priority when
+               the tracked interface goes down";
+          }
+        }
+      }
+    }
+  }
+
+  grouping arista-pfc-priority-counters {
+    description
+      "Grouping that describes the PFC counters per interface.";
+    container priorities {
+      config false;
+      description
+        "This container defines information for PFC counters per priority.";
+      list priority {
+        key "index";
+        description
+          "A list of attributes per ingress class-of-service per interface.";
+        leaf index {
+          type leafref {
+            path "../state/index";
+          }
+          description
+            "Reference to the index leaf which is the key to the list of priorities.";
+        }
+        container state {
+          description
+            "Operational state relating to PFC priority counters.";
+          leaf index {
+            type uint8;
+            description
+              "The Ethernet class-of-service index for accessing the per-priority
+               information of an interface.";
+          }
+          leaf in-frames {
+            type oc-yang:counter64;
+            description
+              "Number of priority flow control frames received.";
+          }
+          leaf out-frames {
+            type oc-yang:counter64;
+            description
+              "Number of priority flow control frames transmitted.";
+          }
+        }
+      }
+    }
+  }
+
+  typedef qos-queue-type {
+    type enumeration {
+      enum UNICAST {
+        description
+          "Queue for unicast packets.";
+      }
+      enum MULTICAST {
+        description
+          "Queue for multicast packets.";
+      }
+    }
+    description
+      "Type used to specify queue type of an interface.";
+  }
+
+  grouping arista-pfc-watchdog-counters {
+    description
+      "Grouping that describes counters per egress queue where PFC watchdog is enabled.";
+    container watchdog {
+      description
+        "This container defines information regarding PFC watchdog per interface.";
+      container tx-queues {
+        config false;
+        description
+          "This container defines information regarding PFC watchdog per egress queue per interface.";
+        list tx-queue {
+          key "index queue-type";
+          description
+            "List of egress queues per PFC enabled interface";
+          leaf index {
+            type leafref {
+              path "../state/index";
+            }
+            description
+              "Reference to the index leaf which is the key to the list of egress queues.";
+          }
+          leaf queue-type {
+            type leafref {
+              path "../state/queue-type";
+            }
+            description
+              "Reference to the queue-type leaf which is the key to the list of egress queues.";
+          }
+          container state {
+            description
+              "Operational state relating to PFC watchdog egress queue.";
+            leaf index {
+              type uint8;
+              description
+                "The ID of the queue belonging to a PFC enabled interface.";
+            }
+            leaf queue-type {
+              type qos-queue-type;
+              description
+                "The type (unicast/multicast) of the queue belonging to a PFC-enabled interface.";
+            }
+            leaf stuck-count {
+              type oc-yang:counter32;
+              description
+                "Number of times an egress queue was stuck due to a PFC storm.";
+            }
+            leaf recovery-count {
+              type oc-yang:counter32;
+              description
+                "Number of times an egress queue recovered after a PFC storm.";
+            }
+          }
+        }
+      }
+    }
+  }
+
+  augment "/oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv4/oc-ip:addresses/oc-ip:address/oc-ip:vrrp/oc-ip:vrrp-group" {
+    uses arista-fhrp-track-interfaces;
+    description
+      "Add IPv4 Track interfaces to subinterface VRRP Group.";
+  }
+
+  augment "/oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv6/oc-ip:addresses/oc-ip:address/oc-ip:vrrp/oc-ip:vrrp-group" {
+    uses arista-fhrp-track-interfaces;
+    description
+      "Add IPv6 Track interfaces to subinterface VRRP Group.";
+  }
+
+  augment "/oc-if:interfaces/oc-if:interface/oc-vlan:routed-vlan/oc-ip:ipv4/oc-ip:addresses/oc-ip:address/oc-ip:vrrp/oc-ip:vrrp-group" {
+    uses arista-fhrp-track-interfaces;
+    description
+      "Add IPv4 Track interfaces to routed VLAN VRRP Group.";
+  }
+
+  augment "/oc-if:interfaces/oc-if:interface/oc-vlan:routed-vlan/oc-ip:ipv6/oc-ip:addresses/oc-ip:address/oc-ip:vrrp/oc-ip:vrrp-group" {
+    uses arista-fhrp-track-interfaces;
+    description
+      "Add IPv6 Track interfaces to routed VLAN VRRP Group.";
+  }
+
+  augment "/oc-if:interfaces/oc-if:interface/oc-eth:ethernet/oc-eth:state" {
+    leaf poe-supported {
+      type boolean;
+      description
+        "Set to true if this interface supports poe.";
+    }
+    description
+      "Add POE supported parameter to Ethernet operational state.";
+  }
+
+  augment "/oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-if:config" {
+    leaf l2protocol-forwarding-profile {
+      type string;
+      description
+        "The name of the l2-protocol forwarding profile.";
+    }
+    description
+      "Add l2-protocol forwarding profile to subinterface configuration.";
+  }
+
+  augment "/oc-if:interfaces/oc-if:interface/oc-eth:ethernet" {
+    container pfc {
+      description
+        "This container defines information for PFC.";
+      uses arista-pfc-priority-counters;
+      uses arista-pfc-watchdog-counters;
+    }
+    description
+      "Augments PFC data for Ethernet interfaces.";
+  }
+}

@@ -1,0 +1,285 @@
+module arista-system-deviations {
+  namespace "http://arista.com/yang/openconfig/system/deviations";
+  prefix arista-system-deviations;
+
+  import openconfig-system {
+    prefix oc-sys;
+  }
+  import openconfig-inet-types {
+    prefix oc-inet;
+  }
+  import openconfig-extensions {
+    prefix oc-ext;
+  }
+  import arista-system-augments {
+    prefix arista-system-augments;
+  }
+
+  organization
+    "Arista Networks, Inc.";
+  contact
+    "Arista Networks, Inc.
+     Product Support";
+  description
+    "This module contains OpenConfig system deviations in Arista EOS.
+     Copyright (c) 2017 Arista Networks, Inc. All rights reserved.";
+  oc-ext:openconfig-version "1.2.1";
+
+  revision 2021-03-03 {
+    description
+      "add support for metadata-authentication leaf under grpc-server and grpc-servers.";
+    reference
+      "1.2.1";
+  }
+  revision 2021-01-07 {
+    description
+      "Mark metadata-authentication and listen-addresses leafs as not supported. Delete the default value
+       for of true for the transport-security leaf under grpc-servers";
+    reference
+      "1.1.4";
+  }
+  revision 2021-01-04 {
+    description
+      "Remove default deviation for system/grpc-server/(config|status)port.";
+    reference
+      "1.1.3";
+  }
+  revision 2020-12-04 {
+    description
+      "Add EOS deviations for NTP enabled leaf.";
+    reference
+      "1.1.2";
+  }
+  revision 2020-11-30 {
+    description
+      "Fix errors reported by pyang.";
+    reference
+      "1.1.1";
+  }
+  revision 2020-01-21 {
+    description
+      "Add EOS deviations for GRPC, SSH, AAA, DNS and hostname config.";
+    reference
+      "1.1.0";
+  }
+  revision 2017-09-24 {
+    description
+      "Initial deviations file.";
+    reference
+      "1.0.0";
+  }
+
+  deviation "/oc-sys:system/oc-sys:dns/oc-sys:config/oc-sys:search" {
+    description
+      "search limited to 6 domain-names";
+    deviate add {
+      max-elements 6;
+    }
+  }
+
+  deviation "/oc-sys:system/oc-sys:dns/oc-sys:servers/oc-sys:server" {
+    description
+      "name servers limited to 3";
+    deviate add {
+      max-elements 3;
+    }
+  }
+
+  deviation "/oc-sys:system/oc-sys:dns/oc-sys:servers/oc-sys:server/oc-sys:config/oc-sys:port" {
+    description
+      "port of name servers must be 53";
+    deviate replace {
+      type oc-inet:port-number {
+        range "53";
+      }
+    }
+  }
+
+  deviation "/oc-sys:system/oc-sys:dns/oc-sys:host-entries/oc-sys:host-entry/oc-sys:config/oc-sys:alias" {
+    description
+      "alias of host-entries is not configurable";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:memory/oc-sys:state/oc-sys:physical" {
+    description
+      "physical memory default value 0";
+    deviate add {
+      default "0";
+    }
+  }
+
+  deviation "/oc-sys:system/oc-sys:aaa/oc-sys:server-groups/oc-sys:server-group/oc-sys:servers/oc-sys:server/oc-sys:config/oc-sys:address" {
+    description
+      "In EOS, the server address can be an IP address or hostname";
+    deviate replace {
+      type union {
+        type oc-inet:ip-address;
+        type string;
+      }
+    }
+  }
+
+  deviation "/oc-sys:system/oc-sys:aaa/oc-sys:server-groups/oc-sys:server-group/oc-sys:servers/oc-sys:server/oc-sys:state/oc-sys:address" {
+    description
+      "In EOS, the server address can be an IP address or a hostname";
+    deviate replace {
+      type union {
+        type oc-inet:ip-address;
+        type string;
+      }
+    }
+  }
+
+  deviation "/oc-sys:system/oc-sys:aaa/oc-sys:server-groups/oc-sys:server-group/oc-sys:servers/oc-sys:server/oc-sys:config/oc-sys:timeout" {
+    description
+      "In EOS, the timeout value can be between 1 and 1000";
+    deviate replace {
+      type uint16 {
+        range "1..1000";
+      }
+    }
+  }
+
+  deviation "/oc-sys:system/oc-sys:aaa/oc-sys:server-groups/oc-sys:server-group/oc-sys:servers/oc-sys:server/oc-sys:radius/oc-sys:config/oc-sys:retransmit-attempts" {
+    description
+      "In EOS, retransmit-attempts can be between 0 and 100";
+    deviate replace {
+      type uint8 {
+        range "0..100";
+      }
+    }
+  }
+
+  deviation "/oc-sys:system/oc-sys:ssh-server/oc-sys:config/oc-sys:session-limit" {
+    deviate replace {
+      type uint8 {
+        range "0..100";
+      }
+    }
+  }
+
+  deviation "/oc-sys:system/oc-sys:ssh-server/oc-sys:state/oc-sys:session-limit" {
+    deviate replace {
+      type uint8 {
+        range "0..100";
+      }
+    }
+  }
+
+  deviation "/oc-sys:system/oc-sys:ssh-server/oc-sys:config/oc-sys:rate-limit" {
+    description
+      "configuring the SSH rate-limit is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:ssh-server/oc-sys:state/oc-sys:rate-limit" {
+    description
+      "getting the SSH rate-limit is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:ssh-server/oc-sys:config/oc-sys:protocol-version" {
+    description
+      "configuring the SSH protocol-version is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:ssh-server/oc-sys:state/oc-sys:protocol-version" {
+    description
+      "getting the SSH protocol-version is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:grpc-server/oc-sys:config/oc-sys:listen-addresses" {
+    description
+      "Configuring the IP addresses that the gRPC server should listen on is not supported";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:grpc-server/oc-sys:state/oc-sys:listen-addresses" {
+    description
+      "Getting the IP addresses that the gRPC server should listen on is not supported";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:ntp/oc-sys:config/oc-sys:enabled" {
+    description
+      "NTP is always enabled in EOS.";
+    deviate replace {
+      default "true";
+    }
+  }
+
+  deviation "/oc-sys:system/oc-sys:ntp/oc-sys:state/oc-sys:enabled" {
+    description
+      "NTP is always enabled in EOS.";
+    deviate replace {
+      default "true";
+    }
+  }
+
+  deviation "/oc-sys:system/oc-sys:ntp/oc-sys:servers/oc-sys:server/oc-sys:config/oc-sys:port" {
+    description
+      "The port number for NTP is not configurable in EOS.";
+    deviate replace {
+      config false;
+    }
+  }
+
+  deviation "/oc-sys:system/oc-sys:grpc-server/oc-sys:config/oc-sys:transport-security" {
+    description
+      "Use gRPC transport security (e.g., TLS or SSL)";
+    deviate delete {
+      default "true";
+    }
+  }
+
+  deviation "/oc-sys:system/oc-sys:grpc-server/oc-sys:state/oc-sys:transport-security" {
+    description
+      "Use gRPC transport security (e.g., TLS or SSL)";
+    deviate delete {
+      default "true";
+    }
+  }
+
+  deviation "/oc-sys:system/oc-sys:logging/oc-sys:remote-servers/oc-sys:remote-server/oc-sys:config/oc-sys:remote-port" {
+    description
+      "Sets the destination port number for syslog UDP messages to the server.  The default for syslog is 514.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:logging/oc-sys:remote-servers/oc-sys:remote-server/oc-sys:state/oc-sys:remote-port" {
+    description
+      "Sets the destination port number for syslog UDP messages to the server.  The default for syslog is 514.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/arista-system-augments:grpc-servers/arista-system-augments:grpc-server/arista-system-augments:config/arista-system-augments:listen-addresses" {
+    description
+      "Configuring the IP addresses that the gRPC server should listen on is not supported";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/arista-system-augments:grpc-servers/arista-system-augments:grpc-server/arista-system-augments:state/arista-system-augments:listen-addresses" {
+    description
+      "Configuring the IP addresses that the gRPC server should listen on is not supported";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/arista-system-augments:grpc-servers/arista-system-augments:grpc-server/arista-system-augments:config/arista-system-augments:transport-security" {
+    description
+      "Use gRPC transport security (e.g., TLS or SSL)";
+    deviate delete {
+      default "true";
+    }
+  }
+
+  deviation "/oc-sys:system/arista-system-augments:grpc-servers/arista-system-augments:grpc-server/arista-system-augments:state/arista-system-augments:transport-security" {
+    description
+      "Use gRPC transport security (e.g., TLS or SSL)";
+    deviate delete {
+      default "true";
+    }
+  }
+}

@@ -1,0 +1,25 @@
+module arista-exp-eos-qos {
+  yang-version 1;
+  namespace "http://arista.com/yang/experimental/eos/qos";
+  prefix qos-exp;
+
+  import arista-exp-eos {
+    prefix eos-exp;
+  }
+
+  organization
+    "Arista Networks <http://arista.com/>";
+  description
+    "Container for qos features.
+
+     Copyright (c) 2017 Arista Networks, Inc. All rights reserved.";
+
+  revision 2017-09-26 {
+    description
+      "Initial revision";
+  }
+
+  augment "/eos-exp:arista/eos-exp:eos" {
+    container qos;
+  }
+}

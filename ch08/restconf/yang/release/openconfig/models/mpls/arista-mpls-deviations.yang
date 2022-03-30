@@ -1,0 +1,133 @@
+module arista-mpls-deviations {
+  namespace "http://arista.com/yang/openconfig/mpls/deviations";
+  prefix arista-mpls-deviations;
+
+  import openconfig-network-instance {
+    prefix oc-netinst;
+  }
+  import openconfig-extensions {
+    prefix oc-ext;
+  }
+
+  organization
+    "Arista Networks, Inc.";
+  contact
+    "Arista Networks, Inc.
+     Product Support";
+  description
+    "This module contains OpenConfig MPLS deviations in Arista EOS.
+
+     Copyright (c) 2018 Arista Networks, Inc. All rights reserved.";
+  oc-ext:openconfig-version "1.0.2";
+
+  revision 2021-02-15 {
+    description
+      "Remove range for RSVP hello interval.";
+    reference
+      "1.0.2";
+  }
+  revision 2020-11-30 {
+    description
+      "Fix errors reported by pyang.";
+    reference
+      "1.0.1";
+  }
+  revision 2018-03-19 {
+    description
+      "Initial deviation file.";
+    reference
+      "1.0.0";
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:mpls/oc-netinst:signaling-protocols/oc-netinst:segment-routing/oc-netinst:aggregate-sid-counters/oc-netinst:aggregate-sid-counter/oc-netinst:state/oc-netinst:out-octets" {
+    description
+      "aggregate out-octets per label is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:mpls/oc-netinst:signaling-protocols/oc-netinst:segment-routing/oc-netinst:aggregate-sid-counters/oc-netinst:aggregate-sid-counter/oc-netinst:state/oc-netinst:out-pkts" {
+    description
+      "aggregate out-pkts per label is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:mpls/oc-netinst:signaling-protocols/oc-netinst:segment-routing/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:sid-counters/oc-netinst:sid-counter/oc-netinst:state/oc-netinst:in-octets" {
+    description
+      "in-octets per interface per label is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:mpls/oc-netinst:signaling-protocols/oc-netinst:segment-routing/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:sid-counters/oc-netinst:sid-counter/oc-netinst:state/oc-netinst:in-pkts" {
+    description
+      "in-pkts per interface per label is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:mpls/oc-netinst:signaling-protocols/oc-netinst:segment-routing/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:sid-counters/oc-netinst:sid-counter/oc-netinst:state/oc-netinst:out-octets" {
+    description
+      "out-octets per interface per label is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:mpls/oc-netinst:signaling-protocols/oc-netinst:segment-routing/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:sid-counters/oc-netinst:sid-counter/oc-netinst:state/oc-netinst:out-pkts" {
+    description
+      "out-pkts per interface per label is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:mpls/oc-netinst:signaling-protocols/oc-netinst:segment-routing/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:sid-counters/oc-netinst:sid-counter/oc-netinst:forwarding-classes/oc-netinst:forwarding-class/oc-netinst:state/oc-netinst:in-octets" {
+    description
+      "in-octets per interface per label per forwarding-class is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:mpls/oc-netinst:signaling-protocols/oc-netinst:segment-routing/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:sid-counters/oc-netinst:sid-counter/oc-netinst:forwarding-classes/oc-netinst:forwarding-class/oc-netinst:state/oc-netinst:in-pkts" {
+    description
+      "in-pkts per interface per label per forwarding-class is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:mpls/oc-netinst:signaling-protocols/oc-netinst:segment-routing/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:sid-counters/oc-netinst:sid-counter/oc-netinst:forwarding-classes/oc-netinst:forwarding-class/oc-netinst:state/oc-netinst:out-octets" {
+    description
+      "out-octets per interface per label per forwarding-class is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:mpls/oc-netinst:signaling-protocols/oc-netinst:segment-routing/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:sid-counters/oc-netinst:sid-counter/oc-netinst:forwarding-classes/oc-netinst:forwarding-class/oc-netinst:state/oc-netinst:out-pkts" {
+    description
+      "out-pkts per interface per label per forwarding-class is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:mpls/oc-netinst:signaling-protocols/oc-netinst:segment-routing/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:state/oc-netinst:out-octets" {
+    description
+      "aggregate out-octets per interface is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:mpls/oc-netinst:signaling-protocols/oc-netinst:segment-routing/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:state/oc-netinst:out-pkts" {
+    description
+      "aggregate out-pkts per interface is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:mpls/oc-netinst:signaling-protocols/oc-netinst:rsvp-te/oc-netinst:global/oc-netinst:hellos/oc-netinst:config/oc-netinst:hello-interval" {
+    description
+      "EOS hello interval is set to 0 to represent Hellos disable, default range does not allow such values";
+    deviate replace {
+      type uint16 {
+        range "0..60000";
+      }
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:mpls/oc-netinst:signaling-protocols/oc-netinst:rsvp-te/oc-netinst:global/oc-netinst:hellos/oc-netinst:state/oc-netinst:hello-interval" {
+    description
+      "EOS hello interval is set to 0 to represent Hellos disable, default range does not allow such values";
+    deviate replace {
+      type uint16 {
+        range "0..60000";
+      }
+    }
+  }
+}

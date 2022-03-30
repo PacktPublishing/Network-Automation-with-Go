@@ -1,0 +1,189 @@
+module arista-exp-eos-mlag {
+  yang-version 1;
+  namespace "urn:aristanetworks:yang:experimental:eos";
+  prefix eos;
+
+  import ietf-inet-types {
+    prefix inet;
+  }
+  import arista-eos-types {
+    prefix eos-types;
+  }
+  import arista-exp-eos {
+    prefix eos-exp;
+  }
+
+  organization
+    "Arista Networks <http://arista.com/>";
+  contact
+    "Arista Networks, Inc.
+     Product Support";
+  description
+    "Automatically generated Sysdb YANG model";
+
+  revision 2021-04-19 {
+    description
+      "Change reload-delay-mlag-configured to be writable.";
+    reference
+      "1.0.1";
+  }
+
+  revision 2017-11-29 {
+    description
+      "Initial revision.";
+    reference
+      "1.0.0";
+  }
+
+  augment "/eos-exp:arista/eos-exp:eos" {
+    uses mlag-config-top;
+    description
+      "Augment mlag model at /arista/eos/";
+  }
+
+  grouping mlag-config-top {
+    description
+      "Top-level grouping for mlag configurations";
+    container mlag {
+      description
+        "Top-level data definitions for MLAGs";
+      container config {
+        description
+          "Configuration data for mlag";
+        uses mlag-config;
+      }
+    }
+  }
+
+  grouping mlag-config {
+    description
+      "Adds configuration for MLAGs";
+    leaf domain-id {
+      type string;
+      description
+        "Unique identifier for the MLAG domain";
+    }
+    leaf dual-primary-action {
+      type dual-primary-action-enum;
+      description
+        "Configure action when dual-primary is detected";
+    }
+    leaf dual-primary-detection-delay {
+      type eos-types:double {
+        range "1..1000";
+      }
+      description
+        "Delay dual-primary detection for <N> seconds";
+    }
+    leaf enabled {
+      type boolean;
+      default "true";
+      description
+        "Enable the MLAG feature";
+    }
+    leaf heartbeat-interval {
+      type heartbeat-intvl-type;
+      default "4000";
+      description
+        "Time in milliseconds between MLAG heartbeat messages";
+    }
+    typedef heartbeat-intvl-type {
+      type union {
+        type enumeration {
+          enum DISABLED {
+            description
+              "Disable sending heartbeats and checking heartbeat timeouts";
+          }
+        }
+        type uint32 {
+          range "1000..30000";
+        }
+      }
+    }
+
+    container heartbeat-peer-address {
+      description
+        "Optional peer-address for heartbeat";
+      uses mlag-peer-address-vrf;
+    }
+    leaf lacp-standby {
+      type boolean;
+      default "false";
+      description
+        "Force LACP to be in standby mode during reload-delay period";
+    }
+    leaf local-intf {
+      type eos-types:Arnet-IntfId;
+      description
+        "Vlan interface for accepting connections from MLAG peer";
+    }
+    leaf peer-address {
+      type inet:ipv4-address;
+      description
+        "IP address of MLAG peer";
+    }
+    leaf peer-link-intf {
+      type eos-types:Arnet-IntfId;
+      description
+        "Interface connecting to MLAG peer";
+    }
+    typedef dual-primary-action-enum {
+      type enumeration {
+        enum errdisable-all-interfaces {
+          description
+            "Disable all Ethernet interfaces except peer-link";
+        }
+        enum action-none {
+          description
+            "No action";
+        }
+      }
+      description
+        "Dual primary action types";
+    }
+
+    grouping mlag-peer-address-vrf {
+      description
+        "Type: Mlag::PeerAddressAndVrf";
+      leaf address {
+        type inet:ipv4-address;
+        description
+          "Peer address";
+      }
+      leaf vrf {
+        type string;
+        description
+          "Peer vrf";
+      }
+    }
+
+    leaf reload-delay-mlag-configured {
+      type boolean;
+      description
+        "Reload delay mlag configured";
+    }
+    leaf reload-delay {
+      type reload-delay-type;
+      description
+        "Delay (seconds) after reboot until all non peer-link ports are enabled";
+    }
+    leaf reload-delay-non-mlag {
+      type reload-delay-type;
+      description
+        "Delay (seconds) after reboot until ports that are not part of an MLAG are enabled";
+    }
+    typedef reload-delay-type {
+      type union {
+        type enumeration {
+          enum INFINITY {
+            description
+              "Keep non peer-link ports disabled after reboot";
+          }
+        }
+        type eos-types:double {
+          range "0..86400";
+        }
+      }
+    }
+  }
+}

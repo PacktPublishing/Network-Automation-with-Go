@@ -1,0 +1,389 @@
+module arista-system-notsupported-deviations {
+  namespace "http://arista.com/yang/openconfig/system/notsupported-deviations";
+  prefix arista-system-notsupported-deviations;
+
+  import openconfig-openflow {
+    prefix openflow;
+  }
+  import openconfig-system {
+    prefix oc-sys;
+  }
+
+  organization
+    "Arista Networks, Inc.";
+  contact
+    "Arista Networks, Inc.
+     Product Support";
+  description
+    "This module contains OpenConfig system deviations in Arista EOS.
+     Copyright (c) 2021 Arista Networks, Inc. All rights reserved.";
+
+  revision 2021-03-15 {
+    description
+      "Not-supported deviations file.";
+  }
+  revision 2021-03-03 {
+    description
+      "Not-supported deviations file.";
+  }
+  revision 2021-01-12 {
+    description
+      "Not-supported deviations file.";
+  }
+  revision 2020-12-02 {
+    description
+      "Not-supported deviations file.";
+  }
+  revision 2020-11-19 {
+    description
+      "Not-supported deviations file.";
+  }
+  revision 2020-10-06 {
+    description
+      "Not-supported deviations file.";
+  }
+  revision 2020-03-26 {
+    description
+      "Not-supported deviations file.";
+  }
+  revision 2020-03-05 {
+    description
+      "Not-supported deviations file.";
+  }
+  revision 2020-02-25 {
+    description
+      "Not-supported deviations file.";
+  }
+  revision 2020-02-19 {
+    description
+      "Not-supported deviations file.";
+  }
+  revision 2020-02-04 {
+    description
+      "Not-supported deviations file.";
+  }
+
+  deviation "/oc-sys:system/oc-sys:alarms" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:clock" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:cpus" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:license" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:telnet-server" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:aaa/oc-sys:accounting" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:aaa/oc-sys:authorization" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:aaa/oc-sys:config" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:aaa/oc-sys:state" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:aaa/oc-sys:authentication/oc-sys:admin-user/oc-sys:state/oc-sys:admin-password" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:aaa/oc-sys:authentication/oc-sys:users/oc-sys:user/oc-sys:state/oc-sys:password" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:aaa/oc-sys:server-groups/oc-sys:server-group/oc-sys:servers/oc-sys:server/oc-sys:config/oc-sys:name" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:aaa/oc-sys:server-groups/oc-sys:server-group/oc-sys:servers/oc-sys:server/oc-sys:radius/oc-sys:config/oc-sys:secret-key-hashed" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:aaa/oc-sys:server-groups/oc-sys:server-group/oc-sys:servers/oc-sys:server/oc-sys:radius/oc-sys:config/oc-sys:source-address" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:aaa/oc-sys:server-groups/oc-sys:server-group/oc-sys:servers/oc-sys:server/oc-sys:radius/oc-sys:state/oc-sys:counters" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:aaa/oc-sys:server-groups/oc-sys:server-group/oc-sys:servers/oc-sys:server/oc-sys:radius/oc-sys:state/oc-sys:secret-key-hashed" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:aaa/oc-sys:server-groups/oc-sys:server-group/oc-sys:servers/oc-sys:server/oc-sys:radius/oc-sys:state/oc-sys:source-address" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:aaa/oc-sys:server-groups/oc-sys:server-group/oc-sys:servers/oc-sys:server/oc-sys:state/oc-sys:connection-aborts" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:aaa/oc-sys:server-groups/oc-sys:server-group/oc-sys:servers/oc-sys:server/oc-sys:state/oc-sys:connection-closes" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:aaa/oc-sys:server-groups/oc-sys:server-group/oc-sys:servers/oc-sys:server/oc-sys:state/oc-sys:connection-failures" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:aaa/oc-sys:server-groups/oc-sys:server-group/oc-sys:servers/oc-sys:server/oc-sys:state/oc-sys:connection-opens" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:aaa/oc-sys:server-groups/oc-sys:server-group/oc-sys:servers/oc-sys:server/oc-sys:state/oc-sys:connection-timeouts" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:aaa/oc-sys:server-groups/oc-sys:server-group/oc-sys:servers/oc-sys:server/oc-sys:state/oc-sys:errors-received" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:aaa/oc-sys:server-groups/oc-sys:server-group/oc-sys:servers/oc-sys:server/oc-sys:state/oc-sys:messages-received" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:aaa/oc-sys:server-groups/oc-sys:server-group/oc-sys:servers/oc-sys:server/oc-sys:state/oc-sys:messages-sent" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:aaa/oc-sys:server-groups/oc-sys:server-group/oc-sys:servers/oc-sys:server/oc-sys:state/oc-sys:name" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:aaa/oc-sys:server-groups/oc-sys:server-group/oc-sys:servers/oc-sys:server/oc-sys:tacacs/oc-sys:config/oc-sys:secret-key-hashed" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:aaa/oc-sys:server-groups/oc-sys:server-group/oc-sys:servers/oc-sys:server/oc-sys:tacacs/oc-sys:config/oc-sys:source-address" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:aaa/oc-sys:server-groups/oc-sys:server-group/oc-sys:servers/oc-sys:server/oc-sys:tacacs/oc-sys:state/oc-sys:secret-key-hashed" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:aaa/oc-sys:server-groups/oc-sys:server-group/oc-sys:servers/oc-sys:server/oc-sys:tacacs/oc-sys:state/oc-sys:source-address" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:dns/oc-sys:host-entries/oc-sys:host-entry/oc-sys:state/oc-sys:alias" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:logging/oc-sys:console" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:logging/oc-sys:remote-servers/oc-sys:remote-server/oc-sys:selectors" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:logging/oc-sys:remote-servers/oc-sys:remote-server/oc-sys:config/oc-sys:source-address" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:logging/oc-sys:remote-servers/oc-sys:remote-server/oc-sys:state/oc-sys:source-address" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:memory/oc-sys:config" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:messages/oc-sys:config" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:messages/oc-sys:debug-entries" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:messages/oc-sys:state/oc-sys:severity" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:messages/oc-sys:state/oc-sys:message/oc-sys:msgid" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:ntp/oc-sys:ntp-keys" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:ntp/oc-sys:config/oc-sys:ntp-source-address" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:ntp/oc-sys:servers/oc-sys:server/oc-sys:config/oc-sys:association-type" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:ntp/oc-sys:servers/oc-sys:server/oc-sys:state/oc-sys:association-type" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:ntp/oc-sys:servers/oc-sys:server/oc-sys:state/oc-sys:offset" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:ntp/oc-sys:servers/oc-sys:server/oc-sys:state/oc-sys:poll-interval" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:ntp/oc-sys:servers/oc-sys:server/oc-sys:state/oc-sys:port" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:ntp/oc-sys:servers/oc-sys:server/oc-sys:state/oc-sys:root-delay" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:ntp/oc-sys:servers/oc-sys:server/oc-sys:state/oc-sys:root-dispersion" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:ntp/oc-sys:servers/oc-sys:server/oc-sys:state/oc-sys:stratum" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:ntp/oc-sys:state/oc-sys:auth-mismatch" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:ntp/oc-sys:state/oc-sys:ntp-source-address" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/openflow:openflow/openflow:agent/openflow:config/openflow:failure-mode" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/openflow:openflow/openflow:agent/openflow:state/openflow:failure-mode" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+}

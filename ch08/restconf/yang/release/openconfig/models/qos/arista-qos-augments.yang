@@ -1,0 +1,375 @@
+module arista-qos-augments {
+  namespace "http://arista.com/yang/openconfig/qos/augments";
+  prefix arista-qos-augments;
+
+  import openconfig-qos {
+    prefix oc-qos;
+  }
+  import openconfig-yang-types {
+    prefix oc-yang;
+  }
+  import openconfig-types {
+    prefix oc-types;
+  }
+  import openconfig-extensions {
+    prefix oc-ext;
+  }
+
+  organization
+    "Arista Networks, Inc.";
+  contact
+    "Arista Networks, Inc.
+     Product Support";
+  description
+    "This module contains OpenConfig QoS augments in Arista EOS.
+
+     Copyright (c) 2019 Arista Networks, Inc. All rights reserved.";
+  oc-ext:openconfig-version "0.0.4";
+
+  revision 2020-11-30 {
+    description
+      "Fix errors reported by pyang.";
+    reference
+      "0.0.4";
+  }
+  revision 2020-06-05 {
+    description
+      "Add support for PFC and ECN config.";
+    reference
+      "0.0.3";
+  }
+  revision 2020-04-13 {
+    description
+      "Add ECN counter support.";
+    reference
+      "0.0.2";
+  }
+  revision 2019-10-31 {
+    description
+      "Initial augment file.";
+    reference
+      "0.0.1";
+  }
+
+  grouping pfc-top {
+    description
+      "Top-level grouping for PFC.";
+    container pfc {
+      description
+        "Top-level configuration and state for PFC.";
+      container watchdog {
+        description
+          "PFC watchdog configuration and state for PFC.";
+        container config {
+          description
+            "PFC watchdog configuration parameters.";
+          uses watchdog-config;
+        }
+        container state {
+          config false;
+          description
+            "PFC watchdog state parameters.";
+          uses watchdog-config;
+        }
+      }
+    }
+  }
+
+  grouping watchdog-config {
+    description
+      "Grouping for PFC watchdog configuration.";
+    leaf default-timeout {
+      type decimal64 {
+        fraction-digits 2;
+      }
+      units "seconds";
+      description
+        "PFC watchdog default timeout in seconds.";
+    }
+    leaf default-recovery-time {
+      type decimal64 {
+        fraction-digits 2;
+      }
+      units "seconds";
+      description
+        "PFC watchdog default recovery time in seconds.";
+    }
+    leaf default-polling-interval {
+      type decimal64 {
+        fraction-digits 3;
+      }
+      units "seconds";
+      description
+        "PFC watchdog default polling interval in seconds.";
+    }
+    leaf action {
+      type watchdog-action;
+      description
+        "PFC watchdog action.";
+    }
+    leaf non-disruptive-priority {
+      type oc-yang:hex-string {
+        length "1..2";
+      }
+      description
+        "Bitmap of non disruptive PFC priorities to avoid traffic drop.";
+    }
+  }
+
+  grouping pfc-interface-top {
+    description
+      "Top-level grouping for interfaces referenced in the PFC model.";
+    container pfc {
+      description
+        "Top-level container for interface PFC configuration and state.";
+      container config {
+        description
+          "PFC interface Configuration data.";
+        uses pfc-interfaces-config;
+      }
+      container state {
+        config false;
+        description
+          "PFC interface State data.";
+        uses pfc-interfaces-config;
+      }
+    }
+  }
+
+  grouping pfc-interfaces-config {
+    description
+      "Grouping for PFC interface Configuration data.";
+    leaf priorities-no-drop {
+      type oc-yang:hex-string {
+        length "1..2";
+      }
+      description
+        "Bitmap of priorities that determines if packets are dropped when PFC
+          is enabled on the interface. Packets are dropped by default.";
+    }
+  }
+
+  grouping tx-queue-ecn-top {
+    description
+      "Top-level grouping for tx-queue ECN cofiguration.";
+    container ecn {
+      description
+        "ECN parameters.";
+      container config {
+        description
+          "ECN configuration parameters.";
+        uses ecn-config;
+      }
+      container state {
+        config false;
+        description
+          "ECN state parameters.";
+        uses ecn-config;
+      }
+    }
+  }
+
+  grouping tx-queue-config {
+    description
+      "parameters relating to egress queue configuration.";
+    leaf scheduling {
+      type tx_queue_scheduling;
+      description
+        "The queue scheduling type.";
+    }
+    leaf bandwidth {
+      type oc-types:percentage;
+      description
+        "Guaranteed/round-robin minimum bandwidth for this queue.";
+    }
+  }
+
+  grouping ecn-config {
+    description
+      "grouping for ECN configuration parameters.";
+    leaf min-threshold {
+      type uint32 {
+        range "0..4294967294";
+      }
+      description
+        "Minimum threshold for ECN.";
+    }
+    leaf max-threshold {
+      type uint32 {
+        range "0..4294967294";
+      }
+      description
+        "Maximum threshold for ECN.";
+    }
+    leaf threshold-unit {
+      type ecn-threshold-unit;
+      description
+        "Units for maximum and maximum threshold for ECN.";
+    }
+    leaf max-drop-rate {
+      type oc-types:percentage;
+      description
+        "ECN maximum marking probability rate.";
+    }
+    leaf weight {
+      type uint32;
+      description
+        "ECN weight.";
+    }
+  }
+
+  typedef watchdog-action {
+    type enumeration {
+      enum INVALID {
+        description
+          "PFC watchdog action Invalid.";
+      }
+      enum ERROR_DISABLE {
+        description
+          "PFC watchdog action disabled due to error.";
+      }
+      enum DROP {
+        description
+          "PFC watchdog action drop.";
+      }
+      enum FORCED_DROP {
+        description
+          "PFC watchdog action force drop.";
+      }
+      enum IGNORE_PFC {
+        description
+          "PFC watchdog action ignore PFC.";
+      }
+      enum NOTIFY_ONLY {
+        description
+          "PFC watchdog action notify.";
+      }
+    }
+    description
+      "Type used to specify PFC watchdog action.";
+  }
+
+  typedef tx_queue_scheduling {
+    type enumeration {
+      enum INVALID {
+        description
+          "Invalid queue priority.";
+      }
+      enum STRICT {
+        description
+          "Strict queue priority.";
+      }
+      enum ROUND_ROBIN {
+        description
+          "Round robin queue priority.";
+      }
+    }
+    description
+      "Type used to specify tx queue scheduling algorithm.";
+  }
+
+  typedef ecn-threshold-unit {
+    type enumeration {
+      enum BYTES {
+        description
+          "Threshold in bytes.";
+      }
+      enum KILOBYTES {
+        description
+          "Threshold in kilobytes.";
+      }
+      enum MEGABYTES {
+        description
+          "Threshold in megabytes.";
+      }
+      enum SEGMENTS {
+        description
+          "Threshold in segments.";
+      }
+      enum MILLISECONDS {
+        description
+          "Threshold in milliseconds.";
+      }
+      enum MICROSECONDS {
+        description
+          "Threshold in micoseconds.";
+      }
+    }
+    description
+      "Type used to specify ECN threshold unit.";
+  }
+
+  typedef packet-type {
+    type enumeration {
+      enum UC {
+        description
+          "This enum describes unicast packet type.";
+      }
+      enum MC {
+        description
+          "This enum describes multicast packet type.";
+      }
+      enum MIXEDUCMC {
+        description
+          "This enum describes either unicast or multicast packet type.";
+      }
+    }
+    description
+      "This type defines type of packets that flow through a queue within an interface.";
+  }
+
+  augment "/oc-qos:qos/oc-qos:interfaces/oc-qos:interface/oc-qos:output/oc-qos:queues/oc-qos:queue/oc-qos:state" {
+    leaf queue-type {
+      type packet-type;
+      description
+        "Indicates the type of packets that are currently flowing through the queue.";
+    }
+    leaf dropped-octets {
+      type oc-yang:counter64;
+      description
+        "Number of octets dropped by the queue due to overrun.";
+    }
+    leaf wred-dropped-pkts {
+      type oc-yang:counter64;
+      description
+        "Wred dropped Packets for this queue";
+    }
+    leaf ecn-marked-pkts {
+      type oc-yang:counter64;
+      description
+        "The ECN packets count for this queue";
+    }
+    description
+      "Augment queue state parameters";
+  }
+
+  augment "/oc-qos:qos" {
+    uses pfc-top;
+    description
+      "Augment PFC config at /qos/";
+  }
+
+  augment "/oc-qos:qos/oc-qos:interfaces/oc-qos:interface/oc-qos:output" {
+    uses pfc-interface-top;
+    description
+      "Augment PFC interface config at /qos/interfaces/interface/output";
+  }
+
+  augment "/oc-qos:qos/oc-qos:queues/oc-qos:queue/oc-qos:config" {
+    uses tx-queue-config;
+    description
+      "Augment queue config at /qos/queues/queue/config";
+  }
+
+  augment "/oc-qos:qos/oc-qos:queues/oc-qos:queue/oc-qos:state" {
+    uses tx-queue-config;
+    description
+      "Augment queue state at /qos/queues/queue/state";
+  }
+
+  augment "/oc-qos:qos/oc-qos:queues/oc-qos:queue" {
+    uses tx-queue-ecn-top;
+    description
+      "Augment tx-queue ecn config at /qos/queues/queue";
+  }
+}

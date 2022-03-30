@@ -1,0 +1,202 @@
+module vlan-translation {
+  yang-version 1;
+  namespace "http://arista.com/yang/vlan-translation";
+  prefix ar-vlan-translation;
+
+  import openconfig-vlan-types {
+    prefix oc-vlan-types;
+  }
+  import openconfig-vlan {
+    prefix oc-vlan;
+  }
+  import openconfig-interfaces {
+    prefix oc-if;
+  }
+  import openconfig-if-ethernet {
+    prefix oc-eth;
+  }
+  import openconfig-if-aggregate {
+    prefix oc-lag;
+  }
+  import iana-if-type {
+    prefix ift;
+  }
+
+  organization
+    "Arista Networks";
+  contact
+    "Arista Networks, Inc.
+     Product Support";
+  description
+    "This module defines VLAN translation configuration,
+     associated with interfaces
+     Copyright (c) 2016 Arista Networks, Inc. All rights reserved.";
+
+  revision 2020-08-10 {
+    description
+      "Use config oc-if:type path to be in accessible tree";
+    reference
+      "1.0.2";
+  }
+  revision 2019-07-31 {
+    description
+      "Correct oc-if:type path in when statement";
+    reference
+      "1.0.1";
+  }
+  revision 2017-11-29 {
+    description
+      "Initial revision.";
+    reference
+      "1.0.0";
+  }
+
+  grouping vlan-tag-required {
+    description
+      "configuration for dropping untagged frames on dot1q tunnel ports";
+    leaf vlan-tag-required {
+      type boolean;
+      description
+        "if this flag is set, then on a dot1q tunnel port, untagged frames and
+          priority tagged frames( Dot1Q tagged frames with vlan id 0 ) will be dropped";
+    }
+  }
+
+  grouping vlan-translation-intf-config {
+    description
+      "Per interface VLAN translation configuration";
+    leaf ingress-mapping-required {
+      type boolean;
+      description
+        "if this flag is set, then on ingress any vlan tagged packet that does not have
+           a corresponding VLAN mapping, will be dropped";
+    }
+  }
+
+  grouping translation-key {
+    description
+      "key for VLAN translation";
+    leaf translation-key {
+      type union {
+        type oc-vlan-types:vlan-id;
+        type oc-vlan-types:qinq-id;
+      }
+      description
+        "the vlan-translation-key";
+    }
+  }
+
+  grouping vlan-translation-config {
+    description
+      "VLAN translation config grouping";
+    uses translation-key;
+    leaf bridging-vlan {
+      type oc-vlan-types:vlan-id;
+      description
+        "The VLAN in which packets matching the VLAN
+         translation key are bridged";
+    }
+    leaf inner-vlan-tag {
+      type oc-vlan-types:vlan-id;
+      description
+        "The inner VLAN tag to be pushed on the
+         packets";
+    }
+    leaf tunnel {
+      type boolean;
+      description
+        "Selective QinQ";
+    }
+  }
+
+  grouping vlan-translation {
+    description
+      "Configuration and State parameters for VLAN Translations";
+    container config {
+      description
+        "Configuration parameters for VLAN Translations";
+      uses vlan-translation-config;
+    }
+    container state {
+      config false;
+      description
+        "State variables for VLAN Translations";
+      uses vlan-translation-config;
+    }
+  }
+
+  grouping vlan-translation-top {
+    description
+      "Top-level grouping for VLAN Translations configurations";
+    container vlan-translation {
+      description
+        "Container for VLAN Translation configuration
+         and state variables";
+      container config {
+        description
+          "Interface configuration parameters for VLAN Translation";
+        uses vlan-translation-intf-config;
+      }
+      container state {
+        description
+          "Interface state variables for VLAN Translation";
+        uses vlan-translation-intf-config;
+      }
+      list ingress {
+        key "translation-key";
+        uses translation-key;
+        uses vlan-translation;
+        description
+          "Ingress VLAN Translation configuration";
+      }
+      list egress {
+        key "translation-key";
+        uses translation-key;
+        uses vlan-translation;
+        description
+          "Egress VLAN Translation configuration";
+      }
+    }
+  }
+
+  augment "/oc-if:interfaces/oc-if:interface/oc-eth:ethernet/oc-vlan:switched-vlan" {
+    when "../../oc-if:config/oc-if:type = 'ift:ethernetCsmacd'" {
+      description
+        "Active when the interface is Ethernet";
+    }
+    description
+      "Adds VLAN translation settings to individual Ethernet
+       interfaces";
+    uses vlan-translation-top;
+  }
+
+  augment "/oc-if:interfaces/oc-if:interface/oc-lag:aggregation/oc-vlan:switched-vlan" {
+    when "../../oc-if:config/oc-if:type = 'ift:ieee8023adLag'" {
+      description
+        "Active when the interface is a LAG";
+    }
+    description
+      "Adds VLAN translation settings to a LAG interface";
+    uses vlan-translation-top;
+  }
+
+  augment "/oc-if:interfaces/oc-if:interface/oc-eth:ethernet/oc-vlan:switched-vlan/oc-vlan:config" {
+    when "../../../oc-if:config/oc-if:type = 'ift:ethernetCsmacd'" {
+      description
+        "Active when the interface is Ethernet";
+    }
+    description
+      "Adds setting to drop untagged and priority frames on an Ethernet dot1q tunnel interface";
+    uses vlan-tag-required;
+  }
+
+  augment "/oc-if:interfaces/oc-if:interface/oc-lag:aggregation/oc-vlan:switched-vlan/oc-vlan:config" {
+    when "../../../oc-if:config/oc-if:type = 'ift:ieee8023adLag'" {
+      description
+        "Active when the interface is a LAG";
+    }
+    description
+      "Adds setting to drop untagged and priority frames on a LAG dot1q tunnel interface";
+    uses vlan-tag-required;
+  }
+}

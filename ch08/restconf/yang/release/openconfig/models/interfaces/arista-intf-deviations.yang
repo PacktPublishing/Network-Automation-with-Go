@@ -1,0 +1,565 @@
+module arista-intf-deviations {
+  namespace "http://arista.com/yang/openconfig/interfaces/deviations";
+  prefix arista-intf-deviations;
+
+  import openconfig-interfaces {
+    prefix oc-if;
+  }
+  import openconfig-if-ethernet {
+    prefix oc-eth;
+  }
+  import openconfig-if-aggregate {
+    prefix oc-lag;
+  }
+  import openconfig-vlan {
+    prefix oc-vlan;
+  }
+  import openconfig-if-ip {
+    prefix oc-ip;
+  }
+  import openconfig-if-tunnel {
+    prefix oc-tunnel;
+  }
+  import openconfig-if-poe {
+    prefix oc-poe;
+  }
+  import openconfig-extensions {
+    prefix oc-ext;
+  }
+
+  organization
+    "Arista Networks, Inc.";
+  contact
+    "Arista Networks, Inc.
+     Product Support";
+  description
+    "This module contains OpenConfig Interface deviations in Arista EOS.
+     Copyright (c) 2016 Arista Networks, Inc. All rights reserved.";
+  oc-ext:openconfig-version "1.0.3";
+
+  revision 2021-01-29 {
+    description
+      "Add deviation for interfaces/interface/ethernet/poe/state/power-class.";
+    reference
+      "1.0.3";
+  }
+  revision 2020-11-30 {
+    description
+      "Fix errors reported by pyang.";
+    reference
+      "1.0.2";
+  }
+  revision 2020-04-02 {
+    description
+      "Removed ip address unnumbered deviation.";
+    reference
+      "1.0.1";
+  }
+  revision 2016-12-28 {
+    description
+      "Initial deviations file.";
+    reference
+      "1.0.0";
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-if:state/oc-if:counters/oc-if:in-unknown-protos" {
+    description
+      "EOS does not support in-unknown-protos counter";
+    deviate not-supported;
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-if:state/oc-if:counters/oc-if:carrier-transitions" {
+    description
+      "EOS does not support carrier-transitions counter";
+    deviate not-supported;
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-if:state/oc-if:counters/oc-if:last-clear" {
+    description
+      "EOS does not support last-clear counter";
+    deviate not-supported;
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-eth:ethernet/oc-eth:state/oc-eth:counters/oc-eth:in-8021q-frames" {
+    description
+      "EOS does not support in-8021q-frames counter";
+    deviate not-supported;
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-eth:ethernet/oc-eth:state/oc-eth:counters/oc-eth:out-8021q-frames" {
+    description
+      "EOS does not support out-8021q-frames counter";
+    deviate not-supported;
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-lag:aggregation/oc-lag:config/oc-lag:min-links" {
+    description
+      "EOS default value for min-links is 0";
+    deviate add {
+      default "0";
+    }
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv4/oc-ip:addresses/oc-ip:address/oc-ip:vrrp/oc-ip:vrrp-group/oc-ip:config/oc-ip:advertisement-interval" {
+    description
+      "In EOS, valid range for advertisement-interval is 100 to 25500 centiseconds";
+    deviate replace {
+      type uint16 {
+        range "100..25500";
+      }
+    }
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv4/oc-ip:addresses/oc-ip:address/oc-ip:vrrp/oc-ip:vrrp-group/oc-ip:state/oc-ip:advertisement-interval" {
+    description
+      "In EOS, valid range for advertisement-interval is 100 to 25500 centiseconds";
+    deviate replace {
+      type uint16 {
+        range "100..25500";
+      }
+    }
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-vlan:routed-vlan/oc-ip:ipv4/oc-ip:addresses/oc-ip:address/oc-ip:vrrp/oc-ip:vrrp-group/oc-ip:config/oc-ip:advertisement-interval" {
+    description
+      "In EOS, valid range for advertisement-interval is 100 to 25500 centiseconds";
+    deviate replace {
+      type uint16 {
+        range "100..25500";
+      }
+    }
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-vlan:routed-vlan/oc-ip:ipv4/oc-ip:addresses/oc-ip:address/oc-ip:vrrp/oc-ip:vrrp-group/oc-ip:state/oc-ip:advertisement-interval" {
+    description
+      "In EOS, valid range for advertisement-interval is 100 to 25500 centiseconds";
+    deviate replace {
+      type uint16 {
+        range "100..25500";
+      }
+    }
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv4/oc-ip:addresses/oc-ip:address/oc-ip:vrrp/oc-ip:vrrp-group/oc-ip:config/oc-ip:accept-mode" {
+    description
+      "In EOS, accept mode is supported at VRRP feature level, not per VRRP group";
+    deviate not-supported;
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-vlan:routed-vlan/oc-ip:ipv4/oc-ip:addresses/oc-ip:address/oc-ip:vrrp/oc-ip:vrrp-group/oc-ip:config/oc-ip:accept-mode" {
+    description
+      "In EOS, accept mode is supported at VRRP feature level, not per VRRP group";
+    deviate not-supported;
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv4/oc-ip:config/oc-ip:mtu" {
+    description
+      "EOS default value for IP MTU is 1500";
+    deviate add {
+      default "1500";
+    }
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv4/oc-ip:state/oc-ip:mtu" {
+    description
+      "EOS default value for IP MTU is 1500";
+    deviate add {
+      default "1500";
+    }
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-vlan:routed-vlan/oc-ip:ipv4/oc-ip:config/oc-ip:mtu" {
+    description
+      "EOS default value for IP MTU is 1500";
+    deviate add {
+      default "1500";
+    }
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-vlan:routed-vlan/oc-ip:ipv4/oc-ip:state/oc-ip:mtu" {
+    description
+      "EOS default value for IP MTU is 1500";
+    deviate add {
+      default "1500";
+    }
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv6/oc-ip:addresses/oc-ip:address/oc-ip:vrrp/oc-ip:vrrp-group/oc-ip:config/oc-ip:advertisement-interval" {
+    description
+      "In EOS, valid range for advertisement-interval is 100 to 25500 centiseconds";
+    deviate replace {
+      type uint16 {
+        range "100..25500";
+      }
+    }
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv6/oc-ip:addresses/oc-ip:address/oc-ip:vrrp/oc-ip:vrrp-group/oc-ip:state/oc-ip:advertisement-interval" {
+    description
+      "In EOS, valid range for advertisement-interval is 100 to 25500 centiseconds";
+    deviate replace {
+      type uint16 {
+        range "100..25500";
+      }
+    }
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-vlan:routed-vlan/oc-ip:ipv6/oc-ip:addresses/oc-ip:address/oc-ip:vrrp/oc-ip:vrrp-group/oc-ip:config/oc-ip:advertisement-interval" {
+    description
+      "In EOS, valid range for advertisement-interval is 100 to 25500 centiseconds";
+    deviate replace {
+      type uint16 {
+        range "100..25500";
+      }
+    }
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-vlan:routed-vlan/oc-ip:ipv6/oc-ip:addresses/oc-ip:address/oc-ip:vrrp/oc-ip:vrrp-group/oc-ip:state/oc-ip:advertisement-interval" {
+    description
+      "In EOS, valid range for advertisement-interval is 100 to 25500 centiseconds";
+    deviate replace {
+      type uint16 {
+        range "100..25500";
+      }
+    }
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv6/oc-ip:addresses/oc-ip:address/oc-ip:vrrp/oc-ip:vrrp-group/oc-ip:config/oc-ip:accept-mode" {
+    description
+      "In EOS, accept mode is supported at VRRP feature level, not per VRRP group";
+    deviate not-supported;
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-vlan:routed-vlan/oc-ip:ipv6/oc-ip:addresses/oc-ip:address/oc-ip:vrrp/oc-ip:vrrp-group/oc-ip:config/oc-ip:accept-mode" {
+    description
+      "In EOS, accept mode is supported at VRRP feature level, not per VRRP group";
+    deviate not-supported;
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv6/oc-ip:neighbors/oc-ip:neighbor/oc-ip:state/oc-ip:is-router" {
+    description
+      "EOS does not support detecting if an IPv6 interface is behaving as a router";
+    deviate not-supported;
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv6/oc-ip:config/oc-ip:mtu" {
+    description
+      "EOS default value for IP MTU is 1500";
+    deviate add {
+      default "1500";
+    }
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv6/oc-ip:state/oc-ip:mtu" {
+    description
+      "EOS default value for IP MTU is 1500";
+    deviate add {
+      default "1500";
+    }
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-vlan:routed-vlan/oc-ip:ipv6/oc-ip:config/oc-ip:mtu" {
+    description
+      "EOS default value for IP MTU is 1500";
+    deviate add {
+      default "1500";
+    }
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-vlan:routed-vlan/oc-ip:ipv6/oc-ip:state/oc-ip:mtu" {
+    description
+      "EOS default value for IP MTU is 1500";
+    deviate add {
+      default "1500";
+    }
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv6/oc-ip:config/oc-ip:mtu" {
+    description
+      "In EOS, valid range for IP MTU is 68 to 65535 octets";
+    deviate replace {
+      type uint32 {
+        range "68..65535";
+      }
+    }
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv6/oc-ip:state/oc-ip:mtu" {
+    description
+      "In EOS, valid range for IP MTU is 68 to 65535 octets";
+    deviate replace {
+      type uint32 {
+        range "68..65535";
+      }
+    }
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-vlan:routed-vlan/oc-ip:ipv6/oc-ip:config/oc-ip:mtu" {
+    description
+      "In EOS, valid range for IP MTU is 68 to 65535 octets";
+    deviate replace {
+      type uint32 {
+        range "68..65535";
+      }
+    }
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-vlan:routed-vlan/oc-ip:ipv6/oc-ip:state/oc-ip:mtu" {
+    description
+      "In EOS, valid range for IP MTU is 68 to 65535 octets";
+    deviate replace {
+      type uint32 {
+        range "68..65535";
+      }
+    }
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv4/oc-ip:config/oc-ip:enabled" {
+    description
+      "EOS default value for IP routing is false";
+    deviate replace {
+      default "false";
+    }
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv6/oc-ip:config/oc-ip:enabled" {
+    description
+      "EOS default value for IPv6 routing is false";
+    deviate replace {
+      default "false";
+    }
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv4/oc-ip:state/oc-ip:enabled" {
+    description
+      "EOS default value for IP routing is false";
+    deviate replace {
+      default "false";
+    }
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv6/oc-ip:state/oc-ip:enabled" {
+    description
+      "EOS default value for IPv6 routing is false";
+    deviate replace {
+      default "false";
+    }
+  }
+
+  typedef vlan-mode-type-eos {
+    type enumeration {
+      enum ACCESS {
+        description
+          "Access mode VLAN interface (No 802.1q header)";
+      }
+      enum TRUNK {
+        description
+          "Trunk mode VLAN interface";
+      }
+      enum DOT1Q-TUNNEL {
+        description
+          "Q-in-Q VLAN interface";
+      }
+    }
+    description
+      "Set the interface to access, trunk or dot1q-tunnel mode";
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-eth:ethernet/oc-vlan:switched-vlan/oc-vlan:config/oc-vlan:interface-mode" {
+    description
+      "switchport mode in EOS can be set to values other than in oc-vlan-types:vlan-mode-type";
+    deviate replace {
+      type enumeration {
+        enum ACCESS {
+          description
+            "Access mode VLAN interface (No 802.1q header)";
+        }
+        enum TRUNK {
+          description
+            "Trunk mode VLAN interface";
+        }
+        enum DOT1Q-TUNNEL {
+          description
+            "Q-in-Q VLAN interface";
+        }
+      }
+    }
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-lag:aggregation/oc-vlan:switched-vlan/oc-vlan:config/oc-vlan:interface-mode" {
+    description
+      "switchport mode in EOS can be set to values other than in oc-vlan-types:vlan-mode-type";
+    deviate replace {
+      type enumeration {
+        enum ACCESS {
+          description
+            "Access mode VLAN interface (No 802.1q header)";
+        }
+        enum TRUNK {
+          description
+            "Trunk mode VLAN interface";
+        }
+        enum DOT1Q-TUNNEL {
+          description
+            "Q-in-Q VLAN interface";
+        }
+      }
+    }
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-eth:ethernet/oc-eth:config/oc-eth:auto-negotiate" {
+    description
+      "In EOS different interface may have different default value";
+    deviate delete {
+      default "true";
+    }
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-eth:ethernet/oc-eth:config/oc-eth:enable-flow-control" {
+    description
+      "In EOS different interface may have different default value";
+    deviate delete {
+      default "false";
+    }
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv4/oc-ip:addresses/oc-ip:address/oc-ip:vrrp/oc-ip:vrrp-group/oc-ip:config/oc-ip:virtual-address" {
+    description
+      "Replaced by Arista augmented virtual-addresses";
+    deviate not-supported;
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv4/oc-ip:addresses/oc-ip:address/oc-ip:vrrp/oc-ip:vrrp-group/oc-ip:state/oc-ip:virtual-address" {
+    description
+      "Replaced by Arista augmented virtual-addresses";
+    deviate not-supported;
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv4/oc-ip:addresses/oc-ip:address/oc-ip:vrrp/oc-ip:vrrp-group/oc-ip:interface-tracking" {
+    description
+      "Replaced by Arista augmented track-interfaces";
+    deviate not-supported;
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv6/oc-ip:addresses/oc-ip:address/oc-ip:vrrp/oc-ip:vrrp-group/oc-ip:config/oc-ip:virtual-address" {
+    description
+      "Replaced by Arista augmented virtual-addresses";
+    deviate not-supported;
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv6/oc-ip:addresses/oc-ip:address/oc-ip:vrrp/oc-ip:vrrp-group/oc-ip:state/oc-ip:virtual-address" {
+    description
+      "Replaced by Arista augmented virtual-addresses";
+    deviate not-supported;
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv6/oc-ip:addresses/oc-ip:address/oc-ip:vrrp/oc-ip:vrrp-group/oc-ip:interface-tracking" {
+    description
+      "Replaced by Arista augmented track-interfaces";
+    deviate not-supported;
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-vlan:routed-vlan/oc-ip:ipv4/oc-ip:addresses/oc-ip:address/oc-ip:vrrp/oc-ip:vrrp-group/oc-ip:config/oc-ip:virtual-address" {
+    description
+      "Replaced by Arista augmented virtual-addresses";
+    deviate not-supported;
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-vlan:routed-vlan/oc-ip:ipv4/oc-ip:addresses/oc-ip:address/oc-ip:vrrp/oc-ip:vrrp-group/oc-ip:state/oc-ip:virtual-address" {
+    description
+      "Replaced by Arista augmented virtual-addresses";
+    deviate not-supported;
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-vlan:routed-vlan/oc-ip:ipv4/oc-ip:addresses/oc-ip:address/oc-ip:vrrp/oc-ip:vrrp-group/oc-ip:interface-tracking" {
+    description
+      "Replaced by Arista augmented track-interfaces";
+    deviate not-supported;
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-vlan:routed-vlan/oc-ip:ipv6/oc-ip:addresses/oc-ip:address/oc-ip:vrrp/oc-ip:vrrp-group/oc-ip:config/oc-ip:virtual-address" {
+    description
+      "Replaced by Arista augmented virtual-addresses";
+    deviate not-supported;
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-vlan:routed-vlan/oc-ip:ipv6/oc-ip:addresses/oc-ip:address/oc-ip:vrrp/oc-ip:vrrp-group/oc-ip:state/oc-ip:virtual-address" {
+    description
+      "Replaced by Arista augmented virtual-addresses";
+    deviate not-supported;
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-vlan:routed-vlan/oc-ip:ipv6/oc-ip:addresses/oc-ip:address/oc-ip:vrrp/oc-ip:vrrp-group/oc-ip:interface-tracking" {
+    description
+      "Replaced by Arista augmented track-interfaces";
+    deviate not-supported;
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-tunnel:tunnel/oc-tunnel:config/oc-tunnel:ttl" {
+    description
+      "In EOS, valid range for tunnel interface ttl is 0-255, with 0 meaning the outer header inherits the inner
+       header's ttl in IPv4 and 64 for IPv6";
+    deviate replace {
+      type uint8 {
+        range "0..255";
+      }
+    }
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-tunnel:tunnel/oc-tunnel:state/oc-tunnel:ttl" {
+    description
+      "In EOS, valid range for tunnel interface ttl is 0-255, with 0 meaning the outer header inherits the inner
+       header's ttl in IPv4 and 64 for IPv6";
+    deviate replace {
+      type uint8 {
+        range "0..255";
+      }
+    }
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv4/oc-ip:proxy-arp" {
+    description
+      "EOS does not support proxy-arp";
+    deviate not-supported;
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv6/oc-ip:router-advertisement" {
+    description
+      "EOS does not support router-advertisement";
+    deviate not-supported;
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-eth:ethernet/oc-poe:poe/oc-poe:config/oc-poe:enabled" {
+    description
+      "Not every interface supports power over ethernet. A default of true will cause the system to try to enable power
+       over ethernet by default. This will fail where PoE is not supported.";
+    deviate delete {
+      default "true";
+    }
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-eth:ethernet/oc-poe:poe/oc-poe:state/oc-poe:enabled" {
+    description
+      "Not every interface supports power over ethernet. A default of true will cause the system to try to enable power
+       over ethernet by default. This will fail where PoE is not supported.";
+    deviate delete {
+      default "true";
+    }
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-eth:ethernet/oc-poe:poe/oc-poe:state/oc-poe:power-class" {
+    description
+      "IEEE 802.3bt power class detected for this ethernet
+       interface. EOS supports up to class8.
+       Also EOS supports following error codes:
+
+         253  -  class mismatch
+         254  -  class invalid
+         255  -  class unknown";
+    deviate replace {
+      type uint8 {
+        range "0..8 | 253 | 254 | 255";
+      }
+    }
+  }
+}

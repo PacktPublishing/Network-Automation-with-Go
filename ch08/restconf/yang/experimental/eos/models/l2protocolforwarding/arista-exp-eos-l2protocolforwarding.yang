@@ -1,0 +1,192 @@
+module arista-exp-eos-l2protocolforwarding {
+  yang-version 1;
+  namespace "http://arista.com/yang/experimental/eos/l2protocolforwarding";
+  prefix l2protocolforwarding-config-exp;
+
+  import arista-exp-eos {
+    prefix eos-exp;
+  }
+
+  organization
+    "Arista Networks, Inc.";
+  contact
+    "Arista Networks, Inc.
+     Product Support";
+  description
+    "This module contains OpenConfig l2protocolforwarding models in Arista EOS.
+     Copyright (c) 2020 Arista Networks, Inc. All rights reserved.";
+
+  revision 2020-04-16 {
+    description
+      "Initial revision";
+    reference
+      "1.0.1";
+  }
+
+  augment "/eos-exp:arista/eos-exp:eos" {
+    container l2-protocol-forwarding {
+      description
+        "l2-protocol-forwarding";
+      container profiles {
+        description
+          "l2-protocol forwarding profiles";
+        uses l2-profile-top;
+      }
+    }
+  }
+
+  grouping l2-profile-top {
+    description
+      "l2-protocol forwarding profiles";
+    list profile {
+      key "name";
+      uses l2-profile;
+    }
+  }
+
+  grouping l2-profile-name {
+    description
+      "profile name";
+    leaf name {
+      type string;
+      description
+        "l2-protocol forwarding profile name";
+    }
+  }
+
+  grouping l2-profile {
+    description
+      "A l2-protocol forwarding profile";
+    leaf name {
+      type leafref {
+        path "../config/name";
+      }
+      description
+        "l2-protocol forwarding profile name";
+    }
+    container config {
+      description
+        "configuration data for l2-protocol forwarding profile";
+      uses l2-profile-name;
+    }
+    container state {
+      description
+        "state data for l2-protocol forwarding profile";
+      uses l2-profile-name;
+    }
+    container protocols {
+      description
+        "protocols to be configured";
+      list protocol {
+        key "name";
+        description
+          "Protocol";
+        leaf name {
+          type leafref {
+            path "../config/name";
+          }
+          description
+            "protocol name";
+        }
+        container config {
+          description
+            "configuration data for l2-protocol";
+          uses l2-protocol-config;
+        }
+        container state {
+          description
+            "state data for l2-protocol";
+          uses l2-protocol-config;
+        }
+      }
+    }
+  }
+
+  grouping l2-protocol-config {
+    description
+      "l2-protocol configuration";
+    leaf name {
+      type l2-protocol;
+      description
+        "Protocol to be configured";
+    }
+    leaf tag-format {
+      type l2-protocol-tagformat;
+      description
+        "Type of l2 frames";
+    }
+    leaf action {
+      type l2-protocol-action;
+      description
+        "l2-protocol forward action";
+    }
+  }
+
+  typedef l2-protocol-action {
+    type enumeration {
+      enum FORWARD {
+        description
+          "Forward packets";
+      }
+      /* Non configurable attribute
+      enum TRAP {
+        description
+          "Trap packets to CPU";
+      } */
+    }
+    default "FORWARD";
+    description
+      "l2-protocol packet forward action";
+  }
+
+  typedef l2-protocol-tagformat {
+    type enumeration {
+      enum ALL {
+        description
+          "All frames";
+      }
+      enum TAGGED {
+        description
+          "Tagged frames";
+      }
+      enum UNTAGGED {
+        description
+          "Untagged frames";
+      }
+    }
+    default "ALL";
+    description
+      "Tagformat for l2 frames";
+  }
+
+  typedef l2-protocol {
+    type enumeration {
+      enum LACP {
+        description
+          "LACP protocol";
+      }
+      enum LLDP {
+        description
+          "LLDP protocol";
+      }
+      enum STP {
+        description
+          "STP protocol";
+      }
+      enum MACSEC {
+        description
+          "MACsec protocol";
+      }
+      enum PAUSE {
+        description
+          "pause frames";
+      }
+      enum ELMI {
+        description
+          "ELMI";
+      }
+    }
+    description
+      "Supported L2 protocols";
+  }
+}

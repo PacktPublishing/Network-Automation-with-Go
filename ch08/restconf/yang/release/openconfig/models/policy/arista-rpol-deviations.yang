@@ -1,0 +1,283 @@
+module arista-rpol-deviations {
+  namespace "http://arista.com/yang/openconfig/policy/deviations";
+  prefix arista-rpol-deviations;
+
+  import openconfig-routing-policy {
+    prefix oc-rpol;
+  }
+  import openconfig-bgp-policy {
+    prefix oc-bgp-pol;
+  }
+  import openconfig-bgp-types {
+    prefix oc-bgp-types;
+  }
+  import openconfig-ospf-policy {
+    prefix oc-ospf-pol;
+  }
+  import openconfig-extensions {
+    prefix oc-ext;
+  }
+
+  organization
+    "Arista Networks, Inc.";
+  contact
+    "Arista Networks, Inc.
+     Product Support";
+  description
+    "This module contains OpenConfig routing policy deviations in Arista EOS.
+
+     Copyright (c) 2016 Arista Networks, Inc. All rights reserved.";
+  oc-ext:openconfig-version "1.0.1";
+
+  revision 2020-11-30 {
+    description
+      "Fix errors reported by pyang.";
+    reference
+      "1.0.1";
+  }
+  revision 2016-02-01 {
+    description
+      "Initial deviations file.";
+    reference
+      "1.0.0";
+  }
+
+  typedef arista-bgp-set-med-type {
+    type union {
+      type uint32;
+      type string {
+        pattern '^[+-][0-9]+$|([0-9]+ )?\+(IGP|METRIC)|METRIC';
+      }
+      type enumeration {
+        enum IGP {
+          description
+            "set the MED value to the IGP cost toward the
+             next hop for the route, only applies for BGP learned routes";
+        }
+      }
+    }
+    description
+      "Type definition for specifying how the BGP MED can
+       be set in BGP policy actions. The three choices are to set
+       the MED directly, increment/decrement using +/- notation or
+       +IGP or +METRIC or <value> +IGP or <value> +METRIC or METRIC,
+       and setting it to the IGP cost (predefined value).";
+  }
+
+  typedef arista-bgp-ext-community-type {
+    type union {
+      type string {
+        pattern 'route\-target:'
+              + '(6553[0-5]|655[0-2][0-9]|65[0-4][0-9]{2}'
+              + '|6[0-4][0-9]{3}|[1-5][0-9]{4}|[1-9][0-9]{1,3}|[0-9]):'
+              + '(429496729[0-5]|42949672[0-8][0-9]|4294967[0-1][0-9]{2}'
+              + '|429496[0-6][0-9]{3}|42949[0-5][0-9]{4}|4294[0-8][0-9]{5}|'
+              + '429[0-3][0-9]{6}|42[0-8][0-9]{7}|4[0-1][0-9]{8}|[1-3][0-9]{9}|'
+              + '[1-9][0-9]{1,8}|[0-9])';
+      }
+      type string {
+        pattern 'route\-target:'
+              + '(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|'
+              + '25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9][0-9]|'
+              + '2[0-4][0-9]|25[0-5]):'
+              + '(6553[0-5]|655[0-2][0-9]|65[0-4][0-9]{2}'
+              + '|6[0-4][0-9]{3}|[1-5][0-9]{4}|[1-9][0-9]{1,3}|[0-9])';
+      }
+      type string {
+        pattern 'route\-target:'
+              + '(429496729[0-5]|42949672[0-8][0-9]|4294967[0-1][0-9]{2}'
+              + '|429496[0-6][0-9]{3}|42949[0-5][0-9]{4}|4294[0-8][0-9]{5}|'
+              + '429[0-3][0-9]{6}|42[0-8][0-9]{7}|4[0-1][0-9]{8}|[1-3][0-9]{9}|'
+              + '[1-9][0-9]{1,8}|[0-9]):'
+              + '(6553[0-5]|655[0-2][0-9]|65[0-4][0-9]{2}'
+              + '|6[0-4][0-9]{3}|[1-5][0-9]{4}|[1-9][0-9]{1,3}|[0-9])';
+      }
+      type string {
+        pattern 'route\-origin:'
+              + '(6553[0-5]|655[0-2][0-9]|65[0-4][0-9]{2}'
+              + '|6[0-4][0-9]{3}|[1-5][0-9]{4}|[1-9][0-9]{1,3}|[0-9]):'
+              + '(429496729[0-5]|42949672[0-8][0-9]|4294967[0-1][0-9]{2}'
+              + '|429496[0-6][0-9]{3}|42949[0-5][0-9]{4}|4294[0-8][0-9]{5}|'
+              + '429[0-3][0-9]{6}|42[0-8][0-9]{7}|4[0-1][0-9]{8}|[1-3][0-9]{9}|'
+              + '[1-9][0-9]{1,8}|[0-9])';
+      }
+      type string {
+        pattern 'route\-origin:'
+              + '(([0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|'
+              + '25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9][0-9]|'
+              + '2[0-4][0-9]|25[0-5]):'
+              + '(6553[0-5]|655[0-2][0-9]|65[0-4][0-9]{2}'
+              + '|6[0-4][0-9]{3}|[1-5][0-9]{4}|[1-9][0-9]{1,3}|[0-9])';
+      }
+      type string {
+        pattern 'route\-origin:'
+              + '(429496729[0-5]|42949672[0-8][0-9]|4294967[0-1][0-9]{2}'
+              + '|429496[0-6][0-9]{3}|42949[0-5][0-9]{4}|4294[0-8][0-9]{5}|'
+              + '429[0-3][0-9]{6}|42[0-8][0-9]{7}|4[0-1][0-9]{8}|[1-3][0-9]{9}|'
+              + '[1-9][0-9]{1,8}|[0-9]):'
+              + '(6553[0-5]|655[0-2][0-9]|654[0-9]{2}|65[0-4][0-9]{2}'
+              + '|6[0-4][0-9]{3}|[1-5][0-9]{4}|[1-9][0-9]{1,3}|[0-9])';
+      }
+      type string {
+        pattern 'link\-bandwidth:'
+              + '(6553[0-5]|655[0-2][0-9]|65[0-4][0-9]{2}'
+              + '|6[0-4][0-9]{3}|[1-5][0-9]{4}|[1-9][0-9]{1,3}|[0-9]):'
+              + '(429496729[0-5]|42949672[0-8][0-9]|4294967[0-1][0-9]{2}'
+              + '|429496[0-6][0-9]{3}|42949[0-5][0-9]{4}|4294[0-8][0-9]{5}|'
+              + '429[0-3][0-9]{6}|42[0-8][0-9]{7}|4[0-1][0-9]{8}|[1-3][0-9]{9}|'
+              + '[1-9][0-9]{1,8}|[0-9])';
+      }
+    }
+    description
+      "EOS supports a subset of the oc-bgp-types:bgp-ext-community-type:
+        - route-target:<2b AS>:<4b value> per RFC4360 section 4
+        - route-target:<4b IPv4>:<2b value> per RFC4360 section 4
+        - route-target:<4b AS>:<2b value> per RFC5668 section 4
+        - route-origin:<2b ASN>:<4b value> per RFC4360 section 5
+        - route-origin:<4b IPv4>:<2b value> per RFC4360 section 5
+        - route-origin:<4b AS>:<2b value> per RFC5668 section 4
+       as well as the link bandwidth extended community
+        - link-bandwidth:<2b AS>:<4b value> per RFC4360 section 3.1";
+  }
+
+  deviation "/oc-rpol:routing-policy/oc-rpol:defined-sets/oc-rpol:neighbor-sets" {
+    description
+      "Neighbor sets are not supported by our routing-policy implementation";
+    deviate not-supported;
+  }
+
+  deviation "/oc-rpol:routing-policy/oc-rpol:policy-definitions/oc-rpol:policy-definition/oc-rpol:statements/oc-rpol:statement/oc-rpol:actions/oc-bgp-pol:bgp-actions/oc-bgp-pol:set-as-path-prepend/oc-bgp-pol:config/oc-bgp-pol:repeat-n" {
+    description
+      "Number of times to prepend specified AS value EOS range restriction";
+    deviate replace {
+      type uint8 {
+        range "1..15";
+      }
+    }
+  }
+
+  deviation "/oc-rpol:routing-policy/oc-rpol:policy-definitions/oc-rpol:policy-definition/oc-rpol:statements/oc-rpol:statement/oc-rpol:actions/oc-bgp-pol:bgp-actions/oc-bgp-pol:set-as-path-prepend/oc-bgp-pol:state/oc-bgp-pol:repeat-n" {
+    description
+      "Number of times to prepend specified AS value EOS range restriction";
+    deviate replace {
+      type uint8 {
+        range "1..15";
+      }
+    }
+  }
+
+  deviation "/oc-rpol:routing-policy/oc-rpol:policy-definitions/oc-rpol:policy-definition/oc-rpol:statements/oc-rpol:statement/oc-rpol:actions/oc-bgp-pol:bgp-actions/oc-bgp-pol:set-community/oc-bgp-pol:inline/oc-bgp-pol:config/oc-bgp-pol:communities" {
+    description
+      "Type of the communities leaf-list is a union of uint32, string or an identityref
+       but Arista supports having union of uint32, string, an identityref or an enum
+       with a single value. Changing existing leaf-list would result in problems with protobuf enabled.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-rpol:routing-policy/oc-rpol:policy-definitions/oc-rpol:policy-definition/oc-rpol:statements/oc-rpol:statement/oc-rpol:actions/oc-bgp-pol:bgp-actions/oc-bgp-pol:set-community/oc-bgp-pol:inline/oc-bgp-pol:state/oc-bgp-pol:communities" {
+    description
+      "Type of the communities leaf-list is a union of uint32, string or an identityref
+       but Arista supports having union of uint32, string, an identityref or an enum
+       with a single value. Changing existing leaf-list would result in problems with protobuf enabled.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-rpol:routing-policy/oc-rpol:policy-definitions/oc-rpol:policy-definition/oc-rpol:statements/oc-rpol:statement/oc-rpol:actions/oc-bgp-pol:bgp-actions/oc-bgp-pol:set-ext-community/oc-bgp-pol:inline/oc-bgp-pol:config/oc-bgp-pol:communities" {
+    description
+      "Type of the communities leaf-list is a union of strings and an identityref
+       but Arista supports having union of strings or an enum with a single value.
+       Changing existing leaf-list type would result in problems with protobuf enabled.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-rpol:routing-policy/oc-rpol:policy-definitions/oc-rpol:policy-definition/oc-rpol:statements/oc-rpol:statement/oc-rpol:actions/oc-bgp-pol:bgp-actions/oc-bgp-pol:set-ext-community/oc-bgp-pol:inline/oc-bgp-pol:state/oc-bgp-pol:communities" {
+    description
+      "Type of the communities leaf-list is a union of strings and an identityref
+       but Arista supports having union of strings or an enum with a single value.
+       Changing existing leaf-list type would result in problems with protobuf enabled.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-rpol:routing-policy/oc-rpol:policy-definitions/oc-rpol:policy-definition/oc-rpol:statements/oc-rpol:statement/oc-rpol:actions/oc-bgp-pol:bgp-actions/oc-bgp-pol:set-ext-community/oc-bgp-pol:reference" {
+    description
+      "Extended community-set references are not supported by our routing-policy implementation";
+    deviate not-supported;
+  }
+
+  deviation "/oc-rpol:routing-policy/oc-rpol:policy-definitions/oc-rpol:policy-definition/oc-rpol:statements/oc-rpol:statement/oc-rpol:actions/oc-bgp-pol:bgp-actions/oc-bgp-pol:config/oc-bgp-pol:set-med" {
+    deviate replace {
+      type arista-rpol-deviations:arista-bgp-set-med-type;
+    }
+  }
+
+  deviation "/oc-rpol:routing-policy/oc-rpol:policy-definitions/oc-rpol:policy-definition/oc-rpol:statements/oc-rpol:statement/oc-rpol:actions/oc-bgp-pol:bgp-actions/oc-bgp-pol:state/oc-bgp-pol:set-med" {
+    deviate replace {
+      type arista-rpol-deviations:arista-bgp-set-med-type;
+    }
+  }
+
+  deviation "/oc-rpol:routing-policy/oc-rpol:defined-sets/oc-bgp-pol:bgp-defined-sets/oc-bgp-pol:ext-community-sets/oc-bgp-pol:ext-community-set/oc-bgp-pol:config/oc-bgp-pol:ext-community-member" {
+    deviate replace {
+      type union {
+        type arista-rpol-deviations:arista-bgp-ext-community-type;
+        type oc-bgp-types:bgp-community-regexp-type;
+      }
+    }
+  }
+
+  deviation "/oc-rpol:routing-policy/oc-rpol:policy-definitions/oc-rpol:policy-definition/oc-rpol:statements/oc-rpol:statement/oc-rpol:actions/oc-ospf-pol:ospf-actions/oc-ospf-pol:set-metric/oc-ospf-pol:config/oc-ospf-pol:metric-type" {
+    description
+      "Specify the type of metric which is to be set by the policy. By default EOS doesn't set it.";
+    deviate delete {
+      default "EXTERNAL_TYPE_2";
+    }
+  }
+
+  deviation "/oc-rpol:routing-policy/oc-rpol:policy-definitions/oc-rpol:policy-definition/oc-rpol:statements/oc-rpol:statement/oc-rpol:actions/oc-ospf-pol:ospf-actions/oc-ospf-pol:set-metric/oc-ospf-pol:state/oc-ospf-pol:metric-type" {
+    description
+      "Specify the type of metric which is to be set by the policy. By default EOS doesn't set it.";
+    deviate delete {
+      default "EXTERNAL_TYPE_2";
+    }
+  }
+
+  // ospf-metric range supported on EOS is <0-4294967295> (2^32), expanding YANG value accordingly (which was originally uint16).
+
+  deviation "/oc-rpol:routing-policy/oc-rpol:policy-definitions/oc-rpol:policy-definition/oc-rpol:statements/oc-rpol:statement/oc-rpol:actions/oc-ospf-pol:ospf-actions/oc-ospf-pol:set-metric/oc-ospf-pol:config/oc-ospf-pol:metric" {
+    deviate replace {
+      type uint32;
+    }
+  }
+
+  deviation "/oc-rpol:routing-policy/oc-rpol:policy-definitions/oc-rpol:policy-definition/oc-rpol:statements/oc-rpol:statement/oc-rpol:actions/oc-ospf-pol:ospf-actions/oc-ospf-pol:set-metric/oc-ospf-pol:state/oc-ospf-pol:metric" {
+    deviate replace {
+      type uint32;
+    }
+  }
+
+  deviation "/oc-rpol:routing-policy/oc-rpol:defined-sets/oc-bgp-pol:bgp-defined-sets/oc-bgp-pol:community-sets/oc-bgp-pol:community-set/oc-bgp-pol:config/oc-bgp-pol:match-set-options" {
+    description
+      "Match-set options are not supported by our routing-policy implementation";
+    deviate not-supported;
+  }
+
+  deviation "/oc-rpol:routing-policy/oc-rpol:policy-definitions/oc-rpol:policy-definition/oc-rpol:statements/oc-rpol:statement/oc-rpol:conditions/oc-bgp-pol:bgp-conditions/oc-bgp-pol:community-count/oc-bgp-pol:config/oc-bgp-pol:value" {
+    description
+      "value must be less than or equal to 1024";
+    deviate replace {
+      type uint32 {
+        range "0..1024";
+      }
+    }
+  }
+
+  deviation "/oc-rpol:routing-policy/oc-rpol:policy-definitions/oc-rpol:policy-definition/oc-rpol:statements/oc-rpol:statement/oc-rpol:conditions/oc-bgp-pol:bgp-conditions/oc-bgp-pol:as-path-length/oc-bgp-pol:config/oc-bgp-pol:value" {
+    description
+      "value must be less than or equal to 4000";
+    deviate replace {
+      type uint32 {
+        range "0..4000";
+      }
+    }
+  }
+}

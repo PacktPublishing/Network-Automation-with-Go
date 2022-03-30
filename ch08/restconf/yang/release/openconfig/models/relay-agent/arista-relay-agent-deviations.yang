@@ -1,0 +1,139 @@
+module arista-relay-agent-deviations {
+  namespace "http://arista.com/yang/openconfig/relay-agent/deviations";
+  prefix arista-relay-agent-deviations;
+
+  import openconfig-relay-agent {
+    prefix oc-relay;
+  }
+  import openconfig-extensions {
+    prefix oc-ext;
+  }
+
+  organization
+    "Arista Networks <http://arista.com/>";
+  contact
+    "Arista Networks, Inc.
+     Product Support";
+  description
+    "This module contains OpenConfig relay-agent deviations in Arista EOS.
+
+     Copyright (c) 2016 Arista Networks, Inc. All rights reserved.";
+  oc-ext:openconfig-version "1.0.1";
+
+  revision 2020-11-30 {
+    description
+      "Fix errors reported by pyang.";
+    reference
+      "1.0.1";
+  }
+  revision 2016-11-21 {
+    description
+      "Initial deviations file.";
+    reference
+      "1.0.0";
+  }
+
+  deviation "/oc-relay:relay-agent/oc-relay:dhcp/oc-relay:config/oc-relay:enable-relay-agent" {
+    description
+      "DHCP relay cannot be configured at the global level. The feature is simply controlled by
+       configuring or removing helper addresses.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-relay:relay-agent/oc-relay:dhcp/oc-relay:state/oc-relay:enable-relay-agent" {
+    description
+      "DHCP relay cannot be configured at the global level. The feature is simply controlled by
+       configuring or removing helper addresses.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-relay:relay-agent/oc-relay:dhcp/oc-relay:agent-information-option" {
+    description
+      "DHCP relay agent information options are not supported.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-relay:relay-agent/oc-relay:dhcp/oc-relay:interfaces/oc-relay:interface/oc-relay:interface-ref" {
+    description
+      "DHCP relay interface-ref is not supported.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-relay:relay-agent/oc-relay:dhcp/oc-relay:interfaces/oc-relay:interface/oc-relay:agent-information-option" {
+    description
+      "DHCP relay interface level agent information option is not supported.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-relay:relay-agent/oc-relay:dhcp/oc-relay:interfaces/oc-relay:interface/oc-relay:config/oc-relay:enable" {
+    description
+      "DHCP relay cannot be configured at the interface level. The feature is simply controlled by
+       configuring or removing helper addresses.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-relay:relay-agent/oc-relay:dhcp/oc-relay:interfaces/oc-relay:interface/oc-relay:state/oc-relay:enable" {
+    description
+      "DHCP relay cannot be configured at the interface level. The feature is simply controlled by
+       configuring or removing helper addresses.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-relay:relay-agent/oc-relay:dhcp/oc-relay:interfaces/oc-relay:interface/oc-relay:state/oc-relay:counters" {
+    description
+      "DHCP interface level counters are not supported.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-relay:relay-agent/oc-relay:dhcpv6/oc-relay:config/oc-relay:enable-relay-agent" {
+    description
+      "DHCPv6 relay cannot be configured at the global level. The feature is simply controlled by
+       configuring or removing helper addresses.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-relay:relay-agent/oc-relay:dhcpv6/oc-relay:state/oc-relay:enable-relay-agent" {
+    description
+      "DHCPv6 relay cannot be configured at the global level. The feature is simply controlled by
+       configuring or removing helper addresses.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-relay:relay-agent/oc-relay:dhcpv6/oc-relay:options" {
+    description
+      "DHCPv6 relay options are not supported.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-relay:relay-agent/oc-relay:dhcpv6/oc-relay:interfaces/oc-relay:interface/oc-relay:config/oc-relay:enable" {
+    description
+      "DHCPv6 relay cannot be configured at the interface level. The feature is simply controlled by
+       configuring or removing helper addresses.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-relay:relay-agent/oc-relay:dhcpv6/oc-relay:interfaces/oc-relay:interface/oc-relay:state/oc-relay:enable" {
+    description
+      "DHCPv6 relay cannot be configured at the interface level. The feature is simply controlled by
+       configuring or removing helper addresses.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-relay:relay-agent/oc-relay:dhcpv6/oc-relay:interfaces/oc-relay:interface/oc-relay:state/oc-relay:counters" {
+    description
+      "DHCP interface level counters are not supported.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-relay:relay-agent/oc-relay:dhcpv6/oc-relay:interfaces/oc-relay:interface/oc-relay:interface-ref" {
+    description
+      "Configuring the interface ref is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-relay:relay-agent/oc-relay:dhcpv6/oc-relay:interfaces/oc-relay:interface/oc-relay:options" {
+    description
+      "Configuring the interface options is not supported in EOS";
+    deviate not-supported;
+  }
+}

@@ -1,0 +1,150 @@
+module arista-pim-augments {
+  namespace "http://arista.com/yang/openconfig/pim/augments";
+  prefix arista-pim-augments;
+
+  import openconfig-network-instance {
+    prefix oc-netinst;
+  }
+  import openconfig-inet-types {
+    prefix oc-inet;
+  }
+  import openconfig-extensions {
+    prefix oc-ext;
+  }
+
+  organization
+    "Arista Networks <http://arista.com/>";
+  contact
+    "Arista Networks, Inc.
+     Product Support";
+  description
+    "This module contains OpenConfig PIM augments in Arista EOS.
+
+     Copyright (c) 2019 Arista Networks, Inc. All rights reserved.";
+  oc-ext:openconfig-version "1.0.1";
+
+  revision 2020-11-30 {
+    description
+      "Fix errors reported by pyang.";
+    reference
+      "1.0.1";
+  }
+  revision 2019-04-24 {
+    description
+      "Initial augment file.";
+    reference
+      "1.0.0";
+  }
+
+  typedef pim-boolean {
+    type boolean;
+    description
+      "Type definition representing a PIM boolean.";
+  }
+
+  augment "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:pim/oc-netinst:global/oc-netinst:ssm/oc-netinst:config" {
+    leaf standard {
+      type pim-boolean;
+      description
+        "Set the PIM SSM range to 232/8";
+    }
+    description
+      "Add standard leaf to PIM SSM configuration.";
+  }
+
+  // PIM static RP augmentation
+
+  typedef pim-rp-priority-type {
+    type uint32 {
+      range "0..255";
+    }
+    description
+      "RP priority";
+  }
+
+  typedef pim-rp-hashmask-len-type {
+    type uint32 {
+      range "0..31";
+    }
+    description
+      "RP hash mask length";
+  }
+
+  grouping pim-static-rp-config {
+    description
+      "Grouping for PIM SM static RP configuration";
+    leaf hashmask {
+      type pim-rp-hashmask-len-type;
+      default "30";
+      description
+        "The length (in bits) of the mask to use in the hash function";
+    }
+    leaf override {
+      type boolean;
+      description
+        "Override dynamically learned mappings";
+    }
+    leaf priority {
+      type pim-rp-priority-type;
+      description
+        "Priority value used for the RP";
+    }
+  }
+
+  augment "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:pim/oc-netinst:global/oc-netinst:rendezvous-points/oc-netinst:rendezvous-point" {
+    container access-lists {
+      description
+        "Top level container for Access lists for the RP.";
+      list access-list {
+        key "name";
+        description
+          "The list of named access-list specifying the group prefixes mapping to the RP.";
+        leaf name {
+          type leafref {
+            path "../config/name";
+          }
+          description
+            "References the name of the interface.";
+        }
+        container config {
+          description
+            "Configurable items for access-lists for the RP.";
+          leaf name {
+            type string;
+            description
+              "Standard access list name.";
+          }
+          uses pim-static-rp-config;
+        }
+      }
+    }
+    container groups {
+      description
+        "Group prefixes mapping to the RP.";
+      list group {
+        key "prefix";
+        description
+          "Group prefix";
+        leaf prefix {
+          type leafref {
+            path "../config/prefix";
+          }
+          description
+            "References the name of the prefix.";
+        }
+        container config {
+          description
+            "Configurable items for Group prefixes mapping to the RP.";
+          leaf prefix {
+            type oc-inet:ipv4-prefix;
+            description
+              "Prefix mapping to the RP.";
+          }
+          uses pim-static-rp-config;
+        }
+      }
+    }
+    description
+      "Add Access lists to the RP.";
+  }
+}

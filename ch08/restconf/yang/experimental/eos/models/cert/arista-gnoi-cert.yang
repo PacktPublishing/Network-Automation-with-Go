@@ -1,0 +1,61 @@
+module arista-gnoi-cert {
+  namespace "http://arista.com/yang/cert/gnoi-cert";
+  prefix arista-gnoi-cert;
+
+  import ietf-yang-types {
+    prefix yang;
+  }
+
+  organization
+    "Arista Networks, Inc.";
+  contact
+    "Arista Networks, Inc.
+     Product Support";
+  description
+    "This module provides reporting for the gnoi.cert service.
+     Copyright (c) 2018 Arista Networks, Inc. All rights reserved.";
+
+  revision 2018-01-15 {
+    description
+      "Initial definition.";
+    reference
+      "https://github.com/openconfig/gnoi";
+  }
+
+  grouping certificate-config {
+    leaf certificate-id {
+      type string;
+    }
+  }
+
+  grouping certificate-status {
+    leaf pem-certificate {
+      type string;
+      description
+        "Current certificate data in PEM format.";
+    }
+    leaf not-before {
+      type yang:timeticks;
+    }
+    leaf not-after {
+      type yang:timeticks;
+    }
+  }
+
+  container certificates {
+    list certificate {
+      key "certificate-id";
+      leaf certificate-id {
+        type leafref {
+          path "../config/certificate-id";
+        }
+      }
+      container config {
+        uses certificate-config;
+      }
+      container status {
+        uses certificate-status;
+      }
+    }
+  }
+}

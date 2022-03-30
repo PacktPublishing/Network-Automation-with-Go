@@ -10,89 +10,145 @@ import (
 	api "json-rpc/pkg/srl"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/openconfig/ygot/ygot"
+	"gopkg.in/yaml.v2"
 )
 
 // docker exec -it clab-netgo-srl /opt/srlinux/bin/sr_cli
 
 //go:generate go run github.com/openconfig/ygot/generator -path=yang -output_file=pkg/srl/srl.go -package_name=srl yang/srl_nokia/models/network-instance/srl_nokia-bgp.yang yang/srl_nokia/models/routing-policy/srl_nokia-routing-policy.yang
 
-var (
-	hostname = "http://clab-netgo-srl/jsonrpc"
-	username = "admin"
-	password = "admin"
+const (
+	srlLoopback    = "system0"
+	defaultSubIdx  = 0
+	defaultNetInst = "default"
 )
 
-type RPC struct {
+var (
+	hostname          = "http://clab-netgo-srl/jsonrpc"
+	username          = "admin"
+	password          = "admin"
+	defaultPolicyName = "all"
+	defaultBGPGroup   = "EBGP"
+)
+
+// SRL JSON-RPC request
+type RpcRequest struct {
 	Version string `json:"jsonrpc"`
 	ID      int    `json:"id"`
 	Method  string `json:"method"`
 	Params  Params `json:"params"`
 }
 
+// SRL JSON-RPC response
+type RpcResponse struct {
+	Version string       `json:"jsonrpc"`
+	ID      int          `json:"id"`
+	Result  *interface{} `json:"result,omitempty"`
+	Error   *interface{} `json:"error,omitempty"`
+}
+
+// SRL JSON-RPC Params
 type Params struct {
 	Commands []*Command `json:"commands"`
 }
 
+// SRL JSON-RPC Command
 type Command struct {
 	Action string      `json:"action"`
 	Path   string      `json:"path"`
 	Value  interface{} `json:"value"`
 }
 
-func buildL3Interface(name, prefix string) (*Command, error) {
-	intf := api.SrlNokiaInterfaces_Interface{}
-	subintf, err := intf.NewSubinterface(0)
-	if err != nil {
-		return nil, err
-	}
-
-	subintf.Ipv4 = &api.SrlNokiaInterfaces_Interface_Subinterface_Ipv4{}
-	subintf.Ipv4.NewAddress(prefix)
-
-	if err := intf.Validate(); err != nil {
-		return nil, err
-	}
-
-	value, err := ygot.ConstructIETFJSON(&intf, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	fmt.Printf("\n/interface[name=%s]>\n", name)
-	printYgot(&intf)
-
-	return &Command{
-		Action: "replace",
-		Path:   fmt.Sprintf("/interface[name=%s]", name),
-		Value:  value,
-	}, nil
+// Input Data Model
+type Model struct {
+	Uplinks  []Link `yaml:"uplinks"`
+	Peers    []Peer `yaml:"peers"`
+	ASN      int    `yaml:"asn"`
+	Loopback Addr   `yaml:"loopback"`
 }
 
-func buildBGPConfig(instance, id, group, policy, neighbor string, lasn, rasn uint32) (*Command, error) {
+// Input Data Model L3 link
+type Link struct {
+	Name   string `yaml:"name"`
+	Prefix string `yaml:"prefix"`
+}
+
+// Input Data Model BGP Peer
+type Peer struct {
+	IP  string `yaml:"ip"`
+	ASN int    `yaml:"asn"`
+}
+
+// Input Data Model IPv4 addr
+type Addr struct {
+	IP string `yaml:"ip"`
+}
+
+func (m *Model) buildL3Interfaces() ([]*Command, error) {
+	var cmds []*Command
+
+	links := m.Uplinks
+	links = append(links, Link{Name: srlLoopback, Prefix: fmt.Sprintf("%s/32", m.Loopback.IP)})
+
+	for _, link := range links {
+		intf := api.SrlNokiaInterfaces_Interface{}
+		subintf, err := intf.NewSubinterface(defaultSubIdx)
+		if err != nil {
+			return nil, err
+		}
+
+		subintf.Ipv4 = &api.SrlNokiaInterfaces_Interface_Subinterface_Ipv4{}
+		subintf.Ipv4.NewAddress(link.Prefix)
+
+		if err := intf.Validate(); err != nil {
+			return nil, err
+		}
+
+		value, err := ygot.ConstructIETFJSON(&intf, nil)
+		if err != nil {
+			return nil, err
+		}
+
+		fmt.Printf("\n/interface[name=%s]:\n", link.Name)
+		printYgot(&intf)
+
+		cmds = append(cmds, &Command{
+			Action: "replace",
+			Path:   fmt.Sprintf("/interface[name=%s]", link.Name),
+			Value:  value,
+		})
+	}
+	return cmds, nil
+}
+
+func (m *Model) buildBGPConfig() (*Command, error) {
 
 	bgp := &api.SrlNokiaNetworkInstance_NetworkInstance_Protocols_Bgp{
-		AutonomousSystem: uintToPtr(lasn),
-		RouterId:         strToPtr(id),
+		AutonomousSystem: uintToPtr(uint32(m.ASN)),
+		RouterId:         strToPtr(m.Loopback.IP),
 		Ipv4Unicast: &api.SrlNokiaNetworkInstance_NetworkInstance_Protocols_Bgp_Ipv4Unicast{
 			AdminState: api.SrlNokiaBgp_AdminState_enable,
 		},
 	}
 
-	g, err := bgp.NewGroup(group)
+	g, err := bgp.NewGroup(defaultBGPGroup)
 	if err != nil {
 		return nil, err
 	}
-	g.ExportPolicy = strToPtr(policy)
-	g.ImportPolicy = strToPtr(policy)
+	g.ExportPolicy = strToPtr(defaultPolicyName)
+	g.ImportPolicy = strToPtr(defaultPolicyName)
 
-	n, err := bgp.NewNeighbor(neighbor)
-	if err != nil {
-		return nil, err
+	for _, peer := range m.Peers {
+		n, err := bgp.NewNeighbor(peer.IP)
+		if err != nil {
+			return nil, err
+		}
+		n.PeerAs = uintToPtr(uint32(peer.ASN))
+		n.PeerGroup = strToPtr(defaultBGPGroup)
 	}
-	n.PeerAs = uintToPtr(rasn)
-	n.PeerGroup = strToPtr(group)
 
 	if err := bgp.Validate(); err != nil {
 		return nil, err
@@ -103,21 +159,28 @@ func buildBGPConfig(instance, id, group, policy, neighbor string, lasn, rasn uin
 		return nil, err
 	}
 
-	fmt.Printf("\n/network-instance[name=%s]/protocols/bgp>\n", instance)
+	fmt.Printf("\n/network-instance[name=%s]/protocols/bgp:\n", defaultNetInst)
 	printYgot(bgp)
 
 	return &Command{
-		Action: "update",
-		Path:   fmt.Sprintf("/network-instance[name=%s]/protocols/bgp", instance),
+		Action: "replace",
+		Path:   fmt.Sprintf("/network-instance[name=%s]/protocols/bgp", defaultNetInst),
 		Value:  value,
 	}, nil
 
 }
 
-func moveIntfsToInstance(intfs []string, instance string) ([]*Command, error) {
+func (m *Model) moveIntfsToInstance() ([]*Command, error) {
 	var cmds []*Command
+
+	var intfs []string
+	for _, link := range m.Uplinks {
+		intfs = append(intfs, fmt.Sprintf("%s.%d", link.Name, defaultSubIdx))
+	}
+	intfs = append(intfs, fmt.Sprintf("%s.%d", srlLoopback, defaultSubIdx))
+
 	for _, intf := range intfs {
-		path := fmt.Sprintf("/network-instance[name=%s]/interface[name=%s]", instance, intf)
+		path := fmt.Sprintf("/network-instance[name=%s]/interface[name=%s]", defaultNetInst, intf)
 		fmt.Println(path)
 		cmds = append(cmds, &Command{
 			Action: "update",
@@ -128,9 +191,9 @@ func moveIntfsToInstance(intfs []string, instance string) ([]*Command, error) {
 	return cmds, nil
 }
 
-func buildDefaultPolicy(name string) (*Command, error) {
+func (m *Model) buildDefaultPolicy() (*Command, error) {
 	rp := api.SrlNokiaRoutingPolicy_RoutingPolicy{}
-	p, err := rp.NewPolicy(name)
+	p, err := rp.NewPolicy(defaultPolicyName)
 	if err != nil {
 		return nil, err
 	}
@@ -154,7 +217,7 @@ func buildDefaultPolicy(name string) (*Command, error) {
 		return nil, err
 	}
 
-	fmt.Printf("\n/routing-policy>\n")
+	fmt.Printf("\n/routing-policy:\n")
 	printYgot(&rp)
 
 	return &Command{
@@ -164,8 +227,8 @@ func buildDefaultPolicy(name string) (*Command, error) {
 	}, nil
 }
 
-func buildSetRPC(cmds []*Command) RPC {
-	return RPC{
+func buildSetRPC(cmds []*Command) RpcRequest {
+	return RpcRequest{
 		Version: "2.0",
 		ID:      0,
 		Method:  "set",
@@ -189,33 +252,41 @@ func printYgot(s ygot.ValidatedGoStruct) {
 
 func main() {
 
+	src, err := os.Open("input.yml")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer src.Close()
+
+	d := yaml.NewDecoder(src)
+
+	var input Model
+	err = d.Decode(&input)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	var cmds []*Command
 
-	eth1, err := buildL3Interface("ethernet-1/1", "192.0.2.0/31")
+	l3Intfs, err := input.buildL3Interfaces()
 	if err != nil {
 		log.Fatal(err)
 	}
-	cmds = append(cmds, eth1)
+	cmds = append(cmds, l3Intfs...)
 
-	lo0, err := buildL3Interface("system0", "198.51.100.0/32")
-	if err != nil {
-		log.Fatal(err)
-	}
-	cmds = append(cmds, lo0)
-
-	policy, err := buildDefaultPolicy("all")
+	policy, err := input.buildDefaultPolicy()
 	if err != nil {
 		log.Fatal(err)
 	}
 	cmds = append(cmds, policy)
 
-	insts, err := moveIntfsToInstance([]string{"ethernet-1/1.0", "system0.0"}, "default")
+	insts, err := input.moveIntfsToInstance()
 	if err != nil {
 		log.Fatal(err)
 	}
 	cmds = append(cmds, insts...)
 
-	bgp, err := buildBGPConfig("default", "198.51.100.0", "EBGP", "all", "192.0.2.1", uint32(65000), uint32(65001))
+	bgp, err := input.buildBGPConfig()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -237,18 +308,28 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		log.Printf("Status: %s", resp.Status)
 	}
 
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer resp.Body.Close()
-	body, _ := io.ReadAll(resp.Body)
-	fmt.Println(string(body))
+	//fmt.Println(string(body))
 
+	var result RpcResponse
+	if err := json.Unmarshal(body, &result); err != nil {
+		log.Fatal(err)
+	}
+
+	if result.Error != nil {
+		log.Fatalf("failed to configure the device: %v", *result.Error)
+	}
+
+	log.Println("Successfully configured the device")
 }
 
 func strToPtr(v string) *string  { return &v }

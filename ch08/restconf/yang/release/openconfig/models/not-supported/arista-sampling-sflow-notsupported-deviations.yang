@@ -1,0 +1,70 @@
+module arista-sampling-sflow-notsupported-deviations {
+  namespace "http://arista.com/yang/openconfig/sampling-sflow/notsupported-deviations";
+  prefix arista-sampling-sflow-notsupported-deviations;
+
+  import openconfig-sampling-sflow {
+    prefix oc-sflow;
+  }
+
+  organization
+    "Arista Networks, Inc.";
+  contact
+    "Arista Networks, Inc.
+     Product Support";
+  description
+    "This module contains OpenConfig sampling-sflow deviations in Arista EOS.
+     Copyright (c) 2021 Arista Networks, Inc. All rights reserved.";
+
+  revision 2021-05-15 {
+    description
+      "Not-supported deviations file.";
+  }
+
+  deviation "/oc-sflow:sampling/oc-sflow:sflow/oc-sflow:collectors" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sflow:sampling/oc-sflow:sflow/oc-sflow:interfaces" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sflow:sampling/oc-sflow:sflow/oc-sflow:config/oc-sflow:sample-size" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sflow:sampling/oc-sflow:sflow/oc-sflow:config/oc-sflow:sampling-rate" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sflow:sampling/oc-sflow:sflow/oc-sflow:config/oc-sflow:source-address" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sflow:sampling/oc-sflow:sflow/oc-sflow:state/oc-sflow:sample-size" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sflow:sampling/oc-sflow:sflow/oc-sflow:state/oc-sflow:sampling-rate" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sflow:sampling/oc-sflow:sflow/oc-sflow:state/oc-sflow:source-address" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+}

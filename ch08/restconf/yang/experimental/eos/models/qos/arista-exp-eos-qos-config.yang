@@ -1,0 +1,737 @@
+module arista-exp-eos-qos-config {
+  yang-version 1;
+  namespace "http://arista.com/yang/experimental/eos/qos/config";
+  prefix qos-config-exp;
+
+  import arista-eos-types {
+    prefix eos-types;
+  }
+  import arista-exp-eos {
+    prefix eos-exp;
+  }
+  import arista-exp-eos-qos {
+    prefix qos-exp;
+  }
+
+  organization
+    "Arista Networks <http://arista.com/>";
+  description
+    "Models for qos config subsystem of Arista EOS
+     Copyright (c) 2017 Arista Networks, Inc. All rights reserved.";
+
+  revision 2017-09-26 {
+    description
+      "Initial revision";
+  }
+
+  augment "/eos-exp:arista/eos-exp:eos/qos-exp:qos" {
+    container input {
+      description
+        "Path: /Sysdb/qos/input, Type: directory Tac::Dir";
+      container config {
+        description
+          "Path: /Sysdb/qos/input/config, Type: directory Tac::Dir";
+        container cli {
+          description
+            "Path: /Sysdb/qos/input/config/cli, Type: entity Qos::Input::Config";
+          uses Qos-Input-Config;
+        }
+      }
+    }
+  }
+
+  grouping Pfc-PortConfig {
+    description
+      "Type: Pfc::PortConfig";
+    leaf enabled {
+      type boolean;
+      description
+        "Path: <Pfc::PortConfig>/enabled, Type: bool";
+    }
+    container portTimerConfig {
+      description
+        "Path: <Pfc::PortConfig>/portTimerConfig, Type: value Pfc::PortTimerConfig";
+      uses Pfc-PortTimerConfig;
+    }
+    leaf portWatchdogVersion {
+      type uint32;
+      description
+        "Path: <Pfc::PortConfig>/portWatchdogVersion, Type: U32";
+    }
+    leaf priorities {
+      type uint8;
+      description
+        "Path: <Pfc::PortConfig>/priorities, Type: U8";
+    }
+    leaf watchdogEnabled {
+      type boolean;
+      description
+        "Path: <Pfc::PortConfig>/watchdogEnabled, Type: bool";
+    }
+    leaf watchdogPortAction {
+      type Pfc-WatchdogAction;
+      description
+        "Path: <Pfc::PortConfig>/watchdogPortAction, Type: enum Pfc::WatchdogAction";
+    }
+  }
+
+  grouping Pfc-PortTimerConfig {
+    description
+      "Type: Pfc::PortTimerConfig";
+    leaf portWatchdogOperPollingInterval {
+      type eos-types:double;
+      description
+        "Path: <Pfc::PortTimerConfig>/portWatchdogOperPollingInterval, Type: double";
+    }
+    leaf portWatchdogPollingInterval {
+      type eos-types:double;
+      description
+        "Path: <Pfc::PortTimerConfig>/portWatchdogPollingInterval, Type: double";
+    }
+    container portWatchdogRecoveryCfg {
+      description
+        "Path: <Pfc::PortTimerConfig>/portWatchdogRecoveryCfg, Type: value Pfc::WatchdogRecoveryConfig";
+      uses Pfc-WatchdogRecoveryConfig;
+    }
+    leaf portWatchdogTimeout {
+      type eos-types:double;
+      description
+        "Path: <Pfc::PortTimerConfig>/portWatchdogTimeout, Type: double";
+    }
+    leaf usePerPortTimerValues {
+      type boolean;
+      description
+        "Path: <Pfc::PortTimerConfig>/usePerPortTimerValues, Type: bool";
+    }
+  }
+
+  typedef Pfc-WatchdogAction {
+    type enumeration {
+      enum drop {
+        description
+          "Type: Pfc::WatchdogAction, Name: drop, Value: 2";
+      }
+      enum errdisable {
+        description
+          "Type: Pfc::WatchdogAction, Name: errdisable, Value: 1";
+      }
+      enum invalid {
+        description
+          "Type: Pfc::WatchdogAction, Name: invalid, Value: 0";
+      }
+      enum notifyOnly {
+        description
+          "Type: Pfc::WatchdogAction, Name: notifyOnly, Value: 3";
+      }
+    }
+    description
+      "Type: Pfc::WatchdogAction";
+  }
+
+  grouping Pfc-WatchdogRecoveryConfig {
+    description
+      "Type: Pfc::WatchdogRecoveryConfig";
+    leaf forcedRecovery {
+      type boolean;
+      description
+        "Path: <Pfc::WatchdogRecoveryConfig>/forcedRecovery, Type: bool";
+    }
+    leaf recoveryTime {
+      type eos-types:double;
+      description
+        "Path: <Pfc::WatchdogRecoveryConfig>/recoveryTime, Type: double";
+    }
+  }
+
+  typedef Qos-Direction {
+    type enumeration {
+      enum input {
+        description
+          "Type: Qos::Direction, Name: input, Value: 0";
+      }
+      enum output {
+        description
+          "Type: Qos::Direction, Name: output, Value: 1";
+      }
+    }
+    description
+      "Type: Qos::Direction";
+  }
+
+  grouping Qos-EcnDelayThreshold {
+    description
+      "Type: Qos::EcnDelayThreshold";
+    leaf threshold {
+      type uint32;
+      description
+        "Path: <Qos::EcnDelayThreshold>/threshold, Type: value Qos::EcnDelayThresholdValue";
+    }
+    leaf unit {
+      type Qos-EcnDelayThresholdUnit;
+      description
+        "Path: <Qos::EcnDelayThreshold>/unit, Type: enum Qos::EcnDelayThresholdUnit";
+    }
+  }
+
+  typedef Qos-EcnDelayThresholdUnit {
+    type enumeration {
+      enum ecnDelayThresholdInvalidUnit {
+        description
+          "Type: Qos::EcnDelayThresholdUnit, Name: ecnDelayThresholdInvalidUnit, Value: 1";
+      }
+      enum ecnDelayThresholdNs {
+        description
+          "Type: Qos::EcnDelayThresholdUnit, Name: ecnDelayThresholdNs, Value: 0";
+      }
+    }
+    description
+      "Type: Qos::EcnDelayThresholdUnit";
+  }
+
+  grouping Qos-EcnWredConfig {
+    description
+      "Type: Qos::EcnWredConfig";
+    leaf maxDroprate {
+      type uint8;
+      description
+        "Path: <Qos::EcnWredConfig>/maxDroprate, Type: value Qos::Percent";
+    }
+    leaf maxThd {
+      type uint32;
+      description
+        "Path: <Qos::EcnWredConfig>/maxThd, Type: value Qos::QueueThreshold";
+    }
+    leaf minThd {
+      type uint32;
+      description
+        "Path: <Qos::EcnWredConfig>/minThd, Type: value Qos::QueueThreshold";
+    }
+    leaf unit {
+      type Qos-QueueThresholdUnit;
+      description
+        "Path: <Qos::EcnWredConfig>/unit, Type: enum Qos::QueueThresholdUnit";
+    }
+    leaf weight {
+      type uint32;
+      description
+        "Path: <Qos::EcnWredConfig>/weight, Type: value Qos::Weight";
+    }
+  }
+
+  grouping Qos-GuaranteedBw {
+    description
+      "Type: Qos::GuaranteedBw";
+    leaf bw {
+      type uint32;
+      description
+        "Path: <Qos::GuaranteedBw>/bw, Type: value Qos::GuaranteedBwVal";
+    }
+    leaf unit {
+      type Qos-GuaranteedBwUnit;
+      description
+        "Path: <Qos::GuaranteedBw>/unit, Type: enum Qos::GuaranteedBwUnit";
+    }
+  }
+
+  typedef Qos-GuaranteedBwUnit {
+    type enumeration {
+      enum guaranteedBwKbps {
+        description
+          "Type: Qos::GuaranteedBwUnit, Name: guaranteedBwKbps, Value: 0";
+      }
+      enum guaranteedBwPercent {
+        description
+          "Type: Qos::GuaranteedBwUnit, Name: guaranteedBwPercent, Value: 2";
+      }
+      enum guaranteedBwPps {
+        description
+          "Type: Qos::GuaranteedBwUnit, Name: guaranteedBwPps, Value: 1";
+      }
+    }
+    description
+      "Type: Qos::GuaranteedBwUnit";
+  }
+
+  grouping Qos-Input-Config {
+    description
+      "Type: Qos::Input::Config";
+    leaf agentName {
+      type string;
+      description
+        "Path: <Qos::Input::Config>/agentName, Type: Tac::String";
+    }
+    leaf configPriority {
+      type uint32;
+      description
+        "Path: <Qos::Input::Config>/configPriority, Type: U32";
+    }
+    leaf cosRewriteEnabled {
+      type Qos-RewriteEnableMode;
+      description
+        "Path: <Qos::Input::Config>/cosRewriteEnabled, Type: enum Qos::RewriteEnableMode";
+    }
+    list cosToTcMap {
+      key "index";
+      description
+        "Path: <Qos::Input::Config>/cosToTcMap, Type: [value Qos::Cos]value Qos::TrafficClass";
+      leaf index {
+        type uint8;
+        description
+          "Path: <Qos::Input::Config>/cosToTcMap/<!External index>, Type: value Qos::Cos";
+      }
+      leaf value {
+        type uint8;
+        description
+          "Path: <Qos::Input::Config>/cosToTcMap/<index>, Type: value Qos::TrafficClass";
+      }
+    }
+    leaf dscpRewriteEnabled {
+      type boolean;
+      description
+        "Path: <Qos::Input::Config>/dscpRewriteEnabled, Type: bool";
+    }
+    list dscpToTcMap {
+      key "index";
+      description
+        "Path: <Qos::Input::Config>/dscpToTcMap, Type: [value Qos::Dscp]value Qos::TrafficClass";
+      leaf index {
+        type uint8;
+        description
+          "Path: <Qos::Input::Config>/dscpToTcMap/<!External index>, Type: value Qos::Dscp";
+      }
+      leaf value {
+        type uint8;
+        description
+          "Path: <Qos::Input::Config>/dscpToTcMap/<index>, Type: value Qos::TrafficClass";
+      }
+    }
+    leaf ecnAllowNonEct {
+      type boolean;
+      description
+        "Path: <Qos::Input::Config>/ecnAllowNonEct, Type: bool";
+    }
+    container ecnDelayThreshold {
+      description
+        "Path: <Qos::Input::Config>/ecnDelayThreshold, Type: value Qos::EcnDelayThreshold";
+      uses Qos-EcnDelayThreshold;
+    }
+    container globalEcnConfig {
+      description
+        "Path: <Qos::Input::Config>/globalEcnConfig, Type: entity Qos::EcnWredConfig";
+      uses Qos-EcnWredConfig;
+    }
+    leaf hwConfigVerificationEnabled {
+      type boolean;
+      description
+        "Path: <Qos::Input::Config>/hwConfigVerificationEnabled, Type: bool";
+    }
+    list hwMonitoredPri {
+      key "index";
+      description
+        "Path: <Qos::Input::Config>/hwMonitoredPri, Type: [U8]bool";
+      leaf index {
+        type uint8;
+        description
+          "Path: <Qos::Input::Config>/hwMonitoredPri/<!External index>, Type: U8";
+      }
+      leaf value {
+        type boolean;
+        description
+          "Path: <Qos::Input::Config>/hwMonitoredPri/<index>, Type: bool";
+      }
+    }
+    list intfConfig {
+      key "intfId";
+      description
+        "Path: <Qos::Input::Config>/intfConfig, Type: ['intfId' value Arnet::IntfId]entity Qos::IntfConfig";
+      uses Qos-IntfConfig;
+    }
+    leaf intfConfigPriority {
+      type uint32;
+      description
+        "Path: <Qos::Input::Config>/intfConfigPriority, Type: U32";
+    }
+    leaf pfcGlobalEnabled {
+      type boolean;
+      description
+        "Path: <Qos::Input::Config>/pfcGlobalEnabled, Type: bool";
+    }
+    list servicePolicyConfig {
+      key "key-direction key-pmapName key-type";
+      description
+        "Path: <Qos::Input::Config>/servicePolicyConfig, Type: ['key' value Qos::ServicePolicyKey]entity Qos::ServicePolicyConfig";
+      leaf key-direction {
+        type Qos-Direction;
+        description
+          "Path: <Qos::ServicePolicyKey>/direction, Type: enum Qos::Direction";
+      }
+      leaf key-pmapName {
+        type string;
+        description
+          "Path: <Qos::ServicePolicyKey>/pmapName, Type: Tac::Name";
+      }
+      leaf key-type {
+        type Qos-MapType;
+        description
+          "Path: <Qos::ServicePolicyKey>/type, Type: enum Qos::MapType";
+      }
+      leaf clearCountersTime {
+        type eos-types:double;
+        description
+          "Path: <Qos::ServicePolicyConfig>/clearCountersTime, Type: double";
+      }
+      list intfIds {
+        key "index";
+        description
+          "Path: <Qos::ServicePolicyConfig>/intfIds, Type: [value Arnet::IntfId]bool";
+        leaf index {
+          type eos-types:Arnet-IntfId;
+          description
+            "Path: <Qos::ServicePolicyConfig>/intfIds/<!External index>, Type: value Arnet::IntfId";
+        }
+        leaf value {
+          type boolean;
+          description
+            "Path: <Qos::ServicePolicyConfig>/intfIds/<index>, Type: bool";
+        }
+      }
+    }
+    list tcToCosMap {
+      key "index";
+      description
+        "Path: <Qos::Input::Config>/tcToCosMap, Type: [value Qos::TrafficClass]value Qos::Cos";
+      leaf index {
+        type uint8;
+        description
+          "Path: <Qos::Input::Config>/tcToCosMap/<!External index>, Type: value Qos::TrafficClass";
+      }
+      leaf value {
+        type uint8;
+        description
+          "Path: <Qos::Input::Config>/tcToCosMap/<index>, Type: value Qos::Cos";
+      }
+    }
+    list tcToDscpMap {
+      key "index";
+      description
+        "Path: <Qos::Input::Config>/tcToDscpMap, Type: [value Qos::TrafficClass]value Qos::Dscp";
+      leaf index {
+        type uint8;
+        description
+          "Path: <Qos::Input::Config>/tcToDscpMap/<!External index>, Type: value Qos::TrafficClass";
+      }
+      leaf value {
+        type uint8;
+        description
+          "Path: <Qos::Input::Config>/tcToDscpMap/<index>, Type: value Qos::Dscp";
+      }
+    }
+    list tcToMcTxQueueMap {
+      key "index";
+      description
+        "Path: <Qos::Input::Config>/tcToMcTxQueueMap, Type: [value Qos::TrafficClass]value Qos::TxQueueId";
+      leaf index {
+        type uint8;
+        description
+          "Path: <Qos::Input::Config>/tcToMcTxQueueMap/<!External index>, Type: value Qos::TrafficClass";
+      }
+      leaf value {
+        type uint8;
+        description
+          "Path: <Qos::Input::Config>/tcToMcTxQueueMap/<index>, Type: value Qos::TxQueueId";
+      }
+    }
+    list tcToTxQueueMap {
+      key "index";
+      description
+        "Path: <Qos::Input::Config>/tcToTxQueueMap, Type: [value Qos::TrafficClass]value Qos::TxQueueId";
+      leaf index {
+        type uint8;
+        description
+          "Path: <Qos::Input::Config>/tcToTxQueueMap/<!External index>, Type: value Qos::TrafficClass";
+      }
+      leaf value {
+        type uint8;
+        description
+          "Path: <Qos::Input::Config>/tcToTxQueueMap/<index>, Type: value Qos::TxQueueId";
+      }
+    }
+    leaf watchdogAction {
+      type Pfc-WatchdogAction;
+      description
+        "Path: <Qos::Input::Config>/watchdogAction, Type: enum Pfc::WatchdogAction";
+    }
+    leaf watchdogNonDisruptivePriorities {
+      type uint8;
+      description
+        "Path: <Qos::Input::Config>/watchdogNonDisruptivePriorities, Type: U8";
+    }
+    leaf watchdogPollingInterval {
+      type eos-types:double;
+      description
+        "Path: <Qos::Input::Config>/watchdogPollingInterval, Type: double";
+    }
+    container watchdogRecoveryCfg {
+      description
+        "Path: <Qos::Input::Config>/watchdogRecoveryCfg, Type: value Pfc::WatchdogRecoveryConfig";
+      uses Pfc-WatchdogRecoveryConfig;
+    }
+    leaf watchdogTimeout {
+      type eos-types:double;
+      description
+        "Path: <Qos::Input::Config>/watchdogTimeout, Type: double";
+    }
+  }
+
+  grouping Qos-IntfConfig {
+    description
+      "Type: Qos::IntfConfig";
+    leaf defaultCos {
+      type uint8;
+      description
+        "Path: <Qos::IntfConfig>/defaultCos, Type: value Qos::Cos";
+    }
+    leaf defaultDscp {
+      type uint8;
+      description
+        "Path: <Qos::IntfConfig>/defaultDscp, Type: value Qos::Dscp";
+    }
+    leaf fabricPfcDlb {
+      type uint8;
+      description
+        "Path: <Qos::IntfConfig>/fabricPfcDlb, Type: U8";
+    }
+    leaf intfId {
+      type eos-types:Arnet-IntfId;
+      description
+        "Path: <Qos::IntfConfig>/intfId, Type: value Arnet::IntfId";
+    }
+    container pfcPortConfig {
+      description
+        "Path: <Qos::IntfConfig>/pfcPortConfig, Type: entity Pfc::PortConfig";
+      uses Pfc-PortConfig;
+    }
+    container shapeRate {
+      description
+        "Path: <Qos::IntfConfig>/shapeRate, Type: value Qos::ShapeRate";
+      uses Qos-ShapeRate;
+    }
+    leaf trustMode {
+      type Qos-TrustMode;
+      description
+        "Path: <Qos::IntfConfig>/trustMode, Type: enum Qos::TrustMode";
+    }
+    list txQueueConfig {
+      key "txQueue-id txQueue-type";
+      description
+        "Path: <Qos::IntfConfig>/txQueueConfig, Type: ['txQueue' value Qos::TxQueue]entity Qos::TxQueueConfig";
+      leaf txQueue-id {
+        type uint8;
+        description
+          "Path: <Qos::TxQueue>/id, Type: value Qos::TxQueueId";
+      }
+      leaf txQueue-type {
+        type Qos-QueueType;
+        description
+          "Path: <Qos::TxQueue>/type, Type: enum Qos::QueueType";
+      }
+      leaf bandwidth {
+        type uint8;
+        description
+          "Path: <Qos::TxQueueConfig>/bandwidth, Type: value Qos::Percent";
+      }
+      leaf delayEcnEnabled {
+        type boolean;
+        description
+          "Path: <Qos::TxQueueConfig>/delayEcnEnabled, Type: bool";
+      }
+      container ecnConfig {
+        description
+          "Path: <Qos::TxQueueConfig>/ecnConfig, Type: entity Qos::EcnWredConfig";
+        uses Qos-EcnWredConfig;
+      }
+      container ecnDelayThreshold {
+        description
+          "Path: <Qos::TxQueueConfig>/ecnDelayThreshold, Type: value Qos::EcnDelayThreshold";
+        uses Qos-EcnDelayThreshold;
+      }
+      container guaranteedBw {
+        description
+          "Path: <Qos::TxQueueConfig>/guaranteedBw, Type: value Qos::GuaranteedBw";
+        uses Qos-GuaranteedBw;
+      }
+      container nonEctConfig {
+        description
+          "Path: <Qos::TxQueueConfig>/nonEctConfig, Type: entity Qos::EcnWredConfig";
+        uses Qos-EcnWredConfig;
+      }
+      leaf priority {
+        type Qos-TxQueuePriority;
+        description
+          "Path: <Qos::TxQueueConfig>/priority, Type: enum Qos::TxQueuePriority";
+      }
+      container shapeRate {
+        description
+          "Path: <Qos::TxQueueConfig>/shapeRate, Type: value Qos::ShapeRate";
+        uses Qos-ShapeRate;
+      }
+      container wredConfig {
+        description
+          "Path: <Qos::TxQueueConfig>/wredConfig, Type: entity Qos::EcnWredConfig";
+        uses Qos-EcnWredConfig;
+      }
+    }
+  }
+
+  typedef Qos-MapType {
+    type enumeration {
+      enum mapControlPlane {
+        description
+          "Type: Qos::MapType, Name: mapControlPlane, Value: 0";
+      }
+      enum mapPdp {
+        description
+          "Type: Qos::MapType, Name: mapPdp, Value: 2";
+      }
+      enum mapQos {
+        description
+          "Type: Qos::MapType, Name: mapQos, Value: 1";
+      }
+    }
+    description
+      "Type: Qos::MapType";
+  }
+
+  typedef Qos-QueueThresholdUnit {
+    type enumeration {
+      enum bytes {
+        description
+          "Type: Qos::QueueThresholdUnit, Name: bytes, Value: 0";
+      }
+      enum kbytes {
+        description
+          "Type: Qos::QueueThresholdUnit, Name: kbytes, Value: 1";
+      }
+      enum mbytes {
+        description
+          "Type: Qos::QueueThresholdUnit, Name: mbytes, Value: 2";
+      }
+      enum segments {
+        description
+          "Type: Qos::QueueThresholdUnit, Name: segments, Value: 3";
+      }
+    }
+    description
+      "Type: Qos::QueueThresholdUnit";
+  }
+
+  typedef Qos-QueueType {
+    type enumeration {
+      enum mcq {
+        description
+          "Type: Qos::QueueType, Name: mcq, Value: 1";
+      }
+      enum ucq {
+        description
+          "Type: Qos::QueueType, Name: ucq, Value: 0";
+      }
+      enum unknown {
+        description
+          "Type: Qos::QueueType, Name: unknown, Value: 2";
+      }
+    }
+    description
+      "Type: Qos::QueueType";
+  }
+
+  typedef Qos-RewriteEnableMode {
+    type enumeration {
+      enum rewriteDisabled {
+        description
+          "Type: Qos::RewriteEnableMode, Name: rewriteDisabled, Value: 2";
+      }
+      enum rewriteEnabled {
+        description
+          "Type: Qos::RewriteEnableMode, Name: rewriteEnabled, Value: 1";
+      }
+      enum rewriteInvalid {
+        description
+          "Type: Qos::RewriteEnableMode, Name: rewriteInvalid, Value: 0";
+      }
+    }
+    description
+      "Type: Qos::RewriteEnableMode";
+  }
+
+  grouping Qos-ShapeRate {
+    description
+      "Type: Qos::ShapeRate";
+    leaf rate {
+      type uint32;
+      description
+        "Path: <Qos::ShapeRate>/rate, Type: value Qos::ShapeRateVal";
+    }
+    leaf unit {
+      type Qos-ShapeRateUnit;
+      description
+        "Path: <Qos::ShapeRate>/unit, Type: enum Qos::ShapeRateUnit";
+    }
+  }
+
+  typedef Qos-ShapeRateUnit {
+    type enumeration {
+      enum shapeRateKbps {
+        description
+          "Type: Qos::ShapeRateUnit, Name: shapeRateKbps, Value: 0";
+      }
+      enum shapeRatePps {
+        description
+          "Type: Qos::ShapeRateUnit, Name: shapeRatePps, Value: 1";
+      }
+    }
+    description
+      "Type: Qos::ShapeRateUnit";
+  }
+
+  typedef Qos-TrustMode {
+    type enumeration {
+      enum cos {
+        description
+          "Type: Qos::TrustMode, Name: cos, Value: 0";
+      }
+      enum dscp {
+        description
+          "Type: Qos::TrustMode, Name: dscp, Value: 1";
+      }
+      enum invalid {
+        description
+          "Type: Qos::TrustMode, Name: invalid, Value: 3";
+      }
+      enum untrusted {
+        description
+          "Type: Qos::TrustMode, Name: untrusted, Value: 2";
+      }
+    }
+    description
+      "Type: Qos::TrustMode";
+  }
+
+  typedef Qos-TxQueuePriority {
+    type enumeration {
+      enum priorityInvalid {
+        description
+          "Type: Qos::TxQueuePriority, Name: priorityInvalid, Value: 2";
+      }
+      enum priorityRoundRobin {
+        description
+          "Type: Qos::TxQueuePriority, Name: priorityRoundRobin, Value: 0";
+      }
+      enum priorityStrict {
+        description
+          "Type: Qos::TxQueuePriority, Name: priorityStrict, Value: 1";
+      }
+    }
+    description
+      "Type: Qos::TxQueuePriority";
+  }
+}

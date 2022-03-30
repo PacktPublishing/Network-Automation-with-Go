@@ -1,0 +1,1302 @@
+module arista-exp-eos-qos-acl-config {
+  yang-version 1;
+  namespace "http://arista.com/yang/experimental/eos/qos/acl";
+  prefix qos-acl-config-exp;
+
+  import arista-eos-types {
+    prefix eos-types;
+  }
+  import arista-exp-eos {
+    prefix eos-exp;
+  }
+  import arista-exp-eos-qos {
+    prefix qos-exp;
+  }
+
+  organization
+    "Arista Networks <http://arista.com/>";
+  description
+    "Models for qos subsystem of Arista EOS
+     Copyright (c) 2017 Arista Networks, Inc. All rights reserved.";
+
+  revision 2019-11-12 {
+    description
+      "Added matchL2Params to enum Qos::ClassMapMatchOption";
+  }
+  revision 2018-11-13 {
+    description
+      "Add default value for a policer leaf";
+  }
+  revision 2017-09-26 {
+    description
+      "Initial revision";
+  }
+
+  augment "/eos-exp:arista/eos-exp:eos/qos-exp:qos" {
+    container acl {
+      description
+        "qos acl subsystem config/state";
+      container input {
+        description
+          "config";
+        container cli {
+          description
+            "set from CLI/Openconfig";
+          uses Qos-Input-AclConfig;
+        }
+      }
+    }
+  }
+
+  typedef Acl-Ecn {
+    type enumeration {
+      enum ce {
+        description
+          "Type: Acl::Ecn, Name: ce, Value: 3";
+      }
+      enum dontCare {
+        description
+          "Type: Acl::Ecn, Name: dontCare, Value: 0";
+      }
+      enum ect {
+        description
+          "Type: Acl::Ecn, Name: ect, Value: 4";
+      }
+      enum ectCe {
+        description
+          "Type: Acl::Ecn, Name: ectCe, Value: 1";
+      }
+      enum nonEct {
+        description
+          "Type: Acl::Ecn, Name: nonEct, Value: 2";
+      }
+    }
+    description
+      "Type: Acl::Ecn";
+  }
+
+  grouping Qos-Action {
+    description
+      "Type: Qos::Action";
+    leaf actionType {
+      type Qos-ActionType;
+      description
+        "Path: <Qos::Action>/actionType, Type: enum Qos::ActionType";
+    }
+    container rate {
+      description
+        "Path: <Qos::Action>/rate, Type: entity Qos::ActionRate";
+      uses Qos-ActionRate;
+    }
+    leaf value {
+      type uint32;
+      description
+        "Path: <Qos::Action>/value, Type: U32";
+    }
+  }
+
+  grouping Qos-ActionRate {
+    description
+      "Type: Qos::ActionRate";
+    leaf rateUnit {
+      type Qos-RateUnit;
+      description
+        "Path: <Qos::ActionRate>/rateUnit, Type: enum Qos::RateUnit";
+    }
+    leaf val {
+      type uint32;
+      description
+        "Path: <Qos::ActionRate>/val, Type: value Qos::ActionRateType";
+    }
+  }
+
+  typedef Qos-ActionType {
+    type enumeration {
+      enum actionSetBandwidth {
+        description
+          "Type: Qos::ActionType, Name: actionSetBandwidth, Value: 1";
+      }
+      enum actionSetCos {
+        description
+          "Type: Qos::ActionType, Name: actionSetCos, Value: 2";
+      }
+      enum actionSetDrop {
+        description
+          "Type: Qos::ActionType, Name: actionSetDrop, Value: 5";
+      }
+      enum actionSetDropPrecedence {
+        description
+          "Type: Qos::ActionType, Name: actionSetDropPrecedence, Value: 6";
+      }
+      enum actionSetDscp {
+        description
+          "Type: Qos::ActionType, Name: actionSetDscp, Value: 3";
+      }
+      enum actionSetShape {
+        description
+          "Type: Qos::ActionType, Name: actionSetShape, Value: 0";
+      }
+      enum actionSetTc {
+        description
+          "Type: Qos::ActionType, Name: actionSetTc, Value: 4";
+      }
+    }
+    description
+      "Type: Qos::ActionType";
+  }
+
+  typedef Qos-BurstUnit {
+    type enumeration {
+      enum burstUnitBytes {
+        description
+          "Type: Qos::BurstUnit, Name: burstUnitBytes, Value: 0";
+      }
+      enum burstUnitKBytes {
+        description
+          "Type: Qos::BurstUnit, Name: burstUnitKBytes, Value: 1";
+      }
+      enum burstUnitMBytes {
+        description
+          "Type: Qos::BurstUnit, Name: burstUnitMBytes, Value: 2";
+      }
+      enum burstUnitPackets {
+        description
+          "Type: Qos::BurstUnit, Name: burstUnitPackets, Value: 3";
+      }
+    }
+    description
+      "Type: Qos::BurstUnit";
+  }
+
+  grouping Qos-ClassAction {
+    description
+      "Type: Qos::ClassAction";
+    leaf count {
+      type boolean;
+      description
+        "Path: <Qos::ClassAction>/count, Type: bool";
+    }
+    leaf name {
+      type string;
+      description
+        "Path: <Qos::ClassAction>/name, Type: Tac::Name";
+    }
+    container policer {
+      description
+        "Path: <Qos::ClassAction>/policer, Type: entity Qos::PolicerConfig";
+      uses Qos-PolicerConfig;
+    }
+    list policyAction {
+      key "actionType";
+      description
+        "Path: <Qos::ClassAction>/policyAction, Type: ['actionType' enum Qos::ActionType]entity Qos::Action";
+      uses Qos-Action;
+    }
+  }
+
+  grouping Qos-ClassMapConfig {
+    description
+      "Type: Qos::ClassMapConfig";
+    leaf cpStaticType {
+      type Qos-ClassMapCpStaticType;
+      description
+        "Path: <Qos::ClassMapConfig>/cpStaticType, Type: enum Qos::ClassMapCpStaticType";
+    }
+    leaf cpType {
+      type Qos-ClassMapCpType;
+      description
+        "Path: <Qos::ClassMapConfig>/cpType, Type: enum Qos::ClassMapCpType";
+    }
+    leaf dynamic {
+      type boolean;
+      description
+        "Path: <Qos::ClassMapConfig>/dynamic, Type: bool";
+    }
+    list match {
+      key "option";
+      description
+        "Path: <Qos::ClassMapConfig>/match, Type: ['option' enum Qos::ClassMapMatchOption]entity Qos::ClassMapMatch";
+      uses Qos-ClassMapMatch;
+    }
+    leaf matchCondition {
+      type Qos-ClassMapMatchCondition;
+      description
+        "Path: <Qos::ClassMapConfig>/matchCondition, Type: enum Qos::ClassMapMatchCondition";
+    }
+    leaf name {
+      type string;
+      description
+        "Path: <Qos::ClassMapConfig>/name, Type: Tac::Name";
+    }
+    leaf type {
+      type Qos-MapType;
+      description
+        "Path: <Qos::ClassMapConfig>/type, Type: enum Qos::MapType";
+    }
+    leaf uniqueId {
+      type eos-types:double;
+      description
+        "Path: <Qos::ClassMapConfig>/uniqueId, Type: value Qos::UniqueId";
+    }
+    leaf version {
+      type uint32;
+      description
+        "Path: <Qos::ClassMapConfig>/version, Type: U32";
+    }
+  }
+
+  typedef Qos-ClassMapCpStaticType {
+    type enumeration {
+      enum cmapCpStaticAclLog {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticAclLog, Value: 20";
+      }
+      enum cmapCpStaticArp {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticArp, Value: 4";
+      }
+      enum cmapCpStaticArpInspect {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticArpInspect, Value: 57";
+      }
+      enum cmapCpStaticArpResolver {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticArpResolver, Value: 17";
+      }
+      enum cmapCpStaticBfd {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticBfd, Value: 37";
+      }
+      enum cmapCpStaticBgp {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticBgp, Value: 35";
+      }
+      enum cmapCpStaticBpdu {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticBpdu, Value: 1";
+      }
+      enum cmapCpStaticCfm {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticCfm, Value: 55";
+      }
+      enum cmapCpStaticCfmSnoop {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticCfmSnoop, Value: 56";
+      }
+      enum cmapCpStaticCvx {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticCvx, Value: 49";
+      }
+      enum cmapCpStaticCvxHeartbeat {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticCvxHeartbeat, Value: 50";
+      }
+      enum cmapCpStaticDefault {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticDefault, Value: 19";
+      }
+      enum cmapCpStaticDot1xMab {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticDot1xMab, Value: 54";
+      }
+      enum cmapCpStaticDrop {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticDrop, Value: 18";
+      }
+      enum cmapCpStaticEgressAclLog {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticEgressAclLog, Value: 45";
+      }
+      enum cmapCpStaticGlean {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticGlean, Value: 13";
+      }
+      enum cmapCpStaticIgmp {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticIgmp, Value: 10";
+      }
+      enum cmapCpStaticInvalid {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticInvalid, Value: 0";
+      }
+      enum cmapCpStaticIpBroadcast {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticIpBroadcast, Value: 23";
+      }
+      enum cmapCpStaticIpMc {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticIpMc, Value: 22";
+      }
+      enum cmapCpStaticIpUnicast {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticIpUnicast, Value: 21";
+      }
+      enum cmapCpStaticIpmcMiss {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticIpmcMiss, Value: 8";
+      }
+      enum cmapCpStaticIpmcRsvd {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticIpmcRsvd, Value: 7";
+      }
+      enum cmapCpStaticIpv6Nd {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticIpv6Nd, Value: 24";
+      }
+      enum cmapCpStaticL2Broadcast {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticL2Broadcast, Value: 27";
+      }
+      enum cmapCpStaticL2Rsvd {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticL2Rsvd, Value: 29";
+      }
+      enum cmapCpStaticL2Unicast {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticL2Unicast, Value: 28";
+      }
+      enum cmapCpStaticL3DestMiss {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticL3DestMiss, Value: 9";
+      }
+      enum cmapCpStaticL3LpmOverflow {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticL3LpmOverflow, Value: 32";
+      }
+      enum cmapCpStaticL3SlowPath {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticL3SlowPath, Value: 14";
+      }
+      enum cmapCpStaticL3Ttl0 {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticL3Ttl0, Value: 16";
+      }
+      enum cmapCpStaticL3Ttl1 {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticL3Ttl1, Value: 15";
+      }
+      enum cmapCpStaticLacp {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticLacp, Value: 2";
+      }
+      enum cmapCpStaticLinkLocal {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticLinkLocal, Value: 33";
+      }
+      enum cmapCpStaticLldp {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticLldp, Value: 3";
+      }
+      enum cmapCpStaticMacLearn {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticMacLearn, Value: 53";
+      }
+      enum cmapCpStaticMax {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticMax, Value: 58";
+      }
+      enum cmapCpStaticMcastSnoop {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticMcastSnoop, Value: 34";
+      }
+      enum cmapCpStaticMirroring {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticMirroring, Value: 51";
+      }
+      enum cmapCpStaticMlag {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticMlag, Value: 36";
+      }
+      enum cmapCpStaticMplsLabelMiss {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticMplsLabelMiss, Value: 47";
+      }
+      enum cmapCpStaticMplsTtl01 {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticMplsTtl01, Value: 46";
+      }
+      enum cmapCpStaticMtu {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticMtu, Value: 44";
+      }
+      enum cmapCpStaticMvrp {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticMvrp, Value: 42";
+      }
+      enum cmapCpStaticOspfIsis {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticOspfIsis, Value: 31";
+      }
+      enum cmapCpStaticPim {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticPim, Value: 48";
+      }
+      enum cmapCpStaticPimPtp {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticPimPtp, Value: 30";
+      }
+      enum cmapCpStaticPtp {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticPtp, Value: 41";
+      }
+      enum cmapCpStaticPtpSnoop {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticPtpSnoop, Value: 52";
+      }
+      enum cmapCpStaticSelfIp {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticSelfIp, Value: 6";
+      }
+      enum cmapCpStaticSelfIpTc6To7 {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticSelfIpTc6To7, Value: 5";
+      }
+      enum cmapCpStaticSflow {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticSflow, Value: 26";
+      }
+      enum cmapCpStaticTc3To5 {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticTc3To5, Value: 11";
+      }
+      enum cmapCpStaticTc6To7 {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticTc6To7, Value: 12";
+      }
+      enum cmapCpStaticUnicastArp {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticUnicastArp, Value: 25";
+      }
+      enum cmapCpStaticUrm {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticUrm, Value: 38";
+      }
+      enum cmapCpStaticVrrp {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticVrrp, Value: 43";
+      }
+      enum cmapCpStaticVxlanEncap {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticVxlanEncap, Value: 39";
+      }
+      enum cmapCpStaticVxlanVtepLearn {
+        description
+          "Type: Qos::ClassMapCpStaticType, Name: cmapCpStaticVxlanVtepLearn, Value: 40";
+      }
+    }
+    description
+      "Type: Qos::ClassMapCpStaticType";
+  }
+
+  typedef Qos-ClassMapCpType {
+    type enumeration {
+      enum cmapCpDynamic {
+        description
+          "Type: Qos::ClassMapCpType, Name: cmapCpDynamic, Value: 1";
+      }
+      enum cmapCpNone {
+        description
+          "Type: Qos::ClassMapCpType, Name: cmapCpNone, Value: 2";
+      }
+      enum cmapCpStatic {
+        description
+          "Type: Qos::ClassMapCpType, Name: cmapCpStatic, Value: 0";
+      }
+    }
+    description
+      "Type: Qos::ClassMapCpType";
+  }
+
+  grouping Qos-ClassMapMatch {
+    description
+      "Type: Qos::ClassMapMatch";
+    leaf builtInClassMatchValue {
+      type Qos-ClassMapMatchBuiltIn;
+      description
+        "Path: <Qos::ClassMapMatch>/builtInClassMatchValue, Type: enum Qos::ClassMapMatchBuiltIn";
+    }
+    container dscpEcnValue {
+      description
+        "Path: <Qos::ClassMapMatch>/dscpEcnValue, Type: entity Qos::ClassMapMatchDscpEcn";
+      uses Qos-ClassMapMatchDscpEcn;
+    }
+    list intColl {
+      key "index";
+      description
+        "Path: <Qos::ClassMapMatch>/intColl, Type: [U32]U32";
+      leaf index {
+        type uint32;
+        description
+          "Path: <Qos::ClassMapMatch>/intColl/<!External index>, Type: U32";
+      }
+      leaf value {
+        type uint32;
+        description
+          "Path: <Qos::ClassMapMatch>/intColl/<index>, Type: U32";
+      }
+    }
+    leaf intValue {
+      type uint32;
+      description
+        "Path: <Qos::ClassMapMatch>/intValue, Type: U32";
+    }
+    container macValue {
+      description
+        "Path: <Qos::ClassMapMatch>/macValue, Type: entity Qos::ClassMapMatchMac";
+      uses Qos-ClassMapMatchMac;
+    }
+    container mplsTrafficClassVal {
+      description
+        "Path: <Qos::ClassMapMatch>/mplsTrafficClassVal, Type: entity Qos::ClassMapMatchMplsTrafficClass";
+      uses Qos-ClassMapMatchMplsTrafficClass;
+    }
+    leaf option {
+      type Qos-ClassMapMatchOption;
+      description
+        "Path: <Qos::ClassMapMatch>/option, Type: enum Qos::ClassMapMatchOption";
+    }
+    leaf strValue {
+      type string;
+      description
+        "Path: <Qos::ClassMapMatch>/strValue, Type: Tac::String";
+    }
+    container vlanValue {
+      description
+        "Path: <Qos::ClassMapMatch>/vlanValue, Type: entity Qos::ClassMapMatchVlan";
+      uses Qos-ClassMapMatchVlan;
+    }
+  }
+
+  typedef Qos-ClassMapMatchBuiltIn {
+    type enumeration {
+      enum matchArp {
+        description
+          "Type: Qos::ClassMapMatchBuiltIn, Name: matchArp, Value: 35";
+      }
+      enum matchArpNeeded {
+        description
+          "Type: Qos::ClassMapMatchBuiltIn, Name: matchArpNeeded, Value: 15";
+      }
+      enum matchBfd {
+        description
+          "Type: Qos::ClassMapMatchBuiltIn, Name: matchBfd, Value: 20";
+      }
+      enum matchBpdu {
+        description
+          "Type: Qos::ClassMapMatchBuiltIn, Name: matchBpdu, Value: 6";
+      }
+      enum matchDhcp {
+        description
+          "Type: Qos::ClassMapMatchBuiltIn, Name: matchDhcp, Value: 29";
+      }
+      enum matchIgmp {
+        description
+          "Type: Qos::ClassMapMatchBuiltIn, Name: matchIgmp, Value: 34";
+      }
+      enum matchInvalid {
+        description
+          "Type: Qos::ClassMapMatchBuiltIn, Name: matchInvalid, Value: 0";
+      }
+      enum matchIpBroadcast {
+        description
+          "Type: Qos::ClassMapMatchBuiltIn, Name: matchIpBroadcast, Value: 39";
+      }
+      enum matchIpv6nd {
+        description
+          "Type: Qos::ClassMapMatchBuiltIn, Name: matchIpv6nd, Value: 24";
+      }
+      enum matchIsis {
+        description
+          "Type: Qos::ClassMapMatchBuiltIn, Name: matchIsis, Value: 25";
+      }
+      enum matchLacp {
+        description
+          "Type: Qos::ClassMapMatchBuiltIn, Name: matchLacp, Value: 5";
+      }
+      enum matchLayer2Broadcast {
+        description
+          "Type: Qos::ClassMapMatchBuiltIn, Name: matchLayer2Broadcast, Value: 40";
+      }
+      enum matchLayer2Control {
+        description
+          "Type: Qos::ClassMapMatchBuiltIn, Name: matchLayer2Control, Value: 2";
+      }
+      enum matchLayer3Control {
+        description
+          "Type: Qos::ClassMapMatchBuiltIn, Name: matchLayer3Control, Value: 21";
+      }
+      enum matchLayer3SlowPath {
+        description
+          "Type: Qos::ClassMapMatchBuiltIn, Name: matchLayer3SlowPath, Value: 36";
+      }
+      enum matchLinkLocalMulticast {
+        description
+          "Type: Qos::ClassMapMatchBuiltIn, Name: matchLinkLocalMulticast, Value: 30";
+      }
+      enum matchLldp {
+        description
+          "Type: Qos::ClassMapMatchBuiltIn, Name: matchLldp, Value: 4";
+      }
+      enum matchMacSourceMiss {
+        description
+          "Type: Qos::ClassMapMatchBuiltIn, Name: matchMacSourceMiss, Value: 38";
+      }
+      enum matchMlagControl {
+        description
+          "Type: Qos::ClassMapMatchBuiltIn, Name: matchMlagControl, Value: 1";
+      }
+      enum matchMlagControlHeartbeat {
+        description
+          "Type: Qos::ClassMapMatchBuiltIn, Name: matchMlagControlHeartbeat, Value: 3";
+      }
+      enum matchMplsRouteMiss {
+        description
+          "Type: Qos::ClassMapMatchBuiltIn, Name: matchMplsRouteMiss, Value: 31";
+      }
+      enum matchMstp {
+        description
+          "Type: Qos::ClassMapMatchBuiltIn, Name: matchMstp, Value: 8";
+      }
+      enum matchMulticastRouteMiss {
+        description
+          "Type: Qos::ClassMapMatchBuiltIn, Name: matchMulticastRouteMiss, Value: 17";
+      }
+      enum matchMvrp {
+        description
+          "Type: Qos::ClassMapMatchBuiltIn, Name: matchMvrp, Value: 37";
+      }
+      enum matchNatMiss {
+        description
+          "Type: Qos::ClassMapMatchBuiltIn, Name: matchNatMiss, Value: 32";
+      }
+      enum matchOspf {
+        description
+          "Type: Qos::ClassMapMatchBuiltIn, Name: matchOspf, Value: 26";
+      }
+      enum matchPim {
+        description
+          "Type: Qos::ClassMapMatchBuiltIn, Name: matchPim, Value: 28";
+      }
+      enum matchPtp {
+        description
+          "Type: Qos::ClassMapMatchBuiltIn, Name: matchPtp, Value: 11";
+      }
+      enum matchPvst {
+        description
+          "Type: Qos::ClassMapMatchBuiltIn, Name: matchPvst, Value: 7";
+      }
+      enum matchRoutedIpOptions {
+        description
+          "Type: Qos::ClassMapMatchBuiltIn, Name: matchRoutedIpOptions, Value: 19";
+      }
+      enum matchSelfBgp {
+        description
+          "Type: Qos::ClassMapMatchBuiltIn, Name: matchSelfBgp, Value: 22";
+      }
+      enum matchSelfIpAll {
+        description
+          "Type: Qos::ClassMapMatchBuiltIn, Name: matchSelfIpAll, Value: 12";
+      }
+      enum matchSelfIpHighPriority {
+        description
+          "Type: Qos::ClassMapMatchBuiltIn, Name: matchSelfIpHighPriority, Value: 13";
+      }
+      enum matchSelfIpLowPriority {
+        description
+          "Type: Qos::ClassMapMatchBuiltIn, Name: matchSelfIpLowPriority, Value: 14";
+      }
+      enum matchTtlException {
+        description
+          "Type: Qos::ClassMapMatchBuiltIn, Name: matchTtlException, Value: 23";
+      }
+      enum matchUnicastRouteMiss {
+        description
+          "Type: Qos::ClassMapMatchBuiltIn, Name: matchUnicastRouteMiss, Value: 16";
+      }
+      enum matchUnicastRouteOverflow {
+        description
+          "Type: Qos::ClassMapMatchBuiltIn, Name: matchUnicastRouteOverflow, Value: 18";
+      }
+      enum matchUnicastRpfFailure {
+        description
+          "Type: Qos::ClassMapMatchBuiltIn, Name: matchUnicastRpfFailure, Value: 33";
+      }
+      enum matchVrrp {
+        description
+          "Type: Qos::ClassMapMatchBuiltIn, Name: matchVrrp, Value: 27";
+      }
+      enum matchVxlanEncapsulation {
+        description
+          "Type: Qos::ClassMapMatchBuiltIn, Name: matchVxlanEncapsulation, Value: 9";
+      }
+      enum matchVxlanVtepLearn {
+        description
+          "Type: Qos::ClassMapMatchBuiltIn, Name: matchVxlanVtepLearn, Value: 10";
+      }
+    }
+    description
+      "Type: Qos::ClassMapMatchBuiltIn";
+  }
+
+  typedef Qos-ClassMapMatchCondition {
+    type enumeration {
+      enum matchConditionAll {
+        description
+          "Type: Qos::ClassMapMatchCondition, Name: matchConditionAll, Value: 1";
+      }
+      enum matchConditionAny {
+        description
+          "Type: Qos::ClassMapMatchCondition, Name: matchConditionAny, Value: 0";
+      }
+    }
+    description
+      "Type: Qos::ClassMapMatchCondition";
+  }
+
+  grouping Qos-ClassMapMatchDscpEcn {
+    description
+      "Type: Qos::ClassMapMatchDscpEcn";
+    leaf dscp {
+      type uint8;
+      description
+        "Path: <Qos::ClassMapMatchDscpEcn>/dscp, Type: value Qos::DscpVal";
+    }
+    list dscpColl {
+      key "index-max index-min";
+      description
+        "Path: <Qos::ClassMapMatchDscpEcn>/dscpColl, Type: [value Qos::DscpRange]bool";
+      leaf index-max {
+        type uint8;
+        description
+          "Path: <Qos::ClassMapMatchDscpEcn>/dscpColl/<!External index>/max, Type: value Qos::DscpVal";
+      }
+      leaf index-min {
+        type uint8;
+        description
+          "Path: <Qos::ClassMapMatchDscpEcn>/dscpColl/<!External index>/min, Type: value Qos::DscpVal";
+      }
+      leaf value {
+        type boolean;
+        description
+          "Path: <Qos::ClassMapMatchDscpEcn>/dscpColl/<index>, Type: bool";
+      }
+    }
+    leaf dscpNameValid {
+      type boolean;
+      description
+        "Path: <Qos::ClassMapMatchDscpEcn>/dscpNameValid, Type: bool";
+    }
+    leaf ecn {
+      type Acl-Ecn;
+      description
+        "Path: <Qos::ClassMapMatchDscpEcn>/ecn, Type: enum Acl::Ecn";
+    }
+    leaf tosId {
+      type uint8;
+      description
+        "Path: <Qos::ClassMapMatchDscpEcn>/tosId, Type: U8";
+    }
+    leaf tosMask {
+      type uint8;
+      description
+        "Path: <Qos::ClassMapMatchDscpEcn>/tosMask, Type: U8";
+    }
+  }
+
+  grouping Qos-ClassMapMatchMac {
+    description
+      "Type: Qos::ClassMapMatchMac";
+    leaf aclName {
+      type string;
+      description
+        "Path: <Qos::ClassMapMatchMac>/aclName, Type: Tac::String";
+    }
+    leaf etherType {
+      type uint16;
+      description
+        "Path: <Qos::ClassMapMatchMac>/etherType, Type: U16";
+    }
+  }
+
+  grouping Qos-ClassMapMatchMplsTrafficClass {
+    description
+      "Type: Qos::ClassMapMatchMplsTrafficClass";
+    leaf isValid {
+      type boolean;
+      description
+        "Path: <Qos::ClassMapMatchMplsTrafficClass>/isValid, Type: bool";
+    }
+    list mplsTrafficClassColl {
+      key "index-max index-min";
+      description
+        "Path: <Qos::ClassMapMatchMplsTrafficClass>/mplsTrafficClassColl, Type: [value Qos::MplsTrafficClassRange]bool";
+      leaf index-max {
+        type uint8;
+        description
+          "Path: <Qos::ClassMapMatchMplsTrafficClass>/mplsTrafficClassColl/<!External index>/max, Type: value Qos::MplsTrafficClassVal";
+      }
+      leaf index-min {
+        type uint8;
+        description
+          "Path: <Qos::ClassMapMatchMplsTrafficClass>/mplsTrafficClassColl/<!External index>/min, Type: value Qos::MplsTrafficClassVal";
+      }
+      leaf value {
+        type boolean;
+        description
+          "Path: <Qos::ClassMapMatchMplsTrafficClass>/mplsTrafficClassColl/<index>, Type: bool";
+      }
+    }
+  }
+
+  typedef Qos-ClassMapMatchOption {
+    type enumeration {
+      enum matchBuiltIn {
+        description
+          "Type: Qos::ClassMapMatchOption, Name: matchBuiltIn, Value: 7";
+      }
+      enum matchDscpEcn {
+        description
+          "Type: Qos::ClassMapMatchOption, Name: matchDscpEcn, Value: 4";
+      }
+      enum matchIpAccessGroup {
+        description
+          "Type: Qos::ClassMapMatchOption, Name: matchIpAccessGroup, Value: 1";
+      }
+      enum matchIpv6AccessGroup {
+        description
+          "Type: Qos::ClassMapMatchOption, Name: matchIpv6AccessGroup, Value: 2";
+      }
+      enum matchMacAccessGroup {
+        description
+          "Type: Qos::ClassMapMatchOption, Name: matchMacAccessGroup, Value: 6";
+      }
+      enum matchMplsTrafficClass {
+        description
+          "Type: Qos::ClassMapMatchOption, Name: matchMplsTrafficClass, Value: 5";
+      }
+      enum matchVlan {
+        description
+          "Type: Qos::ClassMapMatchOption, Name: matchVlan, Value: 3";
+      }
+      enum matchL2Params {
+        description
+          "Type: Qos::ClassMapMatchOption, Name: matchL2Params, Value: 8";
+      }
+    }
+    description
+      "Type: Qos::ClassMapMatchOption";
+  }
+
+  grouping Qos-ClassMapMatchVlan {
+    description
+      "Type: Qos::ClassMapMatchVlan";
+    leaf maskValid {
+      type boolean;
+      description
+        "Path: <Qos::ClassMapMatchVlan>/maskValid, Type: bool";
+    }
+    leaf vlan {
+      type uint16;
+      description
+        "Path: <Qos::ClassMapMatchVlan>/vlan, Type: U16";
+    }
+    list vlanColl {
+      key "index-max index-min";
+      description
+        "Path: <Qos::ClassMapMatchVlan>/vlanColl, Type: [value Qos::VlanRange]bool";
+      leaf index-max {
+        type uint16;
+        description
+          "Path: <Qos::ClassMapMatchVlan>/vlanColl/<!External index>/max, Type: value Bridging::VlanId";
+      }
+      leaf index-min {
+        type uint16;
+        description
+          "Path: <Qos::ClassMapMatchVlan>/vlanColl/<!External index>/min, Type: value Bridging::VlanId";
+      }
+      leaf value {
+        type boolean;
+        description
+          "Path: <Qos::ClassMapMatchVlan>/vlanColl/<index>, Type: bool";
+      }
+    }
+    leaf vlanMask {
+      type uint16 {
+        range "0..4095";
+      }
+      description
+        "Path: <Qos::ClassMapMatchVlan>/vlanMask, Type: U16";
+    }
+  }
+
+  grouping Qos-ClassPriority {
+    description
+      "Type: Qos::ClassPriority";
+    leaf cmapName {
+      type string;
+      description
+        "Path: <Qos::ClassPriority>/cmapName, Type: Tac::String";
+    }
+    leaf index {
+      type uint32;
+      description
+        "Path: <Qos::ClassPriority>/index, Type: U32";
+    }
+  }
+
+  grouping Qos-Input-AclConfig {
+    description
+      "Type: Qos::Input::AclConfig";
+    list cmapType {
+      key "type";
+      description
+        "Path: <Qos::Input::AclConfig>/cmapType, Type: ['type' enum Qos::MapType]entity Qos::Input::ClassMapTypeConfig";
+      uses Qos-Input-ClassMapTypeConfig;
+    }
+    leaf configPriority {
+      type uint32;
+      description
+        "Path: <Qos::Input::AclConfig>/configPriority, Type: U32";
+    }
+    list namedPolicer {
+      key "name";
+      description
+        "Path: <Qos::Input::AclConfig>/namedPolicer, Type: ['name' Tac::Name]entity Qos::NamedPolicerConfig";
+      uses Qos-NamedPolicerConfig;
+    }
+    list pmapType {
+      key "type";
+      description
+        "Path: <Qos::Input::AclConfig>/pmapType, Type: ['type' enum Qos::MapType]entity Qos::Input::PolicyMapTypeConfig";
+      uses Qos-Input-PolicyMapTypeConfig;
+    }
+    leaf routedPortSubIntfQosAclSharing {
+      type boolean;
+      description
+        "Path: <Qos::Input::AclConfig>/routedPortSubIntfQosAclSharing, Type: bool";
+    }
+    leaf sviPolicyQosSharing {
+      type boolean;
+      description
+        "Path: <Qos::Input::AclConfig>/sviPolicyQosSharing, Type: bool";
+    }
+    leaf usingQosRoutedPortSubIntfAclSharingCli {
+      type boolean;
+      description
+        "Path: <Qos::Input::AclConfig>/usingQosRoutedPortSubIntfAclSharingCli, Type: bool";
+    }
+  }
+
+  grouping Qos-Input-ClassMapTypeConfig {
+    description
+      "Type: Qos::Input::ClassMapTypeConfig";
+    list cmap {
+      key "name";
+      description
+        "Path: <Qos::Input::ClassMapTypeConfig>/cmap, Type: ['name' Tac::Name]entity Qos::ClassMapConfig";
+      uses Qos-ClassMapConfig;
+    }
+    leaf type {
+      type Qos-MapType;
+      description
+        "Path: <Qos::Input::ClassMapTypeConfig>/type, Type: enum Qos::MapType";
+    }
+  }
+
+  grouping Qos-Input-PolicyMapTypeConfig {
+    description
+      "Type: Qos::Input::PolicyMapTypeConfig";
+    list pmap {
+      key "name";
+      description
+        "Path: <Qos::Input::PolicyMapTypeConfig>/pmap, Type: ['name' Tac::Name]entity Qos::PolicyMapConfig";
+      uses Qos-PolicyMapConfig;
+    }
+    leaf type {
+      type Qos-MapType;
+      description
+        "Path: <Qos::Input::PolicyMapTypeConfig>/type, Type: enum Qos::MapType";
+    }
+  }
+
+  typedef Qos-MapType {
+    type enumeration {
+      enum mapControlPlane {
+        description
+          "Type: Qos::MapType, Name: mapControlPlane, Value: 0";
+      }
+      enum mapPdp {
+        description
+          "Type: Qos::MapType, Name: mapPdp, Value: 2";
+      }
+      enum mapQos {
+        description
+          "Type: Qos::MapType, Name: mapQos, Value: 1";
+      }
+    }
+    description
+      "Type: Qos::MapType";
+  }
+
+  grouping Qos-NamedPolicerConfig {
+    description
+      "Type: Qos::NamedPolicerConfig";
+    leaf bc {
+      type uint32;
+      description
+        "Path: <Qos::NamedPolicerConfig>/bc, Type: U32";
+    }
+    leaf bcUnit {
+      type Qos-BurstUnit;
+      description
+        "Path: <Qos::NamedPolicerConfig>/bcUnit, Type: enum Qos::BurstUnit";
+    }
+    leaf be {
+      type uint32;
+      description
+        "Path: <Qos::NamedPolicerConfig>/be, Type: U32";
+    }
+    leaf beUnit {
+      type Qos-BurstUnit;
+      description
+        "Path: <Qos::NamedPolicerConfig>/beUnit, Type: enum Qos::BurstUnit";
+    }
+    leaf cir {
+      type uint64;
+      description
+        "Path: <Qos::NamedPolicerConfig>/cir, Type: U64";
+    }
+    leaf cirUnit {
+      type Qos-RateUnit;
+      description
+        "Path: <Qos::NamedPolicerConfig>/cirUnit, Type: enum Qos::RateUnit";
+    }
+    leaf cmdVersion {
+      type uint32;
+      description
+        "Path: <Qos::NamedPolicerConfig>/cmdVersion, Type: U32";
+    }
+    list greenActions {
+      key "actionType";
+      description
+        "Path: <Qos::NamedPolicerConfig>/greenActions, Type: ['actionType' enum Qos::ActionType]entity Qos::Action";
+      uses Qos-Action;
+    }
+    leaf name {
+      type string;
+      description
+        "Path: <Qos::NamedPolicerConfig>/name, Type: Tac::Name";
+    }
+    leaf named {
+      type boolean;
+      description
+        "Path: <Qos::NamedPolicerConfig>/named, Type: bool";
+    }
+    leaf paramChangeVersion {
+      type uint32;
+      description
+        "Path: <Qos::NamedPolicerConfig>/paramChangeVersion, Type: U32";
+    }
+    leaf pir {
+      type uint64;
+      description
+        "Path: <Qos::NamedPolicerConfig>/pir, Type: U64";
+    }
+    leaf pirUnit {
+      type Qos-RateUnit;
+      description
+        "Path: <Qos::NamedPolicerConfig>/pirUnit, Type: enum Qos::RateUnit";
+    }
+    list redActions {
+      key "actionType";
+      description
+        "Path: <Qos::NamedPolicerConfig>/redActions, Type: ['actionType' enum Qos::ActionType]entity Qos::Action";
+      uses Qos-Action;
+    }
+    leaf shared {
+      type boolean;
+      description
+        "Path: <Qos::NamedPolicerConfig>/shared, Type: bool";
+    }
+    leaf uniqueId {
+      type eos-types:double;
+      description
+        "Path: <Qos::NamedPolicerConfig>/uniqueId, Type: value Qos::UniqueId";
+    }
+    leaf version {
+      type uint32;
+      description
+        "Path: <Qos::NamedPolicerConfig>/version, Type: U32";
+    }
+    list yellowActions {
+      key "actionType";
+      description
+        "Path: <Qos::NamedPolicerConfig>/yellowActions, Type: ['actionType' enum Qos::ActionType]entity Qos::Action";
+      uses Qos-Action;
+    }
+  }
+
+  grouping Qos-PolicerConfig {
+    description
+      "Type: Qos::PolicerConfig";
+    leaf bc {
+      type uint32;
+      description
+        "Path: <Qos::PolicerConfig>/bc, Type: U32";
+    }
+    leaf bcUnit {
+      type Qos-BurstUnit;
+      description
+        "Path: <Qos::PolicerConfig>/bcUnit, Type: enum Qos::BurstUnit";
+    }
+    leaf be {
+      type uint32;
+      description
+        "Path: <Qos::PolicerConfig>/be, Type: U32";
+    }
+    leaf beUnit {
+      type Qos-BurstUnit;
+      description
+        "Path: <Qos::PolicerConfig>/beUnit, Type: enum Qos::BurstUnit";
+    }
+    leaf cir {
+      type uint64;
+      description
+        "Path: <Qos::PolicerConfig>/cir, Type: U64";
+    }
+    leaf cirUnit {
+      type Qos-RateUnit;
+      description
+        "Path: <Qos::PolicerConfig>/cirUnit, Type: enum Qos::RateUnit";
+    }
+    leaf cmdVersion {
+      type uint32;
+      default "1";
+      description
+        "Path: <Qos::PolicerConfig>/cmdVersion, Type: U32";
+    }
+    list greenActions {
+      key "actionType";
+      description
+        "Path: <Qos::PolicerConfig>/greenActions, Type: ['actionType' enum Qos::ActionType]entity Qos::Action";
+      uses Qos-Action;
+    }
+    leaf named {
+      type boolean;
+      description
+        "Path: <Qos::PolicerConfig>/named, Type: bool";
+    }
+    leaf pir {
+      type uint64;
+      description
+        "Path: <Qos::PolicerConfig>/pir, Type: U64";
+    }
+    leaf pirUnit {
+      type Qos-RateUnit;
+      description
+        "Path: <Qos::PolicerConfig>/pirUnit, Type: enum Qos::RateUnit";
+    }
+    list redActions {
+      key "actionType";
+      description
+        "Path: <Qos::PolicerConfig>/redActions, Type: ['actionType' enum Qos::ActionType]entity Qos::Action";
+      uses Qos-Action;
+    }
+    list yellowActions {
+      key "actionType";
+      description
+        "Path: <Qos::PolicerConfig>/yellowActions, Type: ['actionType' enum Qos::ActionType]entity Qos::Action";
+      uses Qos-Action;
+    }
+  }
+
+  grouping Qos-PolicyMapConfig {
+    description
+      "Type: Qos::PolicyMapConfig";
+    list classAction {
+      key "name";
+      description
+        "Path: <Qos::PolicyMapConfig>/classAction, Type: ['name' Tac::Name]entity Qos::ClassAction";
+      uses Qos-ClassAction;
+    }
+    container classActionDefault {
+      description
+        "Path: <Qos::PolicyMapConfig>/classActionDefault, Type: entity Qos::ClassAction";
+      uses Qos-ClassAction;
+    }
+    container classDefault {
+      description
+        "Path: <Qos::PolicyMapConfig>/classDefault, Type: entity Qos::ClassMapConfig";
+      uses Qos-ClassMapConfig;
+    }
+    list classPrio {
+      key "index";
+      description
+        "Path: <Qos::PolicyMapConfig>/classPrio, Type: ['index' U32]entity Qos::ClassPriority";
+      uses Qos-ClassPriority;
+    }
+    list coppStaticClassPrio {
+      key "index";
+      description
+        "Path: <Qos::PolicyMapConfig>/coppStaticClassPrio, Type: ['index' U32]entity Qos::ClassPriority";
+      uses Qos-ClassPriority;
+    }
+    leaf dynamic {
+      type boolean;
+      description
+        "Path: <Qos::PolicyMapConfig>/dynamic, Type: bool";
+    }
+    leaf name {
+      type string;
+      description
+        "Path: <Qos::PolicyMapConfig>/name, Type: Tac::Name";
+    }
+    leaf shared {
+      type boolean;
+      description
+        "Path: <Qos::PolicyMapConfig>/shared, Type: bool";
+    }
+    leaf type {
+      type Qos-MapType;
+      description
+        "Path: <Qos::PolicyMapConfig>/type, Type: enum Qos::MapType";
+    }
+    leaf uniqueId {
+      type eos-types:double;
+      description
+        "Path: <Qos::PolicyMapConfig>/uniqueId, Type: value Qos::UniqueId";
+    }
+    leaf version {
+      type uint32;
+      description
+        "Path: <Qos::PolicyMapConfig>/version, Type: U32";
+    }
+  }
+
+  typedef Qos-RateUnit {
+    type enumeration {
+      enum rateUnitInvalid {
+        description
+          "Type: Qos::RateUnit, Name: rateUnitInvalid, Value: 4";
+      }
+      enum rateUnitKbps {
+        description
+          "Type: Qos::RateUnit, Name: rateUnitKbps, Value: 2";
+      }
+      enum rateUnitMbps {
+        description
+          "Type: Qos::RateUnit, Name: rateUnitMbps, Value: 3";
+      }
+      enum rateUnitPps {
+        description
+          "Type: Qos::RateUnit, Name: rateUnitPps, Value: 0";
+      }
+      enum rateUnitbps {
+        description
+          "Type: Qos::RateUnit, Name: rateUnitbps, Value: 1";
+      }
+    }
+    description
+      "Type: Qos::RateUnit";
+  }
+}

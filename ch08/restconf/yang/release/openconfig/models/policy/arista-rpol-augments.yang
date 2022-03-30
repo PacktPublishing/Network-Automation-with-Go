@@ -1,0 +1,185 @@
+module arista-rpol-augments {
+  namespace "http://arista.com/yang/openconfig/policy/augments";
+  prefix arista-rpol-augments;
+
+  import openconfig-bgp-policy {
+    prefix oc-bgp-pol;
+  }
+  import openconfig-bgp-types {
+    prefix oc-bgp-types;
+  }
+  import openconfig-routing-policy {
+    prefix oc-rpol;
+  }
+  import arista-rpol-deviations {
+    prefix arpol-deviations;
+  }
+  import openconfig-extensions {
+    prefix oc-ext;
+  }
+
+  organization
+    "Arista Networks <http://arista.com/>";
+  contact
+    "Arista Networks, Inc.
+     Product Support";
+  description
+    "This module contains OpenConfig routing-policy augments in Arista EOS.
+
+     Copyright (c) 2018 Arista Networks, Inc. All rights reserved.";
+  oc-ext:openconfig-version "1.0.1";
+
+  revision 2020-11-30 {
+    description
+      "Fix errors reported by pyang.";
+    reference
+      "1.0.1";
+  }
+  revision 2018-04-12 {
+    description
+      "Initial augment file.";
+    reference
+      "1.0.0";
+  }
+
+  augment "/oc-rpol:routing-policy/oc-rpol:policy-definitions/oc-rpol:policy-definition/oc-rpol:statements/oc-rpol:statement/oc-rpol:state" {
+    leaf sequence-number {
+      type uint32;
+      description
+        "EOS stores policy entries in a collection keyed by an integer";
+    }
+    description
+      "Add sequence number to Routing Policy state.";
+  }
+
+  augment "/oc-rpol:routing-policy/oc-rpol:policy-definitions/oc-rpol:policy-definition/oc-rpol:statements/oc-rpol:statement/oc-rpol:actions/oc-bgp-pol:bgp-actions/oc-bgp-pol:set-community/oc-bgp-pol:inline" {
+    when "../config/method = 'INLINE'" {
+      description
+        "Active only when the set-community method is INLINE";
+    }
+    description
+      "Add constraint for set-community In-line configuration.";
+  }
+
+  augment "/oc-rpol:routing-policy/oc-rpol:policy-definitions/oc-rpol:policy-definition/oc-rpol:statements/oc-rpol:statement/oc-rpol:actions/oc-bgp-pol:bgp-actions/oc-bgp-pol:set-community/oc-bgp-pol:reference" {
+    when "../config/method = 'REFERENCE'" {
+      description
+        "Active only when the set-community method is REFERENCE";
+    }
+    description
+      "Add constraint for set-community Reference configuration.";
+  }
+
+  augment "/oc-rpol:routing-policy/oc-rpol:policy-definitions/oc-rpol:policy-definition/oc-rpol:statements/oc-rpol:statement/oc-rpol:actions/oc-bgp-pol:bgp-actions/oc-bgp-pol:set-ext-community/oc-bgp-pol:inline" {
+    when "../config/method = 'INLINE'" {
+      description
+        "Active only when the set-ext-community method is INLINE";
+    }
+    description
+      "Add constraint for set-ext-community In-line configuration.";
+  }
+
+  augment "/oc-rpol:routing-policy/oc-rpol:policy-definitions/oc-rpol:policy-definition/oc-rpol:statements/oc-rpol:statement/oc-rpol:actions/oc-bgp-pol:bgp-actions/oc-bgp-pol:set-ext-community/oc-bgp-pol:inline/oc-bgp-pol:config" {
+    leaf-list arista-communities {
+      type union {
+        type arpol-deviations:arista-bgp-ext-community-type;
+        type enumeration {
+          enum NONE {
+            description
+              "Remove existing communities, if any";
+          }
+        }
+      }
+      description
+        "A list of communities for set-ext-community configuration.";
+    }
+    description
+      "Add list for supporting multiple communities in set-ext-community configuration.";
+  }
+
+  augment "/oc-rpol:routing-policy/oc-rpol:policy-definitions/oc-rpol:policy-definition/oc-rpol:statements/oc-rpol:statement/oc-rpol:actions/oc-bgp-pol:bgp-actions/oc-bgp-pol:set-ext-community/oc-bgp-pol:inline/oc-bgp-pol:state" {
+    leaf-list arista-communities {
+      type union {
+        type arpol-deviations:arista-bgp-ext-community-type;
+        type enumeration {
+          enum NONE {
+            description
+              "Remove existing communities, if any";
+          }
+        }
+      }
+      description
+        "A list of communities for set-ext-community state.";
+    }
+    description
+      "Add list for supporting multiple communities in set-ext-community state.";
+  }
+
+  augment "/oc-rpol:routing-policy/oc-rpol:policy-definitions/oc-rpol:policy-definition/oc-rpol:statements/oc-rpol:statement/oc-rpol:actions/oc-bgp-pol:bgp-actions/oc-bgp-pol:set-community/oc-bgp-pol:inline/oc-bgp-pol:config" {
+    leaf-list arista-communities {
+      type union {
+        type oc-bgp-types:bgp-std-community-type;
+        type oc-bgp-types:bgp-well-known-community-type;
+        type enumeration {
+          enum NONE {
+            description
+              "Remove existing communities, if any";
+          }
+        }
+      }
+      description
+        "A list of communities for set-community configuration.";
+    }
+    description
+      "Add list for supporting multiple communities in set-community configuration.";
+  }
+
+  augment "/oc-rpol:routing-policy/oc-rpol:policy-definitions/oc-rpol:policy-definition/oc-rpol:statements/oc-rpol:statement/oc-rpol:actions/oc-bgp-pol:bgp-actions/oc-bgp-pol:set-community/oc-bgp-pol:inline/oc-bgp-pol:state" {
+    leaf-list arista-communities {
+      type union {
+        type oc-bgp-types:bgp-std-community-type;
+        type oc-bgp-types:bgp-well-known-community-type;
+        type enumeration {
+          enum NONE {
+            description
+              "Remove existing communities, if any";
+          }
+        }
+      }
+      description
+        "A list of communities for set-community state.";
+    }
+    description
+      "Add list for supporting multiple communities in set-community state.";
+  }
+
+  augment "/oc-rpol:routing-policy/oc-rpol:policy-definitions/oc-rpol:policy-definition/oc-rpol:statements/oc-rpol:statement/oc-rpol:actions/oc-bgp-pol:bgp-actions/oc-bgp-pol:set-community/oc-bgp-pol:reference/oc-bgp-pol:config" {
+    leaf-list community-set-ref-list {
+      type leafref {
+        path "/oc-rpol:routing-policy/oc-rpol:defined-sets/"
+           + "oc-bgp-pol:bgp-defined-sets/"
+           + "oc-bgp-pol:community-sets/oc-bgp-pol:community-set/"
+           + "oc-bgp-pol:community-set-name";
+      }
+      description
+        "A list of community-set.";
+    }
+    description
+      "EOS allows configuring multiple community-lists as part of set-community clause.";
+  }
+
+  augment "/oc-rpol:routing-policy/oc-rpol:policy-definitions/oc-rpol:policy-definition/oc-rpol:statements/oc-rpol:statement/oc-rpol:actions/oc-bgp-pol:bgp-actions/oc-bgp-pol:set-community/oc-bgp-pol:reference/oc-bgp-pol:state" {
+    leaf-list community-set-ref-list {
+      type leafref {
+        path "/oc-rpol:routing-policy/oc-rpol:defined-sets/"
+           + "oc-bgp-pol:bgp-defined-sets/"
+           + "oc-bgp-pol:community-sets/oc-bgp-pol:community-set/"
+           + "oc-bgp-pol:community-set-name";
+      }
+      description
+        "A list of community-set.";
+    }
+    description
+      "EOS allows configuring multiple community-lists as part of set-community clause.";
+  }
+}

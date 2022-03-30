@@ -1,0 +1,153 @@
+module arista-openflow-deviations {
+  namespace "http://arista.com/yang/openconfig/openflow/deviations";
+  prefix arista-openflow-deviations;
+
+  import openconfig-system {
+    prefix oc-sys;
+  }
+  import openconfig-openflow {
+    prefix openflow;
+  }
+  import openconfig-extensions {
+    prefix oc-ext;
+  }
+
+  organization
+    "Arista Networks, Inc.";
+  contact
+    "Arista Networks, Inc.
+     Product Support";
+  description
+    "This module contains OpenConfig OpenFlow deviations in Arista EOS.
+
+     Copyright (c) 2020 Arista Networks, Inc. All rights reserved.";
+  oc-ext:openconfig-version "1.1.1";
+
+  revision 2020-11-30 {
+    description
+      "Fix errors reported by pyang.";
+    reference
+      "1.1.1";
+  }
+  revision 2020-02-26 {
+    description
+      "Adding deviation for datapath-id type.";
+    reference
+      "1.1.0";
+  }
+  revision 2020-01-03 {
+    description
+      "Initial deviation file.";
+    reference
+      "1.0.0";
+  }
+
+  deviation "/oc-sys:system/openflow:openflow/openflow:controllers/openflow:controller/openflow:connections/openflow:connection" {
+    description
+      "Configuration of multiple connections to OpenFlow
+       controller is not supported.";
+    deviate add {
+      max-elements 1;
+    }
+  }
+
+  deviation "/oc-sys:system/openflow:openflow/openflow:controllers/openflow:controller/openflow:connections/openflow:connection/openflow:config/openflow:priority" {
+    description
+      "Configuration for servicing auxiliary connections with
+       different priorities is not supported.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/openflow:openflow/openflow:controllers/openflow:controller/openflow:connections/openflow:connection/openflow:state/openflow:priority" {
+    description
+      "Servicing auxiliary connections with different priorities is not supported.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/openflow:openflow/openflow:controllers/openflow:controller/openflow:connections/openflow:connection/openflow:config/openflow:certificate-id" {
+    description
+      "Configuration for Certificate ID is not supported.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/openflow:openflow/openflow:controllers/openflow:controller/openflow:connections/openflow:connection/openflow:state/openflow:certificate-id" {
+    description
+      "Certificate ID is not supported.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/openflow:openflow/openflow:controllers/openflow:controller/openflow:connections/openflow:connection/openflow:config/openflow:source-interface" {
+    description
+      "Configuration for the source interface for the controller
+       connection is not supported.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/openflow:openflow/openflow:controllers/openflow:controller/openflow:connections/openflow:connection/openflow:state/openflow:source-interface" {
+    description
+      "Source interface for the controller connection is not supported.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/openflow:openflow/openflow:agent/openflow:config/openflow:backoff-interval" {
+    description
+      "Configuration for Openflow agent connection backoff interval
+       is not supported.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/openflow:openflow/openflow:agent/openflow:state/openflow:backoff-interval" {
+    description
+      "Openflow agent connection backoff interval is not supported.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/openflow:openflow/openflow:agent/openflow:config/openflow:max-backoff" {
+    description
+      "Configuration for Openflow agent max backoff time
+       is not supported.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/openflow:openflow/openflow:agent/openflow:state/openflow:max-backoff" {
+    description
+      "Openflow agent max backoff time is not supported.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/openflow:openflow/openflow:agent/openflow:config/openflow:inactivity-probe" {
+    description
+      "Inactivity-probe timer is range restricted in EOS.";
+    deviate replace {
+      type uint64 {
+        range "0..1000000";
+      }
+    }
+  }
+
+  deviation "/oc-sys:system/openflow:openflow/openflow:agent/openflow:state/openflow:inactivity-probe" {
+    description
+      "Inactivity-probe timer is range restricted in EOS.";
+    deviate replace {
+      type uint64 {
+        range "0..1000000";
+      }
+    }
+  }
+
+  deviation "/oc-sys:system/openflow:openflow/openflow:agent/openflow:config/openflow:datapath-id" {
+    description
+      "Datapath-id is of type uint64 in EOS; MAC address configuration via DPID not supported on EOS.";
+    deviate replace {
+      type uint64;
+    }
+  }
+
+  deviation "/oc-sys:system/openflow:openflow/openflow:agent/openflow:state/openflow:datapath-id" {
+    description
+      "Datapath-id is of type uint64 in EOS; MAC address configuration via DPID not supported on EOS.";
+    deviate replace {
+      type uint64;
+    }
+  }
+}

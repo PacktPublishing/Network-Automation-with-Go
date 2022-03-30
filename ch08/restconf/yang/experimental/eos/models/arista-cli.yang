@@ -1,0 +1,37 @@
+module arista-cli {
+  namespace "http://arista.com/yang/cli";
+  prefix arista-cli;
+
+  organization
+    "Arista Networks, Inc.";
+  contact
+    "Arista Networks, Inc.
+     Product Support";
+  description
+    "This module contains NETCONF RPC extensions in Arista EOS.
+     Copyright (c) 2020 Arista Networks, Inc. All rights reserved.";
+
+  revision 2020-02-11 {
+    description
+      "Initial extension for CLI operation.";
+    reference
+      "1.0.0";
+  }
+
+  typedef eos-cli-config-command {
+    type string;
+    description
+      "An EOS CLI configuration command string.";
+  }
+
+  container commands {
+    description
+      "CLI configuration commands.";
+    leaf-list command {
+      type eos-cli-config-command;
+      ordered-by user;
+      description
+        "CLI configuration commands to apply with config data.";
+    }
+  }
+}

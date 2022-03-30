@@ -1,0 +1,364 @@
+module arista-exp-eos-evpn {
+  yang-version 1;
+  namespace "http://arista.com/yang/experimental/eos/evpn";
+  prefix evpn-exp;
+
+  import arista-exp-eos {
+    prefix eos-exp;
+  }
+  import arista-bgp-augments {
+    prefix arista-bgp;
+  }
+  import openconfig-inet-types {
+    prefix oc-inet;
+  }
+  import openconfig-network-instance-types {
+    prefix oc-ni-types;
+  }
+  import openconfig-vlan-types {
+    prefix oc-vlan-types;
+  }
+
+  organization
+    "Arista Networks, Inc.";
+  description
+    "This module contains OpenConfig EVPN models in Arista EOS.
+
+     Copyright (c) 2019 Arista Networks, Inc. All rights reserved.";
+
+  revision 2020-12-07 {
+    description
+      "Add support for VPWS MTU";
+  }
+  revision 2020-11-26 {
+    description
+      "Fix the when statement on the 'vlans' container";
+  }
+  revision 2020-10-30 {
+    description
+      "Add support for pseudowire MPLS control word override";
+  }
+  revision 2020-07-31 {
+    description
+      "Add range restriction to etid-type";
+  }
+  revision 2020-06-10 {
+    description
+      "Add support for VPWS and maximum-routes configuration";
+  }
+  revision 2020-04-21 {
+    description
+      "Added REMOTE_LEARNED to redistribute-type";
+  }
+  revision 2020-01-03 {
+    description
+      "Remove an unused import";
+  }
+  revision 2019-11-05 {
+    description
+      "Initial version";
+  }
+
+  typedef redistribute-type {
+    type enumeration {
+      enum LEARNED {
+        description
+          "Locally learned MACs.";
+      }
+      enum STATIC {
+        description
+          "Static MACs.";
+      }
+      enum ROUTER_MAC {
+        description
+          "Router MACs.";
+      }
+      enum HOST_ROUTE {
+        description
+          "Host routes with symmetric IRB.";
+      }
+      enum DOT1X {
+        description
+          "Dot1x macs.";
+      }
+      enum LINK_LOCAL {
+        description
+          "IPv6 link local.";
+      }
+      enum IGMP {
+        description
+          "IGMP (EVPN type 6,7,8 for IPv4).";
+      }
+      enum MLD {
+        description
+          "MLD (EVPN type 6,7,8 for IPv6).";
+      }
+      enum BRIDGE_MAC {
+        description
+          "Bridge MACs.";
+      }
+      enum REMOTE_LEARNED {
+        description
+          "Remote learned MACs.";
+      }
+    }
+  }
+
+  typedef route-distinguisher-type {
+    type union {
+      type oc-ni-types:route-distinguisher;
+      type enumeration {
+        enum AUTO {
+          description
+            "The route-distinguisher is auto-generated.";
+        }
+      }
+    }
+  }
+
+  typedef etid-type {
+    type uint32 {
+      range "1 .. 4294967294";
+    }
+    description
+      "Ethernet tag identifier";
+  }
+
+  typedef instance-type {
+    type enumeration {
+      enum VLAN {
+        description
+          "VLAN-based EVPN instance.";
+      }
+      enum VLAN_AWARE_BUNDLE {
+        description
+          "VLAN-aware-bundle-based EVPN instance.";
+      }
+      enum VPWS {
+        description
+          "VPWS-based EVPN instance.";
+      }
+    }
+  }
+
+  typedef fxc-type {
+    type enumeration {
+      enum NO_FXC {
+        description
+          "Disable flexible-cross-connect.";
+      }
+      enum DEFAULT_FXC {
+        description
+          "Default flexible-cross-connect.";
+      }
+    }
+  }
+
+  typedef control-word-override-type {
+    type enumeration {
+      enum DISABLED {
+        description
+          "Control word is never used.";
+      }
+      enum ALWAYS {
+        description
+          "Control word is always used.";
+      }
+    }
+  }
+
+  grouping route-target-config {
+    container route-target {
+      description
+        "Route target import-export rules used in EVPN.";
+      container config {
+        description
+          "Route target import-export rule configuration.";
+        leaf-list import {
+          type arista-bgp:route-target-type;
+          description
+            "Import route-targets.";
+        }
+        leaf-list auto-import {
+          type oc-inet:as-number;
+          description
+            "Automatic import route-targets.";
+        }
+        leaf-list export {
+          type arista-bgp:route-target-type;
+          description
+            "Export route-targets.";
+        }
+        leaf auto-export {
+          type boolean;
+          description
+            "Automatic export.";
+        }
+      }
+    }
+  }
+
+  grouping evpn {
+    container evpn-instances {
+      description
+        "EVPN instances.";
+      list evpn-instance {
+        key "name";
+        description
+          "An EVPN instance.";
+        leaf name {
+          type leafref {
+            path "../config/name";
+          }
+          description
+            "Name of the EVPN instance.";
+        }
+        container config {
+          description
+            "EVPN instance configuration.";
+          leaf name {
+            type string;
+            description
+              "Name of the EVPN instance.";
+          }
+          leaf instance-type {
+            type instance-type;
+            default "VLAN";
+            description
+              "The type of this EVPN instance.";
+          }
+          leaf route-distinguisher {
+            type route-distinguisher-type;
+            description
+              "The configured route distinguisher.";
+          }
+          leaf-list redistribute {
+            type redistribute-type;
+            description
+              "The redistribute setting for this instance.";
+          }
+          leaf maximum-routes {
+            type uint32;
+            description
+              "The maximum number of routes accepted by this EVPN instance.";
+          }
+        }
+        uses route-target-config;
+        container vlans {
+          when "../config/instance-type='VLAN' or ../config/instance-type='VLAN_AWARE_BUNDLE'" {
+            description
+              "Only VLAN and VLAN_AWARE_BUNDLE type evpn-instances have vlan-config.";
+          }
+          description
+            "EVPN instance VLAN configuration.";
+          list vlan {
+            key "vlan-id";
+            description
+              "VLANs used by this EVPN instance.";
+            leaf vlan-id {
+              type leafref {
+                path "../config/vlan-id";
+              }
+              description
+                "The VLAN ID.";
+            }
+            container config {
+              leaf vlan-id {
+                type oc-vlan-types:vlan-id;
+                description
+                  "The VLAN ID.";
+              }
+              leaf etid {
+                type etid-type;
+                description
+                  "The ethernet tag identifier to associate with this VLAN.";
+              }
+            }
+          }
+        }
+        container vpws {
+          when "../config/instance-type='VPWS'" {
+            description
+              "Only VPWS type evpn-instances have vpws-config.";
+          }
+          description
+            "EVPN instance VPWS configuration.";
+          container config {
+            leaf mpls-control-word {
+              type boolean;
+              description
+                "Advertise the use of an MPLS control word.";
+            }
+            leaf flow-label {
+              type boolean;
+              description
+                "Enable flow label.";
+            }
+            leaf flexible-cross-connect {
+              type fxc-type;
+              description
+                "Configure flexible-cross-connect.";
+            }
+            leaf mtu {
+              type uint32;
+              description
+                "MTU in bytes.  If this is zero or absent the MTU will not be sent
+                 and the received MTU will be ignored.";
+            }
+          }
+          container pseudowires {
+            description
+              "Pseudowires used by this EVPN instance.";
+            list pseudowire {
+              key "name";
+              description
+                "Pseudowire configuration for this EVPN instance.";
+              leaf name {
+                type leafref {
+                  path "../config/name";
+                }
+                description
+                  "The pseudowire name.";
+              }
+              container config {
+                leaf name {
+                  type string;
+                  description
+                    "The pseudowire name.";
+                }
+                leaf local-etid {
+                  type etid-type;
+                  description
+                    "The local ethernet tag identifier to associate with this pseudowire.";
+                }
+                leaf remote-etid {
+                  type etid-type;
+                  description
+                    "The remote ethernet tag identifier to associate with this pseudowire.";
+                }
+                leaf transmit-control-word-override {
+                  type control-word-override-type;
+                  description
+                    "Transmit control word override setting.  If this is omitted then the
+                     setting for ../../../config/mpls-control-word is used.";
+                }
+                leaf receive-control-word-override {
+                  type control-word-override-type;
+                  description
+                    "Receive control word override setting.  If this is omitted then the
+                     setting for ../../../config/mpls-control-word is used.";
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  augment "/eos-exp:arista/eos-exp:eos" {
+    container evpn {
+      uses evpn;
+    }
+  }
+}

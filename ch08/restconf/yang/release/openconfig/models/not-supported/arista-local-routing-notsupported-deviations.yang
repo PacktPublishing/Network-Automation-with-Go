@@ -1,0 +1,28 @@
+module arista-local-routing-notsupported-deviations {
+  namespace "http://arista.com/yang/openconfig/local-routing/notsupported-deviations";
+  prefix arista-local-routing-notsupported-deviations;
+
+  import openconfig-local-routing {
+    prefix oc-loc-rt;
+  }
+
+  organization
+    "Arista Networks, Inc.";
+  contact
+    "Arista Networks, Inc.
+     Product Support";
+  description
+    "This module contains OpenConfig local-routing deviations in Arista EOS.
+     Copyright (c) 2020 Arista Networks, Inc. All rights reserved.";
+
+  revision 2020-02-04 {
+    description
+      "Not-supported deviations file.";
+  }
+
+  deviation "/oc-loc-rt:local-routes" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+}

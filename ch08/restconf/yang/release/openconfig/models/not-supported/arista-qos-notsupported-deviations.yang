@@ -1,0 +1,171 @@
+module arista-qos-notsupported-deviations {
+  namespace "http://arista.com/yang/openconfig/qos/notsupported-deviations";
+  prefix arista-qos-notsupported-deviations;
+
+  import openconfig-hercules-qos {
+    prefix herc-qos;
+  }
+  import openconfig-qos {
+    prefix oc-qos;
+  }
+
+  organization
+    "Arista Networks, Inc.";
+  contact
+    "Arista Networks, Inc.
+     Product Support";
+  description
+    "This module contains OpenConfig qos deviations in Arista EOS.
+     Copyright (c) 2020 Arista Networks, Inc. All rights reserved.";
+
+  revision 2020-06-10 {
+    description
+      "Not-supported deviations file.";
+  }
+  revision 2020-06-09 {
+    description
+      "Not-supported deviations file.";
+  }
+  revision 2020-02-04 {
+    description
+      "Not-supported deviations file.";
+  }
+
+  deviation "/oc-qos:qos/oc-qos:classifiers" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-qos:qos/oc-qos:config" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-qos:qos/oc-qos:forwarding-groups" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-qos:qos/oc-qos:scheduler-policies" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-qos:qos/oc-qos:state" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-qos:qos/oc-qos:interfaces/oc-qos:interface/oc-qos:input" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-qos:qos/oc-qos:interfaces/oc-qos:interface/oc-qos:interface-ref" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-qos:qos/oc-qos:interfaces/oc-qos:interface/oc-qos:state" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-qos:qos/oc-qos:interfaces/oc-qos:interface/oc-qos:output/oc-qos:classifiers" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-qos:qos/oc-qos:interfaces/oc-qos:interface/oc-qos:output/oc-qos:config" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-qos:qos/oc-qos:interfaces/oc-qos:interface/oc-qos:output/oc-qos:interface-ref" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-qos:qos/oc-qos:interfaces/oc-qos:interface/oc-qos:output/oc-qos:scheduler-policy" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-qos:qos/oc-qos:interfaces/oc-qos:interface/oc-qos:output/oc-qos:state" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-qos:qos/oc-qos:interfaces/oc-qos:interface/oc-qos:output/oc-qos:queues/oc-qos:queue/oc-qos:state/oc-qos:avg-queue-len" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-qos:qos/oc-qos:interfaces/oc-qos:interface/oc-qos:output/oc-qos:queues/oc-qos:queue/oc-qos:state/oc-qos:max-queue-len" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-qos:qos/oc-qos:interfaces/oc-qos:interface/oc-qos:output/oc-qos:queues/oc-qos:queue/oc-qos:state/oc-qos:name" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-qos:qos/oc-qos:queues/oc-qos:queue/oc-qos:red" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-qos:qos/oc-qos:queues/oc-qos:queue/oc-qos:wred" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-qos:qos/oc-qos:queues/oc-qos:queue/oc-qos:config/herc-qos:id" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-qos:qos/oc-qos:queues/oc-qos:queue/oc-qos:config/oc-qos:queue-type" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-qos:qos/oc-qos:queues/oc-qos:queue/oc-qos:state/herc-qos:id" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-qos:qos/oc-qos:queues/oc-qos:queue/oc-qos:state/oc-qos:name" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-qos:qos/oc-qos:queues/oc-qos:queue/oc-qos:state/oc-qos:queue-type" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+}
