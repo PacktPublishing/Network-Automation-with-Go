@@ -77,8 +77,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	//netInst.NewTableConnection(api.OpenconfigPolicyTypes_INSTALL_PROTOCOL_TYPE_DIRECTLY_CONNECTED, api.OpenconfigPolicyTypes_INSTALL_PROTOCOL_TYPE_BGP, api.OpenconfigTypes_ADDRESS_FAMILY_IPV4)
-	//netInst.NewTableConnection(api.OpenconfigPolicyTypes_INSTALL_PROTOCOL_TYPE_DIRECTLY_CONNECTED, api.OpenconfigPolicyTypes_INSTALL_PROTOCOL_TYPE_BGP, api.OpenconfigTypes_ADDRESS_FAMILY_IPV6)
+	netInst.NewTableConnection(api.OpenconfigPolicyTypes_INSTALL_PROTOCOL_TYPE_DIRECTLY_CONNECTED, api.OpenconfigPolicyTypes_INSTALL_PROTOCOL_TYPE_BGP, api.OpenconfigTypes_ADDRESS_FAMILY_IPV4)
+	netInst.NewTableConnection(api.OpenconfigPolicyTypes_INSTALL_PROTOCOL_TYPE_DIRECTLY_CONNECTED, api.OpenconfigPolicyTypes_INSTALL_PROTOCOL_TYPE_BGP, api.OpenconfigTypes_ADDRESS_FAMILY_IPV6)
 
 	fmt.Println(printYgot(netInst))
 
