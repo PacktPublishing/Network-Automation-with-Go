@@ -1,0 +1,47 @@
+# https://github.com/nokia/srlinux-yang-models/tree/v21.6.4/srlinux-yang-models
+# https://yang.srlinux.dev/v21.6.4/
+
+- prefix: ""
+  encoding: "json_ietf"
+  path: "/interface[name=system0]/subinterface[index=0]/ipv4"
+  value: '{"address":{"ip-prefix":"198.51.100.0/32"}}'
+
+- prefix: ""
+  encoding: "json_ietf"
+  path: "/network-instance[name=default]/interface[name=system0.0]"
+  value: '{}'
+
+- prefix: ""
+  encoding: "json_ietf"
+  path: "/interface[name=ethernet-1/1]/subinterface[index=0]/ipv4"
+  value: '{"address":{"ip-prefix":"192.0.2.0/31"}}'
+
+- prefix: ""
+  encoding: "json_ietf"
+  path: "/network-instance[name=default]/interface[name=ethernet-1/1.0]"
+  value: '{}'
+
+- prefix: ""
+  encoding: "json_ietf"
+  path: "/interface[name=ethernet-1/1]/admin-state"
+  value: enable
+
+- prefix: ""
+  encoding: "json_ietf"
+  path: "/routing-policy/policy[name=all]/default-action/accept/bgp/local-preference/set"
+  value: '100'
+
+- prefix: ""
+  encoding: "json_ietf"
+  path: "/network-instance[name=default]/protocols/bgp"
+  value: '{"autonomous-system": 65000,"router-id": "198.51.100.0", "ipv4-unicast": {"admin-state": "enable"}}'
+
+- prefix: ""
+  encoding: "json_ietf"
+  path: "/network-instance[name=default]/protocols/bgp/group[group-name=EBGP]"
+  value: '{"export-policy": "all","import-policy": "all"}'
+
+- prefix: ""
+  encoding: "json_ietf"
+  path: "/network-instance[name=default]/protocols/bgp/neighbor[peer-address=192.0.2.1]"
+  value: '{"peer-as": 65001,"peer-group": "EBGP"}'

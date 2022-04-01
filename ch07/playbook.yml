@@ -4,7 +4,7 @@
   vars_files:
     - eos.cfg
   vars:
-    data: "{{ lookup('file', 'input.yml') }}"
+    data: "{{ lookup('file', 'input-cvx.yml') }}"
     go: true
 
   tasks:

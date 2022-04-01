@@ -39,7 +39,7 @@ printf '{"Host": "%s", "User": "%s", "Password": "%s", "Input": "%s"}' \
  "$host" "$user" "$password" "$input" > $f
 
 # Run Go code with this file as an argument
-go run main.go $f
+go run cumulus/main.go $f
 
 # Remove temp arguments file
 rm $f

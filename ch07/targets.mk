@@ -1,3 +1,3 @@
 ## Build binary
 build-go-cvx:
-	cd ch07; go build -o library/go_cumulus
+	cd ch07/cumulus; go build -o ../library/go_cumulus
