@@ -1,6 +1,0 @@
-router:
-  - hostname: clab-netgo-srl
-    port: 57400
-    skipverify: true
-    username: admin
-    password: admin
