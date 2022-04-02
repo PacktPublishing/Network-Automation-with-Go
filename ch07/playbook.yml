@@ -2,9 +2,10 @@
   hosts: routers
   gather_facts: true
   vars_files:
-    - eos.cfg
+    - eos/input.yml
   vars:
-    data: "{{ lookup('file', 'input-cvx.yml') }}"
+    in_cvx: "{{ lookup('file', 'cvx/input.yml') }}"
+    in_srl: "{{ lookup('file', 'srl/input.yml') }}"
     go: true
 
   tasks:
@@ -31,11 +32,11 @@
       when: ('eos' in group_names)
 
     - name: Run NVIDIA Go module on Systems without Go installed
-      go_cumulus:
+      go_cvx:
         host: localhost
         user: "{{ ansible_user }}"
         password: "{{ ansible_password }}"
-        input: "{{ data | string | b64encode }}"
+        input: "{{ in_cvx | string | b64encode }}"
       when: ('cvx' in group_names) and not go
 
     - name: Run NVIDIA Go module on Systems with Go installed
@@ -43,6 +44,24 @@
         host: "{{ inventory_hostname }}"
         user: "{{ ansible_user }}"
         password: "{{ ansible_password }}"
-        input: "{{ data | string | b64encode }}"
+        input: "{{ in_cvx | string | b64encode }}"
       delegate_to: localhost
       when: ('cvx' in group_names) and go
+
+    # Check out template file access for template
+    - name: Run Nokia Go module on Systems without Go installed
+      go_srl:
+        host: localhost
+        user: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
+        input: "{{ in_srl | string | b64encode }}"
+      when: ('srl' in group_names) and not go
+
+    - name: Run Nokia Go module on Systems with Go installed
+      go_run:
+        host: "{{ inventory_hostname }}"
+        user: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
+        input: "{{ in_srl | string | b64encode }}"
+      delegate_to: localhost
+      when: ('srl' in group_names) and go

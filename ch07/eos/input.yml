@@ -1,0 +1,29 @@
+interface:
+  - name: Ethernet1
+    enabled: true
+    mode: layer3
+  - name: Ethernet2
+    enabled: true
+    mode: layer3
+
+l3_interface:
+  - name: Ethernet1
+    ipv4:
+      - address: 192.0.2.1/31
+  - name: Ethernet2
+    ipv4:
+      - address: 192.0.2.2/31
+  - name: Loopback0
+    ipv4:
+      - address: 198.51.100.1/32
+
+bgp:
+  router_id: 198.51.100.1
+  as_number: 65001
+  redistribute:
+    - protocol: connected
+  neighbors:
+    - neighbor_address: 192.0.2.0
+      remote_as: 65000
+    - neighbor_address: 192.0.2.3
+      remote_as: 65002

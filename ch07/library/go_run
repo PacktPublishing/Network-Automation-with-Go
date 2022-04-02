@@ -38,8 +38,34 @@ fi
 printf '{"Host": "%s", "User": "%s", "Password": "%s", "Input": "%s"}' \
  "$host" "$user" "$password" "$input" > $f
 
+# Delimiting character for hostnames
+IFS='-'
+read -a list <<< "$host"
+
 # Run Go code with this file as an argument
-go run cumulus/main.go $f
+cd ${list[2]}
+go run main.go ../$f
+cd ..
 
 # Remove temp arguments file
-rm $f
+rm $f 
+
+
+## MANUAL INPUTS
+# c=$(cat << EOF
+# asn: 65000
+# loopback:
+#   ip: "198.51.100.0"
+# uplinks:
+#   - name: "ethernet-1/1"
+#     prefix: "192.0.2.0/31"
+# peers:
+#   - ip: "192.0.2.1"
+#     asn: 65001
+# EOF
+# )
+
+# config_input=$(printf '%s' "$c" | base64 -w 0)
+# host=clab-netgo-srl
+# user=admin
+# password=admin
