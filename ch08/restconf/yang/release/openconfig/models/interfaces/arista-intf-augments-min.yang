@@ -1,0 +1,269 @@
+module arista-intf-augments {
+  namespace "http://arista.com/yang/openconfig/interfaces/augments";
+  prefix arista-intf-augments;
+
+  import openconfig-interfaces {
+    prefix oc-if;
+  }
+  import openconfig-if-ethernet {
+    prefix oc-eth;
+  }
+  import openconfig-if-aggregate {
+    prefix oc-lag;
+  }
+  import openconfig-vlan {
+    prefix oc-vlan;
+  }
+  import iana-if-type {
+    prefix ift;
+  }
+  import openconfig-if-ip {
+    prefix oc-ip;
+  }
+  import openconfig-inet-types {
+    prefix oc-inet;
+  }
+  import openconfig-yang-types {
+    prefix oc-yang;
+  }
+  import openconfig-extensions {
+    prefix oc-ext;
+  }
+
+  organization
+    "Arista Networks <http://arista.com/>";
+  contact
+    "Arista Networks, Inc.
+     Product Support";
+  description
+    "This module contains OpenConfig interface augments in Arista EOS.
+
+     Copyright (c) 2017 Arista Networks, Inc. All rights reserved.";
+  oc-ext:openconfig-version "1.5.0";
+
+  revision 2021-05-21 {
+    description
+      "Add augmentations for HG ethernet speeds.";
+    reference
+      "1.5.0";
+  }
+  revision 2021-01-29 {
+    description
+      "Remove augment for interfaces/interface/ethernet/poe/state/power-class.";
+    reference
+      "1.4.4";
+  }
+  revision 2020-11-30 {
+    description
+      "Fix errors reported by pyang.";
+    reference
+      "1.4.3";
+  }
+  revision 2020-08-10 {
+    description
+      "Use config oc-if:type path to be in accessible tree";
+    reference
+      "1.4.2";
+  }
+  revision 2020-05-13 {
+    description
+      "Remove augmentations for 200G and 400G ethernet speeds, as
+       they are now defined in openconfig-if-ethernet.";
+    reference
+      "1.4.1";
+  }
+  revision 2020-01-07 {
+    description
+      "Add l2protocol-forwarding-profile leaf node.";
+    reference
+      "1.4.0";
+  }
+  revision 2020-01-06 {
+    description
+      "Removed unused imports.";
+    reference
+      "1.3.1";
+  }
+  revision 2019-12-04 {
+    description
+      "Add support for Priority Flow Control(PFC) counters";
+    reference
+      "1.3.0";
+  }
+  revision 2019-11-27 {
+    description
+      "Add poe-supported leaf.";
+    reference
+      "1.2.3";
+  }
+  revision 2019-11-13 {
+    description
+      "Remove arista-tpid augment from oc-if:config in interfaces.";
+    reference
+      "1.2.2";
+  }
+  revision 2019-07-31 {
+    description
+      "Correct oc-if:type path in when statement";
+    reference
+      "1.2.1";
+  }
+  revision 2019-01-20 {
+    description
+      "Add support for reflector interfaces (RFC2544)";
+    reference
+      "1.2.0";
+  }
+  revision 2018-10-02 {
+    description
+      "Add tpid range, trunk groups as interface members. support for
+       50G-1, 100G-2, 200G and 400G ethernet speeds. Config for 1000BASE-T,
+       fec encoding, load-interval and inactive flag for interfaces.";
+    reference
+      "1.1.0";
+  }
+  revision 2017-10-01 {
+    description
+      "Initial augment file.";
+    reference
+      "1.0.0";
+  }
+
+  typedef fallback-enum {
+    type enumeration {
+      enum none {
+        description
+          "Fallback not enabled on this interface";
+      }
+      enum static {
+        description
+          "Static fallback enabled on this interface";
+      }
+      enum individual {
+        description
+          "Individual fallback enabled on this interface";
+      }
+    }
+    description
+      "type definition for fallback on the interface";
+  }
+
+  typedef fallback-state-enum {
+    type enumeration {
+      enum fallbackStateUnconfigured {
+        description
+          "Fallback not enabled on this interface";
+      }
+      enum fallbackStateConfigured {
+        description
+          "Static fallback enabled on this interface";
+      }
+      enum fallbackStateInitialized {
+        description
+          "Individual fallback enabled on this interface";
+      }
+      enum fallbackStateMonitoring {
+        description
+          "Individual fallback enabled on this interface";
+      }
+      enum fallbackStateEnabled {
+        description
+          "Individual fallback enabled on this interface";
+      }
+    }
+    description
+      "type definition for fallback state on the interface";
+  }
+
+  typedef arista-addr-type {
+    type enumeration {
+      enum PRIMARY {
+        description
+          "Primary address type.";
+      }
+      enum SECONDARY {
+        description
+          "Secondary address type.";
+      }
+      enum IPV6 {
+        description
+          "IPv6 address type.";
+      }
+    }
+    description
+      "EOS address type.";
+  }
+
+  
+  augment "/oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv4/oc-ip:addresses/oc-ip:address/oc-ip:config" {
+    description
+      "Add leaf to indicate the type of this address.";
+    leaf addr-type {
+      type arista-addr-type;
+      description
+        "Type of the IP address.";
+    }
+  }
+
+  augment "/oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv4/oc-ip:addresses/oc-ip:address/oc-ip:state" {
+    description
+      "Add leaf to indicate the type of this address.";
+    leaf addr-type {
+      type arista-addr-type;
+      description
+        "Type of the IP address.";
+    }
+  }
+
+  augment "/oc-if:interfaces/oc-if:interface/oc-vlan:routed-vlan/oc-ip:ipv4/oc-ip:addresses/oc-ip:address/oc-ip:config" {
+    description
+      "Add leaf to indicate the type of this address.";
+    leaf addr-type {
+      type arista-addr-type;
+      description
+        "Type of the IP address.";
+    }
+  }
+
+  augment "/oc-if:interfaces/oc-if:interface/oc-vlan:routed-vlan/oc-ip:ipv4/oc-ip:addresses/oc-ip:address/oc-ip:state" {
+    description
+      "Add leaf to indicate the type of this address.";
+    leaf addr-type {
+      type arista-addr-type;
+      description
+        "Type of the IP address.";
+    }
+  }
+
+  grouping arista-virtual-addresses {
+    description
+      "VRRP group's virtual-address";
+    list virtual-addresses {
+      key "addr";
+      description
+        "List of VRRP group's virtual addresses.";
+      leaf addr {
+        type leafref {
+          path "../virtual-address/addr";
+        }
+        description
+          "VRRP group's virtual-address";
+      }
+      container virtual-address {
+        description
+          "The address type to indicate the purpose of this address.";
+        leaf addr {
+          type oc-inet:ip-address;
+          description
+            "An virtual address of an VRRP group";
+        }
+        leaf addr-type {
+          type arista-addr-type;
+          description
+            "Type of the IP address.";
+        }
+      }
+    }
+  }
+
+}

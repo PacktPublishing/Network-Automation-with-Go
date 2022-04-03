@@ -5,6 +5,7 @@ go 1.17
 require (
 	github.com/openconfig/goyang v1.0.0
 	github.com/openconfig/ygot v0.16.2
+	gopkg.in/yaml.v2 v2.2.2
 )
 
 require (
