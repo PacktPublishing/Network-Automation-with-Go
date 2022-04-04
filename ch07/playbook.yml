@@ -75,5 +75,4 @@
     - name: Run Validate module on Systems with Go installed
       go_run:
         host: "{{ inventory_hostname }}"
-      delegate_to: localhost
       when: go
