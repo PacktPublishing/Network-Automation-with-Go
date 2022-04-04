@@ -26,8 +26,5 @@
 - path: "/network-instance[name=default]/protocols/bgp/group[group-name=EBGP]"
   value: '{"export-policy": "all","import-policy": "all"}'
 
-- path: "/network-instance[name=default]/protocols/bgp/neighbor[peer-address={{ (index .Peers 0).IP }}]/peer-as"
-  value: "{{ (index .Peers 0).ASN }}"
-
-- path: "/network-instance[name=default]/protocols/bgp/neighbor[peer-address={{ (index .Peers 0).IP }}]/peer-group[group-name=EBGP]"
-  value: '{}'
+- path: "/network-instance[name=default]/protocols/bgp/neighbor[peer-address={{ (index .Peers 0).IP }}]"
+  value: '{"peer-as":{{ (index .Peers 0).ASN }},"peer-group": "EBGP"}'

@@ -139,7 +139,7 @@ func main() {
 	// Create a target
 	////////////////////////////////
 	tg, err := moduleArgs.createTarget()
-	check(err)
+	r.check(err, "Could not create a target for: "+moduleArgs.Host)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -148,18 +148,19 @@ func main() {
 	// Create a gNMI client
 	////////////////////////////////
 	err = tg.CreateGNMIClient(ctx)
-	check(err)
+	r.check(err, "Could not create a gNMI client for: "+moduleArgs.Host)
 	defer tg.Close()
 
-	gdata, err := os.Open("api-srl.tpl")
-	check(err)
-	defer gdata.Close()
+	filename := "api-srl.tpl"
+	gData, err := os.Open(filename)
+	r.check(err, "Could not open template file: "+filename)
+	defer gData.Close()
 
-	d = yaml.NewDecoder(gdata)
+	d = yaml.NewDecoder(gData)
 
 	var info []Data
 	err = d.Decode(&info)
-	check(err)
+	r.check(err, "Could not decode gNMI paths data: "+filename)
 
 	var pathBuffer bytes.Buffer
 	var valueBuffer bytes.Buffer
@@ -169,41 +170,43 @@ func main() {
 		// Template Path
 		////////////////////////////////
 		dt, err := template.New("path").Parse(data.Path)
-		check(err)
+		r.check(err, "Could not parse template for: "+data.Path)
 		err = dt.Execute(&pathBuffer, input)
-		check(err)
+		r.check(err, "Could not execute template for: "+data.Path)
 
 		////////////////////////////////
 		// Template Value
 		////////////////////////////////
 
 		vt, err := template.New("value").Parse(data.Value)
-		check(err)
+		r.check(err, "Could not parse template for: "+data.Value)
 
 		err = vt.Execute(&valueBuffer, input)
-		check(err)
+		r.check(err, "Could not execute template for: "+data.Value)
 
 		////////////////////////////////
 		// Create a Replace gNMI SetRequest
 		////////////////////////////////
+		gPath := pathBuffer.String()
 		setReq, err := api.NewSetRequest(
 			api.Replace(
-				api.Path(data.Prefix+pathBuffer.String()),
+				api.Path(data.Prefix+gPath),
 				api.Value(valueBuffer.String(), "json_ietf")),
 		)
 
-		check(err)
-		//fmt.Println(prototext.Format(setReq))
+		r.check(err, "Could not create gNMI SetRequest for: "+gPath)
 
 		////////////////////////////////
 		// Send the Replace gNMI SetRequest to the target
 		////////////////////////////////
 		configResp, err := tg.Set(ctx, setReq)
-		check(err)
-
-		fmt.Println(prototext.Format(configResp))
+		r.check(err, "Replace gNMI SetRequest failed for: "+gPath)
+		r.Msg += prototext.Format(configResp)
 		
 		pathBuffer.Reset()
 		valueBuffer.Reset()
 	}
+	r.Changed = true
+	r.Failed = false
+	returnResponse(r)
 }
