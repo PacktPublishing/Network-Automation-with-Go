@@ -1,4 +1,4 @@
-- name: Configure Interface
+- name: First Play - Configure Routers
   hosts: routers
   gather_facts: true
   vars_files:
@@ -9,6 +9,23 @@
     go: true
 
   tasks:
+    - name: Run Nokia Go module on Systems without Go installed
+      go_srl:
+        host: localhost
+        user: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
+        input: "{{ in_srl | string | b64encode }}"
+      when: ('srl' in group_names) and not go
+
+    - name: Run Nokia Go module on Systems with Go installed
+      go_run:
+        host: "{{ inventory_hostname }}"
+        user: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
+        input: "{{ in_srl | string | b64encode }}"
+      delegate_to: localhost
+      when: ('srl' in group_names) and go
+
     - name: Use Resource modules to configure Arista EOS
       block:
         - name: Configure IP Routing
@@ -48,19 +65,15 @@
       delegate_to: localhost
       when: ('cvx' in group_names) and go
 
-    - name: Run Nokia Go module on Systems without Go installed
-      go_srl:
-        host: localhost
-        user: "{{ ansible_user }}"
-        password: "{{ ansible_password }}"
-        input: "{{ in_srl | string | b64encode }}"
-      when: ('srl' in group_names) and not go
+- name: Second Play - Validate changes
+  hosts: localhost
+  gather_facts: false
+  vars:
+    go: true
 
-    - name: Run Nokia Go module on Systems with Go installed
+  tasks:
+    - name: Run Validate module on Systems with Go installed
       go_run:
         host: "{{ inventory_hostname }}"
-        user: "{{ ansible_user }}"
-        password: "{{ ansible_password }}"
-        input: "{{ in_srl | string | b64encode }}"
       delegate_to: localhost
-      when: ('srl' in group_names) and go
+      when: go
