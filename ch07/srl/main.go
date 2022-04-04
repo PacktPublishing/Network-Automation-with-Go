@@ -3,10 +3,12 @@ package main
 import (
 	"bytes"
 	"context"
+	_ "embed"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 	"text/template"
 
 	"github.com/karimra/gnmic/api"
@@ -15,11 +17,8 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-func check(err error) {
-	if err != nil {
-		panic(err)
-	}
-}
+//go:embed api-srl.tpl
+var pathTemplate string
 
 type Model struct {
 	Uplinks  []Link `yaml:"uplinks"`
@@ -151,16 +150,13 @@ func main() {
 	r.check(err, "Could not create a gNMI client for: "+moduleArgs.Host)
 	defer tg.Close()
 
-	filename := "api-srl.tpl"
-	gData, err := os.Open(filename)
-	r.check(err, "Could not open template file: "+filename)
-	defer gData.Close()
+	gnmiData := strings.NewReader(pathTemplate)
 
-	d = yaml.NewDecoder(gData)
+	d = yaml.NewDecoder(gnmiData)
 
 	var info []Data
 	err = d.Decode(&info)
-	r.check(err, "Could not decode gNMI paths data: "+filename)
+	r.check(err, "Could not decode gNMI paths data: "+pathTemplate)
 
 	var pathBuffer bytes.Buffer
 	var valueBuffer bytes.Buffer

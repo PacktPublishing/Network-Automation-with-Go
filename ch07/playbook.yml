@@ -48,7 +48,6 @@
       delegate_to: localhost
       when: ('cvx' in group_names) and go
 
-    # Check out template file access for template
     - name: Run Nokia Go module on Systems without Go installed
       go_srl:
         host: localhost
