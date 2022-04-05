@@ -3,19 +3,30 @@
     name: "{{ hostvars[inventory_hostname]['instance_name'] }}"
   when: hostvars[inventory_hostname]['instance_name'] is defined
 
-- name: Run the equivalent of "apt-get update" as a separate step for Ubuntu
-  ansible.builtin.apt:
-    update_cache: true
+- name: Add Ansible repo to install ansible-core on Ubuntu
+  block:
+    - name: Add Ansible apt key
+      ansible.builtin.apt_key:
+        keyserver: keyserver.ubuntu.com
+        id: 93C4A3FD7BB9C367
+        state: present
+
+    - name: Add Ansible repo to sources file
+      ansible.builtin.lineinfile:
+        path: /etc/apt/sources.list.d/ansible.list
+        line: "deb http://ppa.launchpad.net/ansible/ansible/ubuntu focal main"
+        create: true
   when: ansible_distribution == 'Ubuntu'
 
 - name: Install base packages
   ansible.builtin.package:
     name: "{{ base_software[ansible_distribution_file_variety] | union(common_software) }}"
     state: present
+    update_cache: true
   register: package_check
   until: package_check is not failed
-  retries: 4
-  delay: 5
+  retries: 3
+  delay: 1
 
 - name: Install Python dependencies
   ansible.builtin.pip:

@@ -1,0 +1,51 @@
+- name: Install Terraform on Fedora
+  block:
+    - name: Add Hashicorp Stable repo
+      ansible.builtin.yum_repository:
+        name: hashicorp
+        description: "Hashicorp Stable - $basearch"
+        baseurl: "https://rpm.releases.hashicorp.com/fedora/$releasever/$basearch/stable"
+        enabled: true
+        gpgcheck: true
+        gpgkey: https://rpm.releases.hashicorp.com/gpg
+        file: hashicorp
+
+    - name: Add Hashicorp Test repo
+      ansible.builtin.yum_repository:
+        name: hashicorp-test
+        description: "Hashicorp Test - $basearch"
+        baseurl: "https://rpm.releases.hashicorp.com/fedora/$releasever/$basearch/test"
+        enabled: false
+        gpgcheck: true
+        gpgkey: https://rpm.releases.hashicorp.com/gpg
+        file: hashicorp
+  when: ansible_distribution == "Fedora"
+
+- name: Add Terraform repo on Ubuntu
+  block:
+    - name: Ensure dependencies are installed
+      ansible.builtin.package:
+        name:
+          - software-properties-common
+          - curl
+        state: present
+
+    - name: Add Hashicorp apt key
+      ansible.builtin.apt_key:
+        url: https://apt.releases.hashicorp.com/gpg
+        state: present
+      ignore_errors: true
+
+    - name: Add Hashicorp repository
+      ansible.builtin.apt_repository:
+        repo: "deb [arch=amd64] https://apt.releases.hashicorp.com {{ ansible_distribution_release }} main"
+        state: present
+        update_cache: true
+  when: ansible_distribution == 'Ubuntu'
+
+- name: Install Terraform
+  ansible.builtin.package:
+    name:
+      - terraform
+    state: present
+    update_cache: true

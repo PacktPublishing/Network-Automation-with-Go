@@ -7,6 +7,9 @@
 - name: Install Docker
   include_tasks: install_docker.yml
 
+- name: Install Terraform
+  include_tasks: install_terraform.yml
+
 - name: Copy Labs folder
   include_tasks: copy_labs.yml
 
