@@ -55,3 +55,10 @@ Plan: 4 to add, 0 to change, 0 to destroy.
 ### Issues
 
 - [terraform-provider-netbox](https://github.com/e-breuninger/terraform-provider-netbox/issues/145)
+
+### Explore
+
+:-)
+
+- https://networkop.co.uk/post/2019-04-tf-yang/
+- https://github.com/networkop/terraform-yang

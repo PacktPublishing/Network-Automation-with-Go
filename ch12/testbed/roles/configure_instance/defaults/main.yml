@@ -21,6 +21,7 @@ base_software:
 
 python_libraries:
   - ipaddress
+  - ansible-pylibssh
 
 ansible_collections:
   - arista.eos:4.1.2

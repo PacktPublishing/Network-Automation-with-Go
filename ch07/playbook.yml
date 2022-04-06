@@ -26,6 +26,23 @@
       delegate_to: localhost
       when: ('srl' in group_names) and go
 
+    - name: Run NVIDIA Go module on Systems without Go installed
+      go_cvx:
+        host: localhost
+        user: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
+        input: "{{ in_cvx | string | b64encode }}"
+      when: ('cvx' in group_names) and not go
+
+    - name: Run NVIDIA Go module on Systems with Go installed
+      go_run:
+        host: "{{ inventory_hostname }}"
+        user: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
+        input: "{{ in_cvx | string | b64encode }}"
+      delegate_to: localhost
+      when: ('cvx' in group_names) and go
+
     - name: Use Resource modules to configure Arista EOS
       block:
         - name: Configure IP Routing
@@ -47,23 +64,6 @@
             state: replaced
             config: "{{ bgp }}"
       when: ('eos' in group_names)
-
-    - name: Run NVIDIA Go module on Systems without Go installed
-      go_cvx:
-        host: localhost
-        user: "{{ ansible_user }}"
-        password: "{{ ansible_password }}"
-        input: "{{ in_cvx | string | b64encode }}"
-      when: ('cvx' in group_names) and not go
-
-    - name: Run NVIDIA Go module on Systems with Go installed
-      go_run:
-        host: "{{ inventory_hostname }}"
-        user: "{{ ansible_user }}"
-        password: "{{ ansible_password }}"
-        input: "{{ in_cvx | string | b64encode }}"
-      delegate_to: localhost
-      when: ('cvx' in group_names) and go
 
 - name: Second Play - Validate changes
   hosts: localhost
