@@ -24,20 +24,21 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	val, err := os.ReadFile("input.cue")
+	input, err := os.ReadFile("input.cue")
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	model, err := os.ReadFile("model.cue")
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	s := ctx.CompileBytes(schema)
-	v := ctx.CompileBytes(val, cue.Scope(s))
-	i := ctx.CompileBytes(model, cue.Scope(v))
+	v := ctx.CompileBytes(input)
+
+	u := s.Unify(v)
+
+	i := ctx.CompileBytes(model, cue.Scope(u))
 
 	if i.Err() != nil {
 		msg := errors.Details(i.Err(), nil)
@@ -58,10 +59,12 @@ func main() {
 		fmt.Printf("Eval Error:\n%s\n", msg)
 	}
 
-	data, err := e.LookupPath(cue.ParsePath("set")).MarshalJSON()
+	data, err := e.MarshalJSON()
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	log.Println(string(data))
 
 	if err := sendBytes(data); err != nil {
 		log.Fatal(err)

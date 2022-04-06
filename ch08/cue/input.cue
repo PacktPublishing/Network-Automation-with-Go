@@ -1,16 +1,14 @@
 package cvx
 
-_input: _Input & {
-	ASN:      65002
-	RouterID: "198.51.100.2"
-	Uplinks: [{
-		name:      "swp1"
-		ip:        "192.0.2.3"
-		prefixLen: 31
+input: {
+	asn: 65002
+	loopback: ip: "198.51.100.2"
+	uplinks: [{
+		name:   "swp1"
+		prefix: "192.0.2.3/31"
 	}]
-	Peers: [{
+	peers: [{
 		ip:  "192.0.2.2"
 		asn: 65001
 	}]
 }
-

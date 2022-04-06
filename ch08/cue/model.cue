@@ -1,34 +1,32 @@
 package cvx
 
-set: {
-	interface: _interfaces
-	router: bgp: {
-		_global_bgp
-	}
-	vrf: _vrf
+interface: _interfaces
+router: bgp: {
+	_global_bgp
 }
+vrf: _vrf
 
 _global_bgp: {
-	"autonomous-system": _input.ASN
+	"autonomous-system": input.asn
 	enable:              "on"
-	"router-id":         _input.RouterID
+	"router-id":         input.loopback.ip
 }
 
 _interfaces: {
 	lo: {
-		ip: address: "\(_input.LoopbackIP)": {}
+		ip: address: "\(input.LoopbackIP)": {}
 		type: "loopback"
 	}
-	for intf in _input.Uplinks {
+	for intf in input.uplinks {
 		"\(intf.name)": {
 			type: "swp"
-			ip: address: "\(intf.ip)/\(intf.prefixLen)": {}
+			ip: address: "\(intf.prefix)": {}
 		}
 	}
 }
 
 _vrf: {
-	for vrf in _input.VRFs {
+	for vrf in input.VRFs {
 		"\(vrf.name)": {
 			router: bgp: _vrf_bgp
 			if vrf.name == "default" {
@@ -46,7 +44,7 @@ _vrf_bgp: {
 }
 
 _neighbor: {
-	for intf in _input.Peers {
+	for intf in input.peers {
 		"\(intf.ip)": {
 			type:        "numbered"
 			"remote-as": intf.asn

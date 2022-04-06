@@ -4,19 +4,18 @@ import (
 	"net"
 )
 
-_Input: {
-	ASN:        <=65535 & >=64512
-	RouterID:   net.IPv4 & string
-	LoopbackIP: "\(RouterID)/32"
-	Uplinks: [...{
+input:  {
+	asn:        <=65535 & >=64512
+	loopback: ip:   net.IPv4 & string
+	uplinks: [...{
 		name:      string
-		ip:        net.IPv4 & string
-		prefixLen: <=31 & >=1
+		prefix:   net.IPCIDR & string
 	}]
-	Peers: [...{
+	peers: [...{
 		ip: net.IPv4 & string
 		asn: <=65535 & >=64512
 	}]
+	LoopbackIP: "\(loopback.ip)/32"
 	VRFs: [{name: "default"}]
-	PeerGroup: ""
 }
+
