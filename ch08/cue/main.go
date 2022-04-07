@@ -13,8 +13,11 @@ import (
 	"os"
 
 	"cuelang.org/go/cue"
+	"cuelang.org/go/cue/ast"
 	"cuelang.org/go/cue/cuecontext"
 	"cuelang.org/go/cue/errors"
+	"cuelang.org/go/cue/format"
+	"cuelang.org/go/encoding/yaml"
 )
 
 func main() {
@@ -24,7 +27,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	input, err := os.ReadFile("input.cue")
+	input, err := cueImport("input.yaml", "input")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -71,6 +74,31 @@ func main() {
 	}
 
 	log.Printf("Config applied successfully.")
+}
+
+func cueImport(filename, label string) ([]byte, error) {
+
+	input, err := os.ReadFile(filename)
+	if err != nil {
+		return nil, err
+	}
+
+	ex, err := yaml.Extract(filename, input)
+	if err != nil {
+		return nil, err
+	}
+
+	s := &ast.StructLit{}
+	f := &ast.Field{}
+	f.Label = ast.NewString(label)
+	args := make([]interface{}, len(ex.Decls))
+	for i, decl := range ex.Decls {
+		args[i] = decl
+	}
+	f.Value = ast.NewStruct(args...)
+	s.Elts = append(s.Elts, f)
+
+	return format.Node(s, format.Simplify())
 }
 
 type cvx struct {
