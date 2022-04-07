@@ -31,7 +31,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	model, err := os.ReadFile("model.cue")
+	template, err := os.ReadFile("template.cue")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -40,8 +40,7 @@ func main() {
 	v := ctx.CompileBytes(input)
 
 	u := s.Unify(v)
-
-	i := ctx.CompileBytes(model, cue.Scope(u))
+	i := ctx.CompileBytes(template, cue.Scope(u))
 
 	if i.Err() != nil {
 		msg := errors.Details(i.Err(), nil)
