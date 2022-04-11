@@ -18,7 +18,7 @@ import (
 
 // docker exec -it clab-netgo-srl /opt/srlinux/bin/sr_cli
 
-//go:generate go run github.com/openconfig/ygot/generator -path=yang -output_file=pkg/srl/srl.go -package_name=srl yang/srl_nokia/models/network-instance/srl_nokia-bgp.yang yang/srl_nokia/models/routing-policy/srl_nokia-routing-policy.yang
+//go:generate go run github.com/openconfig/ygot/generator -path=yang -output_file=pkg/srl/srl.go -package_name=srl yang/srl_nokia/models/network-instance/srl_nokia-bgp.yang yang/srl_nokia/models/routing-policy/srl_nokia-routing-policy.yang yang/srl_nokia/models/network-instance/srl_nokia-ip-route-tables.yang
 
 const (
 	srlLoopback    = "system0"

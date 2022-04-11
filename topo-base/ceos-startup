@@ -1,0 +1,18 @@
+!
+username admin role network-admin secret sha512 $6$dDOaXJdbfsZC5mEZ$lRFpoAy1ODx2AcBInmURcP5nlJa8Su79/I.ZJf6H9xhktxtC6VNPArzorY/Z9JQEgSjrvWDqD6QcVKtXwEWp..
+!
+hostname ceos
+!
+management api restconf
+   transport https test
+      ssl profile restconf
+!
+management security
+   ssl profile restconf
+      certificate restconf.crt key restconf.key
+!
+management api models
+   provider aft
+      ipv4-unicast
+      ipv6-unicast
+!

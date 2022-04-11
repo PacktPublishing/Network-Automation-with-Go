@@ -72,7 +72,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	log.Printf("Config applied successfully.")
+	log.Printf("Successfully configured the device")
 }
 
 func cueImport(filename, label string) ([]byte, error) {

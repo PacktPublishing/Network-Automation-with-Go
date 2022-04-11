@@ -21,7 +21,7 @@ import (
 //go:generate go run github.com/openconfig/ygot/generator -path=yang -output_file=pkg/eos/eos.go -compress_paths=true -exclude_modules=ietf-interfaces -package_name=eos yang/openconfig/public/release/models/bgp/openconfig-bgp.yang yang/openconfig/public/release/models/interfaces/openconfig-if-ip.yang yang/openconfig/public/release/models/network-instance/openconfig-network-instance.yang yang/release/openconfig/models/interfaces/arista-intf-augments-min.yang
 
 const (
-	eosLoopback    = "loopback0"
+	eosLoopback    = "Loopback0"
 	defaultSubIdx  = 0
 	defaultNetInst = "default"
 )
@@ -72,6 +72,7 @@ func (m *Model) buildL3Interfaces() ([]*restConfRequest, error) {
 		intf := &api.Interface{
 			Name: strToPtr(link.Name),
 		}
+		intf.Enabled = boolToPtr(true)
 
 		subIntf, err := intf.NewSubinterface(defaultSubIdx)
 		if err != nil {
@@ -92,6 +93,10 @@ func (m *Model) buildL3Interfaces() ([]*restConfRequest, error) {
 
 		addr.PrefixLength = uint8ToPtr(uint8(prefixLen))
 		addr.AddrType = api.AristaIntfAugments_AristaAddrType_PRIMARY
+		// no switchport
+		if link.Name != eosLoopback {
+			subIntf.Ipv4.Enabled = boolToPtr(true)
+		}
 
 		if err := intf.Validate(); err != nil {
 			log.Fatal(err)
@@ -255,7 +260,7 @@ func main() {
 
 	}
 
-	log.Println("Succesfully configured cEOS")
+	log.Println("Successfully configured the device")
 
 }
 
@@ -274,3 +279,4 @@ func printYgot(s ygot.ValidatedGoStruct) string {
 func strToPtr(v string) *string    { return &v }
 func uint32ToPtr(v uint32) *uint32 { return &v }
 func uint8ToPtr(v uint8) *uint8    { return &v }
+func boolToPtr(v bool) *bool       { return &v }
