@@ -70,9 +70,9 @@ func (m *Model) buildL3Interfaces() ([]*restConfRequest, error) {
 
 	for _, link := range links {
 		intf := &api.Interface{
-			Name: strToPtr(link.Name),
+			Name: ygot.String(link.Name),
 		}
-		intf.Enabled = boolToPtr(true)
+		intf.Enabled = ygot.Bool(true)
 
 		subIntf, err := intf.NewSubinterface(defaultSubIdx)
 		if err != nil {
@@ -91,11 +91,11 @@ func (m *Model) buildL3Interfaces() ([]*restConfRequest, error) {
 			log.Fatal(err)
 		}
 
-		addr.PrefixLength = uint8ToPtr(uint8(prefixLen))
+		addr.PrefixLength = ygot.Uint8(uint8(prefixLen))
 		addr.AddrType = api.AristaIntfAugments_AristaAddrType_PRIMARY
 		// no switchport
 		if link.Name != eosLoopback {
-			subIntf.Ipv4.Enabled = boolToPtr(true)
+			subIntf.Ipv4.Enabled = ygot.Bool(true)
 		}
 
 		if err := intf.Validate(); err != nil {
@@ -117,22 +117,25 @@ func (m *Model) buildL3Interfaces() ([]*restConfRequest, error) {
 }
 
 func (m *Model) buildBGPConfig() (*restConfRequest, error) {
-	netInst := &api.NetworkInstance{
-		Name: strToPtr(defaultNetInst),
-	}
-	protocol, _ := netInst.NewProtocol(api.OpenconfigPolicyTypes_INSTALL_PROTOCOL_TYPE_BGP, "BGP")
 
+	netInst := &api.NetworkInstance{
+		Name: ygot.String(defaultNetInst),
+	}
+	protocol, err := netInst.NewProtocol(api.OpenconfigPolicyTypes_INSTALL_PROTOCOL_TYPE_BGP, "BGP")
+	if err != nil {
+		return nil, err
+	}
 	protocol.Bgp = &api.NetworkInstance_Protocol_Bgp{}
 
 	protocol.Bgp.Global = &api.NetworkInstance_Protocol_Bgp_Global{}
-	protocol.Bgp.Global.As = uint32ToPtr(uint32(m.ASN))
+	protocol.Bgp.Global.As = ygot.Uint32(uint32(m.ASN))
 
 	for _, peer := range m.Peers {
 		n, err := protocol.Bgp.NewNeighbor(peer.IP)
 		if err != nil {
 			log.Fatal(err)
 		}
-		n.PeerAs = uint32ToPtr(uint32(peer.ASN))
+		n.PeerAs = ygot.Uint32(uint32(peer.ASN))
 
 		_, err = n.NewAfiSafi(api.OpenconfigBgpTypes_AFI_SAFI_TYPE_IPV4_UNICAST)
 		if err != nil {
@@ -158,7 +161,7 @@ func (m *Model) buildBGPConfig() (*restConfRequest, error) {
 
 func (m *Model) enableRedistribution() (*restConfRequest, error) {
 	netInst := &api.NetworkInstance{
-		Name: strToPtr(defaultNetInst),
+		Name: ygot.String(defaultNetInst),
 	}
 
 	_, err := netInst.NewTableConnection(api.OpenconfigPolicyTypes_INSTALL_PROTOCOL_TYPE_DIRECTLY_CONNECTED, api.OpenconfigPolicyTypes_INSTALL_PROTOCOL_TYPE_BGP, api.OpenconfigTypes_ADDRESS_FAMILY_IPV4)
@@ -275,8 +278,3 @@ func printYgot(s ygot.ValidatedGoStruct) string {
 	)
 	return t
 }
-
-func strToPtr(v string) *string    { return &v }
-func uint32ToPtr(v uint32) *uint32 { return &v }
-func uint8ToPtr(v uint8) *uint8    { return &v }
-func boolToPtr(v bool) *bool       { return &v }

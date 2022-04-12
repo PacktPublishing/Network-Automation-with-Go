@@ -6,7 +6,6 @@ import (
 	srlAPI "json-rpc/pkg/srl"
 	"log"
 	"net/http"
-	"os"
 	"reflect"
 	eosAPI "restconf/pkg/eos"
 	"sync"
@@ -50,12 +49,11 @@ type Router interface {
 	GetRoutes(wg *sync.WaitGroup)
 }
 
-type CVXRoutes struct {
-	Route map[string]Route `json:"route"`
-}
-
-type Route struct {
-	Protocol map[string]interface{} `json:"protocol"`
+// CVX RIB type
+type CVXRIB struct {
+	IPv4Route struct {
+		Route map[string]interface{} `json:"route"`
+	} `json:"ipv4"`
 }
 
 func (r CVX) GetRoutes(wg *sync.WaitGroup) {
@@ -73,39 +71,25 @@ func (r CVX) GetRoutes(wg *sync.WaitGroup) {
 		SetQueryParams(map[string]string{
 			"rev": "operational",
 		}).
-		Get("/nvue_v1/vrf/default/router/rib/ipv4")
+		Get("/nvue_v1/vrf/default/router/rib")
 
 	if err != nil {
 		log.Printf("failed to send request for %s: %s", r.Hostname, err.Error())
+		wg.Done()
 		return
 	}
 
 	ctx := cuecontext.New()
-	schema, err := os.ReadFile("routes.cue")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	s := ctx.CompileBytes(schema)
 	v := ctx.CompileBytes(resp.Body())
-	u := s.Unify(v)
 
-	if u.Err() != nil {
-		fmt.Printf("Compile Error:\n%s\n", err)
-	}
-
-	if err := u.Validate(); err != nil {
-		fmt.Printf("Validate Error:\n%s\n", err)
-	}
-
-	var routes CVXRoutes
-	err = u.Value().Decode(&routes)
+	var rib CVXRIB
+	err = v.Value().Decode(&rib)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	out := []string{}
-	for prefix := range routes.Route {
+	for prefix := range rib.IPv4Route.Route {
 		out = append(out, prefix)
 	}
 
@@ -211,6 +195,11 @@ func (r SRL) GetRoutes(wg *sync.WaitGroup) {
 		return
 	}
 
+	if routes.Ipv4Unicast == nil {
+		log.Printf("No local routes found")
+		wg.Done()
+		return
+	}
 	out := []string{}
 	for key := range routes.Ipv4Unicast.Route {
 		out = append(out, key.Ipv4Prefix)

@@ -3,6 +3,8 @@ username admin role network-admin secret sha512 $6$dDOaXJdbfsZC5mEZ$lRFpoAy1ODx2
 !
 hostname ceos
 !
+ip routing
+!
 management api restconf
    transport https test
       ssl profile restconf
@@ -15,4 +17,6 @@ management api models
    provider aft
       ipv4-unicast
       ipv6-unicast
+!
+service routing protocols model multi-agent
 !
