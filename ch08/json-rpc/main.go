@@ -87,115 +87,84 @@ type Addr struct {
 	IP string `yaml:"ip"`
 }
 
-func (m *Model) buildL3Interfaces() ([]*Command, error) {
-	var cmds []*Command
-
+func (m *Model) buildL3Interfaces(dev *api.Device) error {
 	links := m.Uplinks
 	links = append(links, Link{Name: srlLoopback, Prefix: fmt.Sprintf("%s/32", m.Loopback.IP)})
 
 	for _, link := range links {
-		intf := api.SrlNokiaInterfaces_Interface{}
+		intf, err := dev.NewInterface(link.Name)
+		if err != nil {
+			return err
+		}
 		subintf, err := intf.NewSubinterface(defaultSubIdx)
 		if err != nil {
-			return nil, err
+			return err
 		}
 
 		subintf.Ipv4 = &api.SrlNokiaInterfaces_Interface_Subinterface_Ipv4{}
 		subintf.Ipv4.NewAddress(link.Prefix)
 
 		if err := intf.Validate(); err != nil {
-			return nil, err
+			return err
 		}
-
-		value, err := ygot.ConstructIETFJSON(&intf, nil)
-		if err != nil {
-			return nil, err
-		}
-
-		fmt.Printf("\n/interface[name=%s]:\n", link.Name)
-		printYgot(&intf)
-
-		cmds = append(cmds, &Command{
-			Action: "replace",
-			Path:   fmt.Sprintf("/interface[name=%s]", link.Name),
-			Value:  value,
-		})
 	}
-	return cmds, nil
+
+	return nil
 }
 
-func (m *Model) buildBGPConfig() (*Command, error) {
+func (m *Model) buildNetworkInstance(dev *api.Device) error {
+	ni, err := dev.NewNetworkInstance(defaultNetInst)
+	if err != nil {
+		return err
+	}
 
-	bgp := &api.SrlNokiaNetworkInstance_NetworkInstance_Protocols_Bgp{
-		AutonomousSystem: ygot.Uint32(uint32(m.ASN)),
-		RouterId:         ygot.String(m.Loopback.IP),
-		Ipv4Unicast: &api.SrlNokiaNetworkInstance_NetworkInstance_Protocols_Bgp_Ipv4Unicast{
-			AdminState: api.SrlNokiaBgp_AdminState_enable,
+	links := m.Uplinks
+	links = append(links, Link{Name: srlLoopback, Prefix: fmt.Sprintf("%s/32", m.Loopback.IP)})
+	for _, link := range links {
+		linkName := fmt.Sprintf("%s.%d", link.Name, defaultSubIdx)
+		ni.NewInterface(linkName)
+	}
+
+	ni.Protocols = &api.SrlNokiaNetworkInstance_NetworkInstance_Protocols{
+		Bgp: &api.SrlNokiaNetworkInstance_NetworkInstance_Protocols_Bgp{
+			AutonomousSystem: ygot.Uint32(uint32(m.ASN)),
+			RouterId:         ygot.String(m.Loopback.IP),
+			Ipv4Unicast: &api.SrlNokiaNetworkInstance_NetworkInstance_Protocols_Bgp_Ipv4Unicast{
+				AdminState: api.SrlNokiaBgp_AdminState_enable,
+			},
 		},
 	}
 
-	g, err := bgp.NewGroup(defaultBGPGroup)
+	g, err := ni.Protocols.Bgp.NewGroup(defaultBGPGroup)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	g.ExportPolicy = ygot.String(defaultPolicyName)
 	g.ImportPolicy = ygot.String(defaultPolicyName)
 
 	for _, peer := range m.Peers {
-		n, err := bgp.NewNeighbor(peer.IP)
+		n, err := ni.Protocols.Bgp.NewNeighbor(peer.IP)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		n.PeerAs = ygot.Uint32(uint32(peer.ASN))
 		n.PeerGroup = ygot.String(defaultBGPGroup)
 	}
 
-	if err := bgp.Validate(); err != nil {
-		return nil, err
+	if err := ni.Validate(); err != nil {
+		return err
 	}
 
-	value, err := ygot.ConstructIETFJSON(bgp, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	fmt.Printf("\n/network-instance[name=%s]/protocols/bgp:\n", defaultNetInst)
-	printYgot(bgp)
-
-	return &Command{
-		Action: "replace",
-		Path:   fmt.Sprintf("/network-instance[name=%s]/protocols/bgp", defaultNetInst),
-		Value:  value,
-	}, nil
+	return nil
 
 }
 
-func (m *Model) moveIntfsToInstance() ([]*Command, error) {
-	var cmds []*Command
+func (m *Model) buildDefaultPolicy(dev *api.Device) error {
+	dev.RoutingPolicy = &api.SrlNokiaRoutingPolicy_RoutingPolicy{}
 
-	var intfs []string
-	for _, link := range m.Uplinks {
-		intfs = append(intfs, fmt.Sprintf("%s.%d", link.Name, defaultSubIdx))
-	}
-	intfs = append(intfs, fmt.Sprintf("%s.%d", srlLoopback, defaultSubIdx))
-
-	for _, intf := range intfs {
-		path := fmt.Sprintf("/network-instance[name=%s]/interface[name=%s]", defaultNetInst, intf)
-		fmt.Println(path)
-		cmds = append(cmds, &Command{
-			Action: "update",
-			Path:   path,
-		})
-	}
-
-	return cmds, nil
-}
-
-func (m *Model) buildDefaultPolicy() (*Command, error) {
-	rp := api.SrlNokiaRoutingPolicy_RoutingPolicy{}
-	p, err := rp.NewPolicy(defaultPolicyName)
+	p, err := dev.RoutingPolicy.NewPolicy(defaultPolicyName)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// populating LocalPreference due to YGOT not supporting presence containers, see "ygot/issues/329"
@@ -209,31 +178,26 @@ func (m *Model) buildDefaultPolicy() (*Command, error) {
 		},
 	}
 
-	if err := rp.Validate(); err != nil {
-		return nil, err
-	}
-	value, err := ygot.ConstructIETFJSON(&rp, nil)
-	if err != nil {
-		return nil, err
+	if err := p.Validate(); err != nil {
+		return err
 	}
 
-	fmt.Printf("\n/routing-policy:\n")
-	printYgot(&rp)
-
-	return &Command{
-		Action: "replace",
-		Path:   "/routing-policy",
-		Value:  value,
-	}, nil
+	return nil
 }
 
-func buildSetRPC(cmds []*Command) RpcRequest {
+func buildSetRPC(config map[string]interface{}) RpcRequest {
 	return RpcRequest{
 		Version: "2.0",
 		ID:      0,
 		Method:  "set",
 		Params: Params{
-			Commands: cmds,
+			Commands: []*Command{
+				{
+					Action: "update",
+					Path:   "/",
+					Value:  config,
+				},
+			},
 		},
 	}
 }
@@ -266,33 +230,27 @@ func main() {
 		log.Fatal(err)
 	}
 
-	var cmds []*Command
+	device := &api.Device{}
 
-	l3Intfs, err := input.buildL3Interfaces()
+	if err := input.buildDefaultPolicy(device); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := input.buildL3Interfaces(device); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := input.buildNetworkInstance(device); err != nil {
+		log.Fatal(err)
+	}
+
+	printYgot(device)
+	v, err := ygot.ConstructIETFJSON(device, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
-	cmds = append(cmds, l3Intfs...)
 
-	policy, err := input.buildDefaultPolicy()
-	if err != nil {
-		log.Fatal(err)
-	}
-	cmds = append(cmds, policy)
-
-	insts, err := input.moveIntfsToInstance()
-	if err != nil {
-		log.Fatal(err)
-	}
-	cmds = append(cmds, insts...)
-
-	bgp, err := input.buildBGPConfig()
-	if err != nil {
-		log.Fatal(err)
-	}
-	cmds = append(cmds, bgp)
-
-	value, _ := json.Marshal(buildSetRPC(cmds))
+	value, _ := json.Marshal(buildSetRPC(v))
 
 	req, err := http.NewRequest("POST", hostname, bytes.NewBuffer(value))
 	if err != nil {
