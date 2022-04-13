@@ -127,8 +127,8 @@ func (m *Model) buildL3Interfaces() ([]*Command, error) {
 func (m *Model) buildBGPConfig() (*Command, error) {
 
 	bgp := &api.SrlNokiaNetworkInstance_NetworkInstance_Protocols_Bgp{
-		AutonomousSystem: uintToPtr(uint32(m.ASN)),
-		RouterId:         strToPtr(m.Loopback.IP),
+		AutonomousSystem: ygot.Uint32(uint32(m.ASN)),
+		RouterId:         ygot.String(m.Loopback.IP),
 		Ipv4Unicast: &api.SrlNokiaNetworkInstance_NetworkInstance_Protocols_Bgp_Ipv4Unicast{
 			AdminState: api.SrlNokiaBgp_AdminState_enable,
 		},
@@ -138,21 +138,30 @@ func (m *Model) buildBGPConfig() (*Command, error) {
 	if err != nil {
 		return nil, err
 	}
-	g.ExportPolicy = strToPtr(defaultPolicyName)
-	g.ImportPolicy = strToPtr(defaultPolicyName)
+	g.ExportPolicy = ygot.String(defaultPolicyName)
+	g.ImportPolicy = ygot.String(defaultPolicyName)
 
 	for _, peer := range m.Peers {
 		n, err := bgp.NewNeighbor(peer.IP)
 		if err != nil {
 			return nil, err
 		}
-		n.PeerAs = uintToPtr(uint32(peer.ASN))
-		n.PeerGroup = strToPtr(defaultBGPGroup)
+		n.PeerAs = ygot.Uint32(uint32(peer.ASN))
+		n.PeerGroup = ygot.String(defaultBGPGroup)
 	}
 
 	if err := bgp.Validate(); err != nil {
 		return nil, err
 	}
+
+	dev := api.DeviceRoot("eos")
+	gotPath, _, errs := ygot.ResolvePath(dev.NetworkInstance(defaultNetInst))
+	if errs != nil {
+		return nil, err
+	}
+
+	s, _ := ygot.PathToString(gotPath)
+	fmt.Printf("!!! Path %s\n", s)
 
 	value, err := ygot.ConstructIETFJSON(bgp, nil)
 	if err != nil {
@@ -203,7 +212,7 @@ func (m *Model) buildDefaultPolicy() (*Command, error) {
 		Accept: &api.SrlNokiaRoutingPolicy_RoutingPolicy_Policy_DefaultAction_Accept{
 			Bgp: &api.SrlNokiaRoutingPolicy_RoutingPolicy_Policy_DefaultAction_Accept_Bgp{
 				LocalPreference: &api.SrlNokiaRoutingPolicy_RoutingPolicy_Policy_DefaultAction_Accept_Bgp_LocalPreference{
-					Set: uintToPtr(uint32(100)),
+					Set: ygot.Uint32(uint32(100)),
 				},
 			},
 		},
@@ -331,6 +340,3 @@ func main() {
 
 	log.Println("Successfully configured the device")
 }
-
-func strToPtr(v string) *string  { return &v }
-func uintToPtr(v uint32) *uint32 { return &v }
