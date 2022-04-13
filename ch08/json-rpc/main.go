@@ -18,7 +18,7 @@ import (
 
 // docker exec -it clab-netgo-srl /opt/srlinux/bin/sr_cli
 
-//go:generate go run github.com/openconfig/ygot/generator -path=yang -output_file=pkg/srl/srl.go -package_name=srl yang/srl_nokia/models/network-instance/srl_nokia-bgp.yang yang/srl_nokia/models/routing-policy/srl_nokia-routing-policy.yang yang/srl_nokia/models/network-instance/srl_nokia-ip-route-tables.yang
+//go:generate go run github.com/openconfig/ygot/generator -path=yang -generate_fakeroot -fakeroot_name=device -output_file=pkg/srl/srl.go -package_name=srl yang/srl_nokia/models/network-instance/srl_nokia-bgp.yang yang/srl_nokia/models/routing-policy/srl_nokia-routing-policy.yang yang/srl_nokia/models/network-instance/srl_nokia-ip-route-tables.yang
 
 const (
 	srlLoopback    = "system0"
@@ -153,15 +153,6 @@ func (m *Model) buildBGPConfig() (*Command, error) {
 	if err := bgp.Validate(); err != nil {
 		return nil, err
 	}
-
-	dev := api.DeviceRoot("eos")
-	gotPath, _, errs := ygot.ResolvePath(dev.NetworkInstance(defaultNetInst))
-	if errs != nil {
-		return nil, err
-	}
-
-	s, _ := ygot.PathToString(gotPath)
-	fmt.Printf("!!! Path %s\n", s)
 
 	value, err := ygot.ConstructIETFJSON(bgp, nil)
 	if err != nil {
