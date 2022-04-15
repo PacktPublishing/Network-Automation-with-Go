@@ -18,10 +18,12 @@ ansible_password=admin
 ansible_connection=ansible.netcommon.network_cli
 ansible_network_os=arista.eos.eos
 ansible_become=yes
+gather_network_resources=system,user,interfaces,l2_interfaces,l3_interfaces,static_routes,bgp_global
 
 [cvx:vars]
 ansible_user=cumulus
 ansible_password=cumulus
+gather_subset=network
 
 [srl:vars]
 ansible_user=admin
@@ -29,3 +31,4 @@ ansible_password=admin
 ansible_connection=ansible.netcommon.network_cli
 ansible_network_os=community.network.sros
 ansible_become=yes
+gather_subset=network

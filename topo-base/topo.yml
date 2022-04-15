@@ -8,9 +8,9 @@ topology:
     ceos:
       kind: ceos
       image: ceos:4.26.4M
-      startup-config: topo-base/ceos-startup
+      startup-config: ceos-startup
       binds:
-      - topo-base/secure/ssl:/persist/secure/ssl
+      - secure/ssl:/persist/secure/ssl
     cvx:
       kind: cvx
       image: networkop/cx:5.0.0
