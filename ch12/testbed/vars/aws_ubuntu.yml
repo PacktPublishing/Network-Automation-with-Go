@@ -2,8 +2,8 @@
 # From: https://cloud-images.ubuntu.com/locator/ec2/
 # Ubuntu Cloud Image Finder: https://cloud-images.ubuntu.com/locator/
 # AMI are AWS region dependent
-# Release 20210825
-ubuntu_ami:
+# Release 20210825 (20.04)
+ubuntu_ami_20_04:
   us_east_1: ami-05dc324761386f3a9
   us_east_2: ami-04ea83ef6e494c1f2
   us_west_1: ami-04b5b5f4b328a8b16
@@ -20,6 +20,46 @@ ubuntu_ami:
   ap_south_1: ami-0c290bf29845f91ac
   ap_northeast_2: ami-01119d2bc7609e870
   ap_southeast_1: ami-0292c68e0ac530398
+
+# Release 20220309 (21.10)
+#ubuntu_ami:
+ubuntu_ami_21_10:
+  us_east_1: ami-026a2c62c35267e08
+  us_east_2: ami-0bc8b75555ca2d100
+  us_west_1: ami-082cf279c5d8a29f5
+  us_west_2: ami-0243d24a513554b2d
+  eu_north_1: ami-0bc8c72bfffbcf15f
+  eu_central_1: ami-0a95ac0a51f0ee2de
+  eu_south_1: ami-0aef382807c7f6157
+  eu_west_1: ami-05f9f61e6c95c7d1f
+  eu_west_2: ami-071d920dcc21eb5f0
+  ca_central_1: ami-0e2be10c652957b96
+  ap_northeast_1: ami-0edfcaec6a622178e
+  sa_east_1: ami-0ec20f6e651ae4497
+  ap_southeast_2: ami-0290c4bcf33608f7c
+  ap_south_1: ami-012e11423d642e3a1
+  ap_northeast_2: ami-04441338d409dd50f
+  ap_southeast_1: ami-0170faf5763064660
+
+# Release 20220420 (22.04)
+ubuntu_ami:
+#ubuntu_ami_22_04:
+  us_east_1: ami-09d56f8956ab235b3
+  us_east_2: ami-0aeb7c931a5a61206
+  us_west_1: ami-0dc5e9ff792ec08e3
+  us_west_2: ami-0ee8244746ec5d6d4
+  eu_north_1: ami-01ded35841bc93d7f
+  eu_central_1: ami-015c25ad8763b2f11
+  eu_south_1: ami-069aaf99166131204
+  eu_west_1: ami-00c90dbdc12232b58
+  eu_west_2: ami-0a244485e2e4ffd03
+  ca_central_1: ami-0fb99f22ad0184043
+  ap_northeast_1: ami-081ce1b631be2b337
+  sa_east_1: ami-0deebba34ef22f5a9
+  ap_southeast_2: ami-0b21dcff37a8cd8a4
+  ap_south_1: ami-0756a1c858554433e
+  ap_northeast_2: ami-063454de5fe8eba79
+  ap_southeast_1: ami-0170faf5763064660
 
 ec2_ami_id: "{{ ubuntu_ami[ec2_region | replace('-','_')] }}"
 ec2_name_tag: "{{ ec2_resource_prefix }}"

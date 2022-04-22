@@ -23,7 +23,7 @@ cleanup: 10-down lab-down
 
 ## Clone Arista's cEOS image after uploading it
 clone:
-	docker import cEOS64-lab-4.26.4M.tar ceos:4.26.4M
+	docker import cEOS64-lab-4.28.0F.tar ceos:4.28.0F
 
 env-build: generate-ssh-key check-aws-key check-aws-secret ## Build test enviroment on AWS. Make sure you export your API credentials
 	@docker run -it \
