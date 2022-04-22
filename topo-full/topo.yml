@@ -8,10 +8,8 @@ topology:
       startup-config: ./workdir/srl.json
     ceos:
       kind: ceos
-      image: ceos:4.26.4M
+      image: ceos:4.28.0F
       startup-config: ./workdir/ceos.startup
-      exec:
-      - iptables --policy INPUT ACCEPT
     cvx:
       kind: cvx
       image: networkop/cx:5.0.2-netq

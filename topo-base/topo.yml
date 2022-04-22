@@ -7,7 +7,7 @@ topology:
       image: ghcr.io/nokia/srlinux:21.6.4
     ceos:
       kind: ceos
-      image: ceos:4.26.4M
+      image: ceos:4.28.0F
       startup-config: ceos-startup
       binds:
       - secure/ssl:/persist/secure/ssl
