@@ -1,0 +1,1522 @@
+module openconfig-isis-flex-algo {
+  yang-version 1.1;
+  namespace "http://arista.com/yang/experimental/isis-flex-algo";
+  prefix flex-algo;
+
+  import openconfig-isis-types {
+    prefix oc-isis-types;
+  }
+  import openconfig-network-instance {
+    prefix oc-netinst;
+  }
+  import openconfig-isis-lsdb-types {
+    prefix oc-isis-lsdb-types;
+  }
+  import openconfig-inet-types {
+    prefix inet;
+  }
+  import openconfig-types {
+    prefix oc-types;
+  }
+  import openconfig-extensions {
+    prefix oc-ext;
+  }
+  import openconfig-segment-routing-types {
+    prefix oc-srt;
+  }
+  oc-ext:openconfig-version "0.6.1";
+
+  organization
+    "Arista Networks <http://arista.com/>";
+  contact
+    "Arista Networks, Inc.
+     Product Support";
+  description
+    "This YANG module defines the essential types for the management
+     of Flex-Algorithm for IGP. It also defines the module for
+     configuration and management of IGP Flex-Algorithms.
+
+     The design of this module deserves some explanation, as it
+     follows the Arista configuration model, which may not parallel
+     other implementations.
+
+     We do not consider FlexAlgo to be tightly coupled to any
+     protocol: we want to allow FlexAlgo to be configured in the same
+     way across both IS-IS and OSPF. We also consider FlexAlgo to be
+     independent of MPLS. There are already proposals that suggest
+     using FlexAlgo directly with IP without MPLS.
+
+     To help instantiate this, we define Flexible Algorithm
+     Definitions (FAD) to be outside of any protocol and MPLS. For
+     operator convenience, we also assign names to each FAD and refer
+     to FADs by name. FAD configuration is independent of the
+     advertisement of a FAD, which is part of the router capability
+     TLV.
+
+     Within IS-IS itself, we implement FlexAlgo with an SR data
+     plane, so we enable specific algorithms within the SR
+     configuration. Advertisement of a FAD is independent of
+     participation in the FAD.
+
+     Copyright (c) 2021 Arista Networks, Inc. All rights reserved.
+
+     This module is derived from
+     draft-rasool-lsr-flex-algo-yang-01 and extensively modified.
+
+     Copyright (c) 2019 IETF Trust and the persons identified as
+     authors of the code.  All rights reserved.
+
+     Redistribution and use in source and binary forms, with or
+     without modification, is permitted pursuant to, and subject
+     to the license terms contained in, the Simplified BSD License
+     set forth in Section 4.c of the IETF Trust's Legal Provisions
+     Relating to IETF Documents
+     (http://trustee.ietf.org/license-info).";
+
+  revision 2021-09-30 {
+    description
+      "Change the type of the Flexible Algorithm name field in IS-IS binding";
+    reference
+      "0.7.0";
+  }
+  revision 2021-09-27 {
+    description
+      "Add missing references and pyang auto formatting";
+    reference
+      "0.6.1";
+  }
+  revision 2021-07-20 {
+    description
+      "Add interface shared risk link group ID state";
+    reference
+      "0.6.0";
+  }
+  revision 2021-07-19 {
+    description
+      "Change field names and add default values";
+    reference
+      "0.5.0";
+  }
+  revision 2021-07-16 {
+    description
+      "Add numeric legacy interface administrative groups";
+    reference
+      "0.4.6";
+  }
+  revision 2021-07-16 {
+    description
+      "Added interface latency";
+    reference
+      "0.4.5";
+  }
+  revision 2021-06-30 {
+    description
+      "Minor bug fixes";
+    reference
+      "0.4.4";
+  }
+  revision 2021-06-14 {
+    description
+      "Add interface shared risk link group ID configuration";
+  }
+  revision 2021-05-24 {
+    description
+      "Add Flexible Algorithm prefix segment configuration";
+  }
+  revision 2021-03-30 {
+    description
+      "Initial Arista revision.";
+    reference
+      "0.4.3";
+  }
+
+  /* Types definitions */
+
+  typedef flex-algo-metric-type {
+    type enumeration {
+      enum IGP {
+        value 0;
+        description
+          "IGP metric to be used during the calculation.";
+      }
+      enum MIN_DELAY {
+        value 1;
+        description
+          "Min Unidirectional Link Delay as defined in [RFC7810] to
+           be used during the calculation.";
+      }
+      enum TE_METRIC {
+        value 2;
+        description
+          "TE default metric as defined in [RFC5305] to be used
+           during the calculation.";
+      }
+    }
+    description
+      "Type of metric to be used during a Flex Algo path
+       computation";
+  }
+
+  typedef flex-algo-id {
+    type uint8 {
+      range "128..255";
+    }
+    description
+      "Flex-Algorithm identifies which algorithm should be used during
+       path computation";
+  }
+
+  typedef flex-algo-calc-type {
+    type uint8 {
+      range "0..127";
+    }
+    default "0";
+    description
+      "Calculation type value ranges from 0 to 127 both inclusive
+       from the IGP Algorithm Types registry defined under
+       Interior Gateway Protocol (IGP)
+       Parameters IANA registries.
+       If the required calculation type is Shortest Path First,
+       the value 0 SHOULD appear in this field.";
+  }
+
+  typedef bit-position {
+    type uint8 {
+      range "0..31";
+    }
+    description
+      "A bit position in a 32 bit field, used for specifying
+       legacy administrative groups.";
+  }
+
+  // TLV definitions
+
+  identity ROUTER_CAPABILITY_FLEXIBLE_ALGORITHM_DEFINITION {
+    base oc-isis-lsdb-types:ROUTER_CAPABILITY_SUBTLVS_TYPE;
+    description
+      "sub-TLV 26. Flexible Algorithm Definition";
+    reference
+      "draft-ietf-lsr-flex-algo";
+  }
+
+  // The FAD subTLV has subsubTLVs.
+
+  identity ISIS_SUBSUBTLV_TYPE {
+    description
+      "Base identity for an IS-IS subsubTLV type.";
+  }
+
+  identity FLEXIBLE_ALGORITHM_DEFINITION_SUBSUBTLVS_TYPE {
+    base ISIS_SUBSUBTLV_TYPE;
+    description
+      "Base identity for subsubTLVs of the Router Capability TLV
+       Flexible Algorithm Definition subTLV.";
+  }
+
+  identity FLEXIBLE_ALGORITHM_EXCLUDE_ADMIN_GROUP {
+    base FLEXIBLE_ALGORITHM_DEFINITION_SUBSUBTLVS_TYPE;
+    description
+      "subsubTLV 1. Link Admin Groups that MUST NOT appear in the
+       path.";
+    reference
+      "draft-ietf-lsr-flex-algo";
+  }
+
+  identity FLEXIBLE_ALGORITHM_INCLUDE_ANY_ADMIN_GROUP {
+    base FLEXIBLE_ALGORITHM_DEFINITION_SUBSUBTLVS_TYPE;
+    description
+      "subsubTLV 2. Link Admin Groups that MAY appear in the
+       path.";
+    reference
+      "draft-ietf-lsr-flex-algo";
+  }
+
+  identity FLEXIBLE_ALGORITHM_INCLUDE_ALL_ADMIN_GROUP {
+    base FLEXIBLE_ALGORITHM_DEFINITION_SUBSUBTLVS_TYPE;
+    description
+      "subsubTLV 3. Link Admin Groups that MUST appear in the
+       path.";
+    reference
+      "draft-ietf-lsr-flex-algo";
+  }
+
+  identity FLEXIBLE_ALGORITHM_FLAGS {
+    base FLEXIBLE_ALGORITHM_DEFINITION_SUBSUBTLVS_TYPE;
+    description
+      "subsubTLV 4. Flags to be used with the FAD.";
+    reference
+      "draft-ietf-lsr-flex-algo";
+  }
+
+  identity FLEXIBLE_ALGORITHM_EXCLUDE_SRLG {
+    base FLEXIBLE_ALGORITHM_DEFINITION_SUBSUBTLVS_TYPE;
+    description
+      "subsubTLV 5. Shared Risk Link Groups that MUST NOT appear in
+       the Flex Algo path.";
+    reference
+      "draft-ietf-lsr-flex-algo";
+  }
+
+  // The IS-IS Flexible Algorithm Prefix Metric subTLV is not defined
+  // as it's not part of Arista's implementation.
+  /* Groupings */
+  // Configuration groupings
+
+  grouping algorithm-attributes {
+    description
+      "All of the possible attributes for an flexible algorithm
+       definition";
+    leaf name {
+      type string;
+      description
+        "Flexible Algorithm name";
+    }
+    leaf flex-algo-id {
+      type flex-algo-id;
+      mandatory true;
+      description
+        "Flex Algorithm Identifier";
+    }
+    leaf metric-type {
+      type flex-algo-metric-type;
+      default "IGP";
+      description
+        "Indicates which is the corresponding metric type for
+         this algorithm";
+    }
+    leaf calc-type {
+      type flex-algo-calc-type;
+      description
+        "Indicates the calculation type, if advertised";
+    }
+    leaf priority {
+      type uint8;
+      default "237";
+      description
+        "Indicates the priority for this algorithm";
+    }
+    // Administrative group affinities for the FAD.
+    // Note that Arista's implementation does not provide naming for
+    // bit positions. Extended administrative groups are also not
+    // supported. It would be better to have this be a leafref to
+    //   path "/oc-netinst:network-instances/"
+    //     + "oc-netinst:network-instance/"
+    //     + "oc-netinst:mpls/oc-netinst:te-global-attributes/"
+    //     + "oc-netinst:mpls-admin-groups/oc-netinst:admin-group/"
+    //     + "oc-netinst:config/oc-netinst:bit-position";
+    // but we can't have a reference to part of the tree that we
+    // don't support.
+    leaf-list exclude-group {
+      type bit-position;
+      description
+        "List of admin-groups to exclude in path calculation.";
+    }
+    leaf-list include-all-group {
+      type bit-position;
+      description
+        "list of admin-groups, all of which must be included";
+    }
+    leaf-list include-any-group {
+      type bit-position;
+      description
+        "list of admin-groups, one of which must be included";
+    }
+    // Arista's implementation allows a FAD to reference a list of
+    // SRLGs by name or value.
+    leaf-list srlg-names {
+      type leafref {
+        path "/oc-netinst:network-instances/"
+           + "oc-netinst:network-instance/"
+           + "oc-netinst:mpls/oc-netinst:te-global-attributes/"
+           + "oc-netinst:srlgs/oc-netinst:srlg/"
+           + "oc-netinst:config/oc-netinst:name";
+      }
+      description
+        "list of references to named SRLGs to be excluded";
+    }
+    leaf-list srlg-values {
+      type uint32;
+      description
+        "list of references to SRLG values to be excluded";
+    }
+    // Arista's implementation places FlexAlgo results into the
+    // Colored Tunnel RIB for subsequent use by next hop
+    // resolution. Selection of the color is done as part of the
+    // FAD.
+    leaf color {
+      type uint32;
+      description
+        "Index into the Colored Tunnel RIB for results";
+    }
+  }
+
+  grouping fad-definition-top {
+    description
+      "Top level grouping for Flexible Algorithm Definitions";
+    container algorithms {
+      description
+        "Flexible Algorithms and their definitions";
+      list algorithm {
+        key "name";
+        description
+          "List of Flexible Algorithms";
+        leaf name {
+          type leafref {
+            path "../config/name";
+          }
+          description
+            "Name for a Flexible Algorithm";
+        }
+        container config {
+          description
+            "Attributes for a Flexible Algorithm";
+          uses algorithm-attributes;
+        }
+        container state {
+          config false;
+          description
+            "Attributes for a Flexible Algorithm";
+          uses algorithm-attributes;
+        }
+      }
+    }
+  }
+
+  grouping fad-binding-attributes {
+    description
+      "Attributes for FAD bindings";
+    leaf flex-algo-name {
+      type string;
+      description
+        "Name of a Flexible Algorithm";
+    }
+    leaf isis-level {
+      type oc-isis-types:level-type;
+      default "LEVEL_1_2";
+      description
+        "IS-IS Level associated with this Flex Algorithm";
+    }
+    leaf advertised {
+      type boolean;
+      default "false";
+      description
+        "Is the algorithm advertised?";
+    }
+  }
+
+  // TLV groupings
+
+  grouping isis-lsdb-subsubtlv-type-state {
+    description
+      "Per-subsubTLV type operational state parameters for ISIS.";
+    leaf type {
+      type identityref {
+        base ISIS_SUBSUBTLV_TYPE;
+      }
+      description
+        "The type of subsubTLV being described. The type of subsubTLV
+         is expressed as a canonical name.";
+    }
+  }
+
+  grouping fad-subtlv {
+    description
+      "Flexible Algorithm Definition subTLV";
+    container flexible-algorithm-definition {
+      description
+        "Flexible Algorithms Definition subTLV, a member of the
+         Router Capability TLV";
+      reference
+        "draft-ietf-lsr-flex-algo";
+      container state {
+        description
+          "State parameters of the FlexAlgo Definition subTLV";
+        leaf algo-id {
+          type flex-algo-id;
+          description
+            "Identifier for the algorithm";
+        }
+        leaf metric-type {
+          type flex-algo-metric-type;
+          description
+            "The metric to be used during path computation for this
+             FAD";
+        }
+        leaf calc-type {
+          type flex-algo-calc-type;
+          description
+            "The computation to be performed.";
+        }
+        leaf priority {
+          type uint8;
+          description
+            "Priority of this FAD advertisement";
+        }
+      }
+      container subsubtlvs {
+        description
+          "SubsubTLVs of the FlexAlgo Definition subTLV of the Router
+           Capability TLV";
+        list subsubtlv {
+          key "type";
+          description
+            "List of subsubTLV types for the FlexAlgo Definition
+             subTLV.";
+          leaf type {
+            type leafref {
+              path "../state/type";
+            }
+            description
+              "Reference to the subsubTLV type";
+          }
+          container state {
+            description
+              "State parameters of FlexAlgo Definition subTLVs";
+            uses isis-lsdb-subsubtlv-type-state;
+          }
+          container exclude-admin-group {
+            description
+              "subsubTLV 1. Administrative groups that MUST NOT be
+               part of the path.";
+            container state {
+              leaf-list groups {
+                type uint32;
+                description
+                  "A bitmask (in 32-bit chunks) of the administrative
+                   groups that MUST NOT appear in the resulting
+                   path.";
+              }
+              description
+                "The list of groups to be excluded.";
+            }
+          }
+          container include-any-admin-group {
+            description
+              "subsubTLV 2. Administrative groups that MAY be
+               part of the path.";
+            container state {
+              leaf-list groups {
+                type uint32;
+                description
+                  "A bitmask (in 32-bit chunks) of the administrative
+                   groups that MAY appear in the resulting path.";
+              }
+              description
+                "The list of groups that MAY be included.";
+            }
+          }
+          container include-all-admin-group {
+            description
+              "subsubTLV 3. Administrative groups that MUST be
+               part of the path.";
+            container state {
+              leaf-list groups {
+                type uint32;
+                description
+                  "A bitmask (in 32-bit chunks) of the administrative
+                   groups that MUST appear in the resulting path.";
+              }
+              description
+                "The list of groups that MUST be included.";
+            }
+          }
+          container flags {
+            description
+              "subsubTLV 4. Flag bits to be used as part of a FAD";
+            container state {
+              leaf m-flag {
+                type boolean;
+                description
+                  "When set, the FlexAlgo specific prefix metric
+                   MUST be used, if advertised.";
+              }
+              description
+                "Flags in the subTLV";
+            }
+          }
+          container exclude-srlg {
+            description
+              "subsubTLV 5. Shared Risk Link Groups that MUST NOT be
+               part of the path.";
+            container state {
+              leaf-list groups {
+                type uint32;
+                description
+                  "A list of the Shared Risk Link Groups that MUST NOT
+                   appear in the resulting path.";
+              }
+              description
+                "The list of Shared Risk Link Groups that MUST NOT
+                 appear in the resulting path.";
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Application Specific Link Attributes (ASLA) sub-TLV
+  // While this is not strictly part of FlexAlgo, all attributes that
+  // FlexAlgo is supposed to use are supposed to advertised under
+  // the ASLA sub-TLV.
+
+  grouping asla-sabm-length-and-flag {
+    leaf l-flag {
+      type boolean;
+      description
+        "Set to indicate that legacy (i.e., non-ASLA)
+         advertisements of attributes should be used instead.";
+    }
+    leaf sabm-length {
+      type uint8 {
+        range "0..127";
+      }
+      description
+        "Length of the Standard Application Bit Mask (SABM) field, in
+         octets";
+    }
+    description
+      "The length of the SABM field (in octets) and one flag";
+  }
+
+  grouping asla-udabm-length-and-flag {
+    leaf r-flag {
+      type boolean;
+      description
+        "Reserved bit";
+    }
+    leaf udabm-length {
+      type uint8 {
+        range "0..127";
+      }
+      description
+        "Length of the User Defined Application Bit Mask, in octets";
+    }
+    description
+      "Length of the UDABM field plus a reserved bit";
+  }
+
+  grouping asla-sabm {
+    leaf r-bit {
+      type boolean;
+      description
+        "Set to specify RSVP-TE";
+    }
+    leaf s-bit {
+      type boolean;
+      description
+        "Set to specify Segment Routing Policy";
+    }
+    leaf f-bit {
+      type boolean;
+      description
+        "Set to specify Loop Free Alternate";
+    }
+    leaf x-bit {
+      type boolean;
+      description
+        "Set to specify Flexible Algorithm";
+      reference
+        "draft-ietf-lsr-flex-algo";
+    }
+    description
+      "Standard Application Bit Mask";
+  }
+
+  grouping link-attribute-subtlvs {
+    description
+      "This list of subTLVs here is copied from
+       is-reachability-neighbor-state. It would be
+       better if there was just a grouping that we could
+       invoke.";
+    container admin-group {
+      when "../state/type = "
+         + "'oc-isis-lsdb-types:IS_REACHABILITY_ADMIN_GROUP'" {
+        description
+          "Only include the administrative group container when
+           the sub-TLV is type 3";
+      }
+      description
+        "This container defines sub-TLV 3.";
+      container state {
+        description
+          "State parameters of sub-TLV 3.";
+        leaf-list admin-group {
+          type uint32;
+          description
+            "The administrative group sub-TLV contains a 4-octet
+             bit mask assigned by the network administrator.
+             Each set bit corresponds to one administrative
+             group assigned to the interface. By convention, the
+             least significant bit is referred to as group 0,
+             and the most significant bit is referred to as
+             group 31.";
+          reference
+            "RFC5305: IS-IS Extensions for Traffic
+             Engineering.  sub-TLV 3: TLV 22,23,141,222, 223.";
+        }
+      }
+    }
+    container link-id {
+      when "../state/type = "
+         + "'oc-isis-lsdb-types:IS_REACHABILITY_LINK_ID'" {
+        description
+          "Only include the link identifier container when the
+           sub-TLV is type 4";
+      }
+      description
+        "This container defines sub-TLV 4.";
+      container state {
+        description
+          "State parameters of sub-TLV 4.";
+        leaf local {
+          type uint32;
+          description
+            "The value field of this sub-TLV contains 4 octets
+             of Link Local Identifier followed by 4 octets of
+             Link Remote Identifier.";
+          reference
+            "RFC5307: IS-IS Extensions in Support of Generalized
+             Multi-Protocol Label Switching (GMPLS). sub-TLV 3:
+             TLV 22,23,141,222, 223.";
+        }
+        leaf remote {
+          type uint32;
+          description
+            "If the Link Remote Identifier is unknown, it is set
+             to 0.";
+          reference
+            "RFC5307: IS-IS Extensions in Support of Generalized
+             Multi-Protocol Label Switching (GMPLS). sub-TLV 3:
+             TLV 22,23,141,222, 223.";
+        }
+      }
+    }
+    container ipv4-interface-address {
+      when "../state/type = 'oc-isis-lsdb-types:"
+         + "IS_REACHABILITY_IPV4_INTERFACE_ADDRESS'" {
+        description
+          "Only include the IPv4 interface address group
+           container when the sub-TLV is type 6";
+      }
+      description
+        "This container defines sub-TLV 6.";
+      container state {
+        description
+          "State parameters of sub-TLV 6.";
+        leaf-list address {
+          type inet:ipv4-address;
+          description
+            "A 4-octet IPv4 address for the interface described
+             by the (main) TLV. This sub-TLV can occur multiple
+             times.";
+          reference
+            "RFC5305: IS-IS Extensions for Traffic Engineering.
+             sub-TLV 6: TLV 22,23,41,222,223.";
+        }
+      }
+    }
+    container ipv4-neighbor-address {
+      when "../state/type = 'oc-isis-lsdb-types:"
+         + "IS_REACHABILITY_IPV4_NEIGHBOR_ADDRESS'" {
+        description
+          "Only include the IPv4 neighbor address container when
+           the sub-TLV is type 8.";
+      }
+      description
+        "This container defines sub-TLV 8.";
+      container state {
+        description
+          "State parameters of sub-TLV 8.";
+        leaf-list address {
+          type inet:ipv4-address;
+          description
+            "A single IPv4 address for a neighboring router on
+             this link. This sub-TLV can occur multiple times.";
+          reference
+            "RFC5305: IS-IS Extensions for Traffic Engineering.
+             sub-TLV 8: TLV 22,23, 141,222,223.";
+        }
+      }
+    }
+    container max-link-bandwidth {
+      when "../state/type = 'oc-isis-lsdb-types:"
+         + "IS_REACHABILITY_MAX_LINK_BANDWIDTH'" {
+        description
+          "Only include the maximum link bandwidth container
+           when the sub-TLV is type 9.";
+      }
+      description
+        "This container defines sub-TLV 9.";
+      container state {
+        description
+          "State parameters of sub-TLV 9.";
+        leaf bandwidth {
+          type oc-types:ieeefloat32;
+          units "bytes per second";
+          description
+            "The maximum bandwidth that can be used on this link
+             in this direction (from the system originating the
+             LSP to its neighbors).  It is encoded in 32 bits in
+             IEEE floating point format.  The units are bytes
+             (not bits!) per second.";
+          reference
+            "RFC5305: IS-IS Extensions for Traffic Engineering.
+             sub-TLV 9: TLV 22,23,141,222,223.";
+        }
+      }
+    }
+    container max-reservable-link-bandwidth {
+      when "../state/type = 'oc-isis-lsdb-types:"
+         + "IS_REACHABILITY_MAX_RESERVABLE_BANDWIDTH'" {
+        description
+          "Only include the maximum reservable link bandwidth
+           container when the sub-TLV type is 10.";
+      }
+      description
+        "This container defines sub-TLV 10.";
+      container state {
+        description
+          "State parameters of sub-TLV 10.";
+        leaf bandwidth {
+          type oc-types:ieeefloat32;
+          units "bytes per second";
+          description
+            "The maximum amount of bandwidth that can be
+             reserved in this direction on this link.  Note that
+             for oversubscription purposes, this can be greater
+             than the bandwidth of the link. It is encoded in 32
+             bits in IEEE floating point format.  The units are
+             bytes (not bits!) per second.";
+          reference
+            "RFC5305: IS-IS Extensions for Traffic Engineering.
+             Sub-TLV 10: TLV 22,23,141,222,223.";
+        }
+      }
+    }
+    container unreserved-bandwidth {
+      when "../state/type = 'oc-isis-lsdb-types:"
+         + "IS_REACHABILITY_UNRESERVED_BANDWIDTH'" {
+        description
+          "Only include the unreserved bandwidth container when
+           the sub-TLV type is 11.";
+      }
+      description
+        "This container defines unreserved-bandwidth. The units
+         are bytes per second.";
+      reference
+        "RFC5305: IS-IS Extensions for Traffic Engineering. sub-
+         TLV 11: TLV 22,23,141,222,223";
+      list setup-priority {
+        key "priority";
+        leaf priority {
+          type leafref {
+            path "../state/priority";
+          }
+          description
+            "Reference to the setup priority to which the
+             unreserved bandwidth corresponds.";
+        }
+        description
+          "Setup priority (0 through 7) for unreserved
+           bandwidth.";
+        container state {
+          description
+            "State parameters of IS Extended Reachability
+             sub-TLV 11.";
+          leaf priority {
+            type uint8 {
+              range "0..7";
+            }
+            description
+              "Setup priority level of 0 through 7 to be used by
+               Unreserved Bandwidth sub-TLV 11.";
+          }
+          leaf bandwidth {
+            type oc-types:ieeefloat32;
+            units "bytes per second";
+            description
+              "The amount of bandwidth reservable in this
+               direction on this link. Note that for
+               oversubscription purposes, this can be greater
+               than the bandwidth of the link. It contains eight
+               32-bit IEEE floating point numbers(one for each
+               priority).  The units are bytes (not bits!) per
+               second. The values correspond to the bandwidth
+               that can be reserved with a setup priority of 0
+               through 7, arranged in increasing order with
+               priority 0 occurring at the start of the sub-TLV,
+               and priority 7 at the end of the sub-TLV.";
+          }
+        }
+      }
+    }
+    container ipv6-interface-address {
+      when "../state/type = 'oc-isis-lsdb-types:"
+         + "IS_REACHABILITY_IPV6_INTERFACE_ADDRESS'" {
+        description
+          "Only include the IPv6 interface address when the
+           sub-TLV type is 12.";
+      }
+      description
+        "This container defines sub-TLV 12.";
+      container state {
+        description
+          "State parameters of sub-TLV 12.";
+        leaf-list address {
+          type inet:ipv6-address;
+          description
+            "Contains a 16-octet IPv6 address for the interface
+             described by the containing  Extended IS
+             Reachability TLV. This sub-TLV can occur multiple
+             times.";
+          reference
+            "RFC6119: IPv6 Traffic Engineering in IS-IS. sub-TLV
+             12: TLV 22,23,141,222,223.";
+        }
+      }
+    }
+    container ipv6-neighbor-address {
+      when "../state/type = 'oc-isis-lsdb-types:"
+         + "IS_REACHABILITY_IPV6_NEIGHBOR_ADDRESS'" {
+        description
+          "Only include the IPv6 neighbor address when the
+           sub-TLV type is 13.";
+      }
+      description
+        "This container defines sub-TLV 13.";
+      container state {
+        description
+          "State parameters of sub-TLV 13.";
+        leaf-list address {
+          type inet:ipv6-address;
+          description
+            "Contains a 16-octet IPv6 address for a neighboring
+             router on the link described by the (main)
+             TLV. This sub-TLV can occur multiple times.";
+          reference
+            "RFC6119: IPv6 Traffic Engineering in IS-IS. sub-TLV
+             13: ISIS TLV 22,23,141,222,223.";
+        }
+      }
+    }
+    container extended-admin-group {
+      when "../state/type = 'oc-isis-lsdb-types:"
+         + "IS_REACHABILITY_EXTENDED_ADMIN_GROUP'" {
+        description
+          "Only include the extended admin group when the
+           sub-TLV type is 14.";
+      }
+      description
+        "This container defines sub-TLV 14.";
+      container state {
+        description
+          "State parameters of sub-TLV 14.";
+        leaf-list extended-admin-group {
+          type uint32;
+          description
+            "The extended-admin-group sub-TLV is used in
+             addition to the Administrative Groups when it is
+             desirable to make more than 32 colors available for
+             advertisement in a network.";
+          reference
+            "RFC7308: Extended Administrative Groups in MPLS
+             Traffic Engineering (MPLS-TE). sub-TLV 14: TLV
+             22,23,141,222,223.";
+        }
+      }
+    }
+    container te-default-metric {
+      when "../state/type = 'oc-isis-lsdb-types:"
+         + "IS_REACHABILITY_TE_DEFAULT_METRIC'" {
+        description
+          "Only include the default traffic engineering metric
+           container when the sub-TLV type is 18.";
+      }
+      description
+        "This container defines sub-TLV 18.";
+      container state {
+        description
+          "State parameters of sub-TLV 18.";
+        leaf metric {
+          type uint32;
+          description
+            "This metric is administratively assigned and can be
+             used to present a differently weighted topology to
+             traffic engineering SPF calculations. To preclude
+             overflow within a traffic engineering SPF
+             implementation, all metrics greater than or equal
+             to MAX_PATH_METRIC SHALL be considered to have a
+             metric of MAX_PATH_METRIC.";
+          reference
+            "RFC5305: IS-IS Extensions for Traffic Engineering.
+             sub-TLV 18: TLV 22,23,141,222,223.";
+        }
+      }
+    }
+    container link-attributes {
+      when "../state/type = "
+         + "'oc-isis-lsdb-types:IS_REACHABILITY_LINK_ATTRIBUTES'" {
+        description
+          "Only include the link attributes container when the
+           sub-TLV is type 19.";
+      }
+      description
+        "This container defines link-attributes.";
+      container state {
+        description
+          "State parameters of IS Extended Reachability sub-TLV
+           19.";
+        leaf-list local-protection {
+          type enumeration {
+            enum LOCAL_PROTECTION {
+              description
+                "If set, local protection is available for the
+                 link.";
+            }
+            enum LINK_EXCLUDED {
+              description
+                "If set, the link is excluded from local
+                 protection.";
+            }
+          }
+          description
+            "Link local-protection attributes.";
+          reference
+            "RFC5029: Definition of an IS-IS Link Attribute Sub-
+             TLV. TLV 22, sub-TLV 19.";
+        }
+      }
+    }
+    container link-protection-type {
+      when "../state/type = 'oc-isis-lsdb-types:"
+         + "IS_REACHABILITY_LINK_PROTECTION_TYPE'" {
+        description
+          "Only include the link protection type container when
+           the sub-TLV type 20.";
+      }
+      description
+        "ISIS LSDB parameters relating to the type of link
+         protection offered.";
+      container state {
+        description
+          "State parameters of sub-TLV 20.";
+        leaf-list type {
+          type enumeration {
+            enum EXTRA_TRAFFIC {
+              description
+                "If set the link has extra traffic
+                 protection. If the link is of type Extra
+                 Traffic, it means that the link is protecting
+                 another link or links. The LSPs on a link of
+                 this type will be lost if any of the links it
+                 is protecting fail.";
+            }
+            enum UNPROTECTED {
+              description
+                "If set, the link is unprotected. If the link is
+                 of type Unprotected, it means that there is no
+                 other link protecting this link.  The LSPs on a
+                 link of this type will be lost if the link
+                 fails.";
+            }
+            enum SHARED {
+              description
+                "If set, the link has shared protection. If the
+                 link is of type Shared, it means that there are
+                 one or more disjoint links of type Extra
+                 Traffic that are protecting this link.  These
+                 Extra Traffic links are shared between one or
+                 more links of type Shared.";
+            }
+            enum ONE_ONE {
+              description
+                "If set, the link has dedicated 1:1
+                 protection. If the link is of type Dedicated
+                 1:1, it means that there is one dedicated
+                 disjoint link of type Extra Traffic that is
+                 protecting this link.";
+            }
+            enum PLUS_ONE {
+              description
+                "If set, the link has dedicated 1+1
+                 protection. If the link is of type Dedicated
+                 1+1, it means that a dedicated disjoint link is
+                 protecting this link.  However, the protecting
+                 link is not advertised in the link state
+                 database and is therefore not available for the
+                 routing of LSPs.";
+            }
+            enum ENHANCED {
+              description
+                "If set the link has enhanced protection.  If
+                 the link is of type Enhanced, it means that a
+                 protection scheme that is more reliable than
+                 Dedicated 1+1, e.g., 4 fiber BLSR/MS-SPRING, is
+                 being used to protect this link.";
+            }
+          }
+          description
+            "Link protection capabilities.";
+          reference
+            "RFC5307: IS-IS Extensions in Support of Generalized
+             Multi-Protocol  Label Switching (GMPLS). sub-TLV
+             20: TLV 22,23,141,222,223.";
+        }
+      }
+    }
+    container bandwidth-constraints {
+      when "../state/type = 'oc-isis-lsdb-types:"
+         + "IS_REACHABILITY_BANDWIDTH_CONSTRAINTS'" {
+        description
+          "Only include the bandwidth constraints container when
+           the sub-TLV is type 22.";
+      }
+      description
+        "This container defines bandwidth-constraints. For
+         DS-TE, the existing Maximum Reservable link bandwidth
+         parameter is retained, but its semantics is generalized
+         and interpreted as the aggregate bandwidth constraint
+         across all Class-Types";
+      reference
+        "RFC4124: Protocol Extensions for Support of Diffserv-
+         aware MPLS Traffic Engineering. sub-TLV 22: TLV 22, 23,
+         141, 222,223";
+      list bandwidth-constraint {
+        key "model-id";
+        description
+          "List of the Bandwidth Constraints sub-TLV instances
+           present in the TLV.";
+        leaf model-id {
+          type leafref {
+            path "../state/model-id";
+          }
+          description
+            "Reference to the model ID associated with the
+             instance of the Bandwidth Constraints sub-TLV.";
+        }
+        container state {
+          description
+            "State parameters of IS Extended Reachability
+             sub-TLV 22.";
+          leaf model-id {
+            type uint8;
+            description
+              "Identifier for the Bandwidth Constraints  Model
+               currently in use by the LSR initiating the IGP
+               advertisement.";
+          }
+        }
+        container constraints {
+          description
+            "Constraints contained within the Bandwidth
+             Constraints sub-TLV";
+          list constraint {
+            key "constraint-id";
+            description
+              "List of the constraints within the Bandwidth
+               Constraints sub-TLV. The BC0 level is indicated
+               by the constraint-id leaf being set to 0, with
+               BCN being indicated by constraint-id N.";
+            leaf constraint-id {
+              type leafref {
+                path "../state/constraint-id";
+              }
+              description
+                "Reference to the unique ID for the BCN level.";
+            }
+            container state {
+              description
+                "Operational state parameters of the BCN level";
+              leaf constraint-id {
+                type uint32;
+                description
+                  "Unique reference for the bandwidth constraint
+                   level. BC0 is indicated by this leaf being
+                   set to zero, with BCN represented by this
+                   leaf being set to N.";
+              }
+              leaf bandwidth {
+                type oc-types:ieeefloat32;
+                units "bytes per second";
+                description
+                  "The bandwidth constraint, expressed as a
+                   32-bit IEEE floating point number expressed
+                   in bytes per second.";
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  grouping asla-subtlv {
+    description
+      "The Application Specific Link Attributes subTLV. A subTLV for
+       TLVs 22, 23, 25, 141, 222, and 223.";
+    reference
+      "draft-ietf-isis-te-app";
+    container application-specific-link-attributes {
+      description
+        "The Application Specific Link Attributes subTLV.";
+      container state {
+        description
+          "State parameters of the ASLA sub-TLV";
+        uses asla-sabm-length-and-flag;
+        uses asla-udabm-length-and-flag;
+        uses asla-sabm;
+        leaf-list udabm {
+          type binary;
+          description
+            "The User Defined Application Bit Mask. Each bit
+             represents a user application that should use the
+             contents of this subTLV.";
+        }
+      }
+      container subsubtlvs {
+        description
+          "SubsubTLVs of the ASLA subTLV";
+        list subsubtlv {
+          key "type";
+          description
+            "List of subsubTLV types for the ASLA subTLV";
+          leaf type {
+            type leafref {
+              path "../state/type";
+            }
+            description
+              "Reference to the subsubTLV type";
+          }
+          container state {
+            description
+              "State parameters of ASLA subTLVs";
+            uses isis-lsdb-subsubtlv-type-state;
+          }
+          uses link-attribute-subtlvs;
+        }
+      }
+    }
+  }
+
+  grouping sr-igp-interface-flex-algo-prefix-sid-config {
+    description
+      "Configuration parameters relating to an IGP prefix SID advertisement for
+       Flexible Algorithms";
+    leaf prefix {
+      type inet:ip-prefix;
+      description
+        "The IP prefix for which the IGP prefix SID should be advertised. The
+         value specified is a local prefix on the interface which is advertised
+         into the IGP.";
+    }
+    leaf flex-algo-name {
+      type leafref {
+        path "/oc-netinst:network-instances/oc-netinst:network-instance/"
+           + "flex-algo/algorithms/algorithm/name";
+      }
+      description
+        "Name of the Flexible Algorithm for the prefix segment.";
+    }
+    leaf sid-id {
+      type oc-srt:sr-sid-type;
+      description
+        "The Segment Identifier to be used when advertising the IGP Prefix SID for
+         the Flexible Algorithm.";
+    }
+  }
+
+  grouping interface-latency-config {
+    description
+      "Add in the capability to statically configure the latency on an
+       interface";
+    leaf latency {
+      type uint32 {
+        range "0..16777215";
+      }
+      description
+        "The static one-way latency of the link, in microseconds.";
+    }
+  }
+
+  grouping interface-latency-state {
+    description
+      "Add in the capability to report the latency on an
+       interface";
+    leaf latency {
+      type uint32;
+      description
+        "The one-way latency of the link, in microseconds.";
+    }
+  }
+
+  grouping interface-admin-group-membership {
+    description
+      "Membership in one or more legacy administrative groups,
+       expressed as a bit mask of groups 0-31.";
+    leaf admin-group-membership {
+      type uint32;
+      description
+        "Represents membership in a set of legacy administrative groups.";
+    }
+  }
+
+  /* Configuration and State Info */
+  // Add a top level table that contains FlexAlgo Definitions.
+  // This makes them independent of protocol and data plane.
+
+  augment "/oc-netinst:network-instances/"
+        + "oc-netinst:network-instance" {
+    description
+      "This augments network-instance configuration with
+       Flexible Algorithms.";
+    container flex-algo {
+      uses fad-definition-top;
+      description
+        "List of Flexible Algorithms and their definitions";
+    }
+  }
+
+  /* Configuration and state information for IS-IS */
+  // Enable FlexAlgo bindings of algorithms into the SR data plane.
+
+  augment "/oc-netinst:network-instances/"
+        + "oc-netinst:network-instance/oc-netinst:protocols/"
+        + "oc-netinst:protocol/oc-netinst:isis/oc-netinst:global/"
+        + "oc-netinst:segment-routing" {
+    description
+      "Flex Algo binding configuration";
+    container fad-bindings {
+      description
+        "Flex Algorithm bindings";
+      list fad-binding {
+        key "flex-algo-name";
+        description
+          "Flex Algorithm binding for a given algorithm name";
+        leaf flex-algo-name {
+          type leafref {
+            path "../config/flex-algo-name";
+          }
+          description
+            "Flex Algorithm name used by IS-IS";
+        }
+        container config {
+          description
+            "Attributes of a FAD binding";
+          uses fad-binding-attributes;
+        }
+        container state {
+          config false;
+          description
+            "Attributes of a FAD binding";
+          uses fad-binding-attributes;
+        }
+      }
+    }
+  }
+
+  augment "/oc-netinst:network-instances/oc-netinst:network-instance/"
+        + "oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/"
+        + "oc-netinst:interfaces/oc-netinst:interface/"
+        + "oc-netinst:levels/oc-netinst:level/"
+        + "oc-netinst:afi-safi/oc-netinst:af/"
+        + "oc-netinst:segment-routing" {
+    container flex-algo-prefix-sids {
+      description
+        "Configuration and operational state parameters relating to segment
+         routing flexible algorithm for an interface within the IGP.";
+      list flex-algo-prefix-sid {
+        key "prefix flex-algo-name";
+        description
+          "IGP prefix segments allocated for Flexible Algorithms";
+        leaf prefix {
+          type leafref {
+            path "../config/prefix";
+          }
+          description
+            "Reference to the prefix for which Flexible Algorithm Prefix SID is to be
+             advertised.";
+        }
+        leaf flex-algo-name {
+          type leafref {
+            path "../config/flex-algo-name";
+          }
+          description
+            "Reference to the Flexible Algorithm for which Flexible Algorithm Prefix
+             SID is to be advertised.";
+        }
+        container config {
+          description
+            "Configuration parameters for the IGP Flexible Algorithm Prefix SID.";
+          uses sr-igp-interface-flex-algo-prefix-sid-config;
+        }
+        container state {
+          config false;
+          description
+            "Operational state parameters for the IGP Flexible Algorithm Prefix SID.";
+          uses sr-igp-interface-flex-algo-prefix-sid-config;
+        }
+      }
+    }
+    description
+      "This augments the Flexible Algorithm prefix segment configuration.";
+  }
+
+  augment "/oc-netinst:network-instances/oc-netinst:network-instance/"
+        + "oc-netinst:mpls/oc-netinst:te-interface-attributes/"
+        + "oc-netinst:interface/oc-netinst:config" {
+    description
+      "This adds interface shared risk link group IDs.";
+    leaf-list srlg-id-membership {
+      type uint32;
+      description
+        "list of shared risk link group IDs that the interface belongs to.";
+    }
+  }
+
+  augment "/oc-netinst:network-instances/oc-netinst:network-instance/"
+        + "oc-netinst:mpls/oc-netinst:te-interface-attributes/"
+        + "oc-netinst:interface/oc-netinst:state" {
+    description
+      "This adds interface shared risk link group IDs.";
+    leaf-list srlg-id-membership {
+      type uint32;
+      description
+        "list of shared risk link group IDs that the interface belongs to.";
+    }
+  }
+
+  // Add FAD subTLVs to the ROUTER_CAPABILITY TLV.
+
+  augment "/oc-netinst:network-instances/"
+        + "oc-netinst:network-instance/"
+        + "oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/"
+        + "oc-netinst:levels/oc-netinst:level/"
+        + "oc-netinst:link-state-database/"
+        + "oc-netinst:lsp/oc-netinst:tlvs/oc-netinst:tlv/"
+        + "oc-netinst:router-capabilities/oc-netinst:capability/"
+        + "oc-netinst:subtlvs/oc-netinst:subtlv" {
+    description
+      "This adds FAD subTLVs to the router capability TLV.";
+    uses fad-subtlv;
+  }
+
+  // Add the ASLA subTLV to numerous TLVs.
+  // Add ASLA to the Extended IS reachability TLV
+
+  augment "/oc-netinst:network-instances/"
+        + "oc-netinst:network-instance/"
+        + "oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/"
+        + "oc-netinst:levels/oc-netinst:level/"
+        + "oc-netinst:link-state-database/"
+        + "oc-netinst:lsp/oc-netinst:tlvs/oc-netinst:tlv/"
+        + "oc-netinst:extended-is-reachability/oc-netinst:neighbors/"
+        + "oc-netinst:neighbor/"
+        + "oc-netinst:instances/oc-netinst:instance/"
+        + "oc-netinst:subtlvs/oc-netinst:subtlv" {
+    description
+      "This adds the Application Specific Link Attribute sub-TLV to
+       the Extended IS reachability TLV.";
+    uses asla-subtlv;
+  }
+
+  // Add ASLA to the IS Neighbor Attribute TLV
+
+  augment "/oc-netinst:network-instances/"
+        + "oc-netinst:network-instance/"
+        + "oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/"
+        + "oc-netinst:levels/oc-netinst:level/"
+        + "oc-netinst:link-state-database/"
+        + "oc-netinst:lsp/oc-netinst:tlvs/oc-netinst:tlv/"
+        + "oc-netinst:isis-neighbor-attribute/oc-netinst:neighbors/"
+        + "oc-netinst:neighbor/"
+        + "oc-netinst:instances/oc-netinst:instance/"
+        + "oc-netinst:subtlvs/oc-netinst:subtlv" {
+    description
+      "This adds the Application Specific Link Attribute sub-TLV to
+       the IS Neighbor Attribute TLV.";
+    uses asla-subtlv;
+  }
+
+  // L2 Bundle Member TLV -- not implemented in OpenConfig yet
+  // Inter-AS reachability information TLV -- not implemented in
+  //   OpenConfig yet
+  // Add ASLA to the MT Intermediate Systems (MT-ISN) TLV
+
+  augment "/oc-netinst:network-instances/"
+        + "oc-netinst:network-instance/"
+        + "oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/"
+        + "oc-netinst:levels/oc-netinst:level/"
+        + "oc-netinst:link-state-database/"
+        + "oc-netinst:lsp/oc-netinst:tlvs/oc-netinst:tlv/"
+        + "oc-netinst:mt-isn/oc-netinst:neighbors/"
+        + "oc-netinst:neighbor/"
+        + "oc-netinst:instances/oc-netinst:instance/"
+        + "oc-netinst:subtlvs/oc-netinst:subtlv" {
+    description
+      "This adds the Application Specific Link Attribute sub-TLV to
+       the MT-ISN TLV.";
+    uses asla-subtlv;
+  }
+
+  // Add ASLA to the MT IS Neighbor Attribute TLV
+
+  augment "/oc-netinst:network-instances/"
+        + "oc-netinst:network-instance/"
+        + "oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/"
+        + "oc-netinst:levels/oc-netinst:level/"
+        + "oc-netinst:link-state-database/"
+        + "oc-netinst:lsp/oc-netinst:tlvs/oc-netinst:tlv/"
+        + "oc-netinst:mt-isis-neighbor-attribute/oc-netinst:neighbors/"
+        + "oc-netinst:neighbor/"
+        + "oc-netinst:instances/oc-netinst:instance/"
+        + "oc-netinst:subtlvs/oc-netinst:subtlv" {
+    description
+      "This adds the Application Specific Link Attribute sub-TLV to
+       the MT IS Neighbor Attribute TLV.";
+    uses asla-subtlv;
+  }
+
+  // Add interface static latency configuration and interface latency
+  // state.
+
+  augment "/oc-netinst:network-instances/"
+        + "oc-netinst:network-instance/"
+        + "oc-netinst:mpls/oc-netinst:te-interface-attributes/"
+        + "oc-netinst:interface/oc-netinst:config" {
+    description
+      "This adds the capability to statically configure the latency on
+       an interface.";
+    uses interface-latency-config;
+  }
+
+  augment "/oc-netinst:network-instances/"
+        + "oc-netinst:network-instance/"
+        + "oc-netinst:mpls/oc-netinst:te-interface-attributes/"
+        + "oc-netinst:interface/oc-netinst:state" {
+    description
+      "This adds the capability to report the latency on
+       an interface.";
+    uses interface-latency-state;
+  }
+
+  augment "/oc-netinst:network-instances/"
+        + "oc-netinst:network-instance/"
+        + "oc-netinst:mpls/oc-netinst:te-interface-attributes/"
+        + "oc-netinst:interface/oc-netinst:config" {
+    description
+      "Configure an interface with a set of numeric legacy
+       administrative groups.";
+    uses interface-admin-group-membership;
+  }
+
+  augment "/oc-netinst:network-instances/"
+        + "oc-netinst:network-instance/"
+        + "oc-netinst:mpls/oc-netinst:te-interface-attributes/"
+        + "oc-netinst:interface/oc-netinst:state" {
+    description
+      "Configuration state of an interface with a set of
+       numeric legacy administrative groups.";
+    uses interface-admin-group-membership;
+  }
+}

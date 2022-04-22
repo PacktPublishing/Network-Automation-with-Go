@@ -21,13 +21,18 @@ module arista-exp-eos-mlag {
   description
     "Automatically generated Sysdb YANG model";
 
+  revision 2021-09-27 {
+    description
+      "pyang auto format";
+    reference
+      "1.0.2";
+  }
   revision 2021-04-19 {
     description
       "Change reload-delay-mlag-configured to be writable.";
     reference
       "1.0.1";
   }
-
   revision 2017-11-29 {
     description
       "Initial revision.";

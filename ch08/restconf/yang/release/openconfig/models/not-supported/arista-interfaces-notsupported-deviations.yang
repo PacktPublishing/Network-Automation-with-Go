@@ -20,9 +20,6 @@ module arista-interfaces-notsupported-deviations {
   import openconfig-interfaces {
     prefix oc-if;
   }
-  import openconfig-platform-transceiver {
-    prefix oc-transceiver;
-  }
   import openconfig-vlan {
     prefix oc-vlan;
   }
@@ -36,6 +33,38 @@ module arista-interfaces-notsupported-deviations {
     "This module contains OpenConfig interfaces deviations in Arista EOS.
      Copyright (c) 2021 Arista Networks, Inc. All rights reserved.";
 
+  revision 2021-10-22 {
+    description
+      "Not-supported deviations file.";
+  }
+  revision 2021-09-28 {
+    description
+      "Not-supported deviations file.";
+  }
+  revision 2021-09-16 {
+    description
+      "Not-supported deviations file.";
+  }
+  revision 2021-09-04 {
+    description
+      "Not-supported deviations file.";
+  }
+  revision 2021-07-09 {
+    description
+      "Not-supported deviations file.";
+  }
+  revision 2021-06-24 {
+    description
+      "Not-supported deviations file.";
+  }
+  revision 2021-06-10 {
+    description
+      "Not-supported deviations file.";
+  }
+  revision 2021-06-01 {
+    description
+      "Not-supported deviations file.";
+  }
   revision 2021-05-05 {
     description
       "Not-supported deviations file.";
@@ -81,7 +110,61 @@ module arista-interfaces-notsupported-deviations {
       "Not-supported deviations file.";
   }
 
+  deviation "/oc-if:interfaces/oc-if:interface/oc-eth:ethernet/oc-eth:config/oc-eth:fec-mode" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-eth:ethernet/oc-eth:config/oc-eth:standalone-link-training" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-eth:ethernet/oc-eth:state/herc-if:forwarding-viable" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-eth:ethernet/oc-eth:state/oc-eth:fec-mode" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-eth:ethernet/oc-eth:state/oc-eth:standalone-link-training" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
   deviation "/oc-if:interfaces/oc-if:interface/oc-eth:ethernet/oc-eth:state/oc-eth:counters/oc-eth:in-block-errors" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-eth:ethernet/oc-eth:state/oc-eth:counters/oc-eth:in-carrier-errors" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-eth:ethernet/oc-eth:state/oc-eth:counters/oc-eth:in-interrupted-tx" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-eth:ethernet/oc-eth:state/oc-eth:counters/oc-eth:in-late-collision" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-eth:ethernet/oc-eth:state/oc-eth:counters/oc-eth:in-mac-errors-rx" {
     description
       "Not-supported deviation.";
     deviate not-supported;
@@ -93,19 +176,31 @@ module arista-interfaces-notsupported-deviations {
     deviate not-supported;
   }
 
+  deviation "/oc-if:interfaces/oc-if:interface/oc-eth:ethernet/oc-eth:state/oc-eth:counters/oc-eth:in-single-collision" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-if:interfaces/oc-if:interface/oc-eth:ethernet/oc-eth:state/oc-eth:counters/oc-eth:in-symbol-error" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
   deviation "/oc-if:interfaces/oc-if:interface/oc-eth:ethernet/oc-eth:state/oc-eth:counters/oc-eth:in-undersize-frames" {
     description
       "Not-supported deviation.";
     deviate not-supported;
   }
 
-  deviation "/oc-if:interfaces/oc-if:interface/oc-eth:ethernet/oc-vlan:switched-vlan/oc-vlan:state" {
+  deviation "/oc-if:interfaces/oc-if:interface/oc-eth:ethernet/oc-eth:state/oc-eth:counters/oc-eth:out-mac-errors-tx" {
     description
       "Not-supported deviation.";
     deviate not-supported;
   }
 
-  deviation "/oc-if:interfaces/oc-if:interface/oc-if:config/herc-if:id" {
+  deviation "/oc-if:interfaces/oc-if:interface/oc-eth:ethernet/oc-vlan:switched-vlan/oc-vlan:state" {
     description
       "Not-supported deviation.";
     deviate not-supported;
@@ -130,18 +225,6 @@ module arista-interfaces-notsupported-deviations {
   }
 
   deviation "/oc-if:interfaces/oc-if:interface/oc-if:state/oc-if:management" {
-    description
-      "Not-supported deviation.";
-    deviate not-supported;
-  }
-
-  deviation "/oc-if:interfaces/oc-if:interface/oc-if:state/oc-transceiver:physical-channel" {
-    description
-      "Not-supported deviation.";
-    deviate not-supported;
-  }
-
-  deviation "/oc-if:interfaces/oc-if:interface/oc-if:state/oc-transceiver:transceiver" {
     description
       "Not-supported deviation.";
     deviate not-supported;
@@ -256,12 +339,6 @@ module arista-interfaces-notsupported-deviations {
   }
 
   deviation "/oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv4/oc-ip:addresses/oc-ip:address/oc-ip:vrrp/oc-ip:vrrp-group/oc-ip:state/oc-ip:virtual-router-id" {
-    description
-      "Not-supported deviation.";
-    deviate not-supported;
-  }
-
-  deviation "/oc-if:interfaces/oc-if:interface/oc-if:subinterfaces/oc-if:subinterface/oc-ip:ipv4/oc-ip:neighbors/oc-ip:neighbor/oc-ip:config/oc-ip:link-layer-address" {
     description
       "Not-supported deviation.";
     deviate not-supported;

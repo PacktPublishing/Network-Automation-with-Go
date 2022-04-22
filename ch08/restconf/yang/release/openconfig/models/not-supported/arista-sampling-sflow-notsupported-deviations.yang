@@ -15,30 +15,24 @@ module arista-sampling-sflow-notsupported-deviations {
     "This module contains OpenConfig sampling-sflow deviations in Arista EOS.
      Copyright (c) 2021 Arista Networks, Inc. All rights reserved.";
 
+  revision 2021-08-09 {
+    description
+      "Not-supported deviations file.";
+  }
+  revision 2021-07-21 {
+    description
+      "Not-supported deviations file.";
+  }
+  revision 2021-06-15 {
+    description
+      "Not-supported deviations file.";
+  }
   revision 2021-05-15 {
     description
       "Not-supported deviations file.";
   }
 
-  deviation "/oc-sflow:sampling/oc-sflow:sflow/oc-sflow:collectors" {
-    description
-      "Not-supported deviation.";
-    deviate not-supported;
-  }
-
-  deviation "/oc-sflow:sampling/oc-sflow:sflow/oc-sflow:interfaces" {
-    description
-      "Not-supported deviation.";
-    deviate not-supported;
-  }
-
-  deviation "/oc-sflow:sampling/oc-sflow:sflow/oc-sflow:config/oc-sflow:sample-size" {
-    description
-      "Not-supported deviation.";
-    deviate not-supported;
-  }
-
-  deviation "/oc-sflow:sampling/oc-sflow:sflow/oc-sflow:config/oc-sflow:sampling-rate" {
+  deviation "/oc-sflow:sampling/oc-sflow:sflow/oc-sflow:collectors/oc-sflow:collector/oc-sflow:state/oc-sflow:packets-sent" {
     description
       "Not-supported deviation.";
     deviate not-supported;
@@ -50,13 +44,19 @@ module arista-sampling-sflow-notsupported-deviations {
     deviate not-supported;
   }
 
-  deviation "/oc-sflow:sampling/oc-sflow:sflow/oc-sflow:state/oc-sflow:sample-size" {
+  deviation "/oc-sflow:sampling/oc-sflow:sflow/oc-sflow:interfaces/oc-sflow:interface/oc-sflow:config/oc-sflow:sampling-rate" {
     description
       "Not-supported deviation.";
     deviate not-supported;
   }
 
-  deviation "/oc-sflow:sampling/oc-sflow:sflow/oc-sflow:state/oc-sflow:sampling-rate" {
+  deviation "/oc-sflow:sampling/oc-sflow:sflow/oc-sflow:interfaces/oc-sflow:interface/oc-sflow:state/oc-sflow:packets-sampled" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sflow:sampling/oc-sflow:sflow/oc-sflow:interfaces/oc-sflow:interface/oc-sflow:state/oc-sflow:sampling-rate" {
     description
       "Not-supported deviation.";
     deviate not-supported;

@@ -9,6 +9,10 @@ module arista-aft-augments {
     prefix oc-ext;
   }
 
+  import openconfig-policy-types {
+    prefix oc-pol-types;
+  }
+
   organization
     "Arista Networks, Inc.";
   contact
@@ -19,6 +23,13 @@ module arista-aft-augments {
 
      Copyright (c) 2019 Arista Networks, Inc. All rights reserved.";
   oc-ext:openconfig-version "1.0.1";
+
+  revision 2021-11-16 {
+    description
+      "Add more INSTALL_PROTOCOL_TYPE.";
+    reference
+      "1.6.1";
+  }
 
   revision 2020-11-30 {
     description
@@ -111,5 +122,71 @@ module arista-aft-augments {
     }
     description
       "Add Statistics for ECMP nexthops.";
+  }
+
+  identity ATTACHED {
+    base oc-pol-types:INSTALL_PROTOCOL_TYPE;
+    description "Attached route";
+  }
+
+  identity DHCP_DEFAULT_ROUTE {
+    base oc-pol-types:INSTALL_PROTOCOL_TYPE;
+    description "DHCP default route";
+  }
+
+  identity DYNAMIC_POLICY {
+    base oc-pol-types:INSTALL_PROTOCOL_TYPE;
+    description "Dynamic Policy";
+  }
+
+  identity GRIBI {
+    base oc-pol-types:INSTALL_PROTOCOL_TYPE;
+    description "gRPC Routing Information Base Interface";
+  }
+
+  identity L2_NEXT_HOP_GROUP {
+    base oc-pol-types:INSTALL_PROTOCOL_TYPE;
+    description "Layer2 Nexthop Group";
+  }
+
+  identity STATIC_NEXT_HOP_GROUP {
+    base oc-pol-types:INSTALL_PROTOCOL_TYPE;
+    description "Static Nexthop Group";
+  }
+
+  identity POLICY {
+    base oc-pol-types:INSTALL_PROTOCOL_TYPE;
+    description "Policy";
+  }
+
+  identity RIP {
+    base oc-pol-types:INSTALL_PROTOCOL_TYPE;
+    description "RIP";
+    reference "RFC 2453";
+  }
+
+  identity ROUTE_CACHE_CONNECTED {
+    base oc-pol-types:INSTALL_PROTOCOL_TYPE;
+    description "Route Cache Connect";
+  }
+
+  identity ROUTE_CACHE_FORWARD {
+    base oc-pol-types:INSTALL_PROTOCOL_TYPE;
+    description "Route Cache Forward";
+  }
+
+  identity UNKNOWN {
+    base oc-pol-types:INSTALL_PROTOCOL_TYPE;
+    description "Unknown";
+  }
+
+  identity VCS {
+    base oc-pol-types:INSTALL_PROTOCOL_TYPE;
+    description "Vxlan Control Service";
+  }
+
+  identity INTERNAL {
+    base oc-pol-types:INSTALL_PROTOCOL_TYPE;
+    description "Internal";
   }
 }

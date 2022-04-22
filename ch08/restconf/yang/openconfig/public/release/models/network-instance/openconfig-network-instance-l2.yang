@@ -8,6 +8,8 @@ submodule openconfig-network-instance-l2 {
   import openconfig-extensions { prefix "oc-ext"; }
   import openconfig-interfaces { prefix "oc-if"; }
   import ietf-yang-types { prefix "yang"; }
+  import openconfig-evpn-types { prefix oc-evpn-types; }
+  import openconfig-evpn { prefix "oc-evpn"; }
 
   // meta
   organization "OpenConfig working group";
@@ -21,7 +23,26 @@ submodule openconfig-network-instance-l2 {
     Layer 2 network instance configuration and operational state
     parameters.";
 
-  oc-ext:openconfig-version "0.14.0";
+  oc-ext:openconfig-version "0.16.1";
+
+  revision "2021-07-22" {
+    description
+      "Remove unused imported models.";
+    reference "0.16.1";
+  }
+
+  revision "2021-06-11" {
+    description
+      "Structural update for arp-proxy and
+      proxy-nd.";
+    reference "0.16.0";
+  }
+
+  revision "2021-01-25" {
+    description
+      "Add support for evpn";
+    reference "0.15.0";
+  }
 
   revision "2020-06-20" {
     description
@@ -173,6 +194,9 @@ submodule openconfig-network-instance-l2 {
       }
 
        uses l2ni-mac-table-top;
+       uses oc-evpn:evpn-mac-mobility-top;
+       uses oc-evpn:evpn-arp-proxy-top;
+       uses oc-evpn:evpn-nd-proxy-top;
     }
   }
 
@@ -187,7 +211,6 @@ submodule openconfig-network-instance-l2 {
         "The maximum frame size which should be supported for this
         instance for Layer 2 frames";
     }
-
   }
 
   grouping l2ni-fdb-mac-config {
@@ -226,6 +249,8 @@ submodule openconfig-network-instance-l2 {
         "The maximum number of MAC address entries that should be
         accepted into the FDB";
     }
+
+    uses oc-evpn:evpn-mac-vrf-config;
   }
 
   grouping l2ni-encapsulation-config {
@@ -295,6 +320,10 @@ submodule openconfig-network-instance-l2 {
         dynamically learned.";
     }
 
+    leaf evi {
+      type oc-evpn-types:vni-id;
+      description "EVPN EVI to associate with the BD/VLAN";
+    }
   }
 
   grouping l2ni-mac-table-top {

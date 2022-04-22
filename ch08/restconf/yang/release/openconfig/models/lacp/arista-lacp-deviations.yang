@@ -18,8 +18,20 @@ module arista-lacp-deviations {
     "This module contains OpenConfig lacp deviations in Arista EOS.
 
      Copyright (c) 2017 Arista Networks, Inc. All rights reserved.";
-  oc-ext:openconfig-version "1.1.0";
+  oc-ext:openconfig-version "1.1.2";
 
+  revision 2021-09-27 {
+    description
+      "pyang auto format";
+    reference
+      "1.1.2";
+  }
+  revision 2021-05-21 {
+    description
+      "Remove deviation for leaf lacp-mode.";
+    reference
+      "1.1.1";
+  }
   revision 2021-03-05 {
     description
       "Remove deviation for leaf lacp-rx-errors.";
@@ -47,21 +59,9 @@ module arista-lacp-deviations {
     }
   }
 
-  deviation "/oc-lacp:lacp/oc-lacp:interfaces/oc-lacp:interface/oc-lacp:config/oc-lacp:lacp-mode" {
-    description
-      "EOS does not support port channel level lacp-mode";
-    deviate not-supported;
-  }
-
   deviation "/oc-lacp:lacp/oc-lacp:interfaces/oc-lacp:interface/oc-lacp:config/oc-lacp:system-priority" {
     description
       "EOS does not support port channel level system priority";
-    deviate not-supported;
-  }
-
-  deviation "/oc-lacp:lacp/oc-lacp:interfaces/oc-lacp:interface/oc-lacp:state/oc-lacp:lacp-mode" {
-    description
-      "EOS does not support port channel level lacp-mode";
     deviate not-supported;
   }
 

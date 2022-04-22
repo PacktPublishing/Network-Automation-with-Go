@@ -1,0 +1,57 @@
+module arista-netinst-augments {
+   namespace "http://arista.com/yang/openconfig/network-instances/augments";
+   prefix arista-network-instances-augments;
+
+   import openconfig-network-instance {
+      prefix oc-netinst;
+   }
+   import openconfig-extensions {
+      prefix oc-ext;
+   }
+
+   organization
+      "Arista Networks <http://arista.com/>";
+   contact
+      "Arista Networks, Inc.
+     Product Support";
+   description
+      "This module contains OpenConfig Network Instances deviations in Arista EOS.
+
+     Copyright (c) 2021 Arista Networks, Inc. All rights reserved.";
+   oc-ext:openconfig-version "1.0.0";
+   revision 2021-08-17 {
+      description
+         "Initial augment file.";
+      reference
+         "1.0.0";
+   }
+
+   grouping eos-rib-config {
+      description "Grouping of general RIB configuration parameters";
+      leaf default-prefix-auto-explicit-null {
+         type boolean;
+         default "false";
+         description
+            "Add MPLS Explicit NULL to FIB route for a prefix if nexthop resolves over
+  MPLS tunnel of different address-family";
+      }
+   }
+
+   augment "/oc-netinst:network-instances/oc-netinst:network-instance" {
+      description "Add general RIB configuration";
+      container rib {
+         description "General RIB configuration";
+         container config {
+            description
+               "Configuration parameters for general RIB configuration on EOS";
+            uses eos-rib-config;
+         }
+         container state {
+            config false;
+            description
+               "Operational state parameters for general RIB configuration on EOS";
+            uses eos-rib-config;
+         }
+      }
+   }
+}

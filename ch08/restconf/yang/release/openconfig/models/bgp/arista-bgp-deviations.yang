@@ -21,8 +21,38 @@ module arista-bgp-deviations {
     "This module contains OpenConfig BGP deviations in Arista EOS.
 
      Copyright (c) 2016 Arista Networks, Inc. All rights reserved.";
-  oc-ext:openconfig-version "1.3.0";
+  oc-ext:openconfig-version "1.6.1";
 
+  revision 2021-10-14 {
+    description
+      "Remove default of BGP default-import-policy and default-export-policy";
+    reference
+      "1.6.1";
+  }
+  revision 2021-10-04 {
+    description
+      "Added aggregates-addresses list support for multicast.";
+    reference
+      "1.6.0";
+  }
+  revision 2021-09-27 {
+    description
+      "fix pyang BAD_DEVIATE_ADD error";
+    reference
+      "1.5.1";
+  }
+  revision 2021-09-07 {
+    description
+      "Remove unsupported leaves for prefix-limits.";
+    reference
+      "1.5.0";
+  }
+  revision 2021-07-28 {
+    description
+      "Remove deviations for local-address.";
+    reference
+      "1.4.0";
+  }
   revision 2021-04-21 {
     description
       "Add default values for administrative distances of BGP learned routes to match EOS defaults.";
@@ -277,22 +307,10 @@ module arista-bgp-deviations {
     deviate not-supported;
   }
 
-  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:transport/oc-netinst:config/oc-netinst:local-address" {
-    description
-      "EOS only supports setting the local-address as an interface name";
-    deviate not-supported;
-  }
-
-  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:transport/oc-netinst:config/oc-netinst:local-address" {
-    description
-      "EOS only supports setting the local-address as an interface name";
-    deviate not-supported;
-  }
-
   deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:transport/oc-netinst:config/oc-netinst:mtu-discovery" {
     description
       "MTU discovery is implicitly always true in EOS";
-    deviate add {
+    deviate replace {
       config false;
     }
     deviate replace {
@@ -303,7 +321,7 @@ module arista-bgp-deviations {
   deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:transport/oc-netinst:config/oc-netinst:mtu-discovery" {
     description
       "MTU discovery is implicitly always true in EOS";
-    deviate add {
+    deviate replace {
       config false;
     }
     deviate replace {
@@ -547,7 +565,7 @@ module arista-bgp-deviations {
   deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:global/oc-netinst:use-multiple-paths/oc-netinst:config/oc-netinst:enabled" {
     description
       "Disabling EOS multiple-paths is not supported, multiple-paths is always enabled in EOS";
-    deviate add {
+    deviate replace {
       config false;
     }
     deviate replace {
@@ -581,10 +599,10 @@ module arista-bgp-deviations {
 
   deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:global/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:config/oc-netinst:afi-safi-name" {
     description
-      "IPV4_UNICAST and IPV6_UNICAST are the only AFI-SAFIs type supported in EOS";
+      "IPV4_UNICAST, IPV6_UNICAST, IPV4_MULTICAST and IPV6_MULTICAST are the only AFI-SAFIs type supported in EOS";
     deviate add {
-      must "../afi-safi-name = 'IPV4_UNICAST' or ../afi-safi-name = 'IPV6_UNICAST'" {
-        error-message "IPV4_UNICAST and IPV6_UNICAST are the only AFI-SAFIs type supported in EOS";
+      must "../afi-safi-name = 'IPV4_UNICAST' or ../afi-safi-name = 'IPV6_UNICAST' or ../afi-safi-name = 'IPV4_MULTICAST' or ../afi-safi-name = 'IPV6_MULTICAST'" {
+        error-message "IPV4_UNICAST, IPV6_UNICAST, IPV4_MULTICAST and IPV6_MULTICAST are the only AFI-SAFIs type supported in EOS";
       }
     }
   }
@@ -603,7 +621,7 @@ module arista-bgp-deviations {
 
   deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:global/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:config/oc-netinst:enabled" {
     description
-      "EOS value is a triStateBool which is represented by the absence of the leaf so this leaf can not have a default value";
+      "EOS allows inheriting the value from a different configuration command which is represented by the absence of the leaf so this leaf can not have a default value";
     deviate delete {
       default "false";
     }
@@ -611,7 +629,7 @@ module arista-bgp-deviations {
 
   deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:global/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:state/oc-netinst:enabled" {
     description
-      "EOS value is a triStateBool which is represented by the absence of the leaf so this leaf can not have a default value";
+      "EOS allows inheriting the value from a different configuration command which is represented by the absence of the leaf so this leaf can not have a default value";
     deviate delete {
       default "false";
     }
@@ -841,27 +859,51 @@ module arista-bgp-deviations {
     }
   }
 
-  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:ipv4-unicast/oc-netinst:prefix-limit" {
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:ipv4-unicast/oc-netinst:prefix-limit/oc-netinst:config/oc-netinst:restart-timer" {
     description
-      "Configuring the maximum number of prefixes that will be accepted from the neighbor is not supported in EOS";
+      "Configuring the time interval in seconds after which the BGP session is re-established is not supported in EOS";
     deviate not-supported;
   }
 
-  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:ipv4-unicast/oc-netinst:prefix-limit" {
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:ipv4-unicast/oc-netinst:prefix-limit/oc-netinst:state/oc-netinst:restart-timer" {
     description
-      "Configuring the maximum number of prefixes that will be accepted from the peer-group is not supported in EOS";
+      "Configuring the time interval in seconds after which the BGP session is re-established is not supported in EOS";
     deviate not-supported;
   }
 
-  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:ipv6-unicast/oc-netinst:prefix-limit" {
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:ipv4-unicast/oc-netinst:prefix-limit/oc-netinst:config/oc-netinst:restart-timer" {
     description
-      "Configuring the maximum number of prefixes that will be accepted from the neighbor is not supported in EOS";
+      "Configuring the time interval in seconds after which the BGP session is re-established is not supported in EOS";
     deviate not-supported;
   }
 
-  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:ipv6-unicast/oc-netinst:prefix-limit" {
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:ipv4-unicast/oc-netinst:prefix-limit/oc-netinst:state/oc-netinst:restart-timer" {
     description
-      "Configuring the maximum number of prefixes that will be accepted from the peer-group is not supported in EOS";
+      "Configuring the time interval in seconds after which the BGP session is re-established is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:ipv6-unicast/oc-netinst:prefix-limit/oc-netinst:config/oc-netinst:restart-timer" {
+    description
+      "Configuring the time interval in seconds after which the BGP session is re-established is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:ipv6-unicast/oc-netinst:prefix-limit/oc-netinst:state/oc-netinst:restart-timer" {
+    description
+      "Configuring the time interval in seconds after which the BGP session is re-established is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:ipv6-unicast/oc-netinst:prefix-limit/oc-netinst:config/oc-netinst:restart-timer" {
+    description
+      "Configuring the time interval in seconds after which the BGP session is re-established is not supported in EOS";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:ipv6-unicast/oc-netinst:prefix-limit/oc-netinst:state/oc-netinst:restart-timer" {
+    description
+      "Configuring the time interval in seconds after which the BGP session is re-established is not supported in EOS";
     deviate not-supported;
   }
 
@@ -907,6 +949,70 @@ module arista-bgp-deviations {
     }
   }
 
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:apply-policy/oc-netinst:config/oc-netinst:default-import-policy" {
+    description
+      "The default value is removed to allow the attribute to not be present. When this attribute is not present, its effective value is retrieved from another configuration/leaf.";
+    deviate delete {
+      default "REJECT_ROUTE";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:apply-policy/oc-netinst:config/oc-netinst:default-import-policy" {
+    description
+      "The default value is removed to allow the attribute to not be present. When this attribute is not present, its effective value is retrieved from another configuration/leaf.";
+    deviate delete {
+      default "REJECT_ROUTE";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:apply-policy/oc-netinst:config/oc-netinst:default-export-policy" {
+    description
+      "The default value is removed to allow the attribute to not be present. When this attribute is not present, its effective value is retrieved from another configuration/leaf.";
+    deviate delete {
+      default "REJECT_ROUTE";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:apply-policy/oc-netinst:config/oc-netinst:default-export-policy" {
+    description
+      "The default value is removed to allow the attribute to not be present. When this attribute is not present, its effective value is retrieved from another configuration/leaf.";
+    deviate delete {
+      default "REJECT_ROUTE";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:apply-policy/oc-netinst:state/oc-netinst:default-import-policy" {
+    description
+      "The default value is removed to allow the attribute to not be present. When this attribute is not present, its effective value is retrieved from another configuration/leaf.";
+    deviate delete {
+      default "REJECT_ROUTE";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:apply-policy/oc-netinst:state/oc-netinst:default-import-policy" {
+    description
+      "The default value is removed to allow the attribute to not be present. When this attribute is not present, its effective value is retrieved from another configuration/leaf.";
+    deviate delete {
+      default "REJECT_ROUTE";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:apply-policy/oc-netinst:state/oc-netinst:default-export-policy" {
+    description
+      "The default value is removed to allow the attribute to not be present. When this attribute is not present, its effective value is retrieved from another configuration/leaf.";
+    deviate delete {
+      default "REJECT_ROUTE";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:apply-policy/oc-netinst:state/oc-netinst:default-export-policy" {
+    description
+      "The default value is removed to allow the attribute to not be present. When this attribute is not present, its effective value is retrieved from another configuration/leaf.";
+    deviate delete {
+      default "REJECT_ROUTE";
+    }
+  }
+
   deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:global/oc-netinst:default-route-distance/oc-netinst:config/oc-netinst:internal-route-distance" {
     description
       "In EOS, the default administrative distance for BGP learned routes is 200";
@@ -936,6 +1042,38 @@ module arista-bgp-deviations {
       "In EOS, the default administrative distance for BGP learned routes is 200";
     deviate add {
       default "200";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:ipv4-unicast/oc-netinst:prefix-limit/oc-netinst:config/oc-netinst:prevent-teardown" {
+    description
+      "EOS defaults are used to instantiate the YANG leaf.";
+    deviate delete {
+      default "false";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:ipv4-unicast/oc-netinst:prefix-limit/oc-netinst:config/oc-netinst:prevent-teardown" {
+    description
+      "EOS defaults are used to instantiate the YANG leaf.";
+    deviate delete {
+      default "false";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:ipv6-unicast/oc-netinst:prefix-limit/oc-netinst:config/oc-netinst:prevent-teardown" {
+    description
+      "EOS defaults are used to instantiate the YANG leaf.";
+    deviate delete {
+      default "false";
+    }
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:ipv6-unicast/oc-netinst:prefix-limit/oc-netinst:config/oc-netinst:prevent-teardown" {
+    description
+      "EOS defaults are used to instantiate the YANG leaf.";
+    deviate delete {
+      default "false";
     }
   }
 }

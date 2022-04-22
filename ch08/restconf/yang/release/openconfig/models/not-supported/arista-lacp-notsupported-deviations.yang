@@ -1,0 +1,34 @@
+module arista-lacp-notsupported-deviations {
+  namespace "http://arista.com/yang/openconfig/lacp/notsupported-deviations";
+  prefix arista-lacp-notsupported-deviations;
+
+  import openconfig-lacp {
+    prefix oc-lacp;
+  }
+
+  organization
+    "Arista Networks, Inc.";
+  contact
+    "Arista Networks, Inc.
+     Product Support";
+  description
+    "This module contains OpenConfig lacp deviations in Arista EOS.
+     Copyright (c) 2021 Arista Networks, Inc. All rights reserved.";
+
+  revision 2021-09-28 {
+    description
+      "Not-supported deviations file.";
+  }
+
+  deviation "/oc-lacp:lacp/oc-lacp:interfaces/oc-lacp:interface/oc-lacp:members/oc-lacp:member/oc-lacp:state/oc-lacp:last-change" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-lacp:lacp/oc-lacp:interfaces/oc-lacp:interface/oc-lacp:members/oc-lacp:member/oc-lacp:state/oc-lacp:counters/oc-lacp:lacp-timeout-transitions" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+}

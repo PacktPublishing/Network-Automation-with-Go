@@ -6,6 +6,7 @@ settings.json
 /ch02/hello/hello
 /ch02/pong/pong
 .topo.yaml
+.topo.yml
 clab-netgo
 !/ch07/*.cfg
 output.json

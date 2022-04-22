@@ -11,6 +11,15 @@ module arista-bgp-augments {
   import openconfig-extensions {
     prefix oc-ext;
   }
+  import openconfig-inet-types {
+    prefix oc-inet;
+  }
+  import openconfig-bgp-types {
+    prefix oc-bgp-types;
+  }
+  import openconfig-types {
+    prefix oc-types;
+  }
 
   organization
     "Arista Networks, Inc.";
@@ -21,8 +30,33 @@ module arista-bgp-augments {
     "This module contains OpenConfig BGP deviations in Arista EOS.
 
      Copyright (c) 2019 Arista Networks, Inc. All rights reserved.";
-  oc-ext:openconfig-version "2.6.0";
-  
+
+  oc-ext:openconfig-version "2.9.0";
+
+  revision 2021-10-04 {
+    description
+      "Added aggregates-addresses list support for multicast.";
+    reference
+      "2.9.0";
+  }
+  revision 2021-09-29 {
+    description
+      "Added aggregates-addresses list.";
+    reference
+      "2.8.0";
+  }
+  revision 2021-09-27 {
+    description
+      "pyang auto format";
+    reference
+      "2.7.1";
+  }
+  revision 2021-09-01 {
+    description
+      "Changed prefix-limit container for neighbors, peer groups and AFI/SAFI.";
+    reference
+      "2.7.0";
+  }
   revision 2021-05-05 {
     description
       "Added RPKI validation EBGP/IBGP send container.";
@@ -90,6 +124,20 @@ module arista-bgp-augments {
       "1.0.0";
   }
 
+  identity IPV4_MULTICAST {
+    base oc-bgp-types:AFI_SAFI_TYPE;
+    description
+      "IPv4 multicast (AFI,SAFI = 1,2)";
+    reference "RFC4760";
+  }
+
+  identity IPV6_MULTICAST {
+    base oc-bgp-types:AFI_SAFI_TYPE;
+    description
+      "IPv6 multicast (AFI,SAFI = 2,2)";
+    reference "RFC4760";
+  }
+
   typedef route-target-type {
     type union {
       type string {
@@ -122,6 +170,79 @@ module arista-bgp-augments {
         - <2b AS>:<4b value> per RFC4360 section 4
         - <4b IPv4>:<2b value> per RFC4360 section 4
         - <4b AS>:<2b value> per RFC5668 section 4";
+  }
+
+grouping bgp-common-global-aggregate-address-config {
+    description
+      "Configuration parameters for BGP unicast and multicast aggregation";
+
+    leaf aggregate-address {
+      type oc-inet:ip-prefix;
+      description
+        "The network of the aggregate route";
+    }
+    leaf summary-only {
+      type boolean;
+      default "false";
+      description
+        "Only advertise the aggregate route to peers.
+        Default is to advertise the aggregates and the contributing routes.";
+    }
+    leaf as-set {
+      type boolean;
+      default "false";
+      description
+        "Configure the generation of autonomous system set path information.
+        Default is to disable the generation.";
+    }
+    leaf match-map {
+      type string;
+      description
+        "Name of the route map used to filter the contributors of the aggregate route.";
+    }
+    leaf attribute-map {
+      type string;
+      description
+        "Name of the route map used to set the attributes of the aggregate route.";
+    }
+    leaf advertise-only {
+      type boolean;
+      default "false";
+      description
+        "Advertise without installing the generated blackhole route in FIB.
+        Default is to install the generated blackhole route in FIB.";
+    }
+  }
+
+  grouping bgp-global-aggregate-address-list {
+    description
+      "The list of BGP aggregates";
+
+    list aggregate-address {
+      key "aggregate-address";
+      description
+        "List of BGP aggregates";
+
+      leaf aggregate-address {
+        type leafref {
+            path "../config/aggregate-address";
+        }
+        description
+          "The network of the aggregate route";
+      }
+
+      container config {
+        description
+          "Configuration parameters enabling and modifying the BGP aggregation";
+        uses bgp-common-global-aggregate-address-config;
+      }
+      container state {
+        config false;
+        description
+          "State information relating to the BGP aggregation";
+        uses bgp-common-global-aggregate-address-config;
+      }
+    }
   }
 
   grouping route-target-config {
@@ -331,6 +452,189 @@ module arista-bgp-augments {
     }
   }
 
+  grouping prefix-limit-neighbor-or-peer-group {
+    description
+      "Grouping for configuration of prefix-limit for neighbors and peer-groups";
+    container prefix-limit {
+      description
+        "Configure the maximum number of prefixes that will be
+         received by a peer.";
+      container config {
+        description
+          "Configuration parameters relating to the prefix limit for the peer or peer group.
+           If no leafs are present, the EOS defaults are implicitly used.";
+        uses prefix-limit-config-neighbor-or-peer-group;
+      }
+      container state {
+        config false;
+        description
+          "State information relating to the prefix-limit for the peer or peer group";
+        uses prefix-limit-config-neighbor-or-peer-group;
+      }
+    }
+  }
+
+  grouping prefix-limit-afisafi {
+    description
+      "Grouping for configuration of afi-safi specific prefix-limit for neighbors and peer-groups";
+    container prefix-limit {
+      description
+        "Configure the maximum number of prefixes that can be
+         received a peer.";
+      container state {
+        config false;
+        description
+          "State information relating to the prefix-limit for the peer or peer group";
+        uses prefix-limit-config-afisafi;
+      }
+    }
+  }
+
+  typedef max-prefixes-type {
+    type uint32 {
+      range "0..4294967294";
+    }
+    description
+      "Used to defined the maximum number of prefixes that will be received
+       from the neighbour.";
+  }
+
+  typedef threshold-type-type {
+    type enumeration {
+      enum ABSOLUTE {
+        description
+          "Use warning-threshold leaf to determine the prefix-limit
+           warning threshold.";
+      }
+      enum PERCENTAGE {
+        description
+          "Use warning-threshold-pct leaf to determine the prefix-limit
+           warning threshold.";
+      }
+    }
+    description
+      "Used to indicate which leaf should be used to determine
+       the prefix-limit warning threshold.";
+  }
+
+  grouping prefix-limit-config-neighbor-or-peer-group {
+    description
+      "Configuration parameters for prefix-limit for a neighbor or peer-group.";
+    leaf max-prefixes {
+      type max-prefixes-type;
+      description
+        "Maximum number of prefixes that will be received
+         from the neighbour. A value of 0 disables the limit.
+         If the leaf is not present, but at least another leaf
+         is present in the container, it is assumed to be 256000.";
+    }
+    leaf prevent-teardown {
+      type boolean;
+      description
+        "Do not tear down the BGP session when the maximum
+         prefix limit is exceeded, but rather only log a
+         warning. If the leaf is not present, but at least another leaf
+         is present in the container, it is implicitly assumed to be 'false'";
+    }
+    leaf warning-threshold-type {
+      type threshold-type-type;
+      description
+        "Specifies if the warning threshold is indicated by an
+         absolute value or by a percentage of 'max-prefixes'.
+         If the leaf is not present but at least another leaf
+         is present in the container, 'warning-threshold-type'
+         is assumed to be 'PERCENTAGE'";
+    }
+    leaf warning-threshold {
+      when "../warning-threshold-type = 'ABSOLUTE'" {
+        description
+          "The warning threshold is specified as an absolute number.";
+      }
+      type max-prefixes-type;
+      description
+        "Threshold on number of prefixes that can be received
+         from a neighbor before generation of warning messages
+         or log entries. Expressed as a number of prefixes.
+         If set to 0, no warnings are generated. If the leaf is not present
+         and 'warning-threshold-type' is set to 'ABSOLUTE',
+         the leaf is assumed to be 0. If 'warning-threshold-type'
+         is not present or set to 'PERCENTAGE', the leaf is not used.";
+    }
+    leaf warning-threshold-pct {
+      when "../warning-threshold-type = 'PERCENTAGE'" {
+        description
+          "The warning threshold is specified as a percentage.";
+      }
+      type oc-types:percentage;
+      description
+        "Threshold on number of prefixes that can be received
+         from a neighbor before generation of warning messages
+         or log entries. Expressed as a percentage of 'max-prefixes'.
+         If set to 0, no warnings are generated. If the leaf is not present and
+         'warning-threshold-type' is set to 'PERCENTAGE', the leaf is assumed to be 0.
+         If the leaf is not present and 'warning-threshold-type'
+         is not set to 'PERCENTAGE', the leaf is not used. If the leaf is not present and
+         'warning-threshold-type' is not present but at least another leaf is present
+         in the container, 'warning-threshold-pct' is assumed to be 0.";
+    }
+  }
+
+  grouping prefix-limit-config-afisafi {
+    description
+      "Configuration parameters for prefix-limit for an afi-safi";
+    leaf max-prefixes {
+      type max-prefixes-type;
+      description
+        "Maximum number of prefixes that will be received
+         from the neighbour. A value of 0 disables the limit.
+         If the leaf is not present, but at least another leaf
+         is present in the container, it is assumed to be 256000.";
+    }
+    leaf warning-threshold-type {
+      type threshold-type-type;
+      description
+        "Do not tear down the BGP session when the maximum
+         prefix limit is exceeded, but rather only log a
+         warning. If the leaf is not present, but at least another leaf
+         is present in the container, it is implicitly assumed to be 'false'";
+    }
+    leaf warning-threshold {
+      type max-prefixes-type;
+      description
+        "Threshold on number of prefixes that can be received
+         from a neighbor before generation of warning messages
+         or log entries. Expressed as a number of prefixes.
+         If set to 0, no warnings are generated. If the leaf is not present
+         and 'warning-threshold-type' is set to 'ABSOLUTE',
+         the leaf is assumed to be 0. If 'warning-threshold-type'
+         is not present or set to 'PERCENTAGE', the leaf is not used.";
+    }
+    leaf warning-threshold-pct {
+      type oc-types:percentage;
+      description
+        "Threshold on number of prefixes that can be received
+         from a neighbor before generation of warning messages
+         or log entries. Expressed as a percentage of 'max-prefixes'.
+         If set to 0, no warnings are generated. If the leaf is not present and
+         'warning-threshold-type' is set to 'PERCENTAGE', the leaf is assumed to be 0.
+         If the leaf is not present and 'warning-threshold-type'
+         is not set to 'PERCENTAGE', the leaf is not used. If the leaf is not present and
+         'warning-threshold-type' is not present but at least another leaf is present
+         in the container, 'warning-threshold-pct' is assumed to be 0.";
+    }
+  }
+
+  augment "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol"
+        + "/oc-netinst:bgp/oc-netinst:global/oc-netinst:afi-safis/oc-netinst:afi-safi" {
+    description
+      "Augment the BGP global address families config to include aggregated addresses";
+      container aggregate-addresses {
+        description
+          "Configuration for BGP aggregated addresses";
+        uses bgp-global-aggregate-address-list;
+      }
+  }
+
   augment "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol"
         + "/oc-netinst:bgp/oc-netinst:global" {
     description
@@ -443,6 +747,9 @@ module arista-bgp-augments {
     description
       "Augment the BGP global config to include bgp convergence time";
     container convergence {
+      must "../oc-netinst:afi-safi-name = 'IPV4_UNICAST' or ../oc-netinst:afi-safi-name = 'IPV6_UNICAST'" {
+        error-message "IPV4_UNICAST and IPV6_UNICAST are the only AFI-SAFI types that support BGP convergence in EOS";
+      }
       description
         "BGP convergence related options for the address-family";
       container config {
@@ -460,7 +767,7 @@ module arista-bgp-augments {
       }
     }
   }
-  
+
   augment "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol"
         + "/oc-netinst:bgp/oc-netinst:global/oc-netinst:default-route-distance/oc-netinst:config" {
     leaf local-route-distance {
@@ -496,5 +803,65 @@ module arista-bgp-augments {
     description
       "Augment the BGP global config to include RPKI send configs";
     uses bgp-global-rpki-send-top;
+  }
+
+  augment "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor" {
+    description
+      "Configuring threshold on number of prefixes that can be received from a neighbor is configurable at peer level in EOS";
+    uses prefix-limit-neighbor-or-peer-group;
+  }
+
+  augment "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group" {
+    description
+      "Configuring threshold on number of prefixes that can be received from a neighbor is configurable at peer group level in EOS";
+    uses prefix-limit-neighbor-or-peer-group;
+  }
+
+  augment "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:ipv4-unicast/oc-netinst:prefix-limit/oc-netinst:config" {
+    description
+      "Configuring threshold on number of prefixes that can be received from a neighbor for IPv4 Unicast before generation of warning messages or log entries can be specified as percentage or absolute number in EOS";
+    uses prefix-limit-config-afisafi;
+  }
+
+  augment "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:ipv6-unicast/oc-netinst:prefix-limit/oc-netinst:config" {
+    description
+      "Configuring threshold on number of prefixes that can be received from a neighbor for IPv6 Unicast before generation of warning messages or log entries can be specified as percentage or absolute number in EOS";
+    uses prefix-limit-config-afisafi;
+  }
+
+  augment "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:ipv4-unicast/oc-netinst:prefix-limit/oc-netinst:config" {
+    description
+      "Configuring threshold on number of prefixes that can be received from a peer group for IPv4 Unicast before generation of warning messages or log entries can be specified as percentage or absolute number in EOS";
+    uses prefix-limit-config-afisafi;
+  }
+
+  augment "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:ipv6-unicast/oc-netinst:prefix-limit/oc-netinst:config" {
+    description
+      "Configuring threshold on number of prefixes that can be received from a peer group for IPv6 Unicast before generation of warning messages or log entries can be specified as percentage or absolute number in EOS";
+    uses prefix-limit-config-afisafi;
+  }
+
+  augment "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:ipv4-unicast/oc-netinst:prefix-limit" {
+    description
+      "The threshold on number of prefixes that can be received from a neighbor for IPv4 Unicast before generation of warning messages or log entries can be specified as percentage or absolute number in EOS";
+    uses prefix-limit-afisafi;
+  }
+
+  augment "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:ipv6-unicast/oc-netinst:prefix-limit" {
+    description
+      "The threshold on number of prefixes that can be received from a neighbor for IPv6 Unicast before generation of warning messages or log entries can be specified as percentage or absolute number in EOS";
+    uses prefix-limit-afisafi;
+  }
+
+  augment "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:ipv4-unicast/oc-netinst:prefix-limit" {
+    description
+      "The threshold on number of prefixes that can be received from a peer group for IPv4 Unicast before generation of warning messages or log entries can be specified as percentage or absolute number in EOS";
+    uses prefix-limit-afisafi;
+  }
+
+  augment "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:ipv6-unicast/oc-netinst:prefix-limit" {
+    description
+      "The threshold on number of prefixes that can be received from a peer group for IPv6 Unicast before generation of warning messages or log entries can be specified as percentage or absolute number in EOS";
+    uses prefix-limit-afisafi;
   }
 }

@@ -11,6 +11,9 @@ module arista-platform-notsupported-deviations {
   import openconfig-platform {
     prefix oc-platform;
   }
+  import openconfig-platform-integrated-circuit {
+    prefix oc-ic;
+  }
   import openconfig-platform-linecard {
     prefix oc-linecard;
   }
@@ -30,6 +33,34 @@ module arista-platform-notsupported-deviations {
     "This module contains OpenConfig platform deviations in Arista EOS.
      Copyright (c) 2021 Arista Networks, Inc. All rights reserved.";
 
+  revision 2021-11-05 {
+    description
+      "Not-supported deviations file.";
+  }
+  revision 2021-11-04 {
+    description
+      "Not-supported deviations file.";
+  }
+  revision 2021-11-02 {
+    description
+      "Not-supported deviations file.";
+  }
+  revision 2021-09-21 {
+    description
+      "Not-supported deviations file.";
+  }
+  revision 2021-09-16 {
+    description
+      "Not-supported deviations file.";
+  }
+  revision 2021-09-01 {
+    description
+      "Not-supported deviations file.";
+  }
+  revision 2021-06-01 {
+    description
+      "Not-supported deviations file.";
+  }
   revision 2021-03-11 {
     description
       "Not-supported deviations file.";
@@ -66,12 +97,6 @@ module arista-platform-notsupported-deviations {
   }
 
   deviation "/oc-platform:components/oc-platform:component/oc-platform:fabric" {
-    description
-      "Not-supported deviation.";
-    deviate not-supported;
-  }
-
-  deviation "/oc-platform:components/oc-platform:component/oc-platform:port" {
     description
       "Not-supported deviation.";
     deviate not-supported;
@@ -149,7 +174,19 @@ module arista-platform-notsupported-deviations {
     deviate not-supported;
   }
 
-  deviation "/oc-platform:components/oc-platform:component/oc-platform:integrated-circuit/oc-platform:config" {
+  deviation "/oc-platform:components/oc-platform:component/oc-platform:integrated-circuit/oc-ic:memory" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-platform:components/oc-platform:component/oc-platform:port/oc-platform:config" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-platform:components/oc-platform:component/oc-platform:port/oc-platform:state" {
     description
       "Not-supported deviation.";
     deviate not-supported;
@@ -197,19 +234,7 @@ module arista-platform-notsupported-deviations {
     deviate not-supported;
   }
 
-  deviation "/oc-platform:components/oc-platform:component/oc-platform:state/oc-platform:empty" {
-    description
-      "Not-supported deviation.";
-    deviate not-supported;
-  }
-
-  deviation "/oc-platform:components/oc-platform:component/oc-platform:state/oc-platform:oper-status" {
-    description
-      "Not-supported deviation.";
-    deviate not-supported;
-  }
-
-  deviation "/oc-platform:components/oc-platform:component/oc-platform:state/oc-platform:software-version" {
+  deviation "/oc-platform:components/oc-platform:component/oc-platform:state/oc-platform:pcie" {
     description
       "Not-supported deviation.";
     deviate not-supported;
@@ -251,6 +276,12 @@ module arista-platform-notsupported-deviations {
     deviate not-supported;
   }
 
+  deviation "/oc-platform:components/oc-platform:component/oc-transceiver:transceiver/oc-transceiver:physical-channels/oc-transceiver:channel/oc-transceiver:config/oc-transceiver:associated-optical-channel" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
   deviation "/oc-platform:components/oc-platform:component/oc-transceiver:transceiver/oc-transceiver:physical-channels/oc-transceiver:channel/oc-transceiver:config/oc-transceiver:description" {
     description
       "Not-supported deviation.";
@@ -264,6 +295,12 @@ module arista-platform-notsupported-deviations {
   }
 
   deviation "/oc-platform:components/oc-platform:component/oc-transceiver:transceiver/oc-transceiver:physical-channels/oc-transceiver:channel/oc-transceiver:config/oc-transceiver:tx-laser" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-platform:components/oc-platform:component/oc-transceiver:transceiver/oc-transceiver:physical-channels/oc-transceiver:channel/oc-transceiver:state/oc-transceiver:associated-optical-channel" {
     description
       "Not-supported deviation.";
     deviate not-supported;
@@ -486,6 +523,12 @@ module arista-platform-notsupported-deviations {
   }
 
   deviation "/oc-platform:components/oc-platform:component/oc-transceiver:transceiver/oc-transceiver:state/oc-transceiver:laser-bias-current" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-platform:components/oc-platform:component/oc-transceiver:transceiver/oc-transceiver:state/oc-transceiver:module-functional-type" {
     description
       "Not-supported deviation.";
     deviate not-supported;

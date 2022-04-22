@@ -13,8 +13,16 @@ module arista-lldp-notsupported-deviations {
      Product Support";
   description
     "This module contains OpenConfig lldp deviations in Arista EOS.
-     Copyright (c) 2020 Arista Networks, Inc. All rights reserved.";
+     Copyright (c) 2021 Arista Networks, Inc. All rights reserved.";
 
+  revision 2021-10-01 {
+    description
+      "Not-supported deviations file.";
+  }
+  revision 2021-09-28 {
+    description
+      "Not-supported deviations file.";
+  }
   revision 2020-02-04 {
     description
       "Not-supported deviations file.";

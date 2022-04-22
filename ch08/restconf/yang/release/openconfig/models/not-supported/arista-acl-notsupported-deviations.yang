@@ -13,14 +13,48 @@ module arista-acl-notsupported-deviations {
      Product Support";
   description
     "This module contains OpenConfig acl deviations in Arista EOS.
-     Copyright (c) 2020 Arista Networks, Inc. All rights reserved.";
+     Copyright (c) 2021 Arista Networks, Inc. All rights reserved.";
 
+  revision 2021-06-25 {
+    description
+      "Not-supported deviations file.";
+  }
   revision 2020-02-04 {
     description
       "Not-supported deviations file.";
   }
 
   deviation "/oc-acl:acl/oc-acl:config" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-acl:acl/oc-acl:acl-sets/oc-acl:acl-set/oc-acl:acl-entries/oc-acl:acl-entry/oc-acl:mpls" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-acl:acl/oc-acl:acl-sets/oc-acl:acl-set/oc-acl:acl-entries/oc-acl:acl-entry/oc-acl:ipv4/oc-acl:config/oc-acl:dscp-set" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-acl:acl/oc-acl:acl-sets/oc-acl:acl-set/oc-acl:acl-entries/oc-acl:acl-entry/oc-acl:ipv4/oc-acl:state/oc-acl:dscp-set" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-acl:acl/oc-acl:acl-sets/oc-acl:acl-set/oc-acl:acl-entries/oc-acl:acl-entry/oc-acl:ipv6/oc-acl:config/oc-acl:dscp-set" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-acl:acl/oc-acl:acl-sets/oc-acl:acl-set/oc-acl:acl-entries/oc-acl:acl-entry/oc-acl:ipv6/oc-acl:state/oc-acl:dscp-set" {
     description
       "Not-supported deviation.";
     deviate not-supported;

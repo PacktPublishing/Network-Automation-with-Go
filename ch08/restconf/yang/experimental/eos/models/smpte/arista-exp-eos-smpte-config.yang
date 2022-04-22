@@ -1,0 +1,177 @@
+module arista-exp-eos-smpte-config {
+  yang-version 1;
+  namespace "http://arista.com/yang/experimental/eos/smpte/config";
+  prefix smpte-config-exp;
+
+  import ietf-inet-types {
+    prefix inet;
+  }
+  import arista-eos-types {
+    prefix eos-types;
+  }
+  import arista-exp-eos {
+    prefix eos-exp;
+  }
+
+  organization
+    "Arista Networks <http://arista.com/>";
+  description
+    "Models for smpte config subsystem of Arista EOS
+     Copyright (c) 2021 Arista Networks, Inc. All rights reserved.";
+
+  revision 2021-09-27 {
+    description
+      "pyang auto format";
+    reference
+      "1.0.1";
+  }
+  revision 2017-09-26 {
+    description
+      "Initial revision";
+    reference
+      "0.1.0";
+  }
+
+  augment "/eos-exp:arista/eos-exp:eos" {
+    container smpte {
+      container sessions {
+        description
+          "Path: /Sysdb/smpte/sessions, Type: directory Tac::Dir";
+        container config {
+          description
+            "Path: /Sysdb/smpte/sessions/config, Type: entity Smpte::Sessions::Config";
+          uses Smpte-Sessions-Config;
+        }
+      }
+    }
+  }
+
+  grouping Smpte-Sessions-Action {
+    description
+      "Type: Smpte::Sessions::Action";
+    list destinations {
+      key "index-ip index-port";
+      description
+        "Path: <Smpte::Sessions::Action>/destinations, Type: [value Arnet::IpAndPort]bool";
+      leaf index-ip {
+        type inet:ipv4-address;
+        description
+          "Path: <Smpte::Sessions::Action>/destinations/<!External index>/ip, Type: value Arnet::IpAddr";
+      }
+      leaf index-port {
+        type uint16;
+        description
+          "Path: <Smpte::Sessions::Action>/destinations/<!External index>/port, Type: U16";
+      }
+      leaf value {
+        type boolean;
+        description
+          "Path: <Smpte::Sessions::Action>/destinations/<index>, Type: bool";
+      }
+    }
+    container primaryFlow {
+      description
+        "Path: <Smpte::Sessions::Action>/primaryFlow, Type: value Smpte::Sessions::PrimaryFlow";
+      uses Smpte-Sessions-PrimaryFlow;
+    }
+  }
+
+  grouping Smpte-Sessions-Config {
+    description
+      "Type: Smpte::Sessions::Config";
+    list session {
+      key "name";
+      description
+        "Path: <Smpte::Sessions::Config>/session, Type: ['name' Tac::String]entity Smpte::Sessions::Session";
+      uses Smpte-Sessions-Session;
+    }
+    list udpPort {
+      key "index";
+      description
+        "Path: <Smpte::Sessions::Config>/udpPort, Type: [U16]bool";
+      leaf index {
+        type uint16;
+        description
+          "Path: <Smpte::Sessions::Config>/udpPort/<!External index>, Type: U16";
+      }
+      leaf value {
+        type boolean;
+        description
+          "Path: <Smpte::Sessions::Config>/udpPort/<index>, Type: bool";
+      }
+    }
+  }
+
+  grouping Smpte-Sessions-PrimaryFlow {
+    description
+      "Type: Smpte::Sessions::PrimaryFlow";
+    leaf name {
+      type string;
+    }
+    leaf immediate {
+      type boolean;
+      description
+        "Path: <Smpte::Sessions::PrimaryFlow>/immediate, Type: bool";
+    }
+    leaf timeStamp {
+      type uint32;
+      description
+        "Path: <Smpte::Sessions::PrimaryFlow>/timeStamp, Type: U32";
+    }
+  }
+
+  grouping Smpte-Sessions-Session {
+    description
+      "Type: Smpte::Sessions::Session";
+    container action {
+      description
+        "Path: <Smpte::Sessions::Session>/action, Type: value Smpte::Sessions::Action";
+      uses Smpte-Sessions-Action;
+    }
+    leaf disable {
+      type boolean;
+      description
+        "Path: <Smpte::Sessions::Session>/disable, Type: bool";
+    }
+    list flow {
+      key "index-destIp index-name index-sourceInterface index-sourceIp";
+      description
+        "Path: <Smpte::Sessions::Session>/flow, Type: [value Smpte::Sessions::Flow]bool";
+      leaf index-destIp {
+        type inet:ipv4-address;
+        description
+          "Path: <Smpte::Sessions::Session>/flow/<!External index>/destIp, Type: value Arnet::IpAddr";
+      }
+      leaf index-name {
+        type string;
+        description
+          "Path: <Smpte::Sessions::Session>/flow/<!External index>/name, Type: Tac::String";
+      }
+      leaf index-sourceInterface {
+        type eos-types:Arnet-IntfId;
+        description
+          "Path: <Smpte::Sessions::Session>/flow/<!External index>/sourceInterface, Type: value Arnet::IntfId";
+      }
+      leaf index-sourceIp {
+        type inet:ipv4-address;
+        description
+          "Path: <Smpte::Sessions::Session>/flow/<!External index>/sourceIp, Type: value Arnet::IpAddr";
+      }
+      leaf value {
+        type boolean;
+        description
+          "Path: <Smpte::Sessions::Session>/flow/<index>, Type: bool";
+      }
+    }
+    leaf name {
+      type string;
+      description
+        "Path: <Smpte::Sessions::Session>/name, Type: Tac::String";
+    }
+    leaf reconstructionTimeout {
+      type uint32;
+      description
+        "Path: <Smpte::Sessions::Session>/reconstructionTimeout, Type: U32";
+    }
+  }
+}

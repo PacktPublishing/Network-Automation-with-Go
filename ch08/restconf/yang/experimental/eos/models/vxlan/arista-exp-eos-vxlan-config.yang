@@ -25,15 +25,20 @@ module arista-exp-eos-vxlan-config {
     "This module contains VXLAN configuration models in Arista EOS.
 
      Copyright (c) 2018 Arista Networks, Inc. All rights reserved.";
-  oc-ext:openconfig-version "0.2.0";
+  oc-ext:openconfig-version "0.2.1";
 
+  revision 2021-09-27 {
+    description
+      "pyang auto format";
+    reference
+      "0.2.1";
+  }
   revision 2021-04-26 {
     description
       "Obsolete flood-mcast-grp leaf in vti-config";
     reference
       "0.2.0";
   }
-
   revision 2018-08-01 {
     description
       "Initial revision";

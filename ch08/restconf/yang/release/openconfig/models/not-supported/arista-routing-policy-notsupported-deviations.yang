@@ -21,6 +21,10 @@ module arista-routing-policy-notsupported-deviations {
     "This module contains OpenConfig routing-policy deviations in Arista EOS.
      Copyright (c) 2020 Arista Networks, Inc. All rights reserved.";
 
+  revision 2021-03-02 {
+    description
+      "Not-supported deviations file.";
+  }
   revision 2020-09-08 {
     description
       "Not-supported deviations file.";
@@ -63,12 +67,6 @@ module arista-routing-policy-notsupported-deviations {
   }
 
   deviation "/oc-rpol:routing-policy/oc-rpol:defined-sets/oc-rpol:prefix-sets/oc-rpol:prefix-set/oc-rpol:state" {
-    description
-      "Not-supported deviation.";
-    deviate not-supported;
-  }
-
-  deviation "/oc-rpol:routing-policy/oc-rpol:defined-sets/oc-rpol:prefix-sets/oc-rpol:prefix-set/oc-rpol:config/oc-rpol:mode" {
     description
       "Not-supported deviation.";
     deviate not-supported;

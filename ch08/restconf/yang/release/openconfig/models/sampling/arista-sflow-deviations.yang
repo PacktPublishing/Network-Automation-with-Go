@@ -1,0 +1,51 @@
+module arista-sflow-deviations {
+  namespace "http://arista.com/yang/openconfig/sflow/deviations";
+  prefix arista-sflow-deviations;
+
+  import openconfig-sampling-sflow {
+    prefix oc-sflow;
+  }
+  import openconfig-extensions {
+    prefix oc-ext;
+  }
+
+  organization
+    "Arista Networks, Inc.";
+  contact
+    "Arista Networks, Inc.
+     Product Support";
+  description
+    "This module contains OpenConfig sFlow deviations in Arista EOS.
+
+     Copyright (c) 2021 Arista Networks, Inc. All rights reserved.";
+  oc-ext:openconfig-version "1.0.1";
+
+  revision 2021-09-27 {
+    description
+      "pyang auto format";
+    reference
+      "1.0.1";
+  }
+  revision 2021-07-12 {
+    description
+      "Initial deviations file.";
+    reference
+      "1.0.0";
+  }
+
+  deviation "/oc-sflow:sampling/oc-sflow:sflow/oc-sflow:config/oc-sflow:sampling-rate" {
+    description
+      "sampling-rate has a default value of 1 << 20 in EOS";
+    deviate add {
+      default "1048576";
+    }
+  }
+
+  deviation "/oc-sflow:sampling/oc-sflow:sflow/oc-sflow:state/oc-sflow:sampling-rate" {
+    description
+      "sampling-rate has a default value of 1 << 20 in EOS";
+    deviate add {
+      default "1048576";
+    }
+  }
+}

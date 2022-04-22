@@ -2,6 +2,9 @@ module arista-network-instance-notsupported-deviations {
   namespace "http://arista.com/yang/openconfig/network-instance/notsupported-deviations";
   prefix arista-network-instance-notsupported-deviations;
 
+  import openconfig-isis-flex-algo {
+    prefix flex-algo;
+  }
   import openconfig-network-instance {
     prefix oc-netinst;
   }
@@ -18,6 +21,86 @@ module arista-network-instance-notsupported-deviations {
     "This module contains OpenConfig network-instance deviations in Arista EOS.
      Copyright (c) 2021 Arista Networks, Inc. All rights reserved.";
 
+  revision 2021-11-11 {
+    description
+      "Not-supported deviations file.";
+  }
+  revision 2021-11-05 {
+    description
+      "Not-supported deviations file.";
+  }
+  revision 2021-11-04 {
+    description
+      "Not-supported deviations file.";
+  }
+  revision 2021-10-01 {
+    description
+      "Not-supported deviations file.";
+  }
+  revision 2021-09-28 {
+    description
+      "Not-supported deviations file.";
+  }
+  revision 2021-09-09 {
+    description
+      "Not-supported deviations file.";
+  }
+  revision 2021-09-07 {
+    description
+      "Not-supported deviations file.";
+  }
+  revision 2021-08-11 {
+    description
+      "Not-supported deviations file.";
+  }
+  revision 2021-07-21 {
+    description
+      "Not-supported deviations file.";
+  }
+  revision 2021-07-20 {
+    description
+      "Not-supported deviations file.";
+  }
+  revision 2021-07-19 {
+    description
+      "Not-supported deviations file.";
+  }
+  revision 2021-07-16 {
+    description
+      "Not-supported deviations file.";
+  }
+  revision 2021-07-13 {
+    description
+      "Not-supported deviations file.";
+  }
+  revision 2021-07-09 {
+    description
+      "Not-supported deviations file.";
+  }
+  revision 2021-07-08 {
+    description
+      "Not-supported deviations file.";
+  }
+  revision 2021-07-07 {
+    description
+      "Not-supported deviations file.";
+  }
+  revision 2021-07-05 {
+    description
+      "Not-supported deviations file.";
+  }
+  revision 2021-07-02 {
+    description
+      "Not-supported deviations file.";
+  }
+  revision 2021-06-30 {
+    description
+      "Not-supported deviations file.";
+  }
+  revision 2021-06-24 {
+    description
+      "Not-supported deviations file.";
+  }
   revision 2021-05-11 {
     description
       "Not-supported deviations file.";
@@ -103,6 +186,12 @@ module arista-network-instance-notsupported-deviations {
     deviate not-supported;
   }
 
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:evpn" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
   deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:fdb" {
     description
       "Not-supported deviation.";
@@ -110,6 +199,18 @@ module arista-network-instance-notsupported-deviations {
   }
 
   deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:route-limits" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/flex-algo:flex-algo/flex-algo:algorithms/flex-algo:algorithm/flex-algo:config/flex-algo:calc-type" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/flex-algo:flex-algo/flex-algo:algorithms/flex-algo:algorithm/flex-algo:state/flex-algo:calc-type" {
     description
       "Not-supported deviation.";
     deviate not-supported;
@@ -139,13 +240,19 @@ module arista-network-instance-notsupported-deviations {
     deviate not-supported;
   }
 
-  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:afts/oc-netinst:ipv4-unicast/oc-netinst:ipv4-entry/oc-netinst:state/oc-netinst:octets-forwarded" {
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:afts/oc-netinst:ipv4-unicast/oc-netinst:ipv4-entry/oc-netinst:state/oc-netinst:entry-metadata" {
     description
       "Not-supported deviation.";
     deviate not-supported;
   }
 
-  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:afts/oc-netinst:ipv4-unicast/oc-netinst:ipv4-entry/oc-netinst:state/oc-netinst:origin-protocol" {
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:afts/oc-netinst:ipv4-unicast/oc-netinst:ipv4-entry/oc-netinst:state/oc-netinst:next-hop-group-network-instance" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:afts/oc-netinst:ipv4-unicast/oc-netinst:ipv4-entry/oc-netinst:state/oc-netinst:octets-forwarded" {
     description
       "Not-supported deviation.";
     deviate not-supported;
@@ -163,13 +270,19 @@ module arista-network-instance-notsupported-deviations {
     deviate not-supported;
   }
 
-  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:afts/oc-netinst:ipv6-unicast/oc-netinst:ipv6-entry/oc-netinst:state/oc-netinst:octets-forwarded" {
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:afts/oc-netinst:ipv6-unicast/oc-netinst:ipv6-entry/oc-netinst:state/oc-netinst:entry-metadata" {
     description
       "Not-supported deviation.";
     deviate not-supported;
   }
 
-  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:afts/oc-netinst:ipv6-unicast/oc-netinst:ipv6-entry/oc-netinst:state/oc-netinst:origin-protocol" {
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:afts/oc-netinst:ipv6-unicast/oc-netinst:ipv6-entry/oc-netinst:state/oc-netinst:next-hop-group-network-instance" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:afts/oc-netinst:ipv6-unicast/oc-netinst:ipv6-entry/oc-netinst:state/oc-netinst:octets-forwarded" {
     description
       "Not-supported deviation.";
     deviate not-supported;
@@ -194,6 +307,18 @@ module arista-network-instance-notsupported-deviations {
   }
 
   deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:afts/oc-netinst:next-hop-groups/oc-netinst:next-hop-group/oc-netinst:state/oc-netinst:color" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:afts/oc-netinst:next-hop-groups/oc-netinst:next-hop-group/oc-netinst:state/oc-netinst:programmed-id" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:afts/oc-netinst:next-hops/oc-netinst:next-hop/oc-netinst:ip-in-ip" {
     description
       "Not-supported deviation.";
     deviate not-supported;
@@ -229,7 +354,19 @@ module arista-network-instance-notsupported-deviations {
     deviate not-supported;
   }
 
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:afts/oc-netinst:next-hops/oc-netinst:next-hop/oc-netinst:state/oc-netinst:programmed-index" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
   deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:afts/oc-netinst:next-hops/oc-netinst:next-hop/oc-netinst:state/oc-netinst:pushed-mpls-label-stack" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:inter-instance-policies/oc-netinst:import-export-policy" {
     description
       "Not-supported deviation.";
     deviate not-supported;
@@ -265,103 +402,31 @@ module arista-network-instance-notsupported-deviations {
     deviate not-supported;
   }
 
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:config/oc-netinst:irb-anycast-gateway" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:config/oc-netinst:mac-pinning" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
   deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:state/oc-netinst:associated-address-families" {
     description
       "Not-supported deviation.";
     deviate not-supported;
   }
 
-  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:mpls/oc-netinst:lsps" {
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:state/oc-netinst:irb-anycast-gateway" {
     description
       "Not-supported deviation.";
     deviate not-supported;
   }
 
-  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:mpls/oc-netinst:te-global-attributes" {
-    description
-      "Not-supported deviation.";
-    deviate not-supported;
-  }
-
-  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:mpls/oc-netinst:te-interface-attributes" {
-    description
-      "Not-supported deviation.";
-    deviate not-supported;
-  }
-
-  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:mpls/oc-netinst:global/oc-netinst:config" {
-    description
-      "Not-supported deviation.";
-    deviate not-supported;
-  }
-
-  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:mpls/oc-netinst:global/oc-netinst:interface-attributes" {
-    description
-      "Not-supported deviation.";
-    deviate not-supported;
-  }
-
-  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:mpls/oc-netinst:global/oc-netinst:state" {
-    description
-      "Not-supported deviation.";
-    deviate not-supported;
-  }
-
-  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:mpls/oc-netinst:global/oc-netinst:reserved-label-blocks/oc-netinst:reserved-label-block/oc-netinst:state" {
-    description
-      "Not-supported deviation.";
-    deviate not-supported;
-  }
-
-  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:mpls/oc-netinst:signaling-protocols/oc-netinst:ldp" {
-    description
-      "Not-supported deviation.";
-    deviate not-supported;
-  }
-
-  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:mpls/oc-netinst:signaling-protocols/oc-netinst:rsvp-te/oc-netinst:interface-attributes" {
-    description
-      "Not-supported deviation.";
-    deviate not-supported;
-  }
-
-  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:mpls/oc-netinst:signaling-protocols/oc-netinst:rsvp-te/oc-netinst:neighbors" {
-    description
-      "Not-supported deviation.";
-    deviate not-supported;
-  }
-
-  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:mpls/oc-netinst:signaling-protocols/oc-netinst:rsvp-te/oc-netinst:sessions" {
-    description
-      "Not-supported deviation.";
-    deviate not-supported;
-  }
-
-  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:mpls/oc-netinst:signaling-protocols/oc-netinst:rsvp-te/oc-netinst:global/oc-netinst:graceful-restart" {
-    description
-      "Not-supported deviation.";
-    deviate not-supported;
-  }
-
-  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:mpls/oc-netinst:signaling-protocols/oc-netinst:rsvp-te/oc-netinst:global/oc-netinst:state" {
-    description
-      "Not-supported deviation.";
-    deviate not-supported;
-  }
-
-  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:mpls/oc-netinst:signaling-protocols/oc-netinst:segment-routing/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:interface-ref" {
-    description
-      "Not-supported deviation.";
-    deviate not-supported;
-  }
-
-  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:mpls/oc-netinst:signaling-protocols/oc-netinst:segment-routing/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:sid-counters/oc-netinst:sid-counter/oc-netinst:forwarding-classes/oc-netinst:forwarding-class/oc-netinst:state/oc-netinst:exp" {
-    description
-      "Not-supported deviation.";
-    deviate not-supported;
-  }
-
-  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:mpls/oc-netinst:signaling-protocols/oc-netinst:segment-routing/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:sid-counters/oc-netinst:sid-counter/oc-netinst:state/oc-netinst:mpls-label" {
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:state/oc-netinst:mac-pinning" {
     description
       "Not-supported deviation.";
     deviate not-supported;
@@ -709,12 +774,6 @@ module arista-network-instance-notsupported-deviations {
     deviate not-supported;
   }
 
-  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:graceful-restart" {
-    description
-      "Not-supported deviation.";
-    deviate not-supported;
-  }
-
   deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:use-multiple-paths" {
     description
       "Not-supported deviation.";
@@ -829,31 +888,91 @@ module arista-network-instance-notsupported-deviations {
     deviate not-supported;
   }
 
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:ipv4-unicast/oc-netinst:prefix-limit/oc-netinst:state/oc-netinst:max-prefixes" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:ipv4-unicast/oc-netinst:prefix-limit/oc-netinst:state/oc-netinst:prevent-teardown" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:ipv4-unicast/oc-netinst:prefix-limit/oc-netinst:state/oc-netinst:warning-threshold-pct" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:ipv6-unicast/oc-netinst:prefix-limit/oc-netinst:state/oc-netinst:max-prefixes" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:ipv6-unicast/oc-netinst:prefix-limit/oc-netinst:state/oc-netinst:prevent-teardown" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:ipv6-unicast/oc-netinst:prefix-limit/oc-netinst:state/oc-netinst:warning-threshold-pct" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
   deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:state/oc-netinst:prefixes/oc-netinst:received-pre-policy" {
     description
       "Not-supported deviation.";
     deviate not-supported;
   }
 
-  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:apply-policy/oc-netinst:config/oc-netinst:default-export-policy" {
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:graceful-restart/oc-netinst:config/oc-netinst:restart-time" {
     description
       "Not-supported deviation.";
     deviate not-supported;
   }
 
-  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:apply-policy/oc-netinst:config/oc-netinst:default-import-policy" {
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:graceful-restart/oc-netinst:config/oc-netinst:stale-routes-time" {
     description
       "Not-supported deviation.";
     deviate not-supported;
   }
 
-  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:apply-policy/oc-netinst:state/oc-netinst:default-export-policy" {
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:graceful-restart/oc-netinst:state/oc-netinst:local-restarting" {
     description
       "Not-supported deviation.";
     deviate not-supported;
   }
 
-  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:apply-policy/oc-netinst:state/oc-netinst:default-import-policy" {
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:graceful-restart/oc-netinst:state/oc-netinst:mode" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:graceful-restart/oc-netinst:state/oc-netinst:peer-restart-time" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:graceful-restart/oc-netinst:state/oc-netinst:peer-restarting" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:graceful-restart/oc-netinst:state/oc-netinst:restart-time" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:graceful-restart/oc-netinst:state/oc-netinst:stale-routes-time" {
     description
       "Not-supported deviation.";
     deviate not-supported;
@@ -925,12 +1044,6 @@ module arista-network-instance-notsupported-deviations {
     deviate not-supported;
   }
 
-  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:transport/oc-netinst:state/oc-netinst:local-address" {
-    description
-      "Not-supported deviation.";
-    deviate not-supported;
-  }
-
   deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:neighbors/oc-netinst:neighbor/oc-netinst:transport/oc-netinst:state/oc-netinst:local-port" {
     description
       "Not-supported deviation.";
@@ -950,12 +1063,6 @@ module arista-network-instance-notsupported-deviations {
   }
 
   deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:error-handling" {
-    description
-      "Not-supported deviation.";
-    deviate not-supported;
-  }
-
-  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:graceful-restart" {
     description
       "Not-supported deviation.";
     deviate not-supported;
@@ -1063,31 +1170,67 @@ module arista-network-instance-notsupported-deviations {
     deviate not-supported;
   }
 
-  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:apply-policy/oc-netinst:config/oc-netinst:default-export-policy" {
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:ipv4-unicast/oc-netinst:prefix-limit/oc-netinst:state/oc-netinst:max-prefixes" {
     description
       "Not-supported deviation.";
     deviate not-supported;
   }
 
-  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:apply-policy/oc-netinst:config/oc-netinst:default-import-policy" {
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:ipv4-unicast/oc-netinst:prefix-limit/oc-netinst:state/oc-netinst:prevent-teardown" {
     description
       "Not-supported deviation.";
     deviate not-supported;
   }
 
-  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:apply-policy/oc-netinst:state/oc-netinst:default-export-policy" {
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:ipv4-unicast/oc-netinst:prefix-limit/oc-netinst:state/oc-netinst:warning-threshold-pct" {
     description
       "Not-supported deviation.";
     deviate not-supported;
   }
 
-  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:apply-policy/oc-netinst:state/oc-netinst:default-import-policy" {
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:ipv6-unicast/oc-netinst:prefix-limit/oc-netinst:state/oc-netinst:max-prefixes" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:ipv6-unicast/oc-netinst:prefix-limit/oc-netinst:state/oc-netinst:prevent-teardown" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:afi-safis/oc-netinst:afi-safi/oc-netinst:ipv6-unicast/oc-netinst:prefix-limit/oc-netinst:state/oc-netinst:warning-threshold-pct" {
     description
       "Not-supported deviation.";
     deviate not-supported;
   }
 
   deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:config/oc-netinst:route-flap-damping" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:graceful-restart/oc-netinst:config/oc-netinst:restart-time" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:graceful-restart/oc-netinst:config/oc-netinst:stale-routes-time" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:graceful-restart/oc-netinst:state/oc-netinst:restart-time" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:graceful-restart/oc-netinst:state/oc-netinst:stale-routes-time" {
     description
       "Not-supported deviation.";
     deviate not-supported;
@@ -1124,12 +1267,6 @@ module arista-network-instance-notsupported-deviations {
   }
 
   deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:transport/oc-netinst:config/oc-netinst:tcp-mss" {
-    description
-      "Not-supported deviation.";
-    deviate not-supported;
-  }
-
-  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:bgp/oc-netinst:peer-groups/oc-netinst:peer-group/oc-netinst:transport/oc-netinst:state/oc-netinst:local-address" {
     description
       "Not-supported deviation.";
     deviate not-supported;
@@ -1231,12 +1368,6 @@ module arista-network-instance-notsupported-deviations {
     deviate not-supported;
   }
 
-  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:circuit-counters" {
-    description
-      "Not-supported deviation.";
-    deviate not-supported;
-  }
-
   deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:enable-bfd" {
     description
       "Not-supported deviation.";
@@ -1273,6 +1404,12 @@ module arista-network-instance-notsupported-deviations {
     deviate not-supported;
   }
 
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:circuit-counters/oc-netinst:state/oc-netinst:init-fails" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
   deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:levels/oc-netinst:level/oc-netinst:adjacencies/oc-netinst:adjacency/oc-netinst:state/oc-netinst:adjacency-type" {
     description
       "Not-supported deviation.";
@@ -1280,6 +1417,12 @@ module arista-network-instance-notsupported-deviations {
   }
 
   deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:levels/oc-netinst:level/oc-netinst:afi-safi/oc-netinst:af/oc-netinst:segment-routing/oc-netinst:adjacency-sids" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:levels/oc-netinst:level/oc-netinst:afi-safi/oc-netinst:af/oc-netinst:segment-routing/flex-algo:flex-algo-prefix-sids/flex-algo:flex-algo-prefix-sid/flex-algo:state" {
     description
       "Not-supported deviation.";
     deviate not-supported;
@@ -1315,19 +1458,13 @@ module arista-network-instance-notsupported-deviations {
     deviate not-supported;
   }
 
-  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:timers/oc-netinst:state" {
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:interfaces/oc-netinst:interface/oc-netinst:timers/oc-netinst:state/oc-netinst:csnp-interval" {
     description
       "Not-supported deviation.";
     deviate not-supported;
   }
 
   deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:levels/oc-netinst:level/oc-netinst:link-state-database" {
-    description
-      "Not-supported deviation.";
-    deviate not-supported;
-  }
-
-  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:levels/oc-netinst:level/oc-netinst:system-level-counters" {
     description
       "Not-supported deviation.";
     deviate not-supported;
@@ -1346,6 +1483,18 @@ module arista-network-instance-notsupported-deviations {
   }
 
   deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:levels/oc-netinst:level/oc-netinst:state/oc-netinst:metric-style" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:levels/oc-netinst:level/oc-netinst:system-level-counters/oc-netinst:state/oc-netinst:manual-address-drop-from-areas" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-netinst:network-instances/oc-netinst:network-instance/oc-netinst:protocols/oc-netinst:protocol/oc-netinst:isis/oc-netinst:levels/oc-netinst:level/oc-netinst:system-level-counters/oc-netinst:state/oc-netinst:part-changes" {
     description
       "Not-supported deviation.";
     deviate not-supported;

@@ -18,6 +18,22 @@ module arista-system-notsupported-deviations {
     "This module contains OpenConfig system deviations in Arista EOS.
      Copyright (c) 2021 Arista Networks, Inc. All rights reserved.";
 
+  revision 2021-10-26 {
+    description
+      "Not-supported deviations file.";
+  }
+  revision 2021-10-01 {
+    description
+      "Not-supported deviations file.";
+  }
+  revision 2021-09-28 {
+    description
+      "Not-supported deviations file.";
+  }
+  revision 2021-09-10 {
+    description
+      "Not-supported deviations file.";
+  }
   revision 2021-03-15 {
     description
       "Not-supported deviations file.";
@@ -69,19 +85,13 @@ module arista-system-notsupported-deviations {
     deviate not-supported;
   }
 
-  deviation "/oc-sys:system/oc-sys:clock" {
-    description
-      "Not-supported deviation.";
-    deviate not-supported;
-  }
-
-  deviation "/oc-sys:system/oc-sys:cpus" {
-    description
-      "Not-supported deviation.";
-    deviate not-supported;
-  }
-
   deviation "/oc-sys:system/oc-sys:license" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:mount-points" {
     description
       "Not-supported deviation.";
     deviate not-supported;
@@ -243,6 +253,12 @@ module arista-system-notsupported-deviations {
     deviate not-supported;
   }
 
+  deviation "/oc-sys:system/oc-sys:clock/oc-sys:state" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
   deviation "/oc-sys:system/oc-sys:dns/oc-sys:host-entries/oc-sys:host-entry/oc-sys:state/oc-sys:alias" {
     description
       "Not-supported deviation.";
@@ -274,6 +290,24 @@ module arista-system-notsupported-deviations {
   }
 
   deviation "/oc-sys:system/oc-sys:memory/oc-sys:config" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:memory/oc-sys:state/oc-sys:counters" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:memory/oc-sys:state/oc-sys:free" {
+    description
+      "Not-supported deviation.";
+    deviate not-supported;
+  }
+
+  deviation "/oc-sys:system/oc-sys:memory/oc-sys:state/oc-sys:used" {
     description
       "Not-supported deviation.";
     deviate not-supported;
