@@ -89,7 +89,13 @@ type Addr struct {
 
 func (m *Model) buildL3Interfaces(dev *api.Device) error {
 	links := m.Uplinks
-	links = append(links, Link{Name: srlLoopback, Prefix: fmt.Sprintf("%s/32", m.Loopback.IP)})
+	links = append(
+		links,
+		Link{
+			Name:   srlLoopback,
+			Prefix: fmt.Sprintf("%s/32", m.Loopback.IP),
+		},
+	)
 
 	for _, link := range links {
 		intf, err := dev.NewInterface(link.Name)
@@ -119,7 +125,13 @@ func (m *Model) buildNetworkInstance(dev *api.Device) error {
 	}
 
 	links := m.Uplinks
-	links = append(links, Link{Name: srlLoopback, Prefix: fmt.Sprintf("%s/32", m.Loopback.IP)})
+	links = append(
+		links,
+		Link{
+			Name:   srlLoopback,
+			Prefix: fmt.Sprintf("%s/32", m.Loopback.IP),
+		},
+	)
 	for _, link := range links {
 		linkName := fmt.Sprintf("%s.%d", link.Name, defaultSubIdx)
 		ni.NewInterface(linkName)
@@ -252,12 +264,21 @@ func main() {
 
 	value, _ := json.Marshal(buildSetRPC(v))
 
-	req, err := http.NewRequest("POST", hostname, bytes.NewBuffer(value))
+	req, err := http.NewRequest(
+		"POST",
+		hostname,
+		bytes.NewBuffer(value),
+	)
 	if err != nil {
 		log.Fatal(err)
 	}
 	req.Header.Add("Content-Type", "application/json")
-	req.Header.Add("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s", username, password))))
+	req.Header.Add(
+		"Authorization",
+		"Basic "+base64.StdEncoding.EncodeToString(
+			[]byte(fmt.Sprintf("%s:%s", username, password)),
+		),
+	)
 
 	client := &http.Client{Transport: &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
@@ -284,7 +305,10 @@ func main() {
 	}
 
 	if result.Error != nil {
-		log.Fatalf("failed to configure the device: %v", *result.Error)
+		log.Fatalf(
+			"failed to configure the device: %v",
+			*result.Error,
+		)
 	}
 
 	log.Println("Successfully configured the device")
