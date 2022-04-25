@@ -1,0 +1,12 @@
+{
+    "name": "ceos.jfk01",
+    "device_type": {
+        "slug":  "ceos"
+    },
+    "device_role": {
+        "slug":  "router"
+    },
+    "site": {
+        "slug":  "jfk01"
+    }
+}

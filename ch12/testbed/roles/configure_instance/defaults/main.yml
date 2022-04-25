@@ -14,15 +14,18 @@ base_software:
     - dnsutils
     - build-essential
     - python3-dev
+    - libssh-dev
   RedHat:
     - bind-utils
     - gcc
     - python3-devel
+    - libssh-devel
 
 python_libraries:
   - ipaddress
   - ansible-pylibssh
   - ansible-navigator
+  - resolvelib>=0.5.3,<0.6.0 
 
 ansible_collections:
   - arista.eos:4.1.2

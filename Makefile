@@ -23,14 +23,14 @@ cleanup: 10-down lab-down
 
 ## Clone Arista's cEOS image after uploading it
 clone:
-	docker import cEOS64-lab-4.26.4M.tar ceos:4.26.4M
+	docker import cEOS64-lab-4.28.0F.tar ceos:4.28.0F
 
 env-build: generate-ssh-key check-aws-key check-aws-secret ## Build test enviroment on AWS. Make sure you export your API credentials
 	@docker run -it \
 	--env AWS_ACCESS_KEY_ID \
 	--env AWS_SECRET_ACCESS_KEY \
 	--volume ${CWD}:/network-automation-with-go:Z \
-	ghcr.io/packtpublishing/builder:0.1.27 \
+	ghcr.io/packtpublishing/builder:0.2.0 \
 	ansible-playbook /network-automation-with-go/ch12/testbed/create-EC2-testbed.yml \
 	--extra-vars "instance_type=$(VM_SIZE) \
 	aws_region=$(AWS_REGION) \
@@ -41,7 +41,7 @@ env-delete: check-aws-key check-aws-secret ## Delete test enviroment on AWS. Mak
 	--env AWS_ACCESS_KEY_ID \
 	--env AWS_SECRET_ACCESS_KEY \
 	--volume ${CWD}:/network-automation-with-go:Z \
-	ghcr.io/packtpublishing/builder:0.1.27 \
+	ghcr.io/packtpublishing/builder:0.2.0 \
 	ansible-playbook /network-automation-with-go/ch12/testbed/delete-EC2-testbed.yml
 
 env-show:  ## Show test environment details

@@ -1,5 +1,5 @@
 skip_check: false
-ceos_image: cEOS64-lab-4.26.4M.tar
+ceos_image: cEOS64-lab-4.28.0F.tar
 path_to_image: ~/Downloads
 ssh_key_filename: id_rsa
 temp_dir: /network-automation-with-go/lab-state

@@ -70,3 +70,5 @@ rm $f
 # host=clab-netgo-srl
 # user=admin
 # password=admin
+
+# For the future: https://gist.github.com/sivel/668d9a33cad0172b3b59666196738b59

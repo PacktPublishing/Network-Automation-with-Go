@@ -87,7 +87,7 @@ ok: [testbed] => {}
 MSG:
 
 SSH: ssh -i lab-state/id_rsa fedora@ec2-3-94-8-154.compute-1.amazonaws.com
-To upload cEOS image: scp -i lab-state/id_rsa ~/Downloads/cEOS64-lab-4.26.4M.tar fedora@ec2-3-94-8-154.compute-1.amazonaws.com:.
+To upload cEOS image: scp -i lab-state/id_rsa ~/Downloads/cEOS64-lab-4.28.0F.tar fedora@ec2-3-94-8-154.compute-1.amazonaws.com:.
 
 RUNNING HANDLER [configure_instance : Reboot machine] ****************************************************************
 changed: [testbed] => {
@@ -169,7 +169,7 @@ ok: [testbed] => {}
 MSG:
 
 SSH: ssh -i lab-state/id_rsa ubuntu@ec2-3-142-51-83.us-east-2.compute.amazonaws.com
-To upload cEOS image: scp -i lab-state/id_rsa ~/Downloads/cEOS64-lab-4.26.4M.tar ubuntu@ec2-3-142-51-83.us-east-2.compute:.
+To upload cEOS image: scp -i lab-state/id_rsa ~/Downloads/cEOS64-lab-4.28.0F.tar ubuntu@ec2-3-142-51-83.us-east-2.compute:.
 
 PLAY RECAP **********************************************************************************************************************
 localhost                  : ok=26   changed=1    unreachable=0    failed=0    skipped=6    rescued=0    ignored=0   
@@ -190,32 +190,33 @@ go version go1.18beta2 linux/amd64
 
 Some networking vendors make it simpler than others to access their container-based network operating systems (NOS). If you can't pull the image directly from a container registry, like Docker Hub, you might need to download the image from their website and upload it to the test VM. Keep in mind most container images might require more resources that what a `t2.micro` instance can offer.
 
-Let's pretend you downloaded a cEOS image (`cEOS-lab-4.26.1F.tar`) to your Downloads folder. You can copy the image to the test VM with the `scp` command using the generated SSH private key. See an example next or check [Get Arista cEOS](get_arista_ceos.md)
+Let's pretend you downloaded a cEOS image (`cEOS64-lab-4.28.0F.tar`) to your Downloads folder. You can copy the image to the test VM with the `scp` command using the generated SSH private key. See an example next or check [Get Arista cEOS](get_arista_ceos.md)
 
 ```bash
-$ scp -i lab-state/id_rsa ~/Downloads/cEOS64-lab-4.26.4M.tar fedora@ec2-3-94-8-154.compute-1.amazonaws.com:.
-cEOS64-lab-4.26.4M.tar                                                                 100%  405MB  22.2MB/s   00:18
+$ scp -i lab-state/id_rsa ~/Downloads/cEOS64-lab-4.28.0F.tar fedora@ec2-3-94-8-154.compute-1.amazonaws.com:./network-automation-with-go
+cEOS64-lab-4.28.0F.tar                                                                 100%  434MB  18.9MB/s   00:23
 ```
 
 or
 
 ```bash
-scp -i lab-state/id_rsa ~/Downloads/cEOS64-lab-4.26.4M.tar ubuntu@ec2-3-88-180-178.compute-1.amazonaws.com:.
+$ scp -i lab-state/id_rsa ~/Downloads/cEOS64-lab-4.28.0F.tar ubuntu@ec2-34-229-72-1.compute-1.amazonaws.com:./network-automation-with-go
+cEOS64-lab-4.28.0F.tar                                                                 100%  434MB  18.9MB/s   00:23
 ```
 
 Then, SSH to the instance and import the image with the `docker` command.
 
 ```bash
-fedora@testbed ~ ⇨  docker import cEOS64-lab-4.26.4M.tar ceos:4.26.4M
-sha256:67283d3fe45bcba28c6757cc5f1fafe63140e6cfafa005f5aa7060965d5e1bb9
+fedora@testbed ~ ⇨  cd network-automation-with-go && make clone
+sha256:0844fc4f33d662d472b44324491c7d1cdcfca5db6f83194fbac603ff12661b3a
 ```
 
-You can now reference this image (`ceos:4.26.4M`) in the `image` section of one or more routers in the topology file.
+You can now reference this image (`ceos:4.28.0F`) in the `image` section of one or more routers in the topology file.
 
 ```bash
 ubuntu@testbed topo ⇨  docker exec -it clab-netgo-ceos Cli
 ceos>show ver | i Software
-Software image version: 4.26.4M-25280011.4264M (engineering build)
+Software image version: 4.28.0F-26924507.4280F (engineering build)
 ceos>
 ```
 
@@ -235,7 +236,7 @@ topology:
       image: ghcr.io/nokia/srlinux:21.6.4
     ceos:
       kind: ceos
-      image: ceos:4.26.4M
+      image: ceos:4.28.0F
     cvx:
       kind: cvx
       image: networkop/cx:5.0.0
@@ -259,33 +260,34 @@ This topology file defines a three node topology as the next figure shows. One n
 To launch the virtual topology file, run the command `make` from the home folder to access the `network-automation-with-go/topo/` folder and run `clab deploy` with root privilege, as the next output shows.
 
 ```bash
-fedora@testbed ~ ⇨  make
-sudo containerlab deploy -t ~/network-automation-with-go/topo-base/topo.yml --reconfigure
-INFO[0000] Containerlab v0.24.1 started                 
+ubuntu@testbed network-automation-with-go ⇨  make lab-up
+sudo containerlab deploy -t topo-base/topo.yml --reconfigure
+INFO[0000] Containerlab v0.25.1 started                 
 INFO[0000] Parsing & checking topology file: topo.yml   
-INFO[0000] Removing /home/fedora/network-automation-with-go/clab-netgo directory... 
+INFO[0000] Removing /home/ubuntu/network-automation-with-go/clab-netgo directory... 
 INFO[0000] Could not read docker config: open /root/.docker/config.json: no such file or directory 
 INFO[0000] Pulling docker.io/networkop/cx:5.0.0 Docker image 
-INFO[0027] Done pulling docker.io/networkop/cx:5.0.0    
-INFO[0027] Could not read docker config: open /root/.docker/config.json: no such file or directory 
-INFO[0027] Pulling ghcr.io/nokia/srlinux:21.6.4 Docker image 
-INFO[0052] Done pulling ghcr.io/nokia/srlinux:21.6.4    
-INFO[0052] Creating lab directory: /home/fedora/network-automation-with-go/clab-netgo 
-INFO[0053] Creating docker network: Name="clab", IPv4Subnet="172.20.20.0/24", IPv6Subnet="2001:172:20:20::/64", MTU="1500" 
-INFO[0053] Creating container: "ceos"                   
-INFO[0053] Creating container: "cvx"                    
-INFO[0053] Creating container: "srl"                    
-INFO[0056] Creating virtual wire: cvx:swp1 <--> ceos:eth2 
-INFO[0056] Creating virtual wire: srl:e1-1 <--> ceos:eth1 
-INFO[0056] Running postdeploy actions for Nokia SR Linux 'srl' node 
-INFO[0056] Running postdeploy actions for Arista cEOS 'ceos' node 
-INFO[0112] Adding containerlab host entries to /etc/hosts file 
+INFO[0019] Done pulling docker.io/networkop/cx:5.0.0    
+INFO[0019] Could not read docker config: open /root/.docker/config.json: no such file or directory 
+INFO[0019] Pulling ghcr.io/nokia/srlinux:21.6.4 Docker image 
+INFO[0039] Done pulling ghcr.io/nokia/srlinux:21.6.4    
+WARN[0039] it appears that container host has low memory available: ~0Gi. This might lead to runtime errors. Consider freeing up more memory. 
+INFO[0039] Creating lab directory: /home/ubuntu/network-automation-with-go/clab-netgo 
+INFO[0039] Creating docker network: Name="clab", IPv4Subnet="172.20.20.0/24", IPv6Subnet="2001:172:20:20::/64", MTU="1500" 
+INFO[0040] Creating container: "ceos"                   
+INFO[0040] Creating container: "cvx"                    
+INFO[0040] Creating container: "srl"                    
+INFO[0049] Creating virtual wire: srl:e1-1 <--> ceos:eth1 
+INFO[0050] Creating virtual wire: cvx:swp1 <--> ceos:eth2 
+INFO[0050] Running postdeploy actions for Nokia SR Linux 'srl' node 
+INFO[0050] Running postdeploy actions for Arista cEOS 'ceos' node 
+INFO[0107] Adding containerlab host entries to /etc/hosts file 
 +---+-----------------+--------------+------------------------------+------+---------+----------------+----------------------+
 | # |      Name       | Container ID |            Image             | Kind |  State  |  IPv4 Address  |     IPv6 Address     |
 +---+-----------------+--------------+------------------------------+------+---------+----------------+----------------------+
-| 1 | clab-netgo-ceos | 761ab932e3f1 | ceos:4.26.4M                 | ceos | running | 172.20.20.3/24 | 2001:172:20:20::3/64 |
-| 2 | clab-netgo-cvx  | 1903b058747e | networkop/cx:5.0.0           | cvx  | running | 172.20.20.2/24 | 2001:172:20:20::2/64 |
-| 3 | clab-netgo-srl  | ec8b4357f5dd | ghcr.io/nokia/srlinux:21.6.4 | srl  | running | 172.20.20.4/24 | 2001:172:20:20::4/64 |
+| 1 | clab-netgo-ceos | d6c84094b197 | ceos:4.28.0F                 | ceos | running | 172.20.20.4/24 | 2001:172:20:20::4/64 |
+| 2 | clab-netgo-cvx  | cdc31601e823 | networkop/cx:5.0.0           | cvx  | running | 172.20.20.3/24 | 2001:172:20:20::3/64 |
+| 3 | clab-netgo-srl  | 7061500a1531 | ghcr.io/nokia/srlinux:21.6.4 | srl  | running | 172.20.20.2/24 | 2001:172:20:20::2/64 |
 +---+-----------------+--------------+------------------------------+------+---------+----------------+----------------------+
 ```
 
