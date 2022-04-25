@@ -1,0 +1,26 @@
+[
+  {
+    "display": "SR Linux",
+    "manufacturer": {
+      "slug": "nokia"
+    },
+    "model": "SR-Linux",
+    "slug": "srl"
+  },
+  {
+    "display": "Containerized EOS",
+    "manufacturer": {
+      "slug": "arista"
+    },
+    "model": "cEOS",
+    "slug": "ceos"
+  },
+  {
+    "display": "Cumulus VX",
+    "manufacturer": {
+      "slug": "nvidia"
+    },
+    "model": "Cumulus-VX",
+    "slug": "cvx"
+  }
+]

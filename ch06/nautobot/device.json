@@ -1,0 +1,12 @@
+{
+    "name": "ams01-leaf-18",
+    "device_type": {
+        "slug":  "dcs-7150s-24"
+    },
+    "device_role": {
+        "slug":  "leaf"
+    },
+    "site": {
+        "slug":  "ams01"
+    }
+}

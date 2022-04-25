@@ -1,0 +1,22 @@
+[
+    {
+      "display": "Arista",
+      "name": "Arista",
+      "slug": "arista"
+    },
+    {
+      "display": "Cisco",
+      "name": "Cisco",
+      "slug": "cisco"
+    },
+    {
+      "display": "Nokia",
+      "name": "Nokia",
+      "slug": "nokia"
+    },
+    {
+      "display": "NVIDIA",
+      "name": "NVIDIA",
+      "slug": "nvidia"
+    }
+  ]
