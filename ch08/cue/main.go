@@ -66,7 +66,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	log.Println(string(data))
+	//log.Println(string(data))
 
 	if err := sendBytes(data); err != nil {
 		log.Fatal(err)
