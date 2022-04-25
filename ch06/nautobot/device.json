@@ -1,12 +1,12 @@
 {
-    "name": "ams01-leaf-18",
+    "name": "ams01-ceos-02",
     "device_type": {
-        "slug":  "dcs-7150s-24"
+        "slug": "ceos"
     },
     "device_role": {
-        "slug":  "leaf"
+        "slug": "router"
     },
     "site": {
-        "slug":  "ams01"
+        "slug": "ams01"
     }
 }
