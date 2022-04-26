@@ -1,6 +1,6 @@
 ## Nautobot
 
-PoC
+### Dependencies
 
 ```bash
 cd ch06/nautobot/client
@@ -14,4 +14,27 @@ go mod init github.com/nautobot/go-nautobot
 ```bash
 cd ..
 go mod edit -replace github.com/nautobot/go-nautobot=./client
+```
+
+### Running
+
+```bash
+go run *.go
+```
+
+Creates (device.json)[device.json]:
+
+```json
+{
+    "name": "ams01-ceos-02",
+    "device_type": {
+        "slug": "ceos"
+    },
+    "device_role": {
+        "slug": "router"
+    },
+    "site": {
+        "slug": "ams01"
+    }
+}
 ```
