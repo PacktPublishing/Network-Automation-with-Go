@@ -44,10 +44,10 @@ type RpcRequest struct {
 
 // SRL JSON-RPC response
 type RpcResponse struct {
-	Version string       `json:"jsonrpc"`
-	ID      int          `json:"id"`
-	Result  *interface{} `json:"result,omitempty"`
-	Error   *interface{} `json:"error,omitempty"`
+	Version string           `json:"jsonrpc"`
+	ID      int              `json:"id"`
+	Result  *json.RawMessage `json:"result,omitempty"`
+	Error   interface{}      `json:"error,omitempty"`
 }
 
 // SRL JSON-RPC Params
@@ -197,23 +197,6 @@ func (m *Model) buildDefaultPolicy(dev *api.Device) error {
 	return nil
 }
 
-func buildSetRPC(config map[string]interface{}) RpcRequest {
-	return RpcRequest{
-		Version: "2.0",
-		ID:      0,
-		Method:  "set",
-		Params: Params{
-			Commands: []*Command{
-				{
-					Action: "update",
-					Path:   "/",
-					Value:  config,
-				},
-			},
-		},
-	}
-}
-
 func printYgot(s ygot.ValidatedGoStruct) {
 	t, _ := ygot.EmitJSON(s, &ygot.EmitJSONConfig{
 		Format: ygot.Internal,
@@ -256,13 +239,29 @@ func main() {
 		log.Fatal(err)
 	}
 
-	printYgot(device)
+	//printYgot(device)
 	v, err := ygot.ConstructIETFJSON(device, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	value, _ := json.Marshal(buildSetRPC(v))
+	value, err := json.Marshal(RpcRequest{
+		Version: "2.0",
+		ID:      0,
+		Method:  "set",
+		Params: Params{
+			Commands: []*Command{
+				{
+					Action: "update",
+					Path:   "/",
+					Value:  v,
+				},
+			},
+		},
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	req, err := http.NewRequest(
 		"POST",
@@ -307,7 +306,7 @@ func main() {
 	if result.Error != nil {
 		log.Fatalf(
 			"failed to configure the device: %v",
-			*result.Error,
+			result.Error,
 		)
 	}
 
