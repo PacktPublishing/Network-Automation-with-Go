@@ -1,34 +1,29 @@
 terraform {
   required_providers {
-    netbox = {
-      source = "e-breuninger/netbox"
+    nautobot = {
+      version = "0.1"
+      source  = "github.com/nleiva/nautobot"
     }
   }
 }
 
-provider "netbox" {
-  server_url = "https://demo.netbox.dev"
-  api_token = "0123456789abcdef0123456789abcdef01234567"
+variable "manufacturer_name" {
+  type    = string
+  default = "Juniper"
 }
 
-resource "netbox_platform" "ceos" {
-  name = "Arista EOS"
-  slug = "ceos"
+provider "nautobot" {
+  url = "https://demo.nautobot.com/api/"
+  token = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 }
 
-resource "netbox_platform" "srl" {
-  name = "Nokia SR Linux"
-  slug = "srl"
-}
+data "nautobot_manufacturers" "all" {}
 
-resource "netbox_platform" "cvx" {
-  name = "NVIDIA Cumulus Linux"
-  slug = "cvx"
-}
-
-resource "netbox_device_role" "container" {
-  name      = "Container Router"
-  vm_role   = true
-  slug      = "container"
-  color_hex = "ff0000"
+# Only returns Juniper manufacturer
+output "juniper" {
+  value = {
+    for manufacturer in data.nautobot_manufacturers.all.manufacturers :
+    manufacturer.id => manufacturer
+    if manufacturer.name == var.manufacturer_name
+  }
 }

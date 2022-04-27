@@ -376,7 +376,7 @@ func main() {
 	check(err)
 
 	c, err := nb.NewClientWithResponses(
-		"https://develop.demo.nautobot.com/api/",
+		"https://demo.nautobot.com/api/",
 		nb.WithRequestEditorFn(token.Intercept),
 	)
 	check(err)
