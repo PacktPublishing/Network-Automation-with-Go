@@ -16,8 +16,6 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-// docker exec -it clab-netgo-srl /opt/srlinux/bin/sr_cli
-
 //go:generate go run github.com/openconfig/ygot/generator -path=yang -generate_fakeroot -fakeroot_name=device -output_file=pkg/srl/srl.go -package_name=srl yang/srl_nokia/models/network-instance/srl_nokia-bgp.yang yang/srl_nokia/models/routing-policy/srl_nokia-routing-policy.yang yang/srl_nokia/models/network-instance/srl_nokia-ip-route-tables.yang
 
 const (
@@ -239,7 +237,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	//printYgot(device)
+	printYgot(device)
 	v, err := ygot.ConstructIETFJSON(device, nil)
 	if err != nil {
 		log.Fatal(err)

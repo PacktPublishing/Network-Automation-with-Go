@@ -5,7 +5,6 @@ import (
 	"crypto/tls"
 	"encoding/base64"
 	"fmt"
-	"io"
 	"log"
 	"net"
 	"net/http"
@@ -24,6 +23,7 @@ const (
 	eosLoopback    = "Loopback0"
 	defaultSubIdx  = 0
 	defaultNetInst = "default"
+	restconfPath   = "/restconf/data"
 )
 
 var (
@@ -58,15 +58,21 @@ type Addr struct {
 	IP string `yaml:"ip"`
 }
 
-type restConfRequest struct {
+type restconfRequest struct {
 	path    string
 	payload []byte
 }
 
-func (m *Model) buildL3Interfaces() ([]*restConfRequest, error) {
-	var cmds []*restConfRequest
+func (m *Model) buildL3Interfaces() ([]*restconfRequest, error) {
+	var cmds []*restconfRequest
 	links := m.Uplinks
-	links = append(links, Link{Name: eosLoopback, Prefix: fmt.Sprintf("%s/32", m.Loopback.IP)})
+	links = append(
+		links,
+		Link{
+			Name:   eosLoopback,
+			Prefix: fmt.Sprintf("%s/32", m.Loopback.IP),
+		},
+	)
 
 	for _, link := range links {
 		intf := &api.Interface{
@@ -101,27 +107,33 @@ func (m *Model) buildL3Interfaces() ([]*restConfRequest, error) {
 		if err := intf.Validate(); err != nil {
 			log.Fatal(err)
 		}
-		fmt.Println(printYgot(intf))
+		//fmt.Println(printYgot(intf))
 
 		value, err := ygot.Marshal7951(intf)
 		if err != nil {
 			return nil, err
 		}
 
-		cmds = append(cmds, &restConfRequest{
-			path:    fmt.Sprintf("/openconfig-interfaces:interfaces/interface=%s", link.Name),
+		cmds = append(cmds, &restconfRequest{
+			path: fmt.Sprintf(
+				"/openconfig-interfaces:interfaces/interface=%s",
+				link.Name,
+			),
 			payload: value,
 		})
 	}
 	return cmds, nil
 }
 
-func (m *Model) buildBGPConfig() (*restConfRequest, error) {
+func (m *Model) buildBGPConfig() (*restconfRequest, error) {
 
 	netInst := &api.NetworkInstance{
 		Name: ygot.String(defaultNetInst),
 	}
-	protocol, err := netInst.NewProtocol(api.OpenconfigPolicyTypes_INSTALL_PROTOCOL_TYPE_BGP, "BGP")
+	protocol, err := netInst.NewProtocol(
+		api.OpenconfigPolicyTypes_INSTALL_PROTOCOL_TYPE_BGP,
+		"BGP",
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -137,7 +149,9 @@ func (m *Model) buildBGPConfig() (*restConfRequest, error) {
 		}
 		n.PeerAs = ygot.Uint32(uint32(peer.ASN))
 
-		_, err = n.NewAfiSafi(api.OpenconfigBgpTypes_AFI_SAFI_TYPE_IPV4_UNICAST)
+		_, err = n.NewAfiSafi(
+			api.OpenconfigBgpTypes_AFI_SAFI_TYPE_IPV4_UNICAST,
+		)
 		if err != nil {
 			return nil, err
 		}
@@ -146,30 +160,41 @@ func (m *Model) buildBGPConfig() (*restConfRequest, error) {
 	if err := netInst.Validate(); err != nil {
 		return nil, err
 	}
-	fmt.Println(printYgot(netInst))
+	//fmt.Println(printYgot(netInst))
 
 	value, err := ygot.Marshal7951(netInst)
 	if err != nil {
 		return nil, err
 	}
 
-	return &restConfRequest{
-		path:    fmt.Sprintf("/network-instances/network-instance=%s", defaultNetInst),
+	return &restconfRequest{
+		path: fmt.Sprintf(
+			"/network-instances/network-instance=%s",
+			defaultNetInst,
+		),
 		payload: value,
 	}, nil
 }
 
-func (m *Model) enableRedistribution() (*restConfRequest, error) {
+func (m *Model) enableRedistribution() (*restconfRequest, error) {
 	netInst := &api.NetworkInstance{
 		Name: ygot.String(defaultNetInst),
 	}
 
-	_, err := netInst.NewTableConnection(api.OpenconfigPolicyTypes_INSTALL_PROTOCOL_TYPE_DIRECTLY_CONNECTED, api.OpenconfigPolicyTypes_INSTALL_PROTOCOL_TYPE_BGP, api.OpenconfigTypes_ADDRESS_FAMILY_IPV4)
+	_, err := netInst.NewTableConnection(
+		api.OpenconfigPolicyTypes_INSTALL_PROTOCOL_TYPE_DIRECTLY_CONNECTED,
+		api.OpenconfigPolicyTypes_INSTALL_PROTOCOL_TYPE_BGP,
+		api.OpenconfigTypes_ADDRESS_FAMILY_IPV4,
+	)
 	if err != nil {
 		return nil, err
 	}
 
-	_, err = netInst.NewTableConnection(api.OpenconfigPolicyTypes_INSTALL_PROTOCOL_TYPE_DIRECTLY_CONNECTED, api.OpenconfigPolicyTypes_INSTALL_PROTOCOL_TYPE_BGP, api.OpenconfigTypes_ADDRESS_FAMILY_IPV6)
+	_, err = netInst.NewTableConnection(
+		api.OpenconfigPolicyTypes_INSTALL_PROTOCOL_TYPE_DIRECTLY_CONNECTED,
+		api.OpenconfigPolicyTypes_INSTALL_PROTOCOL_TYPE_BGP,
+		api.OpenconfigTypes_ADDRESS_FAMILY_IPV6,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -177,15 +202,18 @@ func (m *Model) enableRedistribution() (*restConfRequest, error) {
 	if err := netInst.Validate(); err != nil {
 		return nil, err
 	}
-	fmt.Println(printYgot(netInst))
+	//fmt.Println(printYgot(netInst))
 
 	value, err := ygot.Marshal7951(netInst)
 	if err != nil {
 		return nil, err
 	}
 
-	return &restConfRequest{
-		path:    fmt.Sprintf("/network-instances/network-instance=%s", defaultNetInst),
+	return &restconfRequest{
+		path: fmt.Sprintf(
+			"/network-instances/network-instance=%s",
+			defaultNetInst,
+		),
 		payload: value,
 	}, nil
 }
@@ -206,7 +234,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	var cmds []*restConfRequest
+	var cmds []*restconfRequest
 
 	l3Intfs, err := input.buildL3Interfaces()
 	if err != nil {
@@ -226,21 +254,40 @@ func main() {
 	}
 	cmds = append(cmds, redistr)
 
+	baseURL, err := url.Parse(
+		fmt.Sprintf(
+			"https://%s:%d%s",
+			ceosHostname,
+			defaultRestconfPort,
+			restconfPath,
+		),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
 	for _, cmd := range cmds {
-		baseURL, err := url.Parse(fmt.Sprintf("https://%s:%d/restconf/data", ceosHostname, defaultRestconfPort))
-		if err != nil {
-			log.Fatal(err)
-		}
-		baseURL.Path = path.Join(baseURL.Path, cmd.path)
-		log.Println("targetURL ", baseURL.String())
-		log.Println("payload ", string(cmd.payload))
 
-		req, err := http.NewRequest("POST", baseURL.String(), bytes.NewBuffer(cmd.payload))
+		baseURL.Path = path.Join(restconfPath, cmd.path)
+		//log.Println("targetURL ", baseURL.String())
+		//log.Println("payload ", string(cmd.payload))
+
+		req, err := http.NewRequest(
+			"POST",
+			baseURL.String(),
+			bytes.NewBuffer(cmd.payload),
+		)
 		if err != nil {
 			log.Fatal(err)
 		}
 		req.Header.Add("Content-Type", "application/json")
-		req.Header.Add("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s", ceosUsername, ceosPassword))))
+		req.Header.Add(
+			"Authorization",
+			"Basic "+base64.StdEncoding.EncodeToString(
+				[]byte(
+					fmt.Sprintf("%s:%s", ceosUsername, ceosPassword),
+				),
+			),
+		)
 
 		client := &http.Client{Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
@@ -255,11 +302,11 @@ func main() {
 			log.Printf("Status: %s", resp.Status)
 		}
 
-		body, err := io.ReadAll(resp.Body)
-		if err != nil {
-			log.Fatal(err)
-		}
-		fmt.Println(string(body))
+		//body, err := io.ReadAll(resp.Body)
+		//if err != nil {
+		//	log.Fatal(err)
+		//}
+		//fmt.Println(string(body))
 
 	}
 
