@@ -254,6 +254,15 @@ func main() {
 	}
 	cmds = append(cmds, redistr)
 
+	for _, cmd := range cmds {
+		if err := restconfPost(cmd); err != nil {
+			log.Fatal(err)
+		}
+	}
+	log.Println("Successfully configured the device")
+}
+
+func restconfPost(cmd *restconfRequest) error {
 	baseURL, err := url.Parse(
 		fmt.Sprintf(
 			"https://%s:%d%s",
@@ -263,55 +272,49 @@ func main() {
 		),
 	)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-	for _, cmd := range cmds {
+	baseURL.Path = path.Join(restconfPath, cmd.path)
+	//log.Println("targetURL ", baseURL.String())
+	//log.Println("payload ", string(cmd.payload))
 
-		baseURL.Path = path.Join(restconfPath, cmd.path)
-		//log.Println("targetURL ", baseURL.String())
-		//log.Println("payload ", string(cmd.payload))
-
-		req, err := http.NewRequest(
-			"POST",
-			baseURL.String(),
-			bytes.NewBuffer(cmd.payload),
-		)
-		if err != nil {
-			log.Fatal(err)
-		}
-		req.Header.Add("Content-Type", "application/json")
-		req.Header.Add(
-			"Authorization",
-			"Basic "+base64.StdEncoding.EncodeToString(
-				[]byte(
-					fmt.Sprintf("%s:%s", ceosUsername, ceosPassword),
-				),
+	req, err := http.NewRequest(
+		"POST",
+		baseURL.String(),
+		bytes.NewBuffer(cmd.payload),
+	)
+	if err != nil {
+		return err
+	}
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add(
+		"Authorization",
+		"Basic "+base64.StdEncoding.EncodeToString(
+			[]byte(
+				fmt.Sprintf("%s:%s", ceosUsername, ceosPassword),
 			),
-		)
+		),
+	)
 
-		client := &http.Client{Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		}}
-		resp, err := client.Do(req)
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer resp.Body.Close()
+	client := &http.Client{Transport: &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}}
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
 
-		if resp.StatusCode != http.StatusOK {
-			log.Printf("Status: %s", resp.Status)
-		}
-
-		//body, err := io.ReadAll(resp.Body)
-		//if err != nil {
-		//	log.Fatal(err)
-		//}
-		//fmt.Println(string(body))
-
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("HTTP Status: %s", resp.Status)
 	}
 
-	log.Println("Successfully configured the device")
-
+	//body, err := io.ReadAll(resp.Body)
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//fmt.Println(string(body))
+	return nil
 }
 
 func printYgot(s ygot.ValidatedGoStruct) string {
