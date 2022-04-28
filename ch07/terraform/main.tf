@@ -27,3 +27,8 @@ output "juniper" {
     if manufacturer.name == var.manufacturer_name
   }
 }
+
+resource "nautobot_manufacturer" "new" {
+  description = "Created with Terraform"
+  name    = "Vendor I"
+}
