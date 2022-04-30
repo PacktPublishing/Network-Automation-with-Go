@@ -15,14 +15,18 @@ terraform-provider-nautobot ⇨  make install
 ### Example
 
 ```bash
-  terraform init -upgrade
+⇨  terraform init -upgrade
 
 Initializing the backend...
 
 Initializing provider plugins...
-- Finding github.com/nleiva/nautobot versions matching "0.1.0"...
-- Installing github.com/nleiva/nautobot v0.1.0...
-- Installed github.com/nleiva/nautobot v0.1.0 (unauthenticated)
+- Finding nleiva/nautobot versions matching "0.2.3"...
+- Installing nleiva/nautobot v0.2.3...
+- Installed nleiva/nautobot v0.2.3 (self-signed, key ID A33D26E300F155FF)
+
+Partner and community providers are signed by their developers.
+If you'd like to know more about provider signing, you can read about it here:
+https://www.terraform.io/docs/cli/plugins/signing.html
 
 Terraform has created a lock file .terraform.lock.hcl to record the provider
 selections it made above. Include this file in your version control repository
@@ -43,7 +47,8 @@ commands will detect it and remind you to do so if necessary.
 ```bash
 ⇨  terraform apply --auto-approve
 
-Terraform used the selected providers to generate the following execution plan. Resource actions are indicated with the following symbols:
+Terraform used the selected providers to generate the following execution plan. Resource actions
+are indicated with the following symbols:
   + create
 
 Terraform will perform the following actions:
@@ -53,11 +58,14 @@ Terraform will perform the following actions:
       + created             = (known after apply)
       + description         = "Created with Terraform"
       + devicetype_count    = (known after apply)
+      + display             = (known after apply)
       + id                  = (known after apply)
       + inventoryitem_count = (known after apply)
       + last_updated        = (known after apply)
-      + name                = "Vendor I"
+      + name                = "New Vendor"
       + platform_count      = (known after apply)
+      + slug                = (known after apply)
+      + url                 = (known after apply)
     }
 
 Plan: 1 to add, 0 to change, 0 to destroy.
@@ -80,7 +88,7 @@ Changes to Outputs:
         }
     }
 nautobot_manufacturer.new: Creating...
-nautobot_manufacturer.new: Creation complete after 1s [id=9fec5cd1-d23b-40e3-abe6-a220476631af]
+nautobot_manufacturer.new: Creation complete after 1s [id=b5c5ada7-7f98-482e-916d-4ef5e8621d68]
 
 Apply complete! Resources: 1 added, 0 changed, 0 destroyed.
 
@@ -102,7 +110,6 @@ juniper = {
     "url" = "https://demo.nautobot.com/api/dcim/manufacturers/4873d752-5dbe-4006-8345-8279a0dfbbda/"
   }
 }
-
 ```
 
 ### Explore

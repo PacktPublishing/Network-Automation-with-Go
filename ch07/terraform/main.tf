@@ -2,7 +2,7 @@ terraform {
   required_providers {
     nautobot = {
       version = "0.2.3"
-      source  = "github.com/nleiva/nautobot"
+      source  = "nleiva/nautobot"
     }
   }
 }
@@ -30,5 +30,5 @@ output "juniper" {
 
 resource "nautobot_manufacturer" "new" {
   description = "Created with Terraform"
-  name    = "Vendor I"
+  name    = "New Vendor"
 }
