@@ -1,5 +1,5 @@
 asn: 65001
-loopback: 
+loopback:
   ip: "198.51.100.1"
 uplinks:
   - name: "Ethernet1"

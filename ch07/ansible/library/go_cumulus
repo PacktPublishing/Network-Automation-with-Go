@@ -35,25 +35,6 @@ read -a list <<< "$host"
 cd ${list[2]}
 go run main.go ../$f
 cd ..
-rm $f 
-
-## MANUAL INPUTS
-# c=$(cat << EOF
-# asn: 65000
-# loopback:
-#   ip: "198.51.100.0"
-# uplinks:
-#   - name: "ethernet-1/1"
-#     prefix: "192.0.2.0/31"
-# peers:
-#   - ip: "192.0.2.1"
-#     asn: 65001
-# EOF
-# )
-
-# config_input=$(printf '%s' "$c" | base64 -w 0)
-# host=clab-netgo-srl
-# user=admin
-# password=admin
+rm $f
 
 # For the future: https://gist.github.com/sivel/668d9a33cad0172b3b59666196738b59
