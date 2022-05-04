@@ -46,6 +46,6 @@
 - name: Install Terraform
   ansible.builtin.package:
     name:
-      - terraform
+      - terraform-1.1.9*
     state: present
     update_cache: true
