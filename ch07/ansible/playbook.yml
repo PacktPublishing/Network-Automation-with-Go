@@ -4,8 +4,6 @@
   vars_files:
     - eos/input.yml
   vars:
-    in_cvx: "{{ lookup('file', 'cvx/input.yml') }}"
-    in_srl: "{{ lookup('file', 'srl/input.yml') }}"
     go: true
 
   tasks:
@@ -14,7 +12,7 @@
         host: localhost
         user: "{{ ansible_user }}"
         password: "{{ ansible_password }}"
-        input: "{{ in_srl | string | b64encode }}"
+        input: "{{ cfg | string | b64encode }}"
       when: ('srl' in group_names) and not go
 
     - name: Run Nokia Go module on Systems with Go installed
@@ -22,7 +20,7 @@
         host: "{{ inventory_hostname }}"
         user: "{{ ansible_user }}"
         password: "{{ ansible_password }}"
-        input: "{{ in_srl | string | b64encode }}"
+        input: "{{ cfg | string | b64encode }}"
       delegate_to: localhost
       when: ('srl' in group_names) and go
 
@@ -31,7 +29,7 @@
         host: localhost
         user: "{{ ansible_user }}"
         password: "{{ ansible_password }}"
-        input: "{{ in_cvx | string | b64encode }}"
+        input: "{{ cfg | string | b64encode }}"
       when: ('cvx' in group_names) and not go
 
     - name: Run NVIDIA Go module on Systems with Go installed
@@ -39,7 +37,7 @@
         host: "{{ inventory_hostname }}"
         user: "{{ ansible_user }}"
         password: "{{ ansible_password }}"
-        input: "{{ in_cvx | string | b64encode }}"
+        input: "{{ cfg | string | b64encode }}"
       delegate_to: localhost
       when: ('cvx' in group_names) and go
 
