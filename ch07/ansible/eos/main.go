@@ -6,9 +6,38 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"text/template"
+
+	"github.com/scrapli/scrapligo/cfg"
+	"github.com/scrapli/scrapligo/driver/base"
+	"github.com/scrapli/scrapligo/driver/core"
 
 	"gopkg.in/yaml.v2"
 )
+
+const ceosTemplate = `
+!
+configure
+!
+ip routing
+!
+{{- range $uplink := .Uplinks }}
+interface {{ $uplink.Name }}
+  no switchport
+  ip address {{ $uplink.Prefix }}
+!
+{{- end }}
+interface Loopback0
+  ip address {{ .Loopback.IP }}/32
+!
+router bgp {{ .ASN }}
+  router-id {{ .Loopback.IP }}
+{{- range $peer := .Peers }}  
+  neighbor {{ $peer.IP }} remote-as {{ $peer.ASN }}
+{{- end }}
+  redistribute connected
+!
+`
 
 type Model struct {
 	Uplinks  []Link `yaml:"uplinks"`
@@ -79,6 +108,19 @@ func (r Response) check(err error, msg string) {
 	}
 }
 
+func devConfig(in Model) (b bytes.Buffer, err error) {
+	t, err := template.New("config").Parse(ceosTemplate)
+	if err != nil {
+		return b, fmt.Errorf("failed create template: %w", err)
+	}
+
+	err = t.Execute(&b, in)
+	if err != nil {
+		return b, fmt.Errorf("failed create template: %w", err)
+	}
+	return b, nil
+}
+
 func main() {
 	var r Response
 
@@ -106,7 +148,31 @@ func main() {
 	err = d.Decode(&input)
 	r.check(err, "Couldn't decode configuration inputs: "+string(src))
 
-	r.Msg = "INPUT: " + string(src)
+	config, err := devConfig(input)
+	r.check(err, "Couldn't create an EOS specific config for: "+string(src))
+
+	conn, err := core.NewEOSDriver(
+		moduleArgs.Host,
+		base.WithAuthStrictKey(false),
+		base.WithAuthUsername(moduleArgs.User),
+		base.WithAuthPassword(moduleArgs.Password),
+	)
+	r.check(err, "Couldn't create client connection for: "+moduleArgs.Host)
+
+	err = conn.Open()
+	r.check(err, "Couldn't connect to: "+moduleArgs.Host)
+	defer conn.Close()
+
+	conf, err := cfg.NewEOSCfg(conn)
+	r.check(err, "Couldn't create a config with scrapli for: "+moduleArgs.Host)
+
+	err = conf.Prepare()
+	r.check(err, "Couldn't prepare a config with scrapli for: "+moduleArgs.Host)
+
+	_, err = conf.LoadConfig(config.String(), false)
+	r.check(err, "Couldn't load the config with scrapli for: "+moduleArgs.Host)
+
+	r.Msg = "Configuration applied on: " + moduleArgs.Host
 	r.Changed = true
 	r.Failed = false
 	returnResponse(r)

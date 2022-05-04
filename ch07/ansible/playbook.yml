@@ -37,12 +37,13 @@
     #   delegate_to: localhost
     #   when: ('cvx' in group_names)
 
-    - name: Run Arista compiled Go module on remote system without Go installed
-      go_eos:
-        host: localhost
+    - name: Run Arista Go module on local system with Go installed
+      go_run:
+        host: "{{ inventory_hostname }}"
         user: "{{ ansible_user }}"
         password: "{{ ansible_password }}"
         input: "{{ hostvars[inventory_hostname] | string | b64encode }}"
+      delegate_to: localhost
       when: ('eos' in group_names)
 
 - name: Second Play - Validate changes
