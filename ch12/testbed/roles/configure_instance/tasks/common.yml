@@ -18,6 +18,14 @@
         create: true
   when: ansible_distribution == 'Ubuntu'
 
+- name: Remove Ansible from Ubuntu
+  ansible.builtin.apt:
+    name:
+      - ansible
+    state: absent
+    update_cache: true
+  when: ansible_distribution == 'Ubuntu'
+
 - name: Install base packages
   ansible.builtin.package:
     name: "{{ base_software[ansible_distribution_file_variety] | union(common_software) }}"

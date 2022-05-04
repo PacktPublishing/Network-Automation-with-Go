@@ -19,6 +19,13 @@
         gpgcheck: true
         gpgkey: https://rpm.releases.hashicorp.com/gpg
         file: hashicorp
+
+    - name: Install Terraform
+      ansible.builtin.package:
+        name:
+          - terraform-{{ terraform_version }}*
+        state: present
+        update_cache: true
   when: ansible_distribution == "Fedora"
 
 - name: Add Terraform repo on Ubuntu
@@ -41,11 +48,10 @@
         repo: "deb [arch=amd64] https://apt.releases.hashicorp.com {{ ansible_distribution_release }} main"
         state: present
         update_cache: true
-  when: ansible_distribution == 'Ubuntu'
 
-- name: Install Terraform
-  ansible.builtin.package:
-    name:
-      - terraform-1.1.9*
-    state: present
-    update_cache: true
+    - name: Install Terraform
+      ansible.builtin.apt:
+        name:
+          - "terraform={{ terraform_version }}"
+        state: present
+  when: ansible_distribution == 'Ubuntu'
