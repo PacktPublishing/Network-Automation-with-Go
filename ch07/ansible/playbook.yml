@@ -1,8 +1,6 @@
 - name: First Play - Configure Routers
   hosts: routers
   gather_facts: true
-  vars:
-    go: true
 
   tasks:
     # - name: Run Nokia compiled Go module on remote system without Go installed
@@ -11,7 +9,7 @@
     #     user: "{{ ansible_user }}"
     #     password: "{{ ansible_password }}"
     #     input: "{{ hostvars[inventory_hostname] | string | b64encode }}"
-    #   when: ('srl' in group_names) and not go
+    #   when: ('srl' in group_names)
 
     - name: Run Nokia Go module on local system with Go installed
       go_run:
@@ -20,7 +18,7 @@
         password: "{{ ansible_password }}"
         input: "{{ hostvars[inventory_hostname] | string | b64encode }}"
       delegate_to: localhost
-      when: ('srl' in group_names) and go
+      when: ('srl' in group_names)
 
     - name: Run NVIDIA compiled Go module on remote system without Go installed
       go_cvx:
@@ -28,7 +26,7 @@
         user: "{{ ansible_user }}"
         password: "{{ ansible_password }}"
         input: "{{ hostvars[inventory_hostname] | string | b64encode }}"
-      when: ('cvx' in group_names) and not go
+      when: ('cvx' in group_names)
 
     # - name: Run NVIDIA Go module on local system with Go installed
     #   go_run:
@@ -37,7 +35,7 @@
     #     password: "{{ ansible_password }}"
     #     input: "{{ hostvars[inventory_hostname] | string | b64encode }}"
     #   delegate_to: localhost
-    #   when: ('cvx' in group_names) and go
+    #   when: ('cvx' in group_names)
 
     - name: Run Arista compiled Go module on remote system without Go installed
       go_eos:
