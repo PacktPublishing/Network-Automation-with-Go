@@ -30,7 +30,7 @@ type Inventory struct {
 
 var m sync.RWMutex = sync.RWMutex{}
 
-func getVersion(r Router, out chan map[string]interface{}, wg *sync.WaitGroup, isAlive map[string]bool) {
+func getVersion(r Router, out chan data, wg *sync.WaitGroup, isAlive map[string]bool) {
 	defer wg.Done()
 	
 	d, err := core.NewCoreDriver(
@@ -73,15 +73,25 @@ func getVersion(r Router, out chan map[string]interface{}, wg *sync.WaitGroup, i
 		return
 	}
 
-	parsedOut[0]["HOSTNAME"] = r.Hostname
-	out <- parsedOut[0]
+	out <- data{
+		host: r.Hostname,
+		hw: fmt.Sprintf("%s", parsedOut[0]["HARDWARE"]),
+		version: fmt.Sprintf("%s", parsedOut[0]["VERSION"]),
+		uptime: fmt.Sprintf("%s", parsedOut[0]["UPTIME"]),
+	}
 }
 
-func printer(in chan map[string]interface{}) {
+type data struct{
+	host string
+	hw string
+	version string
+	uptime string
+}
+
+func printer(in chan data) {
 	for out := range in {
 		fmt.Printf("Hostname: %s\nHardware: %s\nSW Version: %s\nUptime: %s\n\n",
-			out["HOSTNAME"], out["HARDWARE"],
-			out["VERSION"], out["UPTIME"])
+			out.host, out.hw, out.version, out.uptime)
 	}
 }
 
@@ -103,7 +113,7 @@ func main() {
 		panic(err)
 	}
 
-	ch := make(chan map[string]interface{})
+	ch := make(chan data)
 
 	isAlive := make(map[string]bool)
 

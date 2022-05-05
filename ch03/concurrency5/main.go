@@ -22,7 +22,7 @@ type Inventory struct {
 	Routers []Router `yaml:"router"`
 }
 
-func getVersion(r Router, out chan map[string]interface{}) {
+func getVersion(r Router, out chan data) {
 	d, err := core.NewCoreDriver(
 		r.Hostname,
 		r.Platform,
@@ -56,9 +56,20 @@ func getVersion(r Router, out chan map[string]interface{}) {
 		return
 	}
 
-	parsedOut[0]["HOSTNAME"] = r.Hostname
-	out <- parsedOut[0]
+	out <- data{
+		host: r.Hostname,
+		hw: fmt.Sprintf("%s", parsedOut[0]["HARDWARE"]),
+		version: fmt.Sprintf("%s", parsedOut[0]["VERSION"]),
+		uptime: fmt.Sprintf("%s", parsedOut[0]["UPTIME"]),
+	}
 
+}
+
+type data struct{
+	host string
+	hw string
+	version string
+	uptime string
 }
 
 func main() {
@@ -76,7 +87,7 @@ func main() {
 		panic(err)
 	}
 
-	ch := make(chan map[string]interface{})
+	ch := make(chan data)
 
 	for _, v := range inv.Routers {
 		go getVersion(v, ch)
@@ -86,8 +97,7 @@ func main() {
 		select {
 		case out := <-ch:
 			fmt.Printf("Hostname: %s\nHardware: %s\nSW Version: %s\nUptime: %s\n\n",
-				out["HOSTNAME"], out["HARDWARE"],
-				out["VERSION"], out["UPTIME"])
+				out.host, out.hw, out.version, out.uptime)
 		case <-time.After(5 * time.Second):
 			close(ch)
 			fmt.Println("Timeout: 5 seconds")
