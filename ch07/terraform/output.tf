@@ -1,12 +1,14 @@
-data "nautobot_manufacturers" "all" {}
+data "nautobot_manufacturers" "all" {
+  depends_on = [nautobot_manufacturer.new]
+}
 
 variable "manufacturer_name" {
   type    = string
-  default = "Juniper"
+  default = "New Vendor"
 }
 
-# Only returns Juniper manufacturer
-output "juniper" {
+# Only returns te created manufacturer
+output "data_source_example" {
   value = {
     for manufacturer in data.nautobot_manufacturers.all.manufacturers :
     manufacturer.id => manufacturer

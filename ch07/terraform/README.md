@@ -9,13 +9,13 @@ terraform apply -auto-approve
 ## Nautobot Provider
 
 ```bash
-terraform-provider-nautobot ⇨  make install
+$  make install
 ```
 
 ### Example
 
 ```bash
-⇨  terraform init -upgrade
+$  terraform init -upgrade
 
 Initializing the backend...
 
@@ -45,13 +45,20 @@ commands will detect it and remind you to do so if necessary.
 ```
 
 ```bash
-⇨  terraform apply --auto-approve
+$  terraform apply --auto-approve
 
-Terraform used the selected providers to generate the following execution plan. Resource actions
-are indicated with the following symbols:
+Terraform used the selected providers to generate the following execution plan. Resource actions are indicated with the following symbols:
   + create
+ <= read (data resources)
 
 Terraform will perform the following actions:
+
+  # data.nautobot_manufacturers.all will be read during apply
+  # (config refers to values not yet known)
+ <= data "nautobot_manufacturers" "all"  {
+      + id            = (known after apply)
+      + manufacturers = (known after apply)
+    }
 
   # nautobot_manufacturer.new will be created
   + resource "nautobot_manufacturer" "new" {
@@ -71,43 +78,30 @@ Terraform will perform the following actions:
 Plan: 1 to add, 0 to change, 0 to destroy.
 
 Changes to Outputs:
-  + juniper = {
-      + "4873d752-5dbe-4006-8345-8279a0dfbbda" = {
-          + created             = "2022-03-08"
-          + custom_fields       = {}
-          + description         = ""
-          + devicetype_count    = 1
-          + display             = "Juniper"
-          + id                  = "4873d752-5dbe-4006-8345-8279a0dfbbda"
-          + inventoryitem_count = 0
-          + last_updated        = "2022-03-08T14:50:48.492203Z"
-          + name                = "Juniper"
-          + platform_count      = 1
-          + slug                = "juniper"
-          + url                 = "https://demo.nautobot.com/api/dcim/manufacturers/4873d752-5dbe-4006-8345-8279a0dfbbda/"
-        }
-    }
+  + data_source_example = (known after apply)
 nautobot_manufacturer.new: Creating...
-nautobot_manufacturer.new: Creation complete after 1s [id=b5c5ada7-7f98-482e-916d-4ef5e8621d68]
+nautobot_manufacturer.new: Creation complete after 1s [id=eccd8b38-f6d6-41a4-aebd-73b53731b099]
+data.nautobot_manufacturers.all: Reading...
+data.nautobot_manufacturers.all: Read complete after 0s [id=1651744472]
 
 Apply complete! Resources: 1 added, 0 changed, 0 destroyed.
 
 Outputs:
 
-juniper = {
-  "4873d752-5dbe-4006-8345-8279a0dfbbda" = {
-    "created" = "2022-03-08"
+data_source_example = {
+  "eccd8b38-f6d6-41a4-aebd-73b53731b099" = {
+    "created" = "2022-05-05"
     "custom_fields" = tomap({})
-    "description" = ""
-    "devicetype_count" = 1
-    "display" = "Juniper"
-    "id" = "4873d752-5dbe-4006-8345-8279a0dfbbda"
+    "description" = "Created with Terraform"
+    "devicetype_count" = 0
+    "display" = "New Vendor"
+    "id" = "eccd8b38-f6d6-41a4-aebd-73b53731b099"
     "inventoryitem_count" = 0
-    "last_updated" = "2022-03-08T14:50:48.492203Z"
-    "name" = "Juniper"
-    "platform_count" = 1
-    "slug" = "juniper"
-    "url" = "https://demo.nautobot.com/api/dcim/manufacturers/4873d752-5dbe-4006-8345-8279a0dfbbda/"
+    "last_updated" = "2022-05-05T09:54:32.661009Z"
+    "name" = "New Vendor"
+    "platform_count" = 0
+    "slug" = "new-vendor"
+    "url" = "https://demo.nautobot.com/api/dcim/manufacturers/eccd8b38-f6d6-41a4-aebd-73b53731b099/"
   }
 }
 ```
