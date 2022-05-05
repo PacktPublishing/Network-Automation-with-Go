@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"unsafe"
+	//"unsafe"
 )
 
 func main() {
@@ -11,6 +11,6 @@ func main() {
 	
 	w := n[3:8]
 	fmt.Println(w)
-	fmt.Printf("n: %T, size: %d bytes\n", n, unsafe.Sizeof(n))
-	fmt.Printf("w: %T, size: %d bytes\n", w, unsafe.Sizeof(w))
+	//fmt.Printf("n: %T, size: %d bytes\n", n, unsafe.Sizeof(n))
+	//fmt.Printf("w: %T, size: %d bytes\n", w, unsafe.Sizeof(w))
 }
