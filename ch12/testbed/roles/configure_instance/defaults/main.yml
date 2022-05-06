@@ -7,6 +7,7 @@ common_software:
   - python3-pip
   - ansible-core
   - sshpass
+  - protobuf-compiler
 
 # ansible_distribution_file_variety
 base_software:
