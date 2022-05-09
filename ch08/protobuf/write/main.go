@@ -9,12 +9,6 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-func check(err error) {
-	if err != nil {
-		panic(err)
-	}
-}
-
 type Model struct {
 	Uplinks  []Link `yaml:"uplinks"`
 	Peers    []Peer `yaml:"peers"`
