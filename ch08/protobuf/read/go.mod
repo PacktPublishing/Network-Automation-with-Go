@@ -8,4 +8,4 @@ require (
 	gopkg.in/yaml.v2 v2.4.0
 )
 
-replace github.com/PacktPublishing/Network-Automation-with-Go/ch08/protobuf/pb => ./pb
+replace github.com/PacktPublishing/Network-Automation-with-Go/ch08/protobuf/pb => ../pb
