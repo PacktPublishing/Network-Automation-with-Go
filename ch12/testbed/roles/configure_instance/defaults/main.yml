@@ -35,6 +35,10 @@ ansible_collections:
 
 terraform_version: 1.1.9
 
+go_packages:
+  - google.golang.org/protobuf/cmd/protoc-gen-go@v1.28
+  - google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2
+
 software_additional: []
 
 docker_repo_url: https://download.docker.com/linux
