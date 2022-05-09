@@ -1,0 +1,23 @@
+syntax = "proto3";
+option go_package = "./pb";
+
+message Router {
+  repeated Uplink uplink = 1;
+  repeated Peer peer = 2;
+  int32 asn = 3;
+  Addr loopback = 4; 
+}
+
+message Uplink {
+	string name = 1;
+	string prefix = 2;
+}
+
+message Peer {
+	string ip = 1;
+	int32 asn = 2;
+}
+
+message Addr {
+  string ip = 1;
+}
