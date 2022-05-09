@@ -14,12 +14,12 @@ go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2
 protoc --go_out=. model.proto
 ```
 
-->
+=>
 
 ```go
 type Router struct {
-	Uplink   []*Uplink `protobuf:"bytes,1,rep,name=uplink,proto3" json:"uplink,omitempty"`
-	Peer     []*Peer   `protobuf:"bytes,2,rep,name=peer,proto3" json:"peer,omitempty"`
+	Uplinks  []*Uplink `protobuf:"bytes,1,rep,name=uplinks,proto3" json:"uplinks,omitempty"`
+	Peers    []*Peer   `protobuf:"bytes,2,rep,name=peers,proto3" json:"peers,omitempty"`
 	Asn      int32     `protobuf:"varint,3,opt,name=asn,proto3" json:"asn,omitempty"`
 	Loopback *Addr     `protobuf:"bytes,4,opt,name=loopback,proto3" json:"loopback,omitempty"`
 }
