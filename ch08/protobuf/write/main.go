@@ -53,5 +53,4 @@ func main() {
 	}
 
 	fmt.Printf("%v\n", router)
-
 }

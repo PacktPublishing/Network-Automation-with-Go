@@ -1,0 +1,1 @@
+{"asn":65001,"loopback":{"ip":"198.51.100.1"},"uplinks":[{"name":"Ethernet1","prefix":"192.0.2.1/31"},{"name":"Ethernet2","prefix":"192.0.2.2/31"}],"peers":[{"ip":"192.0.2.0","asn":65000},{"ip":"192.0.2.3","asn":65002}]}

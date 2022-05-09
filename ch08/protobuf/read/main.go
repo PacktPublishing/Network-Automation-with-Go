@@ -104,5 +104,5 @@ func main() {
 	if err := os.WriteFile(f, out, 0644); err != nil {
 		log.Fatalln("Failed to write address book:", err)
 	}
-
+	// fmt.Printf("%X", out)
 }
