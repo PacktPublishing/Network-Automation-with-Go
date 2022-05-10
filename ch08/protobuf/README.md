@@ -42,15 +42,14 @@ cd read && go run main.go
 1.
 
 ```hexdump
-$ hexdump -c router.data
-0000000  \n 031  \n  \t   E   t   h   e   r   n   e   t   1 022  \f   1
-0000010   9   2   .   0   .   2   .   1   /   3   1  \n 031  \n  \t   E
-0000020   t   h   e   r   n   e   t   2 022  \f   1   9   2   .   0   .
-0000030   2   .   2   /   3   1 022 017  \n  \t   1   9   2   .   0   .
-0000040   2   .   0 020 350 373 003 022 017  \n  \t   1   9   2   .   0
-0000050   .   2   .   3 020 352 373 003 030 351 373 003   " 016  \n  \f
-0000060   1   9   8   .   5   1   .   1   0   0   .   1                
-000006c
+$ hexdump -C router.data
+00000000  0a 19 0a 09 45 74 68 65  72 6e 65 74 31 12 0c 31  |....Ethernet1..1|
+00000010  39 32 2e 30 2e 32 2e 31  2f 33 31 0a 19 0a 09 45  |92.0.2.1/31....E|
+00000020  74 68 65 72 6e 65 74 32  12 0c 31 39 32 2e 30 2e  |thernet2..192.0.|
+00000030  32 2e 32 2f 33 31 12 0f  0a 09 31 39 32 2e 30 2e  |2.2/31....192.0.|
+00000040  32 2e 30 10 e8 fb 03 12  0f 0a 09 31 39 32 2e 30  |2.0........192.0|
+00000050  2e 32 2e 33 10 ea fb 03  18 e9 fb 03 22 0e 0a 0c  |.2.3........"...|
+00000060  31 39 38 2e 35 31 2e 31  30 30 2e 31              |198.51.100.1|
 ```
 
 2.
@@ -72,8 +71,8 @@ After grouping the output for convenience, we get something like:
 12 0C 31 39 32 2E 30 2E 32 2E 32 2F 33 31 
 12 0F 0A 09 31 39 32 2E 30 2E 32 2E 30 10 E8 FB 03 
 12 0F 0A 09 31 39 32 2E 30 2E 32 2E 33 10 EA FB 03 
-18 E9 FB 03
-22 0E 0A 0C 31 39 38 2E 35 31 2E 31 30 30 2E 31
+18 E9 FB 03 22 
+0E 0A 0C 31 39 38 2E 35 31 2E 31 30 30 2E 31
 ```
 
 Protobuf uses Varint to serialize integers. The last three bits of the number store the wire type (field encoding), then right-shift by three to get the field number. Having this in mind and how to convert Hex to ASCII, this translates to:
@@ -112,7 +111,7 @@ Hex  Description
 22  tag: loopback(4), field encoding: LENGTH_DELIMITED(2)
 0E  "loopback".length(): 14
 0A  tag: ip(1), field encoding: LENGTH_DELIMITED(2)
-0C  "name".length(): 12 
+0C  "ip".length(): 12 
 ...
 ```
 
