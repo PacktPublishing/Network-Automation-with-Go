@@ -1,0 +1,11 @@
+go get github.com/openconfig/ygot/generator
+go install github.com/openconfig/ygot/generator
+mkdir -p pkg/xr
+generator -path=yang \
+  -generate_fakeroot \
+  -fakeroot_name=device \
+  -output_file=pkg/xr/xr.go \
+  -package_name=xr \
+  -exclude_modules=ietf-interfaces \
+  yang/openconfig/network-instance/openconfig-network-instance.yang \
+  yang/openconfig/interfaces/openconfig-interfaces.yang

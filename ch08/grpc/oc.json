@@ -1,0 +1,9 @@
+{	
+    "openconfig-interfaces:interfaces": [null],
+    "openconfig-local-routing:local-routes": [null],
+    "openconfig-network-instance:network-instances": [null],
+    "openconfig-routing-policy:routing-policy": [null],
+    "openconfig-acl:acl": [null],
+    "openconfig-telemetry:telemetry-system": [null],
+    "openconfig-system:system": [null]
+}

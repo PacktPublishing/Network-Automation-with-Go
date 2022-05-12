@@ -1,18 +1,125 @@
 # Random notes
 
-## Getting an scoped config
-
-There gotta be a better way...
+## Config
 
 ```json
- ⇨  go run main.go 
-Scoped config from sandbox-iosxr-1.cisco.com:
+go run main.go 
 {
-    "config": {
-     "port": 57777,
-     "enable": true
+  "openconfig-network-instance:network-instances": {
+    "network-instance": [
+      {
+        "config": {
+          "name": "default"
+        },
+        "name": "default",
+        "protocols": {
+          "protocol": [
+            {
+              "bgp": {
+                "global": {
+                  "afi-safis": {
+                    "afi-safi": [
+                      {
+                        "afi-safi-name": "openconfig-bgp-types:IPV4_UNICAST",
+                        "config": {
+                          "afi-safi-name": "openconfig-bgp-types:IPV4_UNICAST",
+                          "enabled": true
+                        }
+                      }
+                    ]
+                  },
+                  "config": {
+                    "as": 64512,
+                    "router-id": "198.51.100.0"
+                  }
+                }
+              },
+              "config": {
+                "identifier": "openconfig-policy-types:BGP",
+                "name": "default"
+              },
+              "identifier": "openconfig-policy-types:BGP",
+              "name": "default"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
+
+
+
+BGP config applied on sandbox-iosxr-1.cisco.com:57777
+
+
+Config from sandbox-iosxr-1.cisco.com:
+{
+ "openconfig-network-instance:network-instances": {
+  "network-instance": [
+   {
+    "name": "default",
+    "protocols": {
+     "protocol": [
+      {
+       "identifier": "openconfig-policy-types:BGP",
+       "name": "default",
+       "bgp": {
+        "global": {
+         "config": {
+          "as": 64512,
+          "router-id": "198.51.100.0"
+         },
+         "afi-safis": {
+          "afi-safi": [
+           {
+            "afi-safi-name": "openconfig-bgp-types:IPV4_UNICAST",
+            "config": {
+             "afi-safi-name": "openconfig-bgp-types:IPV4_UNICAST",
+             "enabled": true
+            }
+           },
+           {
+            "afi-safi-name": "openconfig-bgp-types:IPV6_UNICAST",
+            "config": {
+             "afi-safi-name": "openconfig-bgp-types:IPV6_UNICAST",
+             "enabled": true
+            }
+           }
+          ]
+         }
+        },
+        "neighbors": {
+         "neighbor": [
+          {
+           "neighbor-address": "2001:db8:cafe::2",
+           "config": {
+            "neighbor-address": "2001:db8:cafe::2",
+            "peer-as": 64512,
+            "description": "iBGP session"
+           },
+           "afi-safis": {
+            "afi-safi": [
+             {
+              "afi-safi-name": "openconfig-bgp-types:IPV6_UNICAST",
+              "config": {
+               "afi-safi-name": "openconfig-bgp-types:IPV6_UNICAST",
+               "enabled": true
+              }
+             }
+            ]
+           }
+          }
+         ]
+        }
+       }
+      }
+     ]
     }
    }
+  ]
+ }
+}
 ```
 
 ## OpenConfig models

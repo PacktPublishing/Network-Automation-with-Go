@@ -1,0 +1,135 @@
+{
+    "openconfig-network-instance:network-instances": {
+      "network-instance": [
+        {
+          "name": "blue",
+          "config": {
+            "name": "blue"
+          },
+          "interfaces": {
+            "interface": [
+              {
+                "id": "BVI511",
+                "config": {
+                  "id": "BVI511",
+                  "interface": "BVI511",
+                  "subinterface": 0
+                }
+              },
+              {
+                "id": "Loopback701",
+                "config": {
+                  "id": "Loopback701",
+                  "interface": "Loopback701",
+                  "subinterface": 0
+                }
+              },
+              {
+                "id": "Loopback702",
+                "config": {
+                  "id": "Loopback702",
+                  "interface": "Loopback702",
+                  "subinterface": 0
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "default",
+          "protocols": {
+            "protocol": [
+              {
+                "identifier": "openconfig-policy-types:STATIC",
+                "name": "DEFAULT",
+                "config": {
+                  "identifier": "openconfig-policy-types:STATIC",
+                  "name": "DEFAULT"
+                },
+                "static-routes": {
+                  "static": [
+                    {
+                      "prefix": "0.0.0.0/0",
+                      "config": {
+                        "prefix": "0.0.0.0/0"
+                      },
+                      "next-hops": {
+                        "next-hop": [
+                          {
+                            "index": "##10.10.20.254##",
+                            "config": {
+                              "index": "##10.10.20.254##",
+                              "next-hop": "10.10.20.254"
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "identifier": "openconfig-policy-types:BGP",
+                "name": "default",
+                "config": {
+                  "identifier": "openconfig-policy-types:BGP",
+                  "name": "default"
+                },
+                "bgp": {
+                  "global": {
+                    "config": {
+                      "as": 64512
+                    },
+                    "afi-safis": {
+                      "afi-safi": [
+                        {
+                          "afi-safi-name": "openconfig-bgp-types:IPV4_UNICAST",
+                          "config": {
+                            "afi-safi-name": "openconfig-bgp-types:IPV4_UNICAST",
+                            "enabled": true
+                          }
+                        },
+                        {
+                          "afi-safi-name": "openconfig-bgp-types:IPV6_UNICAST",
+                          "config": {
+                            "afi-safi-name": "openconfig-bgp-types:IPV6_UNICAST",
+                            "enabled": true
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "neighbors": {
+                    "neighbor": [
+                      {
+                        "neighbor-address": "2001:db8:cafe::2",
+                        "config": {
+                          "neighbor-address": "2001:db8:cafe::2",
+                          "peer-as": 64512,
+                          "description": "iBGP session"
+                        },
+                        "afi-safis": {
+                          "afi-safi": [
+                            {
+                              "afi-safi-name": "openconfig-bgp-types:IPV6_UNICAST",
+                              "config": {
+                                "afi-safi-name": "openconfig-bgp-types:IPV6_UNICAST",
+                                "enabled": true
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          "config": {
+            "name": "default"
+          }
+        }
+      ]
+    }
+  }
