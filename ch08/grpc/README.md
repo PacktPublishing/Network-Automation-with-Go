@@ -14,10 +14,25 @@ $ protoc --go_out=. --go_opt=paths=source_relative \
     proto/ems/ems_grpc.proto
 ```
 
+## Req
+
+Temporary
+
+```
+telemetry model-driven
+ sensor-group BGPNeighbor
+  sensor-path Cisco-IOS-XR-ipv4-bgp-oper:bgp/instances/instance/instance-active/default-vrf/afs/af/neighbor-af-table/neighbor
+ !
+ subscription BGP
+  sensor-group-id BGPNeighbor sample-interval 5000
+ !
+!
+```
+
 ## Config
 
 ```json
-go run main.go 
+go run grpc
 {
   "openconfig-network-instance:network-instances": {
     "network-instance": [
