@@ -11,7 +11,7 @@ import (
 	"os/signal"
 	"time"
 
-	oc "grpc/pkg/xr"
+	"grpc/pkg/oc"
 	xr "grpc/proto/ems"
 	"grpc/proto/telemetry"
 
@@ -133,56 +133,6 @@ func check(err error) {
 	if err != nil {
 		panic(err)
 	}
-}
-
-func (m *Model) buildNetworkInstance(dev *oc.Device) error {
-	name := defaultNetInst
-	nis := &oc.OpenconfigNetworkInstance_NetworkInstances{}
-	ni, err := nis.NewNetworkInstance(name)
-	if err != nil {
-		return fmt.Errorf("cannot create new network instance: %w", err)
-	}
-	ni.Config = &oc.OpenconfigNetworkInstance_NetworkInstances_NetworkInstance_Config{
-		Name: &name,
-	}
-
-	ni.Protocols = &oc.OpenconfigNetworkInstance_NetworkInstances_NetworkInstance_Protocols{}
-	bgp, err := ni.Protocols.NewProtocol(bgpID, name)
-	if err != nil {
-		return fmt.Errorf("cannot create new bgp instance: %w", err)
-	}
-	bgp.Config = &oc.OpenconfigNetworkInstance_NetworkInstances_NetworkInstance_Protocols_Protocol_Config{
-		Name:       &name,
-		Identifier: bgpID,
-	}
-
-	bgp.Bgp = &oc.OpenconfigNetworkInstance_NetworkInstances_NetworkInstance_Protocols_Protocol_Bgp{
-		Global: &oc.OpenconfigNetworkInstance_NetworkInstances_NetworkInstance_Protocols_Protocol_Bgp_Global{
-			Config: &oc.OpenconfigNetworkInstance_NetworkInstances_NetworkInstance_Protocols_Protocol_Bgp_Global_Config{
-				As:       ygot.Uint32(uint32(m.ASN)),
-				RouterId: ygot.String(m.Loopback.IP),
-			},
-		},
-	}
-	// Initialize the IPv4 Unicast address family.
-
-	bgp.Bgp.Global.AfiSafis = &oc.OpenconfigNetworkInstance_NetworkInstances_NetworkInstance_Protocols_Protocol_Bgp_Global_AfiSafis{}
-	safi, err := bgp.Bgp.Global.AfiSafis.NewAfiSafi(ipv4uniAF)
-	if err != nil {
-		return fmt.Errorf("cannot enable bgp IPv4 address family: %w", err)
-	}
-	safi.Config = &oc.OpenconfigNetworkInstance_NetworkInstances_NetworkInstance_Protocols_Protocol_Bgp_Global_AfiSafis_AfiSafi_Config{
-		AfiSafiName: ipv4uniAF,
-		Enabled:     ygot.Bool(true),
-	}
-
-	if err := ni.Validate(); err != nil {
-		return fmt.Errorf("config validation failed: %w", err)
-	}
-
-	dev.NetworkInstances = nis
-
-	return nil
 }
 
 type xrgrpc struct {

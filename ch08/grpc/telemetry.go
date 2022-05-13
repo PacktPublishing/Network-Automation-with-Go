@@ -1,8 +1,8 @@
 package main
 
 import (
-	"encoding/json"
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"math/rand"
