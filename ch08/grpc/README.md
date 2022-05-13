@@ -1,5 +1,19 @@
 # Random notes
 
+## Generating Go binding from protobuf files
+
+The Go generated code in `ems_grpc.pb.go` is the result of the following:
+
+- `proto/ems`
+
+```bash
+$ protoc --go_out=. --go_opt=paths=source_relative \
+    --go-grpc_out=. --go-grpc_opt=paths=source_relative \
+    --go_opt=Mproto/ems/ems_grpc.proto=proto/ems \
+    --go-grpc_opt=Mproto/ems/ems_grpc.proto=proto/ems \
+    proto/ems/ems_grpc.proto
+```
+
 ## Config
 
 ```json
