@@ -20,6 +20,7 @@ import (
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/protobuf/proto"
 	"gopkg.in/yaml.v2"
+	"github.com/tidwall/gjson"
 )
 
 //go:generate bash $PWD/generate_code
@@ -289,15 +290,26 @@ func main() {
 		err := proto.Unmarshal(msg, message)
 		check(err)
 
-		fmt.Printf("Time %v, Path: %v\n", message.GetMsgTimestamp(), message.GetEncodingPath())
+		fmt.Printf("\n\nTime %v\nPath: %v\n\n", message.GetMsgTimestamp(), message.GetEncodingPath())
 
-		b, err := json.Marshal(message)
+		b, err := json.Marshal(message.GetDataGpbkv())
 		check(err)
 
-		bjs, err := prettyprint(b)
-		check(err)
+		j := string(b)
 
-		fmt.Println(string(bjs))
+		// fields := gjson.Get(j, "0.fields.1.fields.#.name")
+		// fmt.Println("Available fields ", fields)
+
+		// https://go.dev/play/p/uyWenG-1Keu
+		data := gjson.Get(j, "0.fields.0.fields.#(name==neighbor-address).ValueByType.StringValue")
+		fmt.Println("  Neighbor: ",data)
+
+		data = gjson.Get(j, "0.fields.1.fields.#(name==connection-state).ValueByType.StringValue")
+		fmt.Println("  Connection state: ",data)
+
+		// bjs, err := prettyprint(b)
+		// check(err)
+		// fmt.Println(string(bjs))
 	}
 
 }
