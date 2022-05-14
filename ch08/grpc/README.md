@@ -58,7 +58,7 @@ go run grpc
                     ]
                   },
                   "config": {
-                    "as": 64512,
+                    "as": 65001,
                     "router-id": "198.51.100.0"
                   }
                 }

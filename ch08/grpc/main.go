@@ -22,18 +22,11 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-//go:generate bash $PWD/create_models
+//go:generate bash $PWD/generate_code
 
 const (
-	// xrLoopback = "Loopback0"
-	//defaultSubIdx  = 0
-	defaultNetInst = "default"
-	blue           = "\x1b[34;1m"
-	white          = "\x1b[0m"
-	// OpenconfigPolicyTypes_INSTALL_PROTOCOL_TYPE_BGP E_OpenconfigPolicyTypes_INSTALL_PROTOCOL_TYPE = 1
-	bgpID = oc.OpenconfigPolicyTypes_INSTALL_PROTOCOL_TYPE_BGP
-	// OpenconfigBgpTypes_AFI_SAFI_TYPE_IPV4_UNICAST E_OpenconfigBgpTypes_AFI_SAFI_TYPE = 3
-	ipv4uniAF = oc.OpenconfigBgpTypes_AFI_SAFI_TYPE_IPV4_UNICAST
+	blue  = "\x1b[34;1m"
+	white = "\x1b[0m"
 )
 
 type Authentication struct {
@@ -77,24 +70,10 @@ type Addr struct {
 	IP string `yaml:"ip"`
 }
 
-// Provides the user/password for the connection. It implements
-// the PerRPCCredentials interface.
-type loginCreds struct {
-	Username, Password string
-	requireTLS         bool
-}
-
-// Method of the PerRPCCredentials interface.
-func (c *loginCreds) GetRequestMetadata(context.Context, ...string) (map[string]string, error) {
-	return map[string]string{
-		"username": c.Username,
-		"password": c.Password,
-	}, nil
-}
-
-// Method of the PerRPCCredentials interface.
-func (c *loginCreds) RequireTransportSecurity() bool {
-	return c.requireTLS
+func check(err error) {
+	if err != nil {
+		panic(err)
+	}
 }
 
 func (r IOSXR) Connect() (xr xrgrpc, err error) {
@@ -127,12 +106,6 @@ func (r IOSXR) Connect() (xr xrgrpc, err error) {
 	xr.ctx = ctx
 
 	return xr, nil
-}
-
-func check(err error) {
-	if err != nil {
-		panic(err)
-	}
 }
 
 type xrgrpc struct {
@@ -215,6 +188,9 @@ func main() {
 		},
 	}
 
+	//////////////////////
+	// Read config inputs
+	/////////////////////
 	src, err := os.Open("input.yml")
 	check(err)
 	defer src.Close()
@@ -225,12 +201,14 @@ func main() {
 	err = d.Decode(&input)
 	check(err)
 
+	/////////////////////////////////
+	//Build OpenConfig configuration
+	////////////////////////////////
 	device := &oc.Device{}
 
 	err = input.buildNetworkInstance(device)
 	check(err)
 
-	// Generate the payload payload for our message
 	payload, err := ygot.EmitJSON(device, &ygot.EmitJSONConfig{
 		Format: ygot.RFC7951,
 		Indent: "  ",
@@ -238,20 +216,19 @@ func main() {
 			AppendModuleName: true,
 		},
 	})
-	fmt.Printf("%s\n", payload)
-
 	check(err)
 
-	/////////////
-	// Connect
-	////////////
+	///////////////////////////////////////////////////
+	// Connect to target device (DevNet IOS XR device)
+	//////////////////////////////////////////////////
 	router, err := iosxr.Connect()
 	check(err)
 	defer router.conn.Close()
 
-	///////////////////
+	/////////////////////
 	// Replace BGP config
-	///////////////////
+	/////////////////////
+	// TODO: It fails if router is configured on a different ASN
 	err = router.ReplaceConfig(payload)
 	check(err)
 
@@ -260,10 +237,7 @@ func main() {
 	///////////////////
 	// Read BGP config
 	///////////////////
-	var out Config
-	paths := "bgp.json"
-
-	out, err = router.GetConfig(paths)
+	out, err := router.GetConfig("bgp.json")
 	check(err)
 
 	fmt.Printf("Config from %s:\n%s\n", iosxr.Hostname, out.Running)
@@ -305,6 +279,10 @@ func main() {
 			return
 		}
 	}()
+
+	/////////////////////////////////////////////////////////////
+	// Decode Telemetry Protobuf message (payload still a string)
+	/////////////////////////////////////////////////////////////
 
 	for msg := range ch {
 		message := new(telemetry.Telemetry)

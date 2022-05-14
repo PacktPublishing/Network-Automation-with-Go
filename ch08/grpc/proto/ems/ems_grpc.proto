@@ -3,39 +3,57 @@ syntax = "proto3";
 package IOSXRExtensibleManagabilityService;
 
 service gRPCConfigOper {
-   
+
+    // Configuration related commands
+
     rpc GetConfig(ConfigGetArgs) returns(stream ConfigGetReply) {};
-        
+
     rpc MergeConfig(ConfigArgs) returns(ConfigReply) {};
-    
+
     rpc DeleteConfig(ConfigArgs) returns(ConfigReply) {};
-    
+
+    rpc RemoveConfig(ConfigArgs) returns(ConfigReply) {};
+
     rpc ReplaceConfig(ConfigArgs) returns(ConfigReply) {};
 
     rpc CliConfig(CliConfigArgs) returns(CliConfigReply) {};
 
     rpc CommitReplace(CommitReplaceArgs) returns (CommitReplaceReply) {};
 
+    // Do we need implicit or explicit commit
+    //
     rpc CommitConfig(CommitArgs) returns(CommitReply) {};
 
     rpc ConfigDiscardChanges(DiscardChangesArgs) returns(DiscardChangesReply) {};
 
-    rpc GetOper(ConfigGetArgs) returns(stream GetOperReply) {};
+    // Get only returns oper data
+    //
+    rpc GetOper(GetOperArgs) returns(stream GetOperReply) {};
     // Do we need "Get" also to give combined oper and config?
 
     // Get Telemetry Data
     rpc CreateSubs(CreateSubsArgs) returns(stream CreateSubsReply) {};
+
+    // Get Proto File
+    rpc GetProtoFile(GetProtoFileArgs) returns(stream GetProtoFileReply) {};
 }
+
+//
+// Should we seperate Exec from Config/Oper?
+//
 
 service gRPCExec {
 // Exec commands
     rpc ShowCmdTextOutput(ShowCmdArgs) returns(stream ShowCmdTextReply) {};
     rpc ShowCmdJSONOutput(ShowCmdArgs) returns(stream ShowCmdJSONReply) {};
+    rpc ActionJSON(ActionJSONArgs) returns(stream ActionJSONReply) {};
 }
 
 service OpenConfiggRPC {
     rpc SubscribeTelemetry(SubscribeRequest) returns (stream SubscribeResponse) {};
     rpc UnSubscribeTelemetry(CancelSubscribeReq) returns (SubscribeResponse) {};
+    // get-models rpc implementation per
+    // github.com/openconfig/public/blob/master/release/models/rpc/openconfig-rpc.yang
     rpc GetModels(GetModelsInput) returns (GetModelsOutput) {};
 }
 
@@ -50,6 +68,11 @@ message ConfigGetReply {
     string errors = 3;
 }
 
+message GetOperArgs {
+     int64 ReqId = 1;
+     string yangpathjson = 2;
+}
+
 message GetOperReply {
     int64 ResReqId = 1;
     string yangjson = 2;
@@ -59,22 +82,27 @@ message GetOperReply {
 message ConfigArgs {
     int64 ReqId = 1;
     string yangjson = 2;
-    
+    bool   Confirmed = 3;
+    uint32  ConfirmTimeout = 4;
 }
 
 message ConfigReply {
     int64 ResReqId = 1;
     string errors = 2;
+    uint32 CommitID = 3;
 }
 
 message CliConfigArgs {
     int64 ReqId = 1;
     string cli = 2;
+    bool Confirmed = 3;
+    uint32 ConfirmTimeout = 4;
 }
 
 message CliConfigReply {
     int64 ResReqId = 1;
     string errors = 2;
+    uint32 CommitID = 3;
 }
 
 
@@ -101,14 +129,13 @@ enum CommitResult {
 }
 
 message CommitArgs {
-    CommitMsg msg = 1;
-    int64 ReqId = 2;
+    int64 ReqId = 1;
+    uint32 CommitID = 2;
 }
 
 message CommitReply {
-    CommitResult result = 1;
-    int64 ResReqId = 2;
-    string errors = 3;
+    int64 ResReqId = 1;
+    string errors = 2;
 }
 
 
@@ -138,10 +165,28 @@ message ShowCmdJSONReply {
     string errors = 3;
 }
 
+// QOSMarking specifies the DSCP value to be set on transmitted telemetry
+message QOSMarking {
+  uint32 marking = 1;
+}
+
 message CreateSubsArgs {
      int64 ReqId = 1;
      int64 encode = 2;
      string subidstr = 3;
+     QOSMarking qos = 4;   // DSCP marking to be used.
+     repeated string Subscriptions = 5;
+}
+
+message ActionJSONArgs {
+	int64 ReqId = 1;
+	string yangpathjson = 2;
+}
+
+message ActionJSONReply {
+	int64 ResReqId = 1;
+	string yangjson = 2;
+	string errors = 3;
 }
 
 message CreateSubsReply {
@@ -180,6 +225,7 @@ message SubscriptionList {
        ENC_GPB = 1;
     }
     ENC_SPEC encoding = 4;
+    QOSMarking qos = 5;   // DSCP marking to be used.
 }
 enum OC_RPC_RESPONSE_TYPE {
     OK = 0;
@@ -231,7 +277,7 @@ message GetModelsInput {
         SUMMARY = 0;
         DETAIL  = 1;
     }
-    MODLE_REQUEST_TYPE requestType = 5;    
+    MODLE_REQUEST_TYPE requestType = 5;
 }
 
 message GetModelsOutput {
@@ -246,4 +292,15 @@ message GetModelsOutput {
     repeated ModelInfo models = 2;
     OC_RPC_RESPONSE_TYPE responseCode = 3;
     string msg = 4;
+}
+
+message GetProtoFileArgs {
+     int64  reqId = 1;
+     string yangPath = 2;
+}
+
+message GetProtoFileReply {
+    int64  reqId = 1;
+    string protoContent = 2;
+    string errors = 3;
 }

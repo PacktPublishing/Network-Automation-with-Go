@@ -25,14 +25,21 @@ type GRPCConfigOperClient interface {
 	GetConfig(ctx context.Context, in *ConfigGetArgs, opts ...grpc.CallOption) (GRPCConfigOper_GetConfigClient, error)
 	MergeConfig(ctx context.Context, in *ConfigArgs, opts ...grpc.CallOption) (*ConfigReply, error)
 	DeleteConfig(ctx context.Context, in *ConfigArgs, opts ...grpc.CallOption) (*ConfigReply, error)
+	RemoveConfig(ctx context.Context, in *ConfigArgs, opts ...grpc.CallOption) (*ConfigReply, error)
 	ReplaceConfig(ctx context.Context, in *ConfigArgs, opts ...grpc.CallOption) (*ConfigReply, error)
 	CliConfig(ctx context.Context, in *CliConfigArgs, opts ...grpc.CallOption) (*CliConfigReply, error)
 	CommitReplace(ctx context.Context, in *CommitReplaceArgs, opts ...grpc.CallOption) (*CommitReplaceReply, error)
+	// Do we need implicit or explicit commit
+	//
 	CommitConfig(ctx context.Context, in *CommitArgs, opts ...grpc.CallOption) (*CommitReply, error)
 	ConfigDiscardChanges(ctx context.Context, in *DiscardChangesArgs, opts ...grpc.CallOption) (*DiscardChangesReply, error)
-	GetOper(ctx context.Context, in *ConfigGetArgs, opts ...grpc.CallOption) (GRPCConfigOper_GetOperClient, error)
+	// Get only returns oper data
+	//
+	GetOper(ctx context.Context, in *GetOperArgs, opts ...grpc.CallOption) (GRPCConfigOper_GetOperClient, error)
 	// Get Telemetry Data
 	CreateSubs(ctx context.Context, in *CreateSubsArgs, opts ...grpc.CallOption) (GRPCConfigOper_CreateSubsClient, error)
+	// Get Proto File
+	GetProtoFile(ctx context.Context, in *GetProtoFileArgs, opts ...grpc.CallOption) (GRPCConfigOper_GetProtoFileClient, error)
 }
 
 type gRPCConfigOperClient struct {
@@ -93,6 +100,15 @@ func (c *gRPCConfigOperClient) DeleteConfig(ctx context.Context, in *ConfigArgs,
 	return out, nil
 }
 
+func (c *gRPCConfigOperClient) RemoveConfig(ctx context.Context, in *ConfigArgs, opts ...grpc.CallOption) (*ConfigReply, error) {
+	out := new(ConfigReply)
+	err := c.cc.Invoke(ctx, "/IOSXRExtensibleManagabilityService.gRPCConfigOper/RemoveConfig", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *gRPCConfigOperClient) ReplaceConfig(ctx context.Context, in *ConfigArgs, opts ...grpc.CallOption) (*ConfigReply, error) {
 	out := new(ConfigReply)
 	err := c.cc.Invoke(ctx, "/IOSXRExtensibleManagabilityService.gRPCConfigOper/ReplaceConfig", in, out, opts...)
@@ -138,7 +154,7 @@ func (c *gRPCConfigOperClient) ConfigDiscardChanges(ctx context.Context, in *Dis
 	return out, nil
 }
 
-func (c *gRPCConfigOperClient) GetOper(ctx context.Context, in *ConfigGetArgs, opts ...grpc.CallOption) (GRPCConfigOper_GetOperClient, error) {
+func (c *gRPCConfigOperClient) GetOper(ctx context.Context, in *GetOperArgs, opts ...grpc.CallOption) (GRPCConfigOper_GetOperClient, error) {
 	stream, err := c.cc.NewStream(ctx, &GRPCConfigOper_ServiceDesc.Streams[1], "/IOSXRExtensibleManagabilityService.gRPCConfigOper/GetOper", opts...)
 	if err != nil {
 		return nil, err
@@ -202,6 +218,38 @@ func (x *gRPCConfigOperCreateSubsClient) Recv() (*CreateSubsReply, error) {
 	return m, nil
 }
 
+func (c *gRPCConfigOperClient) GetProtoFile(ctx context.Context, in *GetProtoFileArgs, opts ...grpc.CallOption) (GRPCConfigOper_GetProtoFileClient, error) {
+	stream, err := c.cc.NewStream(ctx, &GRPCConfigOper_ServiceDesc.Streams[3], "/IOSXRExtensibleManagabilityService.gRPCConfigOper/GetProtoFile", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &gRPCConfigOperGetProtoFileClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type GRPCConfigOper_GetProtoFileClient interface {
+	Recv() (*GetProtoFileReply, error)
+	grpc.ClientStream
+}
+
+type gRPCConfigOperGetProtoFileClient struct {
+	grpc.ClientStream
+}
+
+func (x *gRPCConfigOperGetProtoFileClient) Recv() (*GetProtoFileReply, error) {
+	m := new(GetProtoFileReply)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // GRPCConfigOperServer is the server API for GRPCConfigOper service.
 // All implementations must embed UnimplementedGRPCConfigOperServer
 // for forward compatibility
@@ -209,14 +257,21 @@ type GRPCConfigOperServer interface {
 	GetConfig(*ConfigGetArgs, GRPCConfigOper_GetConfigServer) error
 	MergeConfig(context.Context, *ConfigArgs) (*ConfigReply, error)
 	DeleteConfig(context.Context, *ConfigArgs) (*ConfigReply, error)
+	RemoveConfig(context.Context, *ConfigArgs) (*ConfigReply, error)
 	ReplaceConfig(context.Context, *ConfigArgs) (*ConfigReply, error)
 	CliConfig(context.Context, *CliConfigArgs) (*CliConfigReply, error)
 	CommitReplace(context.Context, *CommitReplaceArgs) (*CommitReplaceReply, error)
+	// Do we need implicit or explicit commit
+	//
 	CommitConfig(context.Context, *CommitArgs) (*CommitReply, error)
 	ConfigDiscardChanges(context.Context, *DiscardChangesArgs) (*DiscardChangesReply, error)
-	GetOper(*ConfigGetArgs, GRPCConfigOper_GetOperServer) error
+	// Get only returns oper data
+	//
+	GetOper(*GetOperArgs, GRPCConfigOper_GetOperServer) error
 	// Get Telemetry Data
 	CreateSubs(*CreateSubsArgs, GRPCConfigOper_CreateSubsServer) error
+	// Get Proto File
+	GetProtoFile(*GetProtoFileArgs, GRPCConfigOper_GetProtoFileServer) error
 	mustEmbedUnimplementedGRPCConfigOperServer()
 }
 
@@ -233,6 +288,9 @@ func (UnimplementedGRPCConfigOperServer) MergeConfig(context.Context, *ConfigArg
 func (UnimplementedGRPCConfigOperServer) DeleteConfig(context.Context, *ConfigArgs) (*ConfigReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteConfig not implemented")
 }
+func (UnimplementedGRPCConfigOperServer) RemoveConfig(context.Context, *ConfigArgs) (*ConfigReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RemoveConfig not implemented")
+}
 func (UnimplementedGRPCConfigOperServer) ReplaceConfig(context.Context, *ConfigArgs) (*ConfigReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReplaceConfig not implemented")
 }
@@ -248,11 +306,14 @@ func (UnimplementedGRPCConfigOperServer) CommitConfig(context.Context, *CommitAr
 func (UnimplementedGRPCConfigOperServer) ConfigDiscardChanges(context.Context, *DiscardChangesArgs) (*DiscardChangesReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ConfigDiscardChanges not implemented")
 }
-func (UnimplementedGRPCConfigOperServer) GetOper(*ConfigGetArgs, GRPCConfigOper_GetOperServer) error {
+func (UnimplementedGRPCConfigOperServer) GetOper(*GetOperArgs, GRPCConfigOper_GetOperServer) error {
 	return status.Errorf(codes.Unimplemented, "method GetOper not implemented")
 }
 func (UnimplementedGRPCConfigOperServer) CreateSubs(*CreateSubsArgs, GRPCConfigOper_CreateSubsServer) error {
 	return status.Errorf(codes.Unimplemented, "method CreateSubs not implemented")
+}
+func (UnimplementedGRPCConfigOperServer) GetProtoFile(*GetProtoFileArgs, GRPCConfigOper_GetProtoFileServer) error {
+	return status.Errorf(codes.Unimplemented, "method GetProtoFile not implemented")
 }
 func (UnimplementedGRPCConfigOperServer) mustEmbedUnimplementedGRPCConfigOperServer() {}
 
@@ -320,6 +381,24 @@ func _GRPCConfigOper_DeleteConfig_Handler(srv interface{}, ctx context.Context, 
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(GRPCConfigOperServer).DeleteConfig(ctx, req.(*ConfigArgs))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GRPCConfigOper_RemoveConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ConfigArgs)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GRPCConfigOperServer).RemoveConfig(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/IOSXRExtensibleManagabilityService.gRPCConfigOper/RemoveConfig",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GRPCConfigOperServer).RemoveConfig(ctx, req.(*ConfigArgs))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -415,7 +494,7 @@ func _GRPCConfigOper_ConfigDiscardChanges_Handler(srv interface{}, ctx context.C
 }
 
 func _GRPCConfigOper_GetOper_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(ConfigGetArgs)
+	m := new(GetOperArgs)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
@@ -456,6 +535,27 @@ func (x *gRPCConfigOperCreateSubsServer) Send(m *CreateSubsReply) error {
 	return x.ServerStream.SendMsg(m)
 }
 
+func _GRPCConfigOper_GetProtoFile_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(GetProtoFileArgs)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(GRPCConfigOperServer).GetProtoFile(m, &gRPCConfigOperGetProtoFileServer{stream})
+}
+
+type GRPCConfigOper_GetProtoFileServer interface {
+	Send(*GetProtoFileReply) error
+	grpc.ServerStream
+}
+
+type gRPCConfigOperGetProtoFileServer struct {
+	grpc.ServerStream
+}
+
+func (x *gRPCConfigOperGetProtoFileServer) Send(m *GetProtoFileReply) error {
+	return x.ServerStream.SendMsg(m)
+}
+
 // GRPCConfigOper_ServiceDesc is the grpc.ServiceDesc for GRPCConfigOper service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -470,6 +570,10 @@ var GRPCConfigOper_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteConfig",
 			Handler:    _GRPCConfigOper_DeleteConfig_Handler,
+		},
+		{
+			MethodName: "RemoveConfig",
+			Handler:    _GRPCConfigOper_RemoveConfig_Handler,
 		},
 		{
 			MethodName: "ReplaceConfig",
@@ -508,6 +612,11 @@ var GRPCConfigOper_ServiceDesc = grpc.ServiceDesc{
 			Handler:       _GRPCConfigOper_CreateSubs_Handler,
 			ServerStreams: true,
 		},
+		{
+			StreamName:    "GetProtoFile",
+			Handler:       _GRPCConfigOper_GetProtoFile_Handler,
+			ServerStreams: true,
+		},
 	},
 	Metadata: "proto/ems/ems_grpc.proto",
 }
@@ -519,6 +628,7 @@ type GRPCExecClient interface {
 	// Exec commands
 	ShowCmdTextOutput(ctx context.Context, in *ShowCmdArgs, opts ...grpc.CallOption) (GRPCExec_ShowCmdTextOutputClient, error)
 	ShowCmdJSONOutput(ctx context.Context, in *ShowCmdArgs, opts ...grpc.CallOption) (GRPCExec_ShowCmdJSONOutputClient, error)
+	ActionJSON(ctx context.Context, in *ActionJSONArgs, opts ...grpc.CallOption) (GRPCExec_ActionJSONClient, error)
 }
 
 type gRPCExecClient struct {
@@ -593,6 +703,38 @@ func (x *gRPCExecShowCmdJSONOutputClient) Recv() (*ShowCmdJSONReply, error) {
 	return m, nil
 }
 
+func (c *gRPCExecClient) ActionJSON(ctx context.Context, in *ActionJSONArgs, opts ...grpc.CallOption) (GRPCExec_ActionJSONClient, error) {
+	stream, err := c.cc.NewStream(ctx, &GRPCExec_ServiceDesc.Streams[2], "/IOSXRExtensibleManagabilityService.gRPCExec/ActionJSON", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &gRPCExecActionJSONClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type GRPCExec_ActionJSONClient interface {
+	Recv() (*ActionJSONReply, error)
+	grpc.ClientStream
+}
+
+type gRPCExecActionJSONClient struct {
+	grpc.ClientStream
+}
+
+func (x *gRPCExecActionJSONClient) Recv() (*ActionJSONReply, error) {
+	m := new(ActionJSONReply)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // GRPCExecServer is the server API for GRPCExec service.
 // All implementations must embed UnimplementedGRPCExecServer
 // for forward compatibility
@@ -600,6 +742,7 @@ type GRPCExecServer interface {
 	// Exec commands
 	ShowCmdTextOutput(*ShowCmdArgs, GRPCExec_ShowCmdTextOutputServer) error
 	ShowCmdJSONOutput(*ShowCmdArgs, GRPCExec_ShowCmdJSONOutputServer) error
+	ActionJSON(*ActionJSONArgs, GRPCExec_ActionJSONServer) error
 	mustEmbedUnimplementedGRPCExecServer()
 }
 
@@ -612,6 +755,9 @@ func (UnimplementedGRPCExecServer) ShowCmdTextOutput(*ShowCmdArgs, GRPCExec_Show
 }
 func (UnimplementedGRPCExecServer) ShowCmdJSONOutput(*ShowCmdArgs, GRPCExec_ShowCmdJSONOutputServer) error {
 	return status.Errorf(codes.Unimplemented, "method ShowCmdJSONOutput not implemented")
+}
+func (UnimplementedGRPCExecServer) ActionJSON(*ActionJSONArgs, GRPCExec_ActionJSONServer) error {
+	return status.Errorf(codes.Unimplemented, "method ActionJSON not implemented")
 }
 func (UnimplementedGRPCExecServer) mustEmbedUnimplementedGRPCExecServer() {}
 
@@ -668,6 +814,27 @@ func (x *gRPCExecShowCmdJSONOutputServer) Send(m *ShowCmdJSONReply) error {
 	return x.ServerStream.SendMsg(m)
 }
 
+func _GRPCExec_ActionJSON_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(ActionJSONArgs)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(GRPCExecServer).ActionJSON(m, &gRPCExecActionJSONServer{stream})
+}
+
+type GRPCExec_ActionJSONServer interface {
+	Send(*ActionJSONReply) error
+	grpc.ServerStream
+}
+
+type gRPCExecActionJSONServer struct {
+	grpc.ServerStream
+}
+
+func (x *gRPCExecActionJSONServer) Send(m *ActionJSONReply) error {
+	return x.ServerStream.SendMsg(m)
+}
+
 // GRPCExec_ServiceDesc is the grpc.ServiceDesc for GRPCExec service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -686,6 +853,11 @@ var GRPCExec_ServiceDesc = grpc.ServiceDesc{
 			Handler:       _GRPCExec_ShowCmdJSONOutput_Handler,
 			ServerStreams: true,
 		},
+		{
+			StreamName:    "ActionJSON",
+			Handler:       _GRPCExec_ActionJSON_Handler,
+			ServerStreams: true,
+		},
 	},
 	Metadata: "proto/ems/ems_grpc.proto",
 }
@@ -696,6 +868,8 @@ var GRPCExec_ServiceDesc = grpc.ServiceDesc{
 type OpenConfiggRPCClient interface {
 	SubscribeTelemetry(ctx context.Context, in *SubscribeRequest, opts ...grpc.CallOption) (OpenConfiggRPC_SubscribeTelemetryClient, error)
 	UnSubscribeTelemetry(ctx context.Context, in *CancelSubscribeReq, opts ...grpc.CallOption) (*SubscribeResponse, error)
+	// get-models rpc implementation per
+	// github.com/openconfig/public/blob/master/release/models/rpc/openconfig-rpc.yang
 	GetModels(ctx context.Context, in *GetModelsInput, opts ...grpc.CallOption) (*GetModelsOutput, error)
 }
 
@@ -763,6 +937,8 @@ func (c *openConfiggRPCClient) GetModels(ctx context.Context, in *GetModelsInput
 type OpenConfiggRPCServer interface {
 	SubscribeTelemetry(*SubscribeRequest, OpenConfiggRPC_SubscribeTelemetryServer) error
 	UnSubscribeTelemetry(context.Context, *CancelSubscribeReq) (*SubscribeResponse, error)
+	// get-models rpc implementation per
+	// github.com/openconfig/public/blob/master/release/models/rpc/openconfig-rpc.yang
 	GetModels(context.Context, *GetModelsInput) (*GetModelsOutput, error)
 	mustEmbedUnimplementedOpenConfiggRPCServer()
 }
