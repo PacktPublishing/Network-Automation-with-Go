@@ -1,12 +1,11 @@
 package main
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 	"io"
 	"math/rand"
+	"os"
 	"time"
 
 	xr "grpc/proto/ems"
@@ -30,12 +29,6 @@ func (c *loginCreds) GetRequestMetadata(context.Context, ...string) (map[string]
 // Method of the PerRPCCredentials interface.
 func (c *loginCreds) RequireTransportSecurity() bool {
 	return c.requireTLS
-}
-
-func prettyprint(b []byte) ([]byte, error) {
-	var out bytes.Buffer
-	err := json.Indent(&out, b, "", "  ")
-	return out.Bytes(), err
 }
 
 // GetSubscription follows the Channel Generator Pattern, it returns
@@ -107,4 +100,22 @@ func (x *xrgrpc) GetSubscription(sub, enc string) (chan []byte, chan error, erro
 		}
 	}()
 	return b, e, err
+}
+
+func (x *xrgrpc) SessionCancel(e chan error, c chan os.Signal, stop context.CancelFunc) {
+	select {
+	case <-c:
+		fmt.Printf("\nmanually cancelled the session to %v\n\n", x.conn.Target())
+		stop()
+		return
+	case <-x.ctx.Done():
+		// Timeout: "context deadline exceeded"
+		err := x.ctx.Err()
+		fmt.Printf("\ngRPC session timed out after %s seconds: %v\n\n", "10", err.Error())
+		return
+	case err := <-e:
+		// Session canceled: "context canceled"
+		fmt.Printf("\ngRPC session to %v failed: %v\n\n", x.conn.Target(), err.Error())
+		return
+	}
 }

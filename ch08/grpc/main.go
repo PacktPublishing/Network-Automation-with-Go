@@ -9,6 +9,7 @@ import (
 	"math/rand"
 	"os"
 	"os/signal"
+	"strings"
 	"time"
 
 	"grpc/pkg/oc"
@@ -16,11 +17,11 @@ import (
 	"grpc/proto/telemetry"
 
 	"github.com/openconfig/ygot/ygot"
+	"github.com/tidwall/gjson"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/protobuf/proto"
 	"gopkg.in/yaml.v2"
-	"github.com/tidwall/gjson"
 )
 
 //go:generate bash $PWD/generate_code
@@ -177,6 +178,20 @@ func (x *xrgrpc) GetConfig(file string) (cfg Config, err error) {
 	}
 }
 
+func (t targetModel) createPayload() (string, error) {
+	return ygot.EmitJSON(t.device, &ygot.EmitJSONConfig{
+		Format: ygot.RFC7951,
+		Indent: "  ",
+		RFC7951Config: &ygot.RFC7951JSONConfig{
+			AppendModuleName: true,
+		},
+	})
+}
+
+type targetModel struct {
+	device *oc.Device
+}
+
 func main() {
 	///////////
 	// Device
@@ -205,18 +220,12 @@ func main() {
 	/////////////////////////////////
 	//Build OpenConfig configuration
 	////////////////////////////////
-	device := &oc.Device{}
+	tgtModel := targetModel{device: &oc.Device{}}
 
-	err = input.buildNetworkInstance(device)
+	err = input.buildNetworkInstance(tgtModel.device)
 	check(err)
 
-	payload, err := ygot.EmitJSON(device, &ygot.EmitJSONConfig{
-		Format: ygot.RFC7951,
-		Indent: "  ",
-		RFC7951Config: &ygot.RFC7951JSONConfig{
-			AppendModuleName: true,
-		},
-	})
+	payload, err := tgtModel.createPayload()
 	check(err)
 
 	///////////////////////////////////////////////////
@@ -233,7 +242,7 @@ func main() {
 	err = router.ReplaceConfig(payload)
 	check(err)
 
-	fmt.Printf("\n\n\n%sBGP%s config applied on %s\n\n\n", blue, white, router.conn.Target())
+	fmt.Printf("\n\n%sBGP%s config applied on %s\n\n\n", blue, white, router.conn.Target())
 
 	///////////////////
 	// Read BGP config
@@ -251,35 +260,21 @@ func main() {
 	defer cancel()
 	router.ctx = ctx
 
-	ch, ech, err := router.GetSubscription("BGP", "gpbkv")
+	ch, errCh, err := router.GetSubscription("BGP", "gpbkv")
 	check(err)
 
-	c := make(chan os.Signal, 1)
+	//////////////////////////////////
+	// Deal with Session cancellation
+	/////////////////////////////////
+	sigCh := make(chan os.Signal, 1)
 	// If no signals are provided, all incoming signals will be relayed to c.
 	// Otherwise, just the provided signals will. E.g.: signal.Notify(c, os.Interrupt, syscall.SIGTERM)
-	signal.Notify(c, os.Interrupt)
+	signal.Notify(sigCh, os.Interrupt)
 	defer func() {
-		signal.Stop(c)
+		signal.Stop(sigCh)
 		cancel()
 	}()
-
-	go func() {
-		select {
-		case <-c:
-			fmt.Printf("\nmanually cancelled the session to %v\n\n", router.conn.Target())
-			cancel()
-			return
-		case <-ctx.Done():
-			// Timeout: "context deadline exceeded"
-			err = ctx.Err()
-			fmt.Printf("\ngRPC session timed out after %s seconds: %v\n\n", "10", err.Error())
-			return
-		case err = <-ech:
-			// Session canceled: "context canceled"
-			fmt.Printf("\ngRPC session to %v failed: %v\n\n", router.conn.Target(), err.Error())
-			return
-		}
-	}()
+	go router.SessionCancel(errCh, sigCh, cancel)
 
 	/////////////////////////////////////////////////////////////
 	// Decode Telemetry Protobuf message (payload still a string)
@@ -289,27 +284,20 @@ func main() {
 		message := new(telemetry.Telemetry)
 		err := proto.Unmarshal(msg, message)
 		check(err)
-
-		fmt.Printf("\n\nTime %v\nPath: %v\n\n", message.GetMsgTimestamp(), message.GetEncodingPath())
+		fmt.Printf("\n%s\n", strings.Repeat("-", 4))
+		t := time.UnixMilli(int64(message.GetMsgTimestamp()))
+		fmt.Printf("Time: %v\nPath: %v\n\n", t.Format(time.ANSIC), message.GetEncodingPath())
 
 		b, err := json.Marshal(message.GetDataGpbkv())
 		check(err)
 
 		j := string(b)
 
-		// fields := gjson.Get(j, "0.fields.1.fields.#.name")
-		// fmt.Println("Available fields ", fields)
-
 		// https://go.dev/play/p/uyWenG-1Keu
 		data := gjson.Get(j, "0.fields.0.fields.#(name==neighbor-address).ValueByType.StringValue")
-		fmt.Println("  Neighbor: ",data)
+		fmt.Println("  Neighbor: ", data)
 
 		data = gjson.Get(j, "0.fields.1.fields.#(name==connection-state).ValueByType.StringValue")
-		fmt.Println("  Connection state: ",data)
-
-		// bjs, err := prettyprint(b)
-		// check(err)
-		// fmt.Println(string(bjs))
+		fmt.Println("  Connection state: ", data)
 	}
-
 }
