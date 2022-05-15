@@ -9,7 +9,8 @@ generator -path=yang \
   -package_name=oc \
   -exclude_modules=ietf-interfaces \
   yang/openconfig/network-instance/openconfig-network-instance.yang \
-  yang/openconfig/interfaces/openconfig-interfaces.yang
+  yang/openconfig/interfaces/openconfig-interfaces.yang \
+  yang/openconfig/telemetry/openconfig-telemetry.yang
 
 mkdir -p proto/ems
 protoc --go_out=. --go_opt=paths=source_relative \
