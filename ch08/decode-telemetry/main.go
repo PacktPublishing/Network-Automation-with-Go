@@ -305,7 +305,7 @@ func main() {
 	/////////////////////////////////////
 	// Decode Telemetry Protobuf message
 	////////////////////////////////////
-	// Telemetry payload is a json string
+	// Telemetry payload is a protobuf message as well
 
 	for msg := range ch {
 		message := new(telemetry.Telemetry)
