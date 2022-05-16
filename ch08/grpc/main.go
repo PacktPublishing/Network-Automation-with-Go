@@ -264,9 +264,8 @@ func main() {
 	// Replace BGP config
 	/////////////////////
 	// It fails if router is configured on a different ASN
-	// test := `{"openconfig-network-instance:network-instances": [null]}`
-	err = router.DeleteConfig(xrBGPConf)
-	check(err)
+	router.DeleteConfig(xrBGPConf)
+
 
 	err = router.ReplaceConfig(payload)
 	check(err)
@@ -284,7 +283,6 @@ func main() {
 	///////////////////
 	// Stream Telemetry
 	///////////////////
-
 	ctx, cancel := context.WithCancel(router.ctx)
 	defer cancel()
 	router.ctx = ctx

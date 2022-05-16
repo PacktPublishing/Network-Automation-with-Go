@@ -14,14 +14,14 @@ const (
 	polStatemet        = "PASS"
 	subscriptionIDName = "BGP"
 	sensorGroupID      = "BGPNeighbor"
-	subsInterval       = 3
+	subsInterval       = 2000
 	bgpID              = oc.OpenconfigPolicyTypes_INSTALL_PROTOCOL_TYPE_BGP
 	ipv4uniAF          = oc.OpenconfigBgpTypes_AFI_SAFI_TYPE_IPV4_UNICAST
 	subsPath           = "Cisco-IOS-XR-ipv4-bgp-oper:bgp/instances/instance/instance-active/default-vrf/afs/af/neighbor-af-table/neighbor"
 )
 
 func (m *Model) buildNetworkInstance(dev *oc.Device) error {
-	// m.buildTelemetrySubs(dev)
+	m.buildTelemetrySubs(dev)
 	m.buildRoutePolicy(dev)
 	nis := new(oc.OpenconfigNetworkInstance_NetworkInstances)
 	ni, err := nis.NewNetworkInstance(defaultNetInst)
@@ -115,9 +115,7 @@ func (m *Model) buildRoutePolicy(dev *oc.Device) error {
     "error-info": {
     "bad-element": "persistent-subscriptions"
 
-IOS XR hasn't switched from subscription-id to subscription-name,
-the former is a uint64 in the model while XR assigns a string (like subscription-name)
-
+FIX: Modify OC YANG model :-(
 */
 func (m *Model) buildTelemetrySubs(dev *oc.Device) error {
 	t := new(oc.OpenconfigTelemetry_TelemetrySystem)
@@ -128,7 +126,6 @@ func (m *Model) buildTelemetrySubs(dev *oc.Device) error {
 		return fmt.Errorf("failed to generate sensor group %s: %w", sensorGroupID, err)
 	}
 	ygot.BuildEmptyTree(sg)
-	sg.SensorGroupId = ygot.String(sensorGroupID)
 	sg.Config.SensorGroupId = ygot.String(sensorGroupID)
 
 	ygot.BuildEmptyTree(sg)
@@ -141,13 +138,12 @@ func (m *Model) buildTelemetrySubs(dev *oc.Device) error {
 	sp.Config.Path = ygot.String(subsPath)
 
 	// Without Modified OpenConfig model
-	sb, err := t.Subscriptions.PersistentSubscriptions.NewPersistentSubscription(subscriptionIDName)
+	sb, err := t.Subscriptions.Persistent.NewSubscription(subscriptionIDName)
 	if err != nil {
 		return fmt.Errorf("failed to generate telemetry subscription %v: %w", subscriptionIDName, err)
 	}
 	ygot.BuildEmptyTree(sb)
-	sb.Name = ygot.String(subscriptionIDName)
-	sb.Config.Name = ygot.String(subscriptionIDName)
+	sb.Config.SubscriptionId = ygot.String(subscriptionIDName)
 	sp.Path = ygot.String(subsPath)
 	sp.Config.Path = ygot.String(subsPath)
 
@@ -156,7 +152,6 @@ func (m *Model) buildTelemetrySubs(dev *oc.Device) error {
 		return fmt.Errorf("failed to generate sensor profile %s: %w", sensorGroupID, err)
 	}
 	ygot.BuildEmptyTree(spf)
-	spf.SensorGroup = ygot.String(sensorGroupID)
 	spf.Config.SensorGroup = ygot.String(sensorGroupID)
 	spf.Config.SampleInterval = ygot.Uint64(subsInterval)
 
