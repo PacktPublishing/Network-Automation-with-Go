@@ -218,9 +218,9 @@ type targetModel struct {
 }
 
 func main() {
-	///////////
-	// Device
-	//////////
+	////////////////////////////////
+	// Target device access details
+	///////////////////////////////
 	iosxr := IOSXR{
 		Hostname: "sandbox-iosxr-1.cisco.com",
 		Authentication: Authentication{
@@ -229,9 +229,9 @@ func main() {
 		},
 	}
 
-	//////////////////////
-	// Read config inputs
-	/////////////////////
+	/////////////////////////////
+	// Read device config inputs
+	////////////////////////////
 	src, err := os.Open("input.yml")
 	check(err)
 	defer src.Close()
@@ -243,7 +243,7 @@ func main() {
 	check(err)
 
 	/////////////////////////////////
-	//Build OpenConfig configuration
+	// Build OpenConfig configuration
 	////////////////////////////////
 	tgtModel := targetModel{device: &oc.Device{}}
 
@@ -263,26 +263,26 @@ func main() {
 	/////////////////////
 	// Replace BGP config
 	/////////////////////
-	// It fails if router is configured on a different ASN
+	// It fails if the device is already configured on a different ASN.
+	// Hence, we delete any existing BGP config first
 	router.DeleteConfig(xrBGPConf)
-
 
 	err = router.ReplaceConfig(payload)
 	check(err)
 
 	fmt.Printf("\n\n%sBGP%s config applied on %s\n\n\n", blue, white, router.conn.Target())
 
-	///////////////////
-	// Read BGP config
-	///////////////////
+	///////////////////////////////
+	// Read BGP config from device
+	//////////////////////////////
 	out, err := router.GetConfig("bgp.json")
 	check(err)
 
 	fmt.Printf("Config from %s:\n%s\n", iosxr.Hostname, out.Running)
 
-	///////////////////
-	// Stream Telemetry
-	///////////////////
+	////////////////////////////////
+	// Stream Telemetry from device
+	///////////////////////////////
 	ctx, cancel := context.WithCancel(router.ctx)
 	defer cancel()
 	router.ctx = ctx
@@ -290,9 +290,9 @@ func main() {
 	ch, errCh, err := router.GetSubscription("BGP", "gpbkv")
 	check(err)
 
-	//////////////////////////////////
-	// Deal with Session cancellation
-	/////////////////////////////////
+	////////////////////////////////////////////
+	// Deal with Telemetry session cancellation
+	///////////////////////////////////////////
 	sigCh := make(chan os.Signal, 1)
 	// If no signals are provided, all incoming signals will be relayed to c.
 	// Otherwise, just the provided signals will. E.g.: signal.Notify(c, os.Interrupt, syscall.SIGTERM)
@@ -303,9 +303,10 @@ func main() {
 	}()
 	go router.SessionCancel(errCh, sigCh, cancel)
 
-	/////////////////////////////////////////////////////////////
-	// Decode Telemetry Protobuf message (payload still a string)
-	/////////////////////////////////////////////////////////////
+	/////////////////////////////////////
+	// Decode Telemetry Protobuf message
+	////////////////////////////////////
+	// Telemetry payload is a json string
 
 	for msg := range ch {
 		message := new(telemetry.Telemetry)

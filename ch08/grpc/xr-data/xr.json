@@ -1,0 +1,1325 @@
+# show running-config | json openconfig
+Mon May 16 16:16:56.461 UTC
+Building configuration...
+{
+ "data": {
+  "openconfig-telemetry:telemetry-system": {
+   "sensor-groups": {
+    "sensor-group": [
+     {
+      "sensor-group-id": "BGPNeighbor",
+      "config": {
+       "sensor-group-id": "BGPNeighbor"
+      },
+      "sensor-paths": {
+       "sensor-path": [
+        {
+         "path": "Cisco-IOS-XR-ipv4-bgp-oper:bgp/instances/instance/instance-active/default-vrf/afs/af/neighbor-af-table/neighbor",
+         "config": {
+          "path": "Cisco-IOS-XR-ipv4-bgp-oper:bgp/instances/instance/instance-active/default-vrf/afs/af/neighbor-af-table/neighbor"
+         }
+        }
+       ]
+      }
+     }
+    ]
+   },
+   "subscriptions": {
+    "persistent": {
+     "subscription": [
+      {
+       "subscription-id": "BGP",
+       "config": {
+        "subscription-id": "BGP"
+       },
+       "sensor-profiles": {
+        "sensor-profile": [
+         {
+          "sensor-group": "BGPNeighbor",
+          "config": {
+           "sensor-group": "BGPNeighbor",
+           "sample-interval": "2000"
+          }
+         }
+        ]
+       }
+      }
+     ]
+    }
+   }
+  },      
+  "openconfig-system:system": {
+   "aaa": {
+    "authentication": {
+     "users": {
+      "user": [
+       {
+        "username": "root",
+        "config": {
+         "username": "root",
+         "role": "root-lr",
+         "password-hashed": "$6$XvYiZ/CdPNuK4Z/.$3/15yGC1Br2nlIy/AwZVNsl0BbD.XLbqAL2h8hR4CpBxM.ir4ZilYykiaTqMwe/EB6UySyH7ea/x09ajR6NXz."
+        }
+       },
+       {
+        "username": "admin",
+        "config": {
+         "username": "admin",
+         "role": "root-lr",
+         "password-hashed": "$6$vEaDc/Yt1OyU4c/.$v0lze75JluVDfcM6rgDlsFY3oMB6ODv6l5rgRnk3bFrvnzSFnoEIF.hcc1O/2.YxnAuRLSy7VQGmGedvoBlOp."
+        }
+       },
+       {
+        "username": "ansible",
+        "config": {
+         "username": "ansible",
+         "password-hashed": "$6$Q8sct/0COSXa5t/.$oA0j2RuEFulaL7B3lUW5NXUdHOGQIGacYI0HfriQY8Q5xSij9l0qKPIgIS9CoA/KzUXvgtu6QJQLPsqQFbGk5."
+        }
+       },
+       {
+        "username": "user1",
+        "config": {
+         "username": "user1",
+         "role": "root-lr",
+         "password": "15315A1F07257A767B6760"
+        }
+       },
+       {
+        "username": "user0",
+        "config": {
+         "username": "user0",
+         "role": "root-lr",
+         "password": "0225554808095E731F1A5C"
+        }
+       },
+       {
+        "username": "user2",
+        "config": {
+         "username": "user2",
+         "role": "root-lr",
+         "password": "08021D5D0A165445415F59"
+        }
+       },
+       {
+        "username": "user3",
+        "config": {
+         "username": "user3",
+         "role": "root-lr",
+         "password": "15315A1F07257A767B6760"
+        }
+       },
+       {
+        "username": "user4",
+        "config": {
+         "username": "user4",
+         "role": "root-lr",
+         "password": "106D580A061843595F507F"
+        }
+       },
+       {  
+        "username": "user5",
+        "config": {
+         "username": "user5",
+         "role": "root-lr",
+         "password": "06255E324F41584B564347"
+        }
+       },
+       {
+        "username": "user6",
+        "config": {
+         "username": "user6",
+         "role": "root-lr",
+         "password": "08021D5D0A165445415F59"
+        }
+       },
+       {
+        "username": "user7",
+        "config": {
+         "username": "user7",
+         "role": "root-lr",
+         "password": "013057175804575D72181B"
+        }
+       }, 
+       {
+        "username": "user8",
+        "config": {
+         "username": "user8",
+         "role": "root-lr",
+         "password": "013057175804575D72181B"
+        }
+       },
+       {
+        "username": "user9",
+        "config": {
+         "username": "user9",
+         "role": "root-lr",
+         "password": "143443180F0B7B79777C66"
+        }
+       },
+       {
+        "username": "user10",
+        "config": {
+         "username": "user10",
+         "role": "root-lr",
+         "password": "15315A1F07257A767B6760"
+        } 
+       },
+       {
+        "username": "user11",
+        "config": {
+         "username": "user11",
+         "role": "root-lr",
+         "password": "08021D5D0A165445415F59"
+        }
+       },
+       {
+        "username": "user12",
+        "config": {
+         "username": "user12",
+         "role": "root-lr",
+         "password": "04785A150C2E1D1C5A4D50"
+        }
+       },
+       {
+        "username": "user13",
+        "config": {
+         "username": "user13",
+         "role": "root-lr",
+         "password": "0528571C22431F5B4A5142"
+        }
+       },
+       {
+        "username": "user14",
+        "config": {
+         "username": "user14",
+         "role": "root-lr",
+         "password": "143443180F0B7B79777C66"
+        }
+       },
+       {
+        "username": "user15",
+        "config": {
+         "username": "user15",
+         "role": "root-lr",
+         "password": "0027421507545A545C7519"
+        }
+       },
+       {
+        "username": "user16",
+        "config": {
+         "username": "user16",
+         "role": "root-lr",
+         "password": "132646010803557878707D"
+        }
+       },
+       {
+        "username": "user17",
+        "config": {
+         "username": "user17",
+         "role": "root-lr",
+         "password": "072C705F4D06485744465E"
+        }
+       },
+       {
+        "username": "user18",
+        "config": {
+         "username": "user18",
+         "role": "root-lr",
+         "password": "0528571C22431F5B4A5142"
+        }
+       },
+       {
+        "username": "user19",
+        "config": {
+         "username": "user19",
+         "role": "root-lr",
+         "password": "0225554808095E731F1A5C"
+        }
+       }
+      ]
+     }
+    }
+   },
+   "grpc-server": {
+    "config": {
+     "port": 57777,
+     "enable": true
+    }
+   },
+   "config": {
+    "hostname": "iosxr1"
+   },
+   "ssh-server": {
+    "config": {
+     "session-limit": 110,
+     "enable": true,
+     "protocol-version": "V2"
+    }     
+   }
+  },
+  "openconfig-network-instance:network-instances": {
+   "network-instance": [
+    {
+     "name": "default",
+     "protocols": {
+      "protocol": [
+       {
+        "identifier": "openconfig-policy-types:BGP",
+        "name": "default",
+        "config": {
+         "identifier": "openconfig-policy-types:BGP",
+         "name": "default"
+        },
+        "bgp": {
+         "global": {
+          "config": {
+           "as": 65000,
+           "router-id": "198.51.100.0"
+          },
+          "afi-safis": {
+           "afi-safi": [
+            {
+             "afi-safi-name": "openconfig-bgp-types:IPV4_UNICAST",
+             "config": {
+              "afi-safi-name": "openconfig-bgp-types:IPV4_UNICAST",
+              "enabled": true
+             }
+            }
+           ]
+          }
+         },
+         "neighbors": {
+          "neighbor": [
+           {
+            "neighbor-address": "192.0.2.1",
+            "config": {
+             "neighbor-address": "192.0.2.1",
+             "peer-as": 65001,
+             "enabled": true
+            },
+            "afi-safis": {
+             "afi-safi": [
+              {
+               "afi-safi-name": "openconfig-bgp-types:IPV4_UNICAST",
+               "config": {
+                "afi-safi-name": "openconfig-bgp-types:IPV4_UNICAST",
+                "enabled": true
+               },
+               "apply-policy": {
+                "config": {
+                 "import-policy": [
+                  "PERMIT-ALL"
+                 ],
+                 "export-policy": [
+                  "PERMIT-ALL"
+                 ]
+                }
+               }
+              }
+             ]
+            }
+           }
+          ]
+         }
+        }
+       },
+       {  
+        "identifier": "openconfig-policy-types:ISIS",
+        "name": "M1001",
+        "config": {
+         "identifier": "openconfig-policy-types:ISIS",
+         "name": "M1001"
+        },
+        "isis": {
+         "global": {
+          "lsp-bit": {
+           "overload-bit": {
+            "config": {
+             "set-bit-on-boot": true
+            },
+            "reset-triggers": {
+             "reset-trigger": [
+              {
+               "reset-trigger": "openconfig-isis-types:WAIT_FOR_SYSTEM",
+               "config": {
+                "reset-trigger": "openconfig-isis-types:WAIT_FOR_SYSTEM",
+                "delay": 360
+               }
+              }
+             ]
+            }
+           }
+          },
+          "config": {
+           "level-capability": "LEVEL_2",
+           "net": [
+            "49.0200.1700.0000.1001.00"
+           ]
+          },
+          "timers": {
+           "lsp-generation": {
+            "config": {
+             "lsp-max-wait-interval": "5000",
+             "lsp-first-wait-interval": "50",
+             "lsp-second-wait-interval": "200"
+            }
+           },
+           "config": {
+            "lsp-refresh-interval": 65000,
+            "lsp-lifetime-interval": 65535
+           }
+          },
+          "transport": {
+           "config": {
+            "lsp-mtu-size": 8979
+           }
+          },
+          "afi-safi": {
+           "af": [
+            {
+             "afi-name": "openconfig-isis-types:IPV6",
+             "safi-name": "openconfig-isis-types:UNICAST",
+             "config": {
+              "afi-name": "openconfig-isis-types:IPV6",
+              "safi-name": "openconfig-isis-types:UNICAST"
+             },
+             "multi-topology": {
+              "config": {
+               "afi-name": "openconfig-isis-types:IPV6",
+               "safi-name": "openconfig-isis-types:UNICAST"
+              }
+             }
+            }
+           ]
+          }
+         },
+         "interfaces": {
+          "interface": [
+           {
+            "interface-id": "Loopback100",
+            "config": {
+             "interface-id": "Loopback100",
+             "enabled": true,
+             "passive": true,
+             "hello-padding": "STRICT"
+            },
+            "interface-ref": {
+             "config": {
+              "interface": "Loopback100"
+             }
+            },
+            "afi-safi": {
+             "af": [
+              {
+               "afi-name": "openconfig-isis-types:IPV6",
+               "safi-name": "openconfig-isis-types:UNICAST",
+               "config": {
+                "afi-name": "openconfig-isis-types:IPV6",
+                "safi-name": "openconfig-isis-types:UNICAST",
+                "enabled": true
+               }
+              }
+             ]
+            }
+           },
+           {
+            "interface-id": "GigabitEthernet0/0/0/2",
+            "config": {
+             "interface-id": "GigabitEthernet0/0/0/2",
+             "enabled": true,
+             "passive": false,
+             "hello-padding": "LOOSE",
+             "circuit-type": "POINT_TO_POINT"
+            },
+            "interface-ref": {
+             "config": {
+              "interface": "GigabitEthernet0/0/0/2"
+             }
+            },
+            "authentication": {
+             "key": {
+              "config": {
+               "auth-password": "cisco123"
+              }
+             }
+            },
+            "afi-safi": {
+             "af": [
+              {
+               "afi-name": "openconfig-isis-types:IPV6",
+               "safi-name": "openconfig-isis-types:UNICAST",
+               "config": {
+                "afi-name": "openconfig-isis-types:IPV6",
+                "safi-name": "openconfig-isis-types:UNICAST",
+                "enabled": true
+               }
+              }
+             ]
+            }
+           }
+          ]
+         }
+        }
+       }
+      ]   
+     }
+    }
+   ]
+  },
+  "openconfig-routing-policy:routing-policy": {
+   "policy-definitions": {
+    "policy-definition": [
+     {
+      "name": "PERMIT-ALL",
+      "config": {
+       "name": "PERMIT-ALL"
+      },
+      "statements": {
+       "statement": [
+        {
+         "name": "id-1",
+         "config": {
+          "name": "id-1"
+         },
+         "actions": {
+          "config": {
+           "policy-result": "ACCEPT_ROUTE"
+          }
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  },
+  "openconfig-interfaces:interfaces": {
+   "interface": [
+    {
+     "name": "BVI511",
+     "config": {
+      "name": "BVI511",
+      "type": "iana-if-type:propVirtual"
+     },
+     "subinterfaces": {
+      "subinterface": [
+       {
+        "index": 0,
+        "openconfig-if-ip:ipv4": {
+         "addresses": {
+          "address": [
+           {
+            "ip": "10.200.188.33",
+            "config": {
+             "ip": "10.200.188.33",
+             "prefix-length": 24
+            }
+           }
+          ]
+         }
+        }
+       }
+      ]
+     }
+    },
+    {
+     "name": "Loopback0",
+     "config": {
+      "name": "Loopback0",
+      "type": "iana-if-type:softwareLoopback"
+     },
+     "subinterfaces": {
+      "subinterface": [
+       {  
+        "index": 0,
+        "openconfig-if-ip:ipv4": {
+         "addresses": {
+          "address": [
+           {
+            "ip": "2.2.2.2",
+            "config": {
+             "ip": "2.2.2.2",
+             "prefix-length": 32
+            }
+           }
+          ]
+         }
+        }
+       }
+      ]
+     }
+    },
+    {
+     "name": "Loopback100",
+     "config": {
+      "name": "Loopback100",
+      "type": "iana-if-type:softwareLoopback",
+      "description": "##locator##"
+     },
+     "subinterfaces": {
+      "subinterface": [
+       {
+        "index": 0,
+        "openconfig-if-ip:ipv6": {
+         "addresses": {
+          "address": [
+           {
+            "ip": "fc00:1000:10::4",
+            "config": {
+             "ip": "fc00:1000:10::4",
+             "prefix-length": 128
+            }
+           }
+          ]
+         }
+        }
+       }
+      ]
+     }
+    },    
+    {
+     "name": "Loopback111",
+     "config": {
+      "name": "Loopback111",
+      "type": "iana-if-type:softwareLoopback",
+      "description": "Configured by NETCONF"
+     },
+     "subinterfaces": {
+      "subinterface": [
+       {
+        "index": 0,
+        "openconfig-if-ip:ipv4": {
+         "addresses": {
+          "address": [
+           {
+            "ip": "9.9.8.8",
+            "config": {
+             "ip": "9.9.8.8",
+             "prefix-length": 32
+            }
+           }
+          ]
+         }
+        }
+       }
+      ]
+     }
+    },
+    {
+     "name": "Loopback123",
+     "config": {
+      "name": "Loopback123",
+      "type": "iana-if-type:softwareLoopback",
+      "description": "\"123 pyats 123\""
+     }
+    },
+    {
+     "name": "Loopback200",
+     "config": {
+      "name": "Loopback200",
+      "type": "iana-if-type:softwareLoopback",
+      "description": "***MERGE LOOPBACK 200****"
+     },
+     "subinterfaces": {
+      "subinterface": [
+       {  
+        "index": 0,
+        "openconfig-if-ip:ipv4": {
+         "addresses": {
+          "address": [
+           {
+            "ip": "1.1.1.200",
+            "config": {
+             "ip": "1.1.1.200",
+             "prefix-length": 32
+            }
+           }
+          ]
+         }
+        }
+       }
+      ]
+     }
+    },
+    {
+     "name": "Loopback555",
+     "config": {
+      "name": "Loopback555",
+      "type": "iana-if-type:softwareLoopback"
+     },
+     "subinterfaces": {
+      "subinterface": [
+       {
+        "index": 0,
+        "openconfig-if-ip:ipv4": {
+         "addresses": {
+          "address": [
+           {
+            "ip": "2.2.2.2",
+            "config": {
+             "ip": "2.2.2.2",
+             "prefix-length": 24
+            }
+           }
+          ]
+         }
+        }
+       }
+      ]
+     }
+    },
+    {     
+     "name": "Loopback556",
+     "config": {
+      "name": "Loopback556",
+      "type": "iana-if-type:softwareLoopback"
+     },
+     "subinterfaces": {
+      "subinterface": [
+       {
+        "index": 0,
+        "openconfig-if-ip:ipv4": {
+         "addresses": {
+          "address": [
+           {
+            "ip": "3.3.3.3",
+            "config": {
+             "ip": "3.3.3.3",
+             "prefix-length": 24
+            }
+           }
+          ]
+         }
+        }
+       }  
+      ]
+     }
+    },
+    {
+     "name": "Loopback701",
+     "config": {
+      "name": "Loopback701",
+      "type": "iana-if-type:softwareLoopback",
+      "enabled": false
+     },
+     "subinterfaces": {
+      "subinterface": [
+       {
+        "index": 0,
+        "openconfig-if-ip:ipv4": {
+         "addresses": {
+          "address": [
+           {
+            "ip": "10.0.0.1",
+            "config": {
+             "ip": "10.0.0.1",
+             "prefix-length": 24
+            }
+           }
+          ]
+         }
+        }
+       }
+      ]
+     }
+    },
+    {
+     "name": "Loopback702",
+     "config": {
+      "name": "Loopback702",
+      "type": "iana-if-type:softwareLoopback"
+     },
+     "subinterfaces": {
+      "subinterface": [
+       {
+        "index": 0,
+        "openconfig-if-ip:ipv4": {
+         "addresses": {
+          "address": [
+           {
+            "ip": "10.0.1.1",
+            "config": {
+             "ip": "10.0.1.1",
+             "prefix-length": 24
+            }
+           }
+          ]
+         }
+        }
+       }
+      ]
+     }
+    },
+    {
+     "name": "tunnel-ip99",
+     "config": {
+      "name": "tunnel-ip99",
+      "type": "iana-if-type:tunnel"
+     },
+     "subinterfaces": {
+      "subinterface": [
+       {
+        "index": 0,
+        "openconfig-if-ip:ipv4": {
+         "config": {
+          "mtu": 1476
+         },
+         "addresses": {
+          "address": [
+           {
+            "ip": "1.1.1.1",
+            "config": {
+             "ip": "1.1.1.1",
+             "prefix-length": 31
+            }
+           }
+          ]
+         }
+        }
+       }
+      ]
+     },
+     "openconfig-if-tunnel:tunnel": {
+      "ipv4": {
+       "addresses": {
+        "address": [
+         {
+          "ip": "1.1.1.1",
+          "config": {
+           "ip": "1.1.1.1",
+           "prefix-length": 31
+          }
+         }
+        ]
+       }
+      },
+      "config": {
+       "src": "99.99.99.1",
+       "dst": "2.2.2.2"
+      }
+     }
+    },
+    {
+     "name": "MgmtEth0/RP0/CPU0/0",
+     "config": {
+      "name": "MgmtEth0/RP0/CPU0/0",
+      "type": "iana-if-type:ethernetCsmacd"
+     },
+     "openconfig-if-ethernet:ethernet": {
+      "config": {
+       "auto-negotiate": false
+      }
+     },
+     "subinterfaces": {
+      "subinterface": [
+       {
+        "index": 0,
+        "openconfig-if-ip:ipv4": {
+         "addresses": {
+          "address": [
+           {
+            "ip": "10.10.20.175",
+            "config": {
+             "ip": "10.10.20.175",
+             "prefix-length": 24
+            }
+           }
+          ]
+         }
+        }
+       }
+      ]
+     }    
+    },
+    {
+     "name": "GigabitEthernet0/0/0/0",
+     "config": {
+      "name": "GigabitEthernet0/0/0/0",
+      "type": "iana-if-type:ethernetCsmacd",
+      "enabled": false
+     },
+     "openconfig-if-ethernet:ethernet": {
+      "config": {
+       "auto-negotiate": false
+      }
+     },
+     "subinterfaces": {
+      "subinterface": [
+       {
+        "index": 100,
+        "config": {
+         "index": 100
+        },
+        "openconfig-if-ip:ipv6": {
+         "config": {
+          "enabled": true
+         }
+        },
+        "openconfig-vlan:vlan": {
+         "config": {
+          "vlan-id": 100
+         }
+        }
+       }
+      ]
+     }
+    },
+    {
+     "name": "GigabitEthernet0/0/0/1",
+     "config": {
+      "name": "GigabitEthernet0/0/0/1",
+      "type": "iana-if-type:ethernetCsmacd",
+      "enabled": false
+     },
+     "openconfig-if-ethernet:ethernet": {
+      "config": {
+       "auto-negotiate": false
+      }
+     },   
+     "subinterfaces": {
+      "subinterface": [
+       {
+        "index": 101,
+        "config": {
+         "index": 101
+        },
+        "openconfig-if-ip:ipv6": {
+         "config": {
+          "enabled": true
+         }
+        },
+        "openconfig-vlan:vlan": {
+         "config": {
+          "vlan-id": 101
+         }
+        }
+       }
+      ]
+     }
+    },
+    {
+     "name": "GigabitEthernet0/0/0/2",
+     "config": {
+      "name": "GigabitEthernet0/0/0/2",
+      "type": "iana-if-type:ethernetCsmacd",
+      "enabled": false
+     },
+     "openconfig-if-ethernet:ethernet": {
+      "config": {
+       "auto-negotiate": false
+      }
+     },
+     "subinterfaces": {
+      "subinterface": [
+       {
+        "index": 102,
+        "config": {
+         "index": 102
+        },
+        "openconfig-if-ip:ipv6": {
+         "config": {
+          "enabled": true
+         }
+        },
+        "openconfig-vlan:vlan": {
+         "config": {
+          "vlan-id": 102
+         }
+        }
+       }
+      ]
+     }
+    },
+    {
+     "name": "GigabitEthernet0/0/0/3",
+     "config": {
+      "name": "GigabitEthernet0/0/0/3",
+      "type": "iana-if-type:ethernetCsmacd",
+      "enabled": false
+     },
+     "openconfig-if-ethernet:ethernet": {
+      "config": {
+       "auto-negotiate": false
+      }
+     },
+     "subinterfaces": {
+      "subinterface": [
+       {  
+        "index": 103,
+        "config": {
+         "index": 103
+        },
+        "openconfig-if-ip:ipv6": {
+         "config": {
+          "enabled": true
+         }
+        },
+        "openconfig-vlan:vlan": {
+         "config": {
+          "vlan-id": 103
+         }
+        }
+       }
+      ]
+     }
+    },
+    {
+     "name": "GigabitEthernet0/0/0/4",
+     "config": {
+      "name": "GigabitEthernet0/0/0/4",
+      "type": "iana-if-type:ethernetCsmacd",
+      "enabled": false
+     },
+     "openconfig-if-ethernet:ethernet": {
+      "config": {
+       "auto-negotiate": false
+      }
+     },
+     "subinterfaces": {
+      "subinterface": [
+       {
+        "index": 104,
+        "config": {
+         "index": 104
+        },
+        "openconfig-if-ip:ipv6": {
+         "config": {
+          "enabled": true
+         }
+        },
+        "openconfig-vlan:vlan": {
+         "config": {
+          "vlan-id": 104
+         }
+        }
+       }
+      ]
+     }
+    },
+    {
+     "name": "GigabitEthernet0/0/0/5",
+     "config": {
+      "name": "GigabitEthernet0/0/0/5",
+      "type": "iana-if-type:ethernetCsmacd",
+      "enabled": false
+     },
+     "openconfig-if-ethernet:ethernet": {
+      "config": {
+       "auto-negotiate": false
+      }
+     }
+    },
+    {
+     "name": "GigabitEthernet0/0/0/6",
+     "config": {
+      "name": "GigabitEthernet0/0/0/6",
+      "type": "iana-if-type:ethernetCsmacd",
+      "enabled": false
+     },
+     "openconfig-if-ethernet:ethernet": {
+      "config": {
+       "auto-negotiate": false
+      }
+     }
+    }
+   ]
+  },
+  "openconfig-acl:acl": {
+   "interfaces": {
+    "interface": [
+     {
+      "id": "GigabitEthernet0/0/0/0.100",
+      "config": {
+       "id": "GigabitEthernet0/0/0/0.100"
+      },
+      "interface-ref": {
+       "config": {
+        "interface": "GigabitEthernet0/0/0/0",
+        "subinterface": 100
+       }  
+      },
+      "ingress-acl-sets": {
+       "ingress-acl-set": [
+        {
+         "set-name": "SEC-2",
+         "type": "ACL_IPV6"
+        }
+       ]
+      }
+     },
+     {
+      "id": "GigabitEthernet0/0/0/1.101",
+      "config": {
+       "id": "GigabitEthernet0/0/0/1.101"
+      },
+      "interface-ref": {
+       "config": {
+        "interface": "GigabitEthernet0/0/0/1",
+        "subinterface": 101
+       }
+      },
+      "ingress-acl-sets": {
+       "ingress-acl-set": [
+        {
+         "set-name": "SEC-2",
+         "type": "ACL_IPV6"
+        }
+       ]
+      }
+     },
+     {
+      "id": "GigabitEthernet0/0/0/2.102",
+      "config": {
+       "id": "GigabitEthernet0/0/0/2.102"
+      },
+      "interface-ref": {
+       "config": {
+        "interface": "GigabitEthernet0/0/0/2",
+        "subinterface": 102
+       }
+      },
+      "ingress-acl-sets": {
+       "ingress-acl-set": [
+        {
+         "set-name": "SEC-2",
+         "type": "ACL_IPV6"
+        }
+       ]
+      }
+     },
+     {
+      "id": "GigabitEthernet0/0/0/3.103",
+      "config": {
+       "id": "GigabitEthernet0/0/0/3.103"
+      },
+      "interface-ref": {
+       "config": {
+        "interface": "GigabitEthernet0/0/0/3",
+        "subinterface": 103
+       }
+      },
+      "ingress-acl-sets": {
+       "ingress-acl-set": [
+        {
+         "set-name": "SEC-2",
+         "type": "ACL_IPV6"
+        }
+       ]
+      }   
+     },
+     {
+      "id": "GigabitEthernet0/0/0/4.104",
+      "config": {
+       "id": "GigabitEthernet0/0/0/4.104"
+      },
+      "interface-ref": {
+       "config": {
+        "interface": "GigabitEthernet0/0/0/4",
+        "subinterface": 104
+       }
+      },
+      "ingress-acl-sets": {
+       "ingress-acl-set": [
+        {
+         "set-name": "SEC-2",
+         "type": "ACL_IPV6"
+        }
+       ]
+      }
+     }
+    ]
+   },     
+   "acl-sets": {
+    "acl-set": [
+     {
+      "name": "ACL-PBR-VL3929",
+      "type": "ACL_IPV4",
+      "config": {
+       "name": "ACL-PBR-VL3929",
+       "type": "ACL_IPV4"
+      },
+      "acl-entries": {
+       "acl-entry": [
+        {
+         "sequence-id": 10,
+         "config": {
+          "sequence-id": 10
+         },
+         "actions": {
+          "config": {
+           "forwarding-action": "ACCEPT"
+          }
+         },
+         "ipv4": {
+          "config": {
+           "source-address": "10.200.188.0/24",
+           "destination-address": "10.75.96.96/32"
+          }
+         }
+        }
+       ]
+      }
+     },
+     {
+      "name": "VL3929-redirect",
+      "type": "ACL_IPV4",
+      "config": {
+       "name": "VL3929-redirect",
+       "type": "ACL_IPV4"
+      },
+      "acl-entries": {
+       "acl-entry": [
+        {
+         "sequence-id": 10,
+         "config": {
+          "sequence-id": 10
+         },
+         "actions": {
+          "config": {
+           "forwarding-action": "ACCEPT"
+          }
+         },
+         "ipv4": {
+          "config": {
+           "source-address": "10.200.188.0/24",
+           "destination-address": "10.75.96.96/32"
+          }
+         }
+        }
+       ]
+      }
+     },
+     {
+      "name": "SEC-1",
+      "type": "ACL_IPV6",
+      "config": {
+       "name": "SEC-1",
+       "type": "ACL_IPV6"
+      },
+      "acl-entries": {
+       "acl-entry": [
+        {
+         "sequence-id": 10,
+         "config": {
+          "sequence-id": 10
+         },
+         "actions": {
+          "config": {
+           "forwarding-action": "REJECT"
+          }
+         },
+         "ipv6": {
+          "config": {
+           "source-address": "fc00:1000::/24"
+          }
+         }
+        },
+        {
+         "sequence-id": 20,
+         "config": {
+          "sequence-id": 20
+         },
+         "actions": {
+          "config": {
+           "forwarding-action": "REJECT"
+          }
+         },
+         "ipv6": {
+          "config": {
+           "destination-address": "fc00:1000::/24"
+          }
+         }
+        },
+        {
+         "sequence-id": 30,
+         "config": {
+          "sequence-id": 30
+         },
+         "actions": {
+          "config": {
+           "forwarding-action": "ACCEPT"
+          }
+         }
+        }
+       ]
+      }
+     },   
+     {
+      "name": "SEC-2",
+      "type": "ACL_IPV6",
+      "config": {
+       "name": "SEC-2",
+       "type": "ACL_IPV6"
+      },
+      "acl-entries": {
+       "acl-entry": [
+        {
+         "sequence-id": 10,
+         "config": {
+          "sequence-id": 10
+         },
+         "actions": {
+          "config": {
+           "forwarding-action": "ACCEPT"
+          }
+         },
+         "ipv6": {
+          "config": {
+           "source-address": "fc00:1000::/24",
+           "destination-address": "fc00:1000::/24"
+          }
+         }
+        },
+        {
+         "sequence-id": 20,
+         "config": {
+          "sequence-id": 20
+         },
+         "actions": {
+          "config": {
+           "forwarding-action": "ACCEPT"
+          }
+         },
+         "ipv6": {
+          "config": {
+           "source-address": "240b:c0::/24",
+           "destination-address": "fc00:1000::/24"
+          }
+         }
+        },
+        {
+         "sequence-id": 30,
+         "config": {
+          "sequence-id": 30
+         },
+         "actions": {
+          "config": {
+           "forwarding-action": "ACCEPT"
+          }
+         },
+         "ipv6": {
+          "config": {
+           "source-address": "fe80::/10",
+           "destination-address": "fe80::/10"
+          }
+         }
+        },
+        {
+         "sequence-id": 40,
+         "config": {
+          "sequence-id": 40
+         },
+         "actions": {
+          "config": {
+           "forwarding-action": "REJECT"
+          }
+         }
+        }
+       ]
+      }
+     }
+    ]
+   }
+  }
+ }
+}

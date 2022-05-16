@@ -191,3 +191,8 @@ gRPC session timed out after 10 seconds: context deadline exceeded
 - openconfig-types
 - openconfig-vlan
 - openconfig-wavelength-router
+
+### Protobuf files
+
+- [ems_grpc.proto](https://github.com/ios-xr/model-driven-telemetry/blob/master/protos/732/mdt_grpc_dialin/ems_grpc.proto)
+- [telemetry.proto](https://github.com/ios-xr/model-driven-telemetry/blob/master/protos/732/telemetry.proto)

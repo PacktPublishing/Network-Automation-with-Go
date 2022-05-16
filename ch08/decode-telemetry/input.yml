@@ -1,0 +1,12 @@
+asn: 65000
+
+loopback: 
+  ip: "198.51.100.0"
+
+uplinks:
+  - name: "GigabitEthernet0/0/0/4"
+    prefix: "192.0.2.0/31"
+
+peers:
+  - ip: "192.0.2.1"
+    asn: 65001
