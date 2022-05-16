@@ -79,7 +79,7 @@ module openconfig-telemetry {
           key "sensor-group-id";
           description
             "List of telemetry sensory groups on the local
-             system, where a sensor grouping represents a resuable
+             system, where a sensor grouping represents a reuseable
              grouping of multiple paths and exclude filters.";
 
           leaf sensor-group-id {
@@ -244,16 +244,16 @@ module openconfig-telemetry {
           "This container holds information for both persistent
            and dynamic telemetry subscriptions.";
 
-        container persistent-subscriptions {
+        container persistent {
           description
             "This container holds information relating to persistent
              telemetry subscriptions. A persistent telemetry
-             subscription is configued locally on the device through
+             subscription is configured locally on the device through
              configuration, and is persistent across device restarts or
              other redundancy changes.";
 
-          list persistent-subscription {
-            key "name";
+          list subscription {
+            key "subscription-id";
 
             description
               "List of telemetry subscriptions. A telemetry
@@ -261,9 +261,9 @@ module openconfig-telemetry {
               destinations, stream attributes, and associated paths to
               state information in the model (sensor data)";
 
-            leaf name {
+            leaf subscription-id {
               type leafref {
-                path "../config/name";
+                path "../config/subscription-id";
               }
               description
                 "Reference to the identifier of the subscription
@@ -609,7 +609,7 @@ module openconfig-telemetry {
     leaf id {
       type uint64;
       description
-        "System generated identifer of the telemetry
+        "System generated identifier of the telemetry
          subscription.";
     }
   }
@@ -621,7 +621,7 @@ module openconfig-telemetry {
        configured string value which uniquely identifies the
        subscription in the configuration database.";
 
-     leaf name {
+     leaf subscription-id {
        type string;
        description
          "User configured identifier of the telemetry
@@ -716,7 +716,7 @@ module openconfig-telemetry {
     description
       "Config related to creating telemetry sensor groups. A sensor
        group is a related set of sensor paths and/or filters to
-       exclude items. A group is assigned a reusable identifer, so
+       exclude items. A group is assigned a reusable identifier, so
        it can be used in multiple telemetry subscriptions.";
     list telemetry-sensor-group {
       key "telemetry-sensor-group-id";
@@ -726,7 +726,7 @@ module openconfig-telemetry {
       leaf telemetry-sensor-group-id {
         type string;
         description
-          "The sensor group identifer is a reusable handle which
+          "The sensor group identifier is a reusable handle which
            identifies a single sensor group. It is referenced from
            the subscription configuration.";
       }
