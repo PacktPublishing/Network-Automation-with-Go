@@ -95,7 +95,7 @@ func (m *Model) buildRoutePolicy(dev *oc.Device) error {
 	}
 	ygot.BuildEmptyTree(def)
 	def.Config.Name = ygot.String(policy)
-	
+
 	stat, err := def.Statements.NewStatement(polStatemet)
 	if err != nil {
 		return fmt.Errorf("cannot create a policy statement %s: %w", polStatemet, err)
@@ -110,10 +110,14 @@ func (m *Model) buildRoutePolicy(dev *oc.Device) error {
 }
 
 /*
-	"error-path": "openconfig-telemetry:telemetry-system/",
+    "error-path": "openconfig-telemetry:telemetry-system/",
     "error-message": "Unknown element is specified.",
     "error-info": {
-     "bad-element": "persistent-subscriptions"
+    "bad-element": "persistent-subscriptions"
+
+IOS XR hasn't switched from subscription-id to subscription-name,
+the former is a uint64 in the model while XR assigns a string (like subscription-name)
+
 */
 func (m *Model) buildTelemetrySubs(dev *oc.Device) error {
 	t := new(oc.OpenconfigTelemetry_TelemetrySystem)

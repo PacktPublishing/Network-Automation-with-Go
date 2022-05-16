@@ -27,8 +27,9 @@ import (
 //go:generate bash $PWD/generate_code
 
 const (
-	blue  = "\x1b[34;1m"
-	white = "\x1b[0m"
+	blue      = "\x1b[34;1m"
+	white     = "\x1b[0m"
+	xrBGPConf = `{"Cisco-IOS-XR-ipv4-bgp-cfg:bgp": {}}`
 )
 
 type Authentication struct {
@@ -131,7 +132,30 @@ func (x *xrgrpc) ReplaceConfig(json string) error {
 		return fmt.Errorf("cannot replace the config: %w", err)
 	}
 	if len(r.GetErrors()) != 0 {
-		return fmt.Errorf("error triggered by remote host for ReqId: %v; %s", id, r.GetErrors())
+		return fmt.Errorf("replace error triggered by remote host for ReqId: %v; %s",
+			id, r.GetErrors())
+	}
+	return nil
+}
+
+func (x *xrgrpc) DeleteConfig(json string) error {
+	rand.Seed(time.Now().UnixNano())
+	id := rand.Int63()
+
+	// 'g' is the gRPC stub.
+	g := xr.NewGRPCConfigOperClient(x.conn)
+
+	// 'a' is the object we send to the router via the stub.
+	a := xr.ConfigArgs{ReqId: id, Yangjson: json}
+
+	// 'r' is the result that comes back from the target.
+	r, err := g.DeleteConfig(x.ctx, &a)
+	if err != nil {
+		return fmt.Errorf("cannot delete the config: %w", err)
+	}
+	if len(r.GetErrors()) != 0 {
+		return fmt.Errorf("delete error triggered by remote host for ReqId: %v; %s",
+			id, r.GetErrors())
 	}
 	return nil
 }
@@ -170,7 +194,8 @@ func (x *xrgrpc) GetConfig(file string) (cfg Config, err error) {
 			return cfg, nil
 		}
 		if len(r.GetErrors()) != 0 {
-			return cfg, fmt.Errorf("error triggered by remote host for ReqId: %v; %s", id, r.GetErrors())
+			return cfg, fmt.Errorf("get config error triggered by remote host for ReqId: %v; %s",
+				id, r.GetErrors())
 		}
 		if len(r.GetYangjson()) > 0 {
 			cfg.Running += r.GetYangjson()
@@ -238,7 +263,11 @@ func main() {
 	/////////////////////
 	// Replace BGP config
 	/////////////////////
-	// TODO: It fails if router is configured on a different ASN
+	// It fails if router is configured on a different ASN
+	// test := `{"openconfig-network-instance:network-instances": [null]}`
+	err = router.DeleteConfig(xrBGPConf)
+	check(err)
+
 	err = router.ReplaceConfig(payload)
 	check(err)
 
