@@ -106,12 +106,48 @@ Hex  Description
 0F "prefix".length(): 15
 ...
 18 tag: asn(3), field encoding: VARINT(0)
-...
+E9:
+FB:
+03:
 22  tag: loopback(4), field encoding: LENGTH_DELIMITED(2)
 0E  "loopback".length(): 14
 0A  tag: ip(1), field encoding: LENGTH_DELIMITED(2)
 0C  "ip".length(): 12 
 ...
+```
+
+#### Varint
+
+- Most significant bit (msb) set – this indicates that there are further bytes to come
+- The lower 7 bits of each byte are used to store the two's complement representation of the number in groups of 7 bits
+
+```
+18 tag: asn(3), field encoding: VARINT(0)
+E9: 1 1101001
+FB: 1 1111011
+03: 0 0000011
+```
+
+- Reverse the two groups of 7 bits because
+
+```
+0000011 1111011 1101001
+```
+
+- Concatenate them to get your final value
+
+```
+000 0011 ++ 111 1011 ++ 110 1001
+11 1111011 1101001
+(1111110111101001)₂
+```
+
+- In decimal
+
+```
+(1 × 2¹⁵)+(1 × 2¹⁴)+(1 × 2¹³)+(1 × 2¹²)+(1 × 2¹¹)+(1 × 2¹⁰)+(0 × 2⁹)+(1 × 2⁸)+(1 × 2⁷)+(1 × 2⁶)+(1 × 2⁵)+(0 × 2⁴)+(1 × 2³)+(0 × 2²)+(0 × 2¹)+(1 × 2⁰)
+= 32768 + 16384 + 8192 + 4096 + 2048 + 1024 + 256 + 128 + 64 + 32 + 8 + 1
+= (65001)₁₀
 ```
 
 4. Alternatively, `protoc` can show you the decoded data.
