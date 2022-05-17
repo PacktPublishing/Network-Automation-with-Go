@@ -28,18 +28,19 @@ type Router struct {
 ### Write
 
 ```bash
-cd write && go run main.go
+$ cd write && go run protobuf
 ```
 
 ### Read
 
 ```bash
-cd read && go run main.go
+$ cd read && go run protobuf
+uplinks:{name:"Ethernet1"  prefix:"192.0.2.1/31"}  uplinks:{name:"Ethernet2"  prefix:"192.0.2.2/31"}  peers:{ip:"192.0.2.0"  asn:65000}  peers:{ip:"192.0.2.3"  asn:65002}  asn:65001  loopback:{ip:"198.51.100.1"}
 ```
 
 ### Inspecting the data
 
-1.
+1. You can see the content with the `hexdump` command.
 
 ```hexdump
 $ hexdump -C router.data
@@ -52,9 +53,7 @@ $ hexdump -C router.data
 00000060  31 39 38 2e 35 31 2e 31  30 30 2e 31              |198.51.100.1|
 ```
 
-2.
-
-Let's print out the protobuf encoded slice of bytes
+2. You could also out the protobuf encoded slice of bytes as follows
 
 ```go
 	out, err := proto.Marshal(router)
@@ -62,7 +61,7 @@ Let's print out the protobuf encoded slice of bytes
 	fmt.Printf("%X", out)
 ```
 
-After grouping the output for convenience, we get something like:
+3. If we group the byte content for convenience, we get something like:
 
 ```hexdump
 0A 19 0A 09 45 74 68 65 72 6E 65 74 31 
@@ -115,7 +114,7 @@ Hex  Description
 ...
 ```
 
-3.
+4. Alternatively, `protoc` can show you the decoded data.
 
 ```bash
 cat router.data | protoc --decode_raw
@@ -142,15 +141,6 @@ cat router.data | protoc --decode_raw
 3: 65001
 4 {
   1: "198.51.100.1"
-}
-```
-
-=>
-
-```json
-1 {
-  1: "Ethernet1"
-  2: "192.0.2.1/31"
 }
 ```
 

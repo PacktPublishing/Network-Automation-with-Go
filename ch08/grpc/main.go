@@ -5,7 +5,6 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	"io"
 	"math/rand"
 	"os"
 	"os/signal"
@@ -29,6 +28,7 @@ import (
 const (
 	blue      = "\x1b[34;1m"
 	white     = "\x1b[0m"
+	yellow = "\x1b[33;1m"
 	xrBGPConf = `{"Cisco-IOS-XR-ipv4-bgp-cfg:bgp": {}}`
 )
 
@@ -160,49 +160,6 @@ func (x *xrgrpc) DeleteConfig(json string) error {
 	return nil
 }
 
-func (x *xrgrpc) GetConfig(file string) (cfg Config, err error) {
-	rand.Seed(time.Now().UnixNano())
-	id := rand.Int63()
-	cfg.Device = x.conn.Target()
-	cfg.Timestamp = time.Now()
-
-	var paths string
-	// Get config for the YANG paths
-	if file != "" {
-		f, err := os.ReadFile(file)
-		if err != nil {
-			return cfg, fmt.Errorf("could not read file: %v: %w", file, err)
-
-		}
-		paths = string(f)
-	}
-	// 'g' is the gRPC stub.
-	g := xr.NewGRPCConfigOperClient(x.conn)
-
-	// 'a' is the object we send to the router via the stub.
-	a := xr.ConfigGetArgs{ReqId: id, Yangpathjson: paths}
-
-	// 'st' is the streamed result that comes back from the target.
-	st, err := g.GetConfig(x.ctx, &a)
-	if err != nil {
-		return cfg, fmt.Errorf("could not get the config from %s: %w", x.conn.Target(), err)
-	}
-	for {
-		// Loop through the responses in the stream until there is nothing left.
-		r, err := st.Recv()
-		if err == io.EOF {
-			return cfg, nil
-		}
-		if len(r.GetErrors()) != 0 {
-			return cfg, fmt.Errorf("get config error triggered by remote host for ReqId: %v; %s",
-				id, r.GetErrors())
-		}
-		if len(r.GetYangjson()) > 0 {
-			cfg.Running += r.GetYangjson()
-		}
-	}
-}
-
 func (t targetModel) createPayload() (string, error) {
 	return ygot.EmitJSON(t.device, &ygot.EmitJSONConfig{
 		Format: ygot.RFC7951,
@@ -270,15 +227,7 @@ func main() {
 	err = router.ReplaceConfig(payload)
 	check(err)
 
-	fmt.Printf("\n\n%sBGP%s config applied on %s\n\n\n", blue, white, router.conn.Target())
-
-	///////////////////////////////
-	// Read BGP config from device
-	//////////////////////////////
-	out, err := router.GetConfig("bgp.json")
-	check(err)
-
-	fmt.Printf("Config from %s:\n%s\n", iosxr.Hostname, out.Running)
+	fmt.Printf("\n%sBGP%s config applied on %s\n\n", blue, white, router.conn.Target())
 
 	////////////////////////////////
 	// Stream Telemetry from device
@@ -307,6 +256,7 @@ func main() {
 	// Decode Telemetry Protobuf message
 	////////////////////////////////////
 	// Telemetry payload is a json string
+	fmt.Printf("\n%sStreaming telemetry%s from %s\n", yellow, white, router.conn.Target())
 
 	for msg := range ch {
 		message := new(telemetry.Telemetry)
