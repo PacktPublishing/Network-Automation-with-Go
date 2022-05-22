@@ -1,10 +1,10 @@
-package cvx
+package input
 
 import (
 	"net"
 )
 
-input: {
+data: {
 	asn: <=65535 & >=64512
 	loopback: ip: net.IPv4 & string
 	uplinks: [...{

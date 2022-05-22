@@ -1,5 +1,7 @@
 package cvx
 
+import "network.automation:input"
+
 interface: _interfaces
 router: bgp: {
 	_global_bgp
@@ -7,17 +9,17 @@ router: bgp: {
 vrf: _vrf
 
 _global_bgp: {
-	"autonomous-system": input.asn
+	"autonomous-system": input.data.asn
 	enable:              "on"
-	"router-id":         input.loopback.ip
+	"router-id":         input.data.loopback.ip
 }
 
 _interfaces: {
 	lo: {
-		ip: address: "\(input.LoopbackIP)": {}
+		ip: address: "\(input.data.LoopbackIP)": {}
 		type: "loopback"
 	}
-	for intf in input.uplinks {
+	for intf in input.data.uplinks {
 		"\(intf.name)": {
 			type: "swp"
 			ip: address: "\(intf.prefix)": {}
@@ -26,7 +28,7 @@ _interfaces: {
 }
 
 _vrf: {
-	for vrf in input.VRFs {
+	for vrf in input.data.VRFs {
 		"\(vrf.name)": {
 			router: bgp: _vrf_bgp
 			if vrf.name == "default" {
@@ -44,7 +46,7 @@ _vrf_bgp: {
 }
 
 _neighbor: {
-	for intf in input.peers {
+	for intf in input.data.peers {
 		"\(intf.ip)": {
 			type:        "numbered"
 			"remote-as": intf.asn

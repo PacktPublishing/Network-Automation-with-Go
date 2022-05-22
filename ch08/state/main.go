@@ -232,7 +232,11 @@ func (r CEOS) GetRoutes(wg *sync.WaitGroup) {
 		Get(fmt.Sprintf("/restconf/data/network-instances/network-instance=%s/afts", "default"))
 
 	if err != nil {
-		log.Printf("failed to send request for %s: %s", r.Hostname, err.Error())
+		log.Printf(
+			"failed to send request for %s: %s",
+			r.Hostname,
+			err.Error(),
+		)
 		wg.Done()
 		return
 	}

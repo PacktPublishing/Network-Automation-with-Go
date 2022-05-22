@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
@@ -17,31 +18,31 @@ import (
 	"cuelang.org/go/cue/cuecontext"
 	"cuelang.org/go/cue/errors"
 	"cuelang.org/go/cue/format"
+	"cuelang.org/go/cue/load"
 	"cuelang.org/go/encoding/yaml"
+)
+
+var (
+	inputFilename = "input.yaml"
+	inputCueFile  = "input.cue"
+	inputPackage  = "input"
+	inputPath     = "data"
 )
 
 func main() {
 	ctx := cuecontext.New()
 
-	schema, err := os.ReadFile("schema.cue")
-	if err != nil {
-		log.Fatal(err)
-	}
-	input, err := cueImport("input.yaml", "input")
-	if err != nil {
-		log.Fatal(err)
-	}
-	template, err := os.ReadFile("template.cue")
-	if err != nil {
+	// cue import input.yaml -p input -l '"data"'
+	if err := importInput(); err != nil {
 		log.Fatal(err)
 	}
 
-	s := ctx.CompileBytes(schema)
-	v := ctx.CompileBytes(input)
+	// cue eval network.automation:cvx -c --out json
+	instances := load.Instances([]string{"."}, &load.Config{
+		Package: "cvx",
+	})
 
-	u := s.Unify(v)
-	i := ctx.CompileBytes(template, cue.Scope(u))
-
+	i := ctx.BuildInstance(instances[0])
 	if i.Err() != nil {
 		msg := errors.Details(i.Err(), nil)
 		fmt.Printf("Compile Error:\n%s\n", msg)
@@ -75,29 +76,42 @@ func main() {
 	log.Printf("Successfully configured the device")
 }
 
-func cueImport(filename, label string) ([]byte, error) {
-
-	input, err := os.ReadFile(filename)
+func importInput() error {
+	// <cue import input.yaml>
+	input, err := os.ReadFile(inputFilename)
 	if err != nil {
-		return nil, err
+		return err
+	}
+	ex, err := yaml.Extract(inputFilename, input)
+	if err != nil {
+		return err
 	}
 
-	ex, err := yaml.Extract(filename, input)
-	if err != nil {
-		return nil, err
-	}
+	// <-p input>
+	s := &ast.File{Decls: []ast.Decl{
+		&ast.Package{
+			Name: ast.NewIdent(inputPackage),
+		},
+	}}
 
-	s := &ast.StructLit{}
+	// <-l '"data"'>
 	f := &ast.Field{}
-	f.Label = ast.NewString(label)
+	f.Label = ast.NewString(inputPath)
 	args := make([]interface{}, len(ex.Decls))
 	for i, decl := range ex.Decls {
 		args[i] = decl
 	}
 	f.Value = ast.NewStruct(args...)
-	s.Elts = append(s.Elts, f)
+	s.Decls = append(s.Decls, f)
 
-	return format.Node(s, format.Simplify())
+	// dump into binary
+	bytes, err := format.Node(s, format.Simplify())
+	if err != nil {
+		return err
+	}
+
+	// write inputCueFile
+	return ioutil.WriteFile(inputCueFile, bytes, 0644)
 }
 
 type cvx struct {
