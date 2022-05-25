@@ -1,16 +1,4 @@
 router:
-# - hostname: sandbox-iosxe-latest-1.cisco.com
-#   platform: cisco_iosxe
-#   strictkey: false
-#   username: developer
-#   password: C1sco12345
-
-# - hostname: sandbox-nxos-1.cisco.com
-#   platform: cisco_nxos
-#   strictkey: false
-#   username: admin
-#   password: Admin_1234!
-
 - hostname: sandbox-iosxr-1.cisco.com
   platform: cisco_iosxr
   strictkey: false

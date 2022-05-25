@@ -198,7 +198,8 @@ func main() {
 		Insecure: false,
 		CLI:      "show grpc status",
 	}
-	intentHash, err := hashstructure.Hash(intent, hashstructure.FormatV2, nil)
+	intentHash, err := hashstructure.Hash(intent,
+		hashstructure.FormatV2, nil)
 	check(err)
 
 	////////////////////////////////////////
