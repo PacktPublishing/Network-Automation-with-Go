@@ -30,9 +30,7 @@ var (
 )
 
 func main() {
-	ctx := cuecontext.New()
-
-	// cue import input.yaml -p input -l '"data"'
+	// cue import input.yaml -p input
 	if err := importInput(); err != nil {
 		log.Fatal(err)
 	}
@@ -42,6 +40,7 @@ func main() {
 		Package: "cvx",
 	})
 
+	ctx := cuecontext.New()
 	i := ctx.BuildInstance(instances[0])
 	if i.Err() != nil {
 		msg := errors.Details(i.Err(), nil)
@@ -56,13 +55,7 @@ func main() {
 		fmt.Printf("Validate Error:\n%s\n", msg)
 	}
 
-	e := i.Eval()
-	if e.Err() != nil {
-		msg := errors.Details(e.Err(), nil)
-		fmt.Printf("Eval Error:\n%s\n", msg)
-	}
-
-	data, err := e.MarshalJSON()
+	data, err := i.MarshalJSON()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -95,14 +88,14 @@ func importInput() error {
 	}}
 
 	// <-l '"data"'>
-	f := &ast.Field{}
-	f.Label = ast.NewString(inputPath)
-	args := make([]interface{}, len(ex.Decls))
-	for i, decl := range ex.Decls {
-		args[i] = decl
-	}
-	f.Value = ast.NewStruct(args...)
-	s.Decls = append(s.Decls, f)
+	//f := &ast.Field{}
+	//f.Label = ast.NewString(inputPath)
+	//args := make([]interface{}, len(ex.Decls))
+	//for i, decl := range ex.Decls {
+	//	args[i] = decl
+	//}
+	//f.Value = ast.NewStruct(args...)
+	s.Decls = append(s.Decls, ex.Decls...)
 
 	// dump into binary
 	bytes, err := format.Node(s, format.Simplify())

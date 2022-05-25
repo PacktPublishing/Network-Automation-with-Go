@@ -26,7 +26,7 @@ CUE tool is a command line tool, similar to `go` that can be used to interact wi
 First, import the `input.yaml` file into the `input` CUE package:
 
 ```bash
-cue import input.yaml -p input -l '"data"' -f
+cue import input.yaml -p input -f
 ```
 
 You can preview the generated payload using the following command:
