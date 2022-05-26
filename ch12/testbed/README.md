@@ -217,8 +217,7 @@ This topology file defines a three node topology as the next figure shows. One n
 To launch the virtual topology file, run the command `make make lab-up` from the $HOME/network-automation-with-go in the VM, as the next output shows.
 
 ```bash
-fedora@testbed network-automation-with-go ⇨  make lab-up
-sudo containerlab deploy -t topo-base/topo.yml --reconfigure
+fedora@testbed network-automation-with-go$ make lab-up
 INFO[0000] Containerlab v0.25.1 started                 
 INFO[0000] Parsing & checking topology file: topo.yml   
 INFO[0000] Removing /home/fedora/network-automation-with-go/clab-netgo directory... 
@@ -294,10 +293,10 @@ ceos#
 
 ### Destroying the Network Topology
 
-You can destroy the network topology using the `clab destroy` command.
+You can destroy the network topology using the `make lab-down` command.
 
 ```bash
-$  sudo clab destroy --topo topo-base/topo.yml
+fedora@testbed network-automation-with-go$ make lab-down
 ```
 
 ## Delete All Resources
