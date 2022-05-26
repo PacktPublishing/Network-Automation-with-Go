@@ -47,13 +47,34 @@ export AWS_ACCESS_KEY_ID=’…’
 export AWS_SECRET_ACCESS_KEY=’…’
 ```
 
-Then, run the command `make env-build`.
+Then, from the book repository directory, run the command `make env-build`.
 
 ```bash
-$ make env-build  
+Network-Automation-with-Go$ make env-build
+AWS_ACCESS_KEY_ID is AKIAVFPUEFZCFVFGXXXX
+AWS_SECRET_ACCESS_KEY is **************************
+Using /etc/ansible/ansible.cfg as config file
+
+PLAY [Create EC2 instance] *************************************************************************************************************************************************************
+
+TASK [Gathering Facts] *****************************************************************************************************************************************************************
+ok: [localhost]
+
+### ... <omitted for brevity > ... ###
+
+TASK [Print out instance information for the user] *************************************************************************************************************************************
+ok: [testbed] => {}
+
+MSG:
+
+['SSH: ssh -i lab-state/id_rsa fedora@ec2-54-86-51-96.compute-1.amazonaws.com\n', 'To upload cEOS image: scp -i lab-state/id_rsa ~/Downloads/cEOS64-lab-4.28.0F.tar fedora@ec2-54-86-51-96.compute-1.amazonaws.com:./network-automation-with-go\n']
+
+PLAY RECAP *****************************************************************************************************************************************************************************
+localhost                  : ok=28   changed=9    unreachable=0    failed=0    skipped=3    rescued=0    ignored=0   
+testbed                    : ok=36   changed=24   unreachable=0    failed=0    skipped=11   rescued=0    ignored=0  
 ```
 
-You can find the VM access details in the logs, as the preceding output shows. Look for something similar to: `ssh -i lab-state/id_rsa fedora@ec2-3-94-8-154.compute-1.amazonaws.com` or `ssh -i lab-state/id_rsa ubuntu@ec2-3-88-180-178.compute-1.amazonaws.com`.
+You can find the VM access details in the logs, as the preceding output shows. Look for something like: `ssh -i lab-state/id_rsa fedora@ec2-54-86-51-96.compute-1.amazonaws.com` or `ssh -i lab-state/id_rsa ubuntu@ec2-54-86-51-96.compute-1.amazonaws.com` depending on the target Linux distribution.
 
 ## Virtual Machine Options
 
@@ -135,22 +156,17 @@ Some networking vendors make it simpler than others to access their container-ba
 Let's pretend you downloaded a cEOS image (`cEOS64-lab-4.28.0F.tar`) to your Downloads folder. You can copy the image to the test VM with the `scp` command using the generated SSH private key. See an example next or check [Get Arista cEOS](get_arista_ceos.md)
 
 ```bash
-$ scp -i lab-state/id_rsa ~/Downloads/cEOS64-lab-4.28.0F.tar fedora@ec2-3-94-8-154.compute-1.amazonaws.com:./network-automation-with-go
-cEOS64-lab-4.28.0F.tar                                                                 100%  434MB  18.9MB/s   00:23
-```
-
-or
-
-```bash
-$ scp -i lab-state/id_rsa ~/Downloads/cEOS64-lab-4.28.0F.tar ubuntu@ec2-34-229-72-1.compute-1.amazonaws.com:./network-automation-with-go
-cEOS64-lab-4.28.0F.tar                                                                 100%  434MB  18.9MB/s   00:23
+Network-Automation-with-Go$ scp -i lab-state/id_rsa ~/Downloads/cEOS64-lab-4.28.0F.tar fedora@ec2-54-86-51-96.compute-1.amazonaws.com:./network-automation-with-go
+cEOS64-lab-4.28.0F.tar                        100%  434MB  26.6MB/s   00:16
 ```
 
 Then, SSH to the instance and import the image with the `docker` command.
 
 ```bash
+Network-Automation-with-Go$ ssh -i lab-state/id_rsa fedora@ec2-54-86-51-96.compute-1.amazonaws.com
 fedora@testbed ~ ⇨  cd network-automation-with-go && make clone
-sha256:0844fc4f33d662d472b44324491c7d1cdcfca5db6f83194fbac603ff12661b3a
+docker import cEOS64-lab-4.28.0F.tar ceos:4.28.0F
+sha256:dcdc721054804ed4ea92f970b5923d8501c28526ef175242cfab0d158ac0085c
 ```
 
 You can now reference this image (`ceos:4.28.0F`) in the `image` section of one or more routers in the topology file.
@@ -195,41 +211,42 @@ This topology file defines a three node topology as the next figure shows. One n
   <img width=600 title="Network Topology" src="pictures/ch6-topo.png"><br>
 </p>
 
-...
 
 ## Launching a Virtual Network Topology
 
-To launch the virtual topology file, run the command `make` from the home folder to access the `network-automation-with-go/topo/` folder and run `clab deploy` with root privilege, as the next output shows.
+To launch the virtual topology file, run the command `make make lab-up` from the $HOME/network-automation-with-go in the VM, as the next output shows.
 
 ```bash
-ubuntu@testbed network-automation-with-go ⇨  make lab-up
+fedora@testbed network-automation-with-go ⇨  make lab-up
 sudo containerlab deploy -t topo-base/topo.yml --reconfigure
 INFO[0000] Containerlab v0.25.1 started                 
 INFO[0000] Parsing & checking topology file: topo.yml   
-INFO[0000] Removing /home/ubuntu/network-automation-with-go/clab-netgo directory... 
+INFO[0000] Removing /home/fedora/network-automation-with-go/clab-netgo directory... 
 INFO[0000] Could not read docker config: open /root/.docker/config.json: no such file or directory 
 INFO[0000] Pulling docker.io/networkop/cx:5.0.0 Docker image 
-INFO[0019] Done pulling docker.io/networkop/cx:5.0.0    
-INFO[0019] Could not read docker config: open /root/.docker/config.json: no such file or directory 
-INFO[0019] Pulling ghcr.io/nokia/srlinux:21.6.4 Docker image 
+INFO[0021] Done pulling docker.io/networkop/cx:5.0.0    
+INFO[0021] Could not read docker config: open /root/.docker/config.json: no such file or directory 
+INFO[0021] Pulling ghcr.io/nokia/srlinux:21.6.4 Docker image 
 INFO[0039] Done pulling ghcr.io/nokia/srlinux:21.6.4    
 WARN[0039] it appears that container host has low memory available: ~0Gi. This might lead to runtime errors. Consider freeing up more memory. 
-INFO[0039] Creating lab directory: /home/ubuntu/network-automation-with-go/clab-netgo 
-INFO[0039] Creating docker network: Name="clab", IPv4Subnet="172.20.20.0/24", IPv6Subnet="2001:172:20:20::/64", MTU="1500" 
+INFO[0039] Creating lab directory: /home/fedora/network-automation-with-go/clab-netgo 
+INFO[0040] Creating docker network: Name="clab", IPv4Subnet="172.20.20.0/24", IPv6Subnet="2001:172:20:20::/64", MTU="1500" 
 INFO[0040] Creating container: "ceos"                   
 INFO[0040] Creating container: "cvx"                    
-INFO[0040] Creating container: "srl"                    
-INFO[0049] Creating virtual wire: srl:e1-1 <--> ceos:eth1 
-INFO[0050] Creating virtual wire: cvx:swp1 <--> ceos:eth2 
-INFO[0050] Running postdeploy actions for Nokia SR Linux 'srl' node 
-INFO[0050] Running postdeploy actions for Arista cEOS 'ceos' node 
+INFO[0041] Creating container: "srl"                    
+INFO[0043] Creating virtual wire: cvx:swp1 <--> ceos:eth2 
+INFO[0046] Creating virtual wire: srl:e1-1 <--> ceos:eth1 
+INFO[0046] Running postdeploy actions for Arista cEOS 'ceos' node 
+INFO[0046] Running postdeploy actions for Nokia SR Linux 'srl' node 
 INFO[0107] Adding containerlab host entries to /etc/hosts file 
+INFO[0107] 🎉 New containerlab version 0.26.2 is available! Release notes: https://containerlab.dev/rn/0.26/#0262
+Run 'containerlab version upgrade' to upgrade or go check other installation options at https://containerlab.dev/install/ 
 +---+-----------------+--------------+------------------------------+------+---------+----------------+----------------------+
 | # |      Name       | Container ID |            Image             | Kind |  State  |  IPv4 Address  |     IPv6 Address     |
 +---+-----------------+--------------+------------------------------+------+---------+----------------+----------------------+
-| 1 | clab-netgo-ceos | d6c84094b197 | ceos:4.28.0F                 | ceos | running | 172.20.20.4/24 | 2001:172:20:20::4/64 |
-| 2 | clab-netgo-cvx  | cdc31601e823 | networkop/cx:5.0.0           | cvx  | running | 172.20.20.3/24 | 2001:172:20:20::3/64 |
-| 3 | clab-netgo-srl  | 7061500a1531 | ghcr.io/nokia/srlinux:21.6.4 | srl  | running | 172.20.20.2/24 | 2001:172:20:20::2/64 |
+| 1 | clab-netgo-ceos | 53274759376c | ceos:4.28.0F                 | ceos | running | 172.20.20.3/24 | 2001:172:20:20::3/64 |
+| 2 | clab-netgo-cvx  | 404c58026c11 | networkop/cx:5.0.0           | cvx  | running | 172.20.20.2/24 | 2001:172:20:20::2/64 |
+| 3 | clab-netgo-srl  | 16a5cf8add7a | ghcr.io/nokia/srlinux:21.6.4 | srl  | running | 172.20.20.4/24 | 2001:172:20:20::4/64 |
 +---+-----------------+--------------+------------------------------+------+---------+----------------+----------------------+
 ```
 
@@ -287,18 +304,36 @@ $  sudo clab destroy --topo topo-base/topo.yml
 
 As important or even more important that automating the VM setup process, is automating how you delete all cloud resources afterwards, so you don't pay for something you might no longer need. 
 
-You need to provide the AWS region in case you didn't use the default value.
-
 ```bash
-$ make env-delete
+Network-Automation-with-Go$ make env-delete
+AWS_ACCESS_KEY_ID is AKIAVFPUEFZCFVFGXXXX
+AWS_SECRET_ACCESS_KEY is **************************
+[WARNING]: No inventory was parsed, only implicit localhost is available
+[WARNING]: provided hosts list is empty, only localhost is available. Note that the implicit localhost does not match 'all'
+
+PLAY [Delete EC2 instance] *************************************************************************************************************************************************************
+
+TASK [Gathering Facts] *****************************************************************************************************************************************************************
+ok: [localhost]
+
+### ... <omitted for brevity > ... ###
+
+TASK [aws_delete_resources : Delete SSH Key Pair for instance] *************************************************************************************************************************
+changed: [localhost]
+
+TASK [Cleanup state files] *************************************************************************************************************************************************************
+changed: [localhost] => (item=.region)
+changed: [localhost] => (item=.vm)
+
+PLAY RECAP *****************************************************************************************************************************************************************************
+localhost                  : ok=21   changed=8    unreachable=0    failed=0    skipped=3    rescued=0    ignored=0   
 ```
 
 ## Other Testing Options
 
 Not every networking offers public access to the container images of their network operating systems. We aim to make the examples as useful to you as possible. For this reason, we also take advantage of a couple of additional resources to get access to networking operating systems you might run in your organization.
 
-- [DevNet Sandbox]: DevNet offers **free** access to always-on devices that we can target in some examples. They have Cisco Nexus, IOS XR and IOS shared devices. Keep in mind their hostname/fqdn, and credentials might change in the future. You can also [reserve a DevNet Sandbox].
-- [NRE Labs]: NRE Labs is an open source educational project sponsored by Juniper. It provides free access to lab scenarios with JunOS devices.
+The [DevNet Sandbox] is a **free** option to access always-on devices that we target in some examples in the book. They have Cisco Nexus, IOS XR and IOS shared devices. Keep in mind their hostname/fqdn, and credentials might change in the future. You can also [reserve a DevNet Sandbox].
 
 Other great resources to run virtual network topologies are [GNS3], [EVE-NG], [netsim-tools], and [Vagrant]. You need to have a contract with a networking vendor company to get access to their virtual images to run on any of these though.
 
@@ -316,7 +351,6 @@ Last, but not least, [Cisco Modeling Labs] offer access to Cisco virtual images 
 [Vagrant]: https://www.vagrantup.com/
 [Add cEOS]: https://github.com/nleiva/aws-testbed/blob/main/lab/get_arista_ceos.md#add-image-to-your-local-image-repository
 [Arista cEOS in Containerlab]: https://containerlab.dev/manual/kinds/ceos/#arista-ceos
-[NRE Labs]: https://nrelabs.io/
 [DevNet Sandbox]: https://developer.cisco.com/site/sandbox/
 [reserve a DevNet Sandbox]: https://developer.cisco.com/docs/sandbox/#!first-reservation-guide/reservation-hello-world
 [EC2 Available Regions]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html#concepts-available-regions
