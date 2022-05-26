@@ -407,7 +407,7 @@ func main() {
 		res, err := c.DcimDevicesListWithResponse(
 			context.TODO(),
 			&nb.DcimDevicesListParams{
-				Id: &[]types.UUID{*devWithIDs.Id},
+				NameIe: &[]string{*device.Name},
 			})
 		check(err)
 		fmt.Printf("Device already present: %v\n", string(res.Body))
