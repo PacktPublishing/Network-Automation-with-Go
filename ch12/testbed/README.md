@@ -1,104 +1,56 @@
 # Setting Up a Testing Environment
 
-You can run the Go code snippets in the first part of this book in the [Go Playground][] or on your personal computer if you have already installed Go. Some code examples in chapters six and later interact with other systems—such as virtual network devices—which we run as containers with Docker. Now, instead of asking you to install Docker on your computer to run these examples, we think is more practical for you to recreate the Linux environment we actually use to write and test the code examples of these chapters. This testing environment comes with Docker and all other software dependencies installed, so you can run the examples without a hitch. We want to make sure you have a pleasant experience running the examples.
+You can run the Go code example of the first part of the book in the [Go Playground][] or on your personal computer if you have already installed Go. Code examples in chapters six and later interact with a virtual network topology---which we run in containers with Containerlab. 
 
 ## What Is a Testing Environment?
 
 A test environment is the hardware and software that meets the minimum requirements to execute test cases.
 
-For the hardware, we rely on a cloud provider to have a common denominator. In this case, we leverage Amazon Web Services (AWS) to provision a virtual machine (VM), where we can install all the software we need to run the code examples of the book. We call this virtual machine an EC2 instance, or just an instance (we use these terms interchangeably). By default, the instance type we run in AWS is a `t2.micro`, which you can run for free as part of the [AWS Free Tier][], but we recommend you run at least a `t2.medium`, ideally a `t2.large` size instance that has more CPU and memory, to support all the virtual network devices we need to run.
+For the hardware, we rely on a cloud provider to have a common denominator. In this case, we leverage Amazon Web Services (AWS) to provision a virtual machine (VM), where we can install all the software we need to run the code examples of the book. We call this virtual machine an EC2 instance, or just an instance (we use these terms interchangeably). By default, the instance type we run in AWS is a `t2.micro`, which you can run for free as part of the [AWS Free Tier][], but we recommend you run at least a `t2.medium`, ideally a `t2.large` size instance that has more CPU and memory, to support all the virtual network devices in the lab topology.
 
-An Ansible playbook describes and automates all the tasks required to create this VM in AWS, as well as the tasks that prescribe the software—such as Docker—that needs to be present in the VM and it defines how to configure the software as well. You can find this playbook in the [book's GitHub repository]. Another playbook is also available to delete the resources you create when you no longer need them.
+An Ansible playbook describes and automates all the tasks required to create this VM in AWS, as well as the tasks that prescribe the software---such as Containerlab---that needs to be present in the VM. It also defines how to configure the software. You can find this playbook in the [book's GitHub repository]. Another playbook is also available to delete the resources you create when you no longer need them.
 
 The playbooks in the book are:
 - [create-EC2-testbed.yml](create-EC2-testbed.yml):  Creates the testbed. It takes around 10 minutes to run.
 - [delete-EC2-testbed.yml](delete-EC2-testbed.yml): Deletes the resources you create when you no longer need them.
 
-If you have Docker installed, you can trigger the AWS test setup from a container with `make env-build`, without having to install the dependencies we cover next.
+If you have Docker installed in your computer, you can build the AWS test setup with the command `make build-env`.
 
-## What You Need Create a Testing Environment
+## What You Need to Create a Testing Environment
 
 Before you run the playbook in your computer to create a Linux testing environment in AWS, you need to make sure you meet the following requirements:
 
 1. An AWS account. [AWS Free Tier] is fine.
 2. A computer with: 
-    * Git --- if you don't have installed already, check out their [Getting Started - Installing Git][] guide. Example: `sudo apt install git-all` (Ubuntu)
-    * Python3 --- they provide installation instructions in the [Beginners Guide: Downloading Python][]. Example: `sudo apt install python3.8` (Ubuntu)
-    * pip --- if your Python environment does not have pip installed, they offer instruction at [Installing pip - Supported Methods][]. Example: `python3 -m pip install --upgrade pip`
-    * Ansible 2.9 --- you can install Ansible with pip as they describe it in [Installing Ansible with pip][]. Example: `python3 -m pip install --user ansible==2.9.26` 
+    * Git
+    * Docker
+    * Make
 
 With all this in place, you can go ahead and clone the [book's GitHub repository][] with the `git clone` command.
 
 ```bash
-$ git clone https://github.com/PacktPublishing/Network-Automation-with-Go && cd Network-Automation-with-Go/ch012/testbed
-```
-
-Now we are one step closer to execute the playbook to create the test environment and run the code examples.
-
-## Getting Ready to Run the Playbook
-
-Ansible executes some tasks of the playbook, for example to communication with AWS, with content or code that the authors of that content distribute in the form of an Ansible Collection. To install it, you need to execute this command from the repository folder:
-
-```bash
-ch012/testbed$ ansible-galaxy collection install -r collections/requirements.yml -p ./collections
-```
-
-Ansible Collections might depend on some Python libraries. To install these Python libraries, from the repository folder run `pip install` as in the next output: 
-
-```bash
-ch012/testbed$ pip install --user -r requirements.txt
-```
-
-You can verify `pip` installed the libraries correctly with the command `pip list`. See the following output for an example of what to expect.
-
-```bash
-ch012/testbed$ pip list | grep 'boto\|crypto'
-boto                              2.49.0
-boto3                             1.17.93
-botocore                          1.20.112
-cryptography                      3.4.7
+$ git clone https://github.com/PacktPublishing/Network-Automation-with-Go
 ```
 
 ## Creating the Testing Environment
 
-The testing environment is a single Linux instance in AWS running Docker and Containerlab to create container-based network topologies. The next figure illustrates what the environment looks like. 
+The testing environment is a single Linux instance in AWS running Containerlab to create container-based network topologies. The next figure illustrates what the environment looks like. 
 
 <p align="center">
   <img width=800 title="Target Environment" src="pictures/ch12-test_env.png"><br>
 </p>
 
-Before you run the playbook, you need to make your AWS account credentials (`AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`) available as environment variables with the `export` command. Check out [AWS Programmatic access][] to create an access key, and to save your secret access key.
+The first step is to make your AWS account credentials (`AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`) available as environment variables with the `export` command. Check out [AWS Programmatic access][] to create an access key, and to save your secret access key.
 
 ```bash
 export AWS_ACCESS_KEY_ID=’…’
 export AWS_SECRET_ACCESS_KEY=’…’
 ```
 
-The next step is to execute the playbook with the `ansible-playbook` command.
+Then, run the command `make env-build`.
 
 ```bash
-ch012/testbed$ ansible-playbook create-EC2-testbed.yml --extra-vars "instance_type=t2.large" -v 
-
-<snip>
-
-TASK [Print out SSH access details] **********************************************************************************
-ok: [testbed] => {}
-
-MSG:
-
-SSH: ssh -i lab-state/id_rsa fedora@ec2-3-94-8-154.compute-1.amazonaws.com
-To upload cEOS image: scp -i lab-state/id_rsa ~/Downloads/cEOS64-lab-4.28.0F.tar fedora@ec2-3-94-8-154.compute-1.amazonaws.com:.
-
-RUNNING HANDLER [configure_instance : Reboot machine] ****************************************************************
-changed: [testbed] => {
-    "changed": true,
-    "elapsed": 47,
-    "rebooted": true
-}
-
-PLAY RECAP **********************************************************************************************************************
-localhost                  : ok=26   changed=1    unreachable=0    failed=0    skipped=6    rescued=0    ignored=0   
-testbed                    : ok=30   changed=20   unreachable=0    failed=0    skipped=6    rescued=0    ignored=0      
+$ make env-build  
 ```
 
 You can find the VM access details in the logs, as the preceding output shows. Look for something similar to: `ssh -i lab-state/id_rsa fedora@ec2-3-94-8-154.compute-1.amazonaws.com` or `ssh -i lab-state/id_rsa ubuntu@ec2-3-88-180-178.compute-1.amazonaws.com`.
@@ -123,10 +75,11 @@ m5.2xlarge | $0.384 | 8 | 32 GiB
 r5.2xlarge | $0.504 | 8 | 64 GiB
 c5.metal | $4.08 | 96 | 192 GiB
 
-To run the testing environment on a `m5.large` instance, you need to pass the variable `instance_type` to the playbook with the value `m5.large`, like in the command example below.
+To run the testing environment on a `m5.large` instance, you need to export the environment variables `VM_SIZE` with the value `m5.large`, like in the next output.
 
 ```bash
-ansible-playbook create-EC2-testbed.yml -v --extra-vars "instance_type=m5.large"
+$ export VM_SIZE=m5.large
+$ make env-build
 ```
 
 ### AWS Region
@@ -146,44 +99,33 @@ ap-northeast-1| Asia Pacific (Tokyo)
 ap-southeast-2| Asia Pacific (Sydney)
 ap-south-1| Asia Pacific (Mumbai)
 
-To run the testing environment in London, you need to pass the variable `aws_region` to the playbook with the value `eu-west-2`, like in the command example below.
+To run the testing environment in London, you need to export the environment variables `AWS_REGION` with the value `eu-west-2`, like in the next output
 
 ```bash
-ansible-playbook create-EC2-testbed.yml -v --extra-vars "aws_region=eu-west-2"
+$ export AWS_REGION=eu-west-2
+$ make env-build
 ```
 
 ### Linux Distribution
 
-If you have a preference between Fedora vs Debian based Linux distributions, you have the option to run the testing environment on either Fedora (34) or Ubuntu (20.04). Pass the the variable `aws_distro` to the playbook to select one or the other. The default option is `fedora`.
+If you have a preference between Fedora vs Debian based Linux distributions, you have the option to run the testing environment on either Fedora (35) or Ubuntu (22.04). Export the environment variables `AWS_DISTRO` to select one or the other. The default option is `fedora`.
 
-To run an `ubuntu` machine instead, you need to pass the variable `aws_distro` with value `ubuntu` to the `ansible playbook` command. The next example shows how you can create a `t2.medium` instance running `ubuntu` in Ohio.
+The next example shows how you can create a `t2.medium` instance running `ubuntu` in Ohio.
 
 ```bash
-$ ansible-playbook create-EC2-testbed.yml -v --extra-vars "aws_distro=ubuntu instance_type=t2.medium aws_region=us-east-2"
-
-<skip>
-
-TASK [Print out SSH access details] *********************************************************************************************************************************************************
-ok: [testbed] => {}
-
-MSG:
-
-SSH: ssh -i lab-state/id_rsa ubuntu@ec2-3-142-51-83.us-east-2.compute.amazonaws.com
-To upload cEOS image: scp -i lab-state/id_rsa ~/Downloads/cEOS64-lab-4.28.0F.tar ubuntu@ec2-3-142-51-83.us-east-2.compute:.
-
-PLAY RECAP **********************************************************************************************************************
-localhost                  : ok=26   changed=1    unreachable=0    failed=0    skipped=6    rescued=0    ignored=0   
-testbed                    : ok=30   changed=20   unreachable=0    failed=0    skipped=6    rescued=0    ignored=0
+$ export AWS_DISTRO=ubuntu
+$ export VM_SIZE=t2.medium
+$ export AWS_REGION=us-east-2
+$ make env-build
 ```
-
 
 ## Connecting to the Test VM
 
-After you create the instance, you can connect to it using the info provided in the logs. The playbook generates an SSH private key (`my_key`), which we use to authenticate to the test VM. Connect to the VM and verify that Go is present in the system with the `go version` command. 
+After you create the instance, you can connect to it using the info provided in the logs. The playbook generates an SSH private key (`lab-state/id_rsa`), which we use to authenticate to the test VM. Connect to the VM and verify that Go is present in the system with the `go version` command. 
 
 ```bash
 fedora@testbed ~ ⇨  go version
-go version go1.18beta2 linux/amd64
+go version go1.18.1 linux/amd64
 ```
 
 ## Uploading Container Images to the Test VM
@@ -224,7 +166,7 @@ ceos>
 
 The Linux environment comes with [Containerlab] in it. We use this application to wire together different containerized NOS and create a virtual network topology we can interact with to run the book code examples. [Containerlab] offers a hassle-free and quick way to define and run network topologies. It also worth mentioning that Go is the programming language of choice for this tool.
 
-You can find the topology definition file in the `topo` folder of [book's GitHub repository].
+You can find the topology definition file in the `topo-base` folder of [book's GitHub repository].
 
 ```yaml
 name: netgo
@@ -345,25 +287,10 @@ $  sudo clab destroy --topo topo-base/topo.yml
 
 As important or even more important that automating the VM setup process, is automating how you delete all cloud resources afterwards, so you don't pay for something you might no longer need. 
 
-You can do this by running the delete playbook with the `ansible-playbook` command. You need to provide the AWS region in case you didn't use the default value.
+You need to provide the AWS region in case you didn't use the default value.
 
 ```bash
-ansible-playbook delete-EC2-testbed.yml -v --extra-vars "aws_region=us-east-2"
-
-<snip>
-
-TASK [aws_delete_resources : Delete SSH Key Pair for instance] ********************************************************************************************
-changed: [localhost] => {
-    "changed": true,
-    "key": null
-}
-
-MSG:
-
-key deleted
-
-PLAY RECAP ************************************************************************************************************************************************
-localhost                  : ok=19   changed=7    unreachable=0    failed=0    skipped=2    rescued=0    ignored=0   
+$ make env-delete
 ```
 
 ## Other Testing Options
