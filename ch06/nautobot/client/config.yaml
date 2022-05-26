@@ -1,0 +1,5 @@
+package: nautobot
+generate:
+  client: true
+  models: true
+output: nautobot.go

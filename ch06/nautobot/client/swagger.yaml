@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: API Documentation
-  version: 1.3.3b1 (1.3)
+  version: 1.3.4 (1.3)
   description: Source of truth and network automation platform
   license:
     name: Apache v2 License
