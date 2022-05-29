@@ -218,9 +218,10 @@ func main() {
 	///////////////////////////////////////////////////
 	// Connect to target device (DevNet IOS XR device)
 	//////////////////////////////////////////////////
-	iosxr.Connect()
+	if err := iosxr.Connect(); err != nil {
+		check(err)
+	}
 
-	check(err)
 	defer iosxr.conn.Close()
 
 	/////////////////////
