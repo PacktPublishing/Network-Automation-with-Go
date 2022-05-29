@@ -28,7 +28,7 @@ import (
 const (
 	blue      = "\x1b[34;1m"
 	white     = "\x1b[0m"
-	yellow = "\x1b[33;1m"
+	yellow    = "\x1b[33;1m"
 	xrBGPConf = `{"Cisco-IOS-XR-ipv4-bgp-cfg:bgp": {}}`
 )
 
@@ -160,20 +160,6 @@ func (x *xrgrpc) DeleteConfig(json string) error {
 	return nil
 }
 
-func (t targetModel) createPayload() (string, error) {
-	return ygot.EmitJSON(t.device, &ygot.EmitJSONConfig{
-		Format: ygot.RFC7951,
-		Indent: "  ",
-		RFC7951Config: &ygot.RFC7951JSONConfig{
-			AppendModuleName: true,
-		},
-	})
-}
-
-type targetModel struct {
-	device *oc.Device
-}
-
 func main() {
 	////////////////////////////////
 	// Target device access details
@@ -202,12 +188,18 @@ func main() {
 	/////////////////////////////////
 	// Build OpenConfig configuration
 	////////////////////////////////
-	tgtModel := targetModel{device: &oc.Device{}}
+	device := &oc.Device{}
 
-	err = input.buildNetworkInstance(tgtModel.device)
+	err = input.buildNetworkInstance(device)
 	check(err)
 
-	payload, err := tgtModel.createPayload()
+	payload, err := ygot.EmitJSON(device, &ygot.EmitJSONConfig{
+		Format: ygot.RFC7951,
+		Indent: "  ",
+		RFC7951Config: &ygot.RFC7951JSONConfig{
+			AppendModuleName: true,
+		},
+	})
 	check(err)
 
 	///////////////////////////////////////////////////
