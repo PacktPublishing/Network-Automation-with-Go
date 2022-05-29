@@ -26,7 +26,10 @@ func (m *Model) buildNetworkInstance(dev *oc.Device) error {
 	nis := new(oc.OpenconfigNetworkInstance_NetworkInstances)
 	ni, err := nis.NewNetworkInstance(defaultNetInst)
 	if err != nil {
-		return fmt.Errorf("cannot create new network instance: %w", err)
+		return fmt.Errorf(
+			"cannot create new network instance: %w",
+			err,
+		)
 	}
 	ygot.BuildEmptyTree(ni)
 	ni.Config.Name = ygot.String(defaultNetInst)
@@ -45,7 +48,10 @@ func (m *Model) buildNetworkInstance(dev *oc.Device) error {
 
 	safi, err := bgp.Bgp.Global.AfiSafis.NewAfiSafi(ipv4uniAF)
 	if err != nil {
-		return fmt.Errorf("cannot enable bgp IPv4 address family: %w", err)
+		return fmt.Errorf(
+			"cannot enable bgp IPv4 address family: %w",
+			err,
+		)
 	}
 	ygot.BuildEmptyTree(safi)
 
@@ -55,7 +61,11 @@ func (m *Model) buildNetworkInstance(dev *oc.Device) error {
 	for _, peer := range m.Peers {
 		n, err := bgp.Bgp.Neighbors.NewNeighbor(peer.IP)
 		if err != nil {
-			return fmt.Errorf("cannot add bgp neighbor %s: %w", peer.IP, err)
+			return fmt.Errorf(
+				"cannot add bgp neighbor %s: %w",
+				peer.IP,
+				err,
+			)
 		}
 		ygot.BuildEmptyTree(n)
 
@@ -66,7 +76,11 @@ func (m *Model) buildNetworkInstance(dev *oc.Device) error {
 
 		safi, err := n.AfiSafis.NewAfiSafi(ipv4uniAF)
 		if err != nil {
-			return fmt.Errorf("cannot add address family to bgp neighbor %s: %w", peer.IP, err)
+			return fmt.Errorf(
+				"cannot add address family to bgp neighbor %s: %w",
+				peer.IP,
+				err,
+			)
 		}
 		ygot.BuildEmptyTree(safi)
 		safi.Config.AfiSafiName = ipv4uniAF
@@ -91,14 +105,22 @@ func (m *Model) buildRoutePolicy(dev *oc.Device) error {
 
 	def, err := pol.PolicyDefinitions.NewPolicyDefinition(policy)
 	if err != nil {
-		return fmt.Errorf("cannot create policy definition %s: %w", policy, err)
+		return fmt.Errorf(
+			"cannot create policy definition %s: %w",
+			policy,
+			err,
+		)
 	}
 	ygot.BuildEmptyTree(def)
 	def.Config.Name = ygot.String(policy)
 
 	stat, err := def.Statements.NewStatement(polStatemet)
 	if err != nil {
-		return fmt.Errorf("cannot create a policy statement %s: %w", polStatemet, err)
+		return fmt.Errorf(
+			"cannot create a policy statement %s: %w",
+			polStatemet,
+			err,
+		)
 	}
 	ygot.BuildEmptyTree(stat)
 	stat.Config.Name = ygot.String(polStatemet)
@@ -123,7 +145,11 @@ func (m *Model) buildTelemetrySubs(dev *oc.Device) error {
 
 	sg, err := t.SensorGroups.NewSensorGroup(sensorGroupID)
 	if err != nil {
-		return fmt.Errorf("failed to generate sensor group %s: %w", sensorGroupID, err)
+		return fmt.Errorf(
+			"failed to generate sensor group %s: %w",
+			sensorGroupID,
+			err,
+		)
 	}
 	ygot.BuildEmptyTree(sg)
 	sg.Config.SensorGroupId = ygot.String(sensorGroupID)
@@ -131,16 +157,26 @@ func (m *Model) buildTelemetrySubs(dev *oc.Device) error {
 	ygot.BuildEmptyTree(sg)
 	sp, err := sg.SensorPaths.NewSensorPath(subsPath)
 	if err != nil {
-		return fmt.Errorf("failed to generate sensor path %s: %w", subsPath, err)
+		return fmt.Errorf(
+			"failed to generate sensor path %s: %w",
+			subsPath,
+			err,
+		)
 	}
 	ygot.BuildEmptyTree(sp)
 	sp.Path = ygot.String(subsPath)
 	sp.Config.Path = ygot.String(subsPath)
 
 	// Without Modified OpenConfig model
-	sb, err := t.Subscriptions.Persistent.NewSubscription(subscriptionIDName)
+	sb, err := t.Subscriptions.Persistent.NewSubscription(
+		subscriptionIDName,
+	)
 	if err != nil {
-		return fmt.Errorf("failed to generate telemetry subscription %v: %w", subscriptionIDName, err)
+		return fmt.Errorf(
+			"failed to generate telemetry subscription %v: %w",
+			subscriptionIDName,
+			err,
+		)
 	}
 	ygot.BuildEmptyTree(sb)
 	sb.Config.SubscriptionId = ygot.String(subscriptionIDName)
@@ -149,7 +185,11 @@ func (m *Model) buildTelemetrySubs(dev *oc.Device) error {
 
 	spf, err := sb.SensorProfiles.NewSensorProfile(sensorGroupID)
 	if err != nil {
-		return fmt.Errorf("failed to generate sensor profile %s: %w", sensorGroupID, err)
+		return fmt.Errorf(
+			"failed to generate sensor profile %s: %w",
+			sensorGroupID,
+			err,
+		)
 	}
 	ygot.BuildEmptyTree(spf)
 	spf.Config.SensorGroup = ygot.String(sensorGroupID)
