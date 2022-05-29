@@ -19,7 +19,10 @@ type loginCreds struct {
 }
 
 // Method of the PerRPCCredentials interface.
-func (c *loginCreds) GetRequestMetadata(context.Context, ...string) (map[string]string, error) {
+func (c *loginCreds) GetRequestMetadata(
+	context.Context,
+	...string,
+) (map[string]string, error) {
 	return map[string]string{
 		"username": c.Username,
 		"password": c.Password,
@@ -34,7 +37,9 @@ func (c *loginCreds) RequireTransportSecurity() bool {
 // GetSubscription follows the Channel Generator Pattern, it returns
 // a []byte channel where the Streaming Telemetry data is sent/received. It
 // also propagates error messages on an error channel.
-func (x *xrgrpc) GetSubscription(sub, enc string) (chan []byte, chan error, error) {
+func (x *xrgrpc) GetSubscription(
+	sub, enc string,
+) (chan []byte, chan error, error) {
 	encodigMap := map[string]int64{
 		"gpb":   2,
 		"gpbkv": 3,
@@ -43,7 +48,10 @@ func (x *xrgrpc) GetSubscription(sub, enc string) (chan []byte, chan error, erro
 
 	encoding, ok := encodigMap[enc]
 	if !ok {
-		return nil, nil, fmt.Errorf("encoding value not supported: %s", enc)
+		return nil, nil, fmt.Errorf(
+			"encoding value not supported: %s",
+			enc,
+		)
 	}
 
 	rand.Seed(time.Now().UnixNano())
@@ -102,20 +110,35 @@ func (x *xrgrpc) GetSubscription(sub, enc string) (chan []byte, chan error, erro
 	return b, e, err
 }
 
-func (x *xrgrpc) SessionCancel(e chan error, c chan os.Signal, stop context.CancelFunc) {
+func (x *xrgrpc) SessionCancel(
+	e chan error,
+	c chan os.Signal,
+	stop context.CancelFunc,
+) {
 	select {
 	case <-c:
-		fmt.Printf("\nmanually cancelled the session to %v\n\n", x.conn.Target())
+		fmt.Printf(
+			"\nmanually cancelled the session to %v\n\n",
+			x.conn.Target(),
+		)
 		stop()
 		return
 	case <-x.ctx.Done():
 		// Timeout: "context deadline exceeded"
 		err := x.ctx.Err()
-		fmt.Printf("\ngRPC session timed out after %s seconds: %v\n\n", "10", err.Error())
+		fmt.Printf(
+			"\ngRPC session timed out after %s seconds: %v\n\n",
+			"10",
+			err.Error(),
+		)
 		return
 	case err := <-e:
 		// Session canceled: "context canceled"
-		fmt.Printf("\ngRPC session to %v failed: %v\n\n", x.conn.Target(), err.Error())
+		fmt.Printf(
+			"\ngRPC session to %v failed: %v\n\n",
+			x.conn.Target(),
+			err.Error(),
+		)
 		return
 	}
 }
