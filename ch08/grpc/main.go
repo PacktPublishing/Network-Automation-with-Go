@@ -203,8 +203,9 @@ func main() {
 	////////////////////////////////
 	device := &oc.Device{}
 
-	err = input.buildNetworkInstance(device)
-	check(err)
+	if err := input.buildNetworkInstance(device); err != nil {
+		check(err)
+	}
 
 	payload, err := ygot.EmitJSON(device, &ygot.EmitJSONConfig{
 		Format: ygot.RFC7951,
@@ -221,7 +222,6 @@ func main() {
 	if err := iosxr.Connect(); err != nil {
 		check(err)
 	}
-
 	defer iosxr.conn.Close()
 
 	/////////////////////
@@ -229,10 +229,13 @@ func main() {
 	/////////////////////
 	// It fails if the device is already configured on a different ASN.
 	// Hence, we delete any existing BGP config first
-	iosxr.DeleteConfig(xrBGPConf)
+	if err := iosxr.DeleteConfig(xrBGPConf); err != nil {
+		check(err)
+	}
 
-	err = iosxr.ReplaceConfig(payload)
-	check(err)
+	if err := iosxr.ReplaceConfig(payload); err != nil {
+		check(err)
+	}
 
 	fmt.Printf(
 		"\n%sBGP%s config applied on %s\n\n",
