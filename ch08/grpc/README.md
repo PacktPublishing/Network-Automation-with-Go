@@ -50,7 +50,7 @@ We use a slightly modified version of the `openconfig-telemetry` model. For deta
 
 ## Running the example
 
-```json
+```bash
 $ go run grpc
 
 BGP config applied on sandbox-iosxr-1.cisco.com:57777
