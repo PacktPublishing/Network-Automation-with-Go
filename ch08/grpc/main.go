@@ -128,8 +128,11 @@ func (x *xrgrpc) ReplaceConfig(json string) error {
 		return fmt.Errorf("cannot replace the config: %w", err)
 	}
 	if len(r.GetErrors()) != 0 {
-		return fmt.Errorf("replace error triggered by remote host for ReqId: %v; %s",
-			id, r.GetErrors())
+		return fmt.Errorf(
+			"replace error triggered by remote host for ReqId: %v; %s",
+			id,
+			r.GetErrors(),
+		)
 	}
 	return nil
 }
@@ -150,8 +153,11 @@ func (x *xrgrpc) DeleteConfig(json string) error {
 		return fmt.Errorf("cannot delete the config: %w", err)
 	}
 	if len(r.GetErrors()) != 0 {
-		return fmt.Errorf("delete error triggered by remote host for ReqId: %v; %s",
-			id, r.GetErrors())
+		return fmt.Errorf(
+			"delete error triggered by remote host for ReqId: %v; %s",
+			id,
+			r.GetErrors(),
+		)
 	}
 	return nil
 }
@@ -159,7 +165,10 @@ func (x *xrgrpc) DeleteConfig(json string) error {
 func main() {
 	// Add gRPC overall timeout to the config options array.
 	// Hardcoded at 10 seconds. Don't do this at home.
-	ctx, _ := context.WithTimeout(context.Background(), time.Second*time.Duration(10))
+	ctx, _ := context.WithTimeout(
+		context.Background(),
+		time.Second*time.Duration(10),
+	)
 
 	////////////////////////////////
 	// Target device access details
@@ -223,7 +232,12 @@ func main() {
 	err = iosxr.ReplaceConfig(payload)
 	check(err)
 
-	fmt.Printf("\n%sBGP%s config applied on %s\n\n", blue, white, iosxr.conn.Target())
+	fmt.Printf(
+		"\n%sBGP%s config applied on %s\n\n",
+		blue,
+		white,
+		iosxr.conn.Target(),
+	)
 
 	////////////////////////////////
 	// Stream Telemetry from device
@@ -252,7 +266,12 @@ func main() {
 	// Decode Telemetry Protobuf message
 	////////////////////////////////////
 	// Telemetry payload is a json string
-	fmt.Printf("\n%sStreaming telemetry%s from %s\n", yellow, white, iosxr.conn.Target())
+	fmt.Printf(
+		"\n%sStreaming telemetry%s from %s\n",
+		yellow,
+		white,
+		iosxr.conn.Target(),
+	)
 
 	for msg := range ch {
 		message := new(telemetry.Telemetry)
@@ -260,7 +279,11 @@ func main() {
 		check(err)
 		fmt.Printf("\n%s\n", strings.Repeat("-", 4))
 		t := time.UnixMilli(int64(message.GetMsgTimestamp()))
-		fmt.Printf("Time: %v\nPath: %v\n\n", t.Format(time.ANSIC), message.GetEncodingPath())
+		fmt.Printf(
+			"Time: %v\nPath: %v\n\n",
+			t.Format(time.ANSIC),
+			message.GetEncodingPath(),
+		)
 
 		b, err := json.Marshal(message.GetDataGpbkv())
 		check(err)
@@ -268,10 +291,16 @@ func main() {
 		j := string(b)
 
 		// https://go.dev/play/p/uyWenG-1Keu
-		data := gjson.Get(j, "0.fields.0.fields.#(name==neighbor-address).ValueByType.StringValue")
+		data := gjson.Get(
+			j,
+			"0.fields.0.fields.#(name==neighbor-address).ValueByType.StringValue",
+		)
 		fmt.Println("  Neighbor: ", data)
 
-		data = gjson.Get(j, "0.fields.1.fields.#(name==connection-state).ValueByType.StringValue")
+		data = gjson.Get(
+			j,
+			"0.fields.1.fields.#(name==connection-state).ValueByType.StringValue",
+		)
 		fmt.Println("  Connection state: ", data)
 	}
 }
