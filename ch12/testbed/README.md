@@ -1,107 +1,80 @@
 # Setting Up a Testing Environment
 
-You can run the Go code snippets in the first part of this book in the [Go Playground][] or on your personal computer if you have already installed Go. Some code examples in chapters six and later interact with other systems—such as virtual network devices—which we run as containers with Docker. Now, instead of asking you to install Docker on your computer to run these examples, we think is more practical for you to recreate the Linux environment we actually use to write and test the code examples of these chapters. This testing environment comes with Docker and all other software dependencies installed, so you can run the examples without a hitch. We want to make sure you have a pleasant experience running the examples.
+You can run the Go code example of the first part of the book in the [Go Playground][] or on your personal computer if you have already installed Go. Code examples in chapters six and later interact with a virtual network topology---which we run in containers with Containerlab. 
 
 ## What Is a Testing Environment?
 
 A test environment is the hardware and software that meets the minimum requirements to execute test cases.
 
-For the hardware, we rely on a cloud provider to have a common denominator. In this case, we leverage Amazon Web Services (AWS) to provision a virtual machine (VM), where we can install all the software we need to run the code examples of the book. We call this virtual machine an EC2 instance, or just an instance (we use these terms interchangeably). By default, the instance type we run in AWS is a `t2.micro`, which you can run for free as part of the [AWS Free Tier][], but we recommend you run at least a `t2.medium`, ideally a `t2.large` size instance that has more CPU and memory, to support all the virtual network devices we need to run.
+For the hardware, we rely on a cloud provider to have a common denominator. In this case, we leverage Amazon Web Services (AWS) to provision a virtual machine (VM), where we can install all the software we need to run the code examples of the book. We call this virtual machine an EC2 instance, or just an instance (we use these terms interchangeably). By default, the instance type we run in AWS is a `t2.micro`, which you can run for free as part of the [AWS Free Tier][], but we recommend you run at least a `t2.medium`, ideally a `t2.large` size instance that has more CPU and memory, to support all the virtual network devices in the lab topology.
 
-An Ansible playbook describes and automates all the tasks required to create this VM in AWS, as well as the tasks that prescribe the software—such as Docker—that needs to be present in the VM and it defines how to configure the software as well. You can find this playbook in the [book's GitHub repository]. Another playbook is also available to delete the resources you create when you no longer need them.
+An Ansible playbook describes and automates all the tasks required to create this VM in AWS, as well as the tasks that prescribe the software---such as Containerlab---that needs to be present in the VM. It also defines how to configure the software. You can find this playbook in the [book's GitHub repository]. Another playbook is also available to delete the resources you create when you no longer need them.
 
 The playbooks in the book are:
 - [create-EC2-testbed.yml](create-EC2-testbed.yml):  Creates the testbed. It takes around 10 minutes to run.
 - [delete-EC2-testbed.yml](delete-EC2-testbed.yml): Deletes the resources you create when you no longer need them.
 
-If you have Docker installed, you can trigger the AWS test setup from a container with `make env-build`, without having to install the dependencies we cover next.
+If you have Docker installed in your computer, you can build the AWS test setup with the command `make build-env`.
 
-## What You Need Create a Testing Environment
+## What You Need to Create a Testing Environment
 
 Before you run the playbook in your computer to create a Linux testing environment in AWS, you need to make sure you meet the following requirements:
 
 1. An AWS account. [AWS Free Tier] is fine.
 2. A computer with: 
-    * Git --- if you don't have installed already, check out their [Getting Started - Installing Git][] guide. Example: `sudo apt install git-all` (Ubuntu)
-    * Python3 --- they provide installation instructions in the [Beginners Guide: Downloading Python][]. Example: `sudo apt install python3.8` (Ubuntu)
-    * pip --- if your Python environment does not have pip installed, they offer instruction at [Installing pip - Supported Methods][]. Example: `python3 -m pip install --upgrade pip`
-    * Ansible 2.9 --- you can install Ansible with pip as they describe it in [Installing Ansible with pip][]. Example: `python3 -m pip install --user ansible==2.9.26` 
+    * Git
+    * Docker
+    * Make
 
 With all this in place, you can go ahead and clone the [book's GitHub repository][] with the `git clone` command.
 
 ```bash
-$ git clone https://github.com/PacktPublishing/Network-Automation-with-Go && cd Network-Automation-with-Go/ch012/testbed
-```
-
-Now we are one step closer to execute the playbook to create the test environment and run the code examples.
-
-## Getting Ready to Run the Playbook
-
-Ansible executes some tasks of the playbook, for example to communication with AWS, with content or code that the authors of that content distribute in the form of an Ansible Collection. To install it, you need to execute this command from the repository folder:
-
-```bash
-ch012/testbed$ ansible-galaxy collection install -r collections/requirements.yml -p ./collections
-```
-
-Ansible Collections might depend on some Python libraries. To install these Python libraries, from the repository folder run `pip install` as in the next output: 
-
-```bash
-ch012/testbed$ pip install --user -r requirements.txt
-```
-
-You can verify `pip` installed the libraries correctly with the command `pip list`. See the following output for an example of what to expect.
-
-```bash
-ch012/testbed$ pip list | grep 'boto\|crypto'
-boto                              2.49.0
-boto3                             1.17.93
-botocore                          1.20.112
-cryptography                      3.4.7
+$ git clone https://github.com/PacktPublishing/Network-Automation-with-Go
 ```
 
 ## Creating the Testing Environment
 
-The testing environment is a single Linux instance in AWS running Docker and Containerlab to create container-based network topologies. The next figure illustrates what the environment looks like. 
+The testing environment is a single Linux instance in AWS running Containerlab to create container-based network topologies. The next figure illustrates what the environment looks like. 
 
 <p align="center">
   <img width=800 title="Target Environment" src="pictures/ch12-test_env.png"><br>
 </p>
 
-Before you run the playbook, you need to make your AWS account credentials (`AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`) available as environment variables with the `export` command. Check out [AWS Programmatic access][] to create an access key, and to save your secret access key.
+The first step is to make your AWS account credentials (`AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`) available as environment variables with the `export` command. Check out [AWS Programmatic access][] to create an access key, and to save your secret access key.
 
 ```bash
 export AWS_ACCESS_KEY_ID=’…’
 export AWS_SECRET_ACCESS_KEY=’…’
 ```
 
-The next step is to execute the playbook with the `ansible-playbook` command.
+Then, from the book repository directory, run the command `make env-build`.
 
 ```bash
-ch012/testbed$ ansible-playbook create-EC2-testbed.yml --extra-vars "instance_type=t2.large" -v 
+Network-Automation-with-Go$ make env-build
+AWS_ACCESS_KEY_ID is AKIAVFPUEFZCFVFGXXXX
+AWS_SECRET_ACCESS_KEY is **************************
+Using /etc/ansible/ansible.cfg as config file
 
-<snip>
+PLAY [Create EC2 instance] *************************************************************************************************************************************************************
 
-TASK [Print out SSH access details] **********************************************************************************
+TASK [Gathering Facts] *****************************************************************************************************************************************************************
+ok: [localhost]
+
+### ... <omitted for brevity > ... ###
+
+TASK [Print out instance information for the user] *************************************************************************************************************************************
 ok: [testbed] => {}
 
 MSG:
 
-SSH: ssh -i lab-state/id_rsa fedora@ec2-3-94-8-154.compute-1.amazonaws.com
-To upload cEOS image: scp -i lab-state/id_rsa ~/Downloads/cEOS64-lab-4.28.0F.tar fedora@ec2-3-94-8-154.compute-1.amazonaws.com:.
+['SSH: ssh -i lab-state/id_rsa fedora@ec2-54-86-51-96.compute-1.amazonaws.com\n', 'To upload cEOS image: scp -i lab-state/id_rsa ~/Downloads/cEOS64-lab-4.28.0F.tar fedora@ec2-54-86-51-96.compute-1.amazonaws.com:./network-automation-with-go\n']
 
-RUNNING HANDLER [configure_instance : Reboot machine] ****************************************************************
-changed: [testbed] => {
-    "changed": true,
-    "elapsed": 47,
-    "rebooted": true
-}
-
-PLAY RECAP **********************************************************************************************************************
-localhost                  : ok=26   changed=1    unreachable=0    failed=0    skipped=6    rescued=0    ignored=0   
-testbed                    : ok=30   changed=20   unreachable=0    failed=0    skipped=6    rescued=0    ignored=0      
+PLAY RECAP *****************************************************************************************************************************************************************************
+localhost                  : ok=28   changed=9    unreachable=0    failed=0    skipped=3    rescued=0    ignored=0   
+testbed                    : ok=36   changed=24   unreachable=0    failed=0    skipped=11   rescued=0    ignored=0  
 ```
 
-You can find the VM access details in the logs, as the preceding output shows. Look for something similar to: `ssh -i lab-state/id_rsa fedora@ec2-3-94-8-154.compute-1.amazonaws.com` or `ssh -i lab-state/id_rsa ubuntu@ec2-3-88-180-178.compute-1.amazonaws.com`.
+You can find the VM access details in the logs, as the preceding output shows. Look for something like: `ssh -i lab-state/id_rsa fedora@ec2-54-86-51-96.compute-1.amazonaws.com` or `ssh -i lab-state/id_rsa ubuntu@ec2-54-86-51-96.compute-1.amazonaws.com` depending on the target Linux distribution.
 
 ## Virtual Machine Options
 
@@ -123,10 +96,11 @@ m5.2xlarge | $0.384 | 8 | 32 GiB
 r5.2xlarge | $0.504 | 8 | 64 GiB
 c5.metal | $4.08 | 96 | 192 GiB
 
-To run the testing environment on a `m5.large` instance, you need to pass the variable `instance_type` to the playbook with the value `m5.large`, like in the command example below.
+To run the testing environment on a `m5.large` instance, you need to export the environment variables `VM_SIZE` with the value `m5.large`, like in the next output.
 
 ```bash
-ansible-playbook create-EC2-testbed.yml -v --extra-vars "instance_type=m5.large"
+$ export VM_SIZE=m5.large
+$ make env-build
 ```
 
 ### AWS Region
@@ -146,44 +120,33 @@ ap-northeast-1| Asia Pacific (Tokyo)
 ap-southeast-2| Asia Pacific (Sydney)
 ap-south-1| Asia Pacific (Mumbai)
 
-To run the testing environment in London, you need to pass the variable `aws_region` to the playbook with the value `eu-west-2`, like in the command example below.
+To run the testing environment in London, you need to export the environment variables `AWS_REGION` with the value `eu-west-2`, like in the next output
 
 ```bash
-ansible-playbook create-EC2-testbed.yml -v --extra-vars "aws_region=eu-west-2"
+$ export AWS_REGION=eu-west-2
+$ make env-build
 ```
 
 ### Linux Distribution
 
-If you have a preference between Fedora vs Debian based Linux distributions, you have the option to run the testing environment on either Fedora (34) or Ubuntu (20.04). Pass the the variable `aws_distro` to the playbook to select one or the other. The default option is `fedora`.
+If you have a preference between Fedora vs Debian based Linux distributions, you have the option to run the testing environment on either Fedora (35) or Ubuntu (22.04). Export the environment variables `AWS_DISTRO` to select one or the other. The default option is `fedora`.
 
-To run an `ubuntu` machine instead, you need to pass the variable `aws_distro` with value `ubuntu` to the `ansible playbook` command. The next example shows how you can create a `t2.medium` instance running `ubuntu` in Ohio.
+The next example shows how you can create a `t2.medium` instance running `ubuntu` in Ohio.
 
 ```bash
-$ ansible-playbook create-EC2-testbed.yml -v --extra-vars "aws_distro=ubuntu instance_type=t2.medium aws_region=us-east-2"
-
-<skip>
-
-TASK [Print out SSH access details] *********************************************************************************************************************************************************
-ok: [testbed] => {}
-
-MSG:
-
-SSH: ssh -i lab-state/id_rsa ubuntu@ec2-3-142-51-83.us-east-2.compute.amazonaws.com
-To upload cEOS image: scp -i lab-state/id_rsa ~/Downloads/cEOS64-lab-4.28.0F.tar ubuntu@ec2-3-142-51-83.us-east-2.compute:.
-
-PLAY RECAP **********************************************************************************************************************
-localhost                  : ok=26   changed=1    unreachable=0    failed=0    skipped=6    rescued=0    ignored=0   
-testbed                    : ok=30   changed=20   unreachable=0    failed=0    skipped=6    rescued=0    ignored=0
+$ export AWS_DISTRO=ubuntu
+$ export VM_SIZE=t2.medium
+$ export AWS_REGION=us-east-2
+$ make env-build
 ```
-
 
 ## Connecting to the Test VM
 
-After you create the instance, you can connect to it using the info provided in the logs. The playbook generates an SSH private key (`my_key`), which we use to authenticate to the test VM. Connect to the VM and verify that Go is present in the system with the `go version` command. 
+After you create the instance, you can connect to it using the info provided in the logs. The playbook generates an SSH private key (`lab-state/id_rsa`), which we use to authenticate to the test VM. Connect to the VM and verify that Go is present in the system with the `go version` command. 
 
 ```bash
 fedora@testbed ~ ⇨  go version
-go version go1.18beta2 linux/amd64
+go version go1.18.1 linux/amd64
 ```
 
 ## Uploading Container Images to the Test VM
@@ -193,22 +156,17 @@ Some networking vendors make it simpler than others to access their container-ba
 Let's pretend you downloaded a cEOS image (`cEOS64-lab-4.28.0F.tar`) to your Downloads folder. You can copy the image to the test VM with the `scp` command using the generated SSH private key. See an example next or check [Get Arista cEOS](get_arista_ceos.md)
 
 ```bash
-$ scp -i lab-state/id_rsa ~/Downloads/cEOS64-lab-4.28.0F.tar fedora@ec2-3-94-8-154.compute-1.amazonaws.com:./network-automation-with-go
-cEOS64-lab-4.28.0F.tar                                                                 100%  434MB  18.9MB/s   00:23
-```
-
-or
-
-```bash
-$ scp -i lab-state/id_rsa ~/Downloads/cEOS64-lab-4.28.0F.tar ubuntu@ec2-34-229-72-1.compute-1.amazonaws.com:./network-automation-with-go
-cEOS64-lab-4.28.0F.tar                                                                 100%  434MB  18.9MB/s   00:23
+Network-Automation-with-Go$ scp -i lab-state/id_rsa ~/Downloads/cEOS64-lab-4.28.0F.tar fedora@ec2-54-86-51-96.compute-1.amazonaws.com:./network-automation-with-go
+cEOS64-lab-4.28.0F.tar                        100%  434MB  26.6MB/s   00:16
 ```
 
 Then, SSH to the instance and import the image with the `docker` command.
 
 ```bash
+Network-Automation-with-Go$ ssh -i lab-state/id_rsa fedora@ec2-54-86-51-96.compute-1.amazonaws.com
 fedora@testbed ~ ⇨  cd network-automation-with-go && make clone
-sha256:0844fc4f33d662d472b44324491c7d1cdcfca5db6f83194fbac603ff12661b3a
+docker import cEOS64-lab-4.28.0F.tar ceos:4.28.0F
+sha256:dcdc721054804ed4ea92f970b5923d8501c28526ef175242cfab0d158ac0085c
 ```
 
 You can now reference this image (`ceos:4.28.0F`) in the `image` section of one or more routers in the topology file.
@@ -224,7 +182,7 @@ ceos>
 
 The Linux environment comes with [Containerlab] in it. We use this application to wire together different containerized NOS and create a virtual network topology we can interact with to run the book code examples. [Containerlab] offers a hassle-free and quick way to define and run network topologies. It also worth mentioning that Go is the programming language of choice for this tool.
 
-You can find the topology definition file in the `topo` folder of [book's GitHub repository].
+You can find the topology definition file in the `topo-base` folder of [book's GitHub repository].
 
 ```yaml
 name: netgo
@@ -253,41 +211,41 @@ This topology file defines a three node topology as the next figure shows. One n
   <img width=600 title="Network Topology" src="pictures/ch6-topo.png"><br>
 </p>
 
-...
 
 ## Launching a Virtual Network Topology
 
-To launch the virtual topology file, run the command `make` from the home folder to access the `network-automation-with-go/topo/` folder and run `clab deploy` with root privilege, as the next output shows.
+To launch the virtual topology file, run the command `make make lab-up` from the $HOME/network-automation-with-go in the VM, as the next output shows.
 
 ```bash
-ubuntu@testbed network-automation-with-go ⇨  make lab-up
-sudo containerlab deploy -t topo-base/topo.yml --reconfigure
+fedora@testbed network-automation-with-go$ make lab-up
 INFO[0000] Containerlab v0.25.1 started                 
 INFO[0000] Parsing & checking topology file: topo.yml   
-INFO[0000] Removing /home/ubuntu/network-automation-with-go/clab-netgo directory... 
+INFO[0000] Removing /home/fedora/network-automation-with-go/clab-netgo directory... 
 INFO[0000] Could not read docker config: open /root/.docker/config.json: no such file or directory 
 INFO[0000] Pulling docker.io/networkop/cx:5.0.0 Docker image 
-INFO[0019] Done pulling docker.io/networkop/cx:5.0.0    
-INFO[0019] Could not read docker config: open /root/.docker/config.json: no such file or directory 
-INFO[0019] Pulling ghcr.io/nokia/srlinux:21.6.4 Docker image 
+INFO[0021] Done pulling docker.io/networkop/cx:5.0.0    
+INFO[0021] Could not read docker config: open /root/.docker/config.json: no such file or directory 
+INFO[0021] Pulling ghcr.io/nokia/srlinux:21.6.4 Docker image 
 INFO[0039] Done pulling ghcr.io/nokia/srlinux:21.6.4    
 WARN[0039] it appears that container host has low memory available: ~0Gi. This might lead to runtime errors. Consider freeing up more memory. 
-INFO[0039] Creating lab directory: /home/ubuntu/network-automation-with-go/clab-netgo 
-INFO[0039] Creating docker network: Name="clab", IPv4Subnet="172.20.20.0/24", IPv6Subnet="2001:172:20:20::/64", MTU="1500" 
+INFO[0039] Creating lab directory: /home/fedora/network-automation-with-go/clab-netgo 
+INFO[0040] Creating docker network: Name="clab", IPv4Subnet="172.20.20.0/24", IPv6Subnet="2001:172:20:20::/64", MTU="1500" 
 INFO[0040] Creating container: "ceos"                   
 INFO[0040] Creating container: "cvx"                    
-INFO[0040] Creating container: "srl"                    
-INFO[0049] Creating virtual wire: srl:e1-1 <--> ceos:eth1 
-INFO[0050] Creating virtual wire: cvx:swp1 <--> ceos:eth2 
-INFO[0050] Running postdeploy actions for Nokia SR Linux 'srl' node 
-INFO[0050] Running postdeploy actions for Arista cEOS 'ceos' node 
+INFO[0041] Creating container: "srl"                    
+INFO[0043] Creating virtual wire: cvx:swp1 <--> ceos:eth2 
+INFO[0046] Creating virtual wire: srl:e1-1 <--> ceos:eth1 
+INFO[0046] Running postdeploy actions for Arista cEOS 'ceos' node 
+INFO[0046] Running postdeploy actions for Nokia SR Linux 'srl' node 
 INFO[0107] Adding containerlab host entries to /etc/hosts file 
+INFO[0107] 🎉 New containerlab version 0.26.2 is available! Release notes: https://containerlab.dev/rn/0.26/#0262
+Run 'containerlab version upgrade' to upgrade or go check other installation options at https://containerlab.dev/install/ 
 +---+-----------------+--------------+------------------------------+------+---------+----------------+----------------------+
 | # |      Name       | Container ID |            Image             | Kind |  State  |  IPv4 Address  |     IPv6 Address     |
 +---+-----------------+--------------+------------------------------+------+---------+----------------+----------------------+
-| 1 | clab-netgo-ceos | d6c84094b197 | ceos:4.28.0F                 | ceos | running | 172.20.20.4/24 | 2001:172:20:20::4/64 |
-| 2 | clab-netgo-cvx  | cdc31601e823 | networkop/cx:5.0.0           | cvx  | running | 172.20.20.3/24 | 2001:172:20:20::3/64 |
-| 3 | clab-netgo-srl  | 7061500a1531 | ghcr.io/nokia/srlinux:21.6.4 | srl  | running | 172.20.20.2/24 | 2001:172:20:20::2/64 |
+| 1 | clab-netgo-ceos | 53274759376c | ceos:4.28.0F                 | ceos | running | 172.20.20.3/24 | 2001:172:20:20::3/64 |
+| 2 | clab-netgo-cvx  | 404c58026c11 | networkop/cx:5.0.0           | cvx  | running | 172.20.20.2/24 | 2001:172:20:20::2/64 |
+| 3 | clab-netgo-srl  | 16a5cf8add7a | ghcr.io/nokia/srlinux:21.6.4 | srl  | running | 172.20.20.4/24 | 2001:172:20:20::4/64 |
 +---+-----------------+--------------+------------------------------+------+---------+----------------+----------------------+
 ```
 
@@ -335,43 +293,46 @@ ceos#
 
 ### Destroying the Network Topology
 
-You can destroy the network topology using the `clab destroy` command.
+You can destroy the network topology using the `make lab-down` command.
 
 ```bash
-$  sudo clab destroy --topo topo-base/topo.yml
+fedora@testbed network-automation-with-go$ make lab-down
 ```
 
 ## Delete All Resources
 
 As important or even more important that automating the VM setup process, is automating how you delete all cloud resources afterwards, so you don't pay for something you might no longer need. 
 
-You can do this by running the delete playbook with the `ansible-playbook` command. You need to provide the AWS region in case you didn't use the default value.
-
 ```bash
-ansible-playbook delete-EC2-testbed.yml -v --extra-vars "aws_region=us-east-2"
+Network-Automation-with-Go$ make env-delete
+AWS_ACCESS_KEY_ID is AKIAVFPUEFZCFVFGXXXX
+AWS_SECRET_ACCESS_KEY is **************************
+[WARNING]: No inventory was parsed, only implicit localhost is available
+[WARNING]: provided hosts list is empty, only localhost is available. Note that the implicit localhost does not match 'all'
 
-<snip>
+PLAY [Delete EC2 instance] *************************************************************************************************************************************************************
 
-TASK [aws_delete_resources : Delete SSH Key Pair for instance] ********************************************************************************************
-changed: [localhost] => {
-    "changed": true,
-    "key": null
-}
+TASK [Gathering Facts] *****************************************************************************************************************************************************************
+ok: [localhost]
 
-MSG:
+### ... <omitted for brevity > ... ###
 
-key deleted
+TASK [aws_delete_resources : Delete SSH Key Pair for instance] *************************************************************************************************************************
+changed: [localhost]
 
-PLAY RECAP ************************************************************************************************************************************************
-localhost                  : ok=19   changed=7    unreachable=0    failed=0    skipped=2    rescued=0    ignored=0   
+TASK [Cleanup state files] *************************************************************************************************************************************************************
+changed: [localhost] => (item=.region)
+changed: [localhost] => (item=.vm)
+
+PLAY RECAP *****************************************************************************************************************************************************************************
+localhost                  : ok=21   changed=8    unreachable=0    failed=0    skipped=3    rescued=0    ignored=0   
 ```
 
 ## Other Testing Options
 
 Not every networking offers public access to the container images of their network operating systems. We aim to make the examples as useful to you as possible. For this reason, we also take advantage of a couple of additional resources to get access to networking operating systems you might run in your organization.
 
-- [DevNet Sandbox]: DevNet offers **free** access to always-on devices that we can target in some examples. They have Cisco Nexus, IOS XR and IOS shared devices. Keep in mind their hostname/fqdn, and credentials might change in the future. You can also [reserve a DevNet Sandbox].
-- [NRE Labs]: NRE Labs is an open source educational project sponsored by Juniper. It provides free access to lab scenarios with JunOS devices.
+The [DevNet Sandbox] is a **free** option to access always-on devices that we target in some examples in the book. They have Cisco Nexus, IOS XR and IOS shared devices. Keep in mind their hostname/fqdn, and credentials might change in the future. You can also [reserve a DevNet Sandbox].
 
 Other great resources to run virtual network topologies are [GNS3], [EVE-NG], [netsim-tools], and [Vagrant]. You need to have a contract with a networking vendor company to get access to their virtual images to run on any of these though.
 
@@ -389,7 +350,6 @@ Last, but not least, [Cisco Modeling Labs] offer access to Cisco virtual images 
 [Vagrant]: https://www.vagrantup.com/
 [Add cEOS]: https://github.com/nleiva/aws-testbed/blob/main/lab/get_arista_ceos.md#add-image-to-your-local-image-repository
 [Arista cEOS in Containerlab]: https://containerlab.dev/manual/kinds/ceos/#arista-ceos
-[NRE Labs]: https://nrelabs.io/
 [DevNet Sandbox]: https://developer.cisco.com/site/sandbox/
 [reserve a DevNet Sandbox]: https://developer.cisco.com/docs/sandbox/#!first-reservation-guide/reservation-hello-world
 [EC2 Available Regions]: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html#concepts-available-regions
