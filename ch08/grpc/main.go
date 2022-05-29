@@ -79,7 +79,7 @@ func check(err error) {
 	}
 }
 
-func (r IOSXR) Connect() (xr xrgrpc, err error) {
+func (x *xrgrpc) Connect() (err error) {
 	// Hardcoded. Don't do at home.
 	port := ":57777"
 
@@ -91,27 +91,23 @@ func (r IOSXR) Connect() (xr xrgrpc, err error) {
 	var opts []grpc.DialOption
 	opts = append(opts, grpc.WithTransportCredentials(creds))
 
-	// Add gRPC overall timeout to the config options array.
-	// Hardcoded at 10 seconds. Don't do at home.
-	ctx, _ := context.WithTimeout(context.Background(), time.Second*time.Duration(10))
-
 	// Add user/password to config options array.
 	opts = append(opts, grpc.WithPerRPCCredentials(&loginCreds{
-		Username:   r.Username,
-		Password:   r.Password,
+		Username:   x.Username,
+		Password:   x.Password,
 		requireTLS: true}))
 
-	conn, err := grpc.DialContext(ctx, r.Hostname+port, opts...)
+	conn, err := grpc.DialContext(x.ctx, x.Hostname+port, opts...)
 	if err != nil {
-		return xr, fmt.Errorf("could not build a router: %w", err)
+		return fmt.Errorf("could not build a router: %w", err)
 	}
-	xr.conn = conn
-	xr.ctx = ctx
+	x.conn = conn
 
-	return xr, nil
+	return nil
 }
 
 type xrgrpc struct {
+	IOSXR
 	conn *grpc.ClientConn
 	ctx  context.Context
 }
@@ -161,15 +157,22 @@ func (x *xrgrpc) DeleteConfig(json string) error {
 }
 
 func main() {
+	// Add gRPC overall timeout to the config options array.
+	// Hardcoded at 10 seconds. Don't do this at home.
+	ctx, _ := context.WithTimeout(context.Background(), time.Second*time.Duration(10))
+
 	////////////////////////////////
 	// Target device access details
 	///////////////////////////////
-	iosxr := IOSXR{
-		Hostname: "sandbox-iosxr-1.cisco.com",
-		Authentication: Authentication{
-			Username: "admin",
-			Password: "C1sco12345",
+	iosxr := xrgrpc{
+		IOSXR: IOSXR{
+			Hostname: "sandbox-iosxr-1.cisco.com",
+			Authentication: Authentication{
+				Username: "admin",
+				Password: "C1sco12345",
+			},
 		},
+		ctx: ctx,
 	}
 
 	/////////////////////////////
@@ -205,30 +208,31 @@ func main() {
 	///////////////////////////////////////////////////
 	// Connect to target device (DevNet IOS XR device)
 	//////////////////////////////////////////////////
-	router, err := iosxr.Connect()
+	iosxr.Connect()
+
 	check(err)
-	defer router.conn.Close()
+	defer iosxr.conn.Close()
 
 	/////////////////////
 	// Replace BGP config
 	/////////////////////
 	// It fails if the device is already configured on a different ASN.
 	// Hence, we delete any existing BGP config first
-	router.DeleteConfig(xrBGPConf)
+	iosxr.DeleteConfig(xrBGPConf)
 
-	err = router.ReplaceConfig(payload)
+	err = iosxr.ReplaceConfig(payload)
 	check(err)
 
-	fmt.Printf("\n%sBGP%s config applied on %s\n\n", blue, white, router.conn.Target())
+	fmt.Printf("\n%sBGP%s config applied on %s\n\n", blue, white, iosxr.conn.Target())
 
 	////////////////////////////////
 	// Stream Telemetry from device
 	///////////////////////////////
-	ctx, cancel := context.WithCancel(router.ctx)
+	ctx, cancel := context.WithCancel(iosxr.ctx)
 	defer cancel()
-	router.ctx = ctx
+	iosxr.ctx = ctx
 
-	ch, errCh, err := router.GetSubscription("BGP", "gpbkv")
+	ch, errCh, err := iosxr.GetSubscription("BGP", "gpbkv")
 	check(err)
 
 	////////////////////////////////////////////
@@ -242,13 +246,13 @@ func main() {
 		signal.Stop(sigCh)
 		cancel()
 	}()
-	go router.SessionCancel(errCh, sigCh, cancel)
+	go iosxr.SessionCancel(errCh, sigCh, cancel)
 
 	/////////////////////////////////////
 	// Decode Telemetry Protobuf message
 	////////////////////////////////////
 	// Telemetry payload is a json string
-	fmt.Printf("\n%sStreaming telemetry%s from %s\n", yellow, white, router.conn.Target())
+	fmt.Printf("\n%sStreaming telemetry%s from %s\n", yellow, white, iosxr.conn.Target())
 
 	for msg := range ch {
 		message := new(telemetry.Telemetry)
