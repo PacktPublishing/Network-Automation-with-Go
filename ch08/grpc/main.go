@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"math/rand"
 	"os"
@@ -12,6 +13,7 @@ import (
 	"time"
 
 	"grpc/pkg/oc"
+	"grpc/proto/bgp"
 	xr "grpc/proto/ems"
 	"grpc/proto/telemetry"
 
@@ -171,6 +173,9 @@ func (x *xrgrpc) DeleteConfig(json string) error {
 }
 
 func main() {
+	// flag to enable self-describing subscription messages
+	var kvMode = flag.Bool("kvmode", false, "self-describing kv subscription mode")
+	flag.Parse()
 
 	////////////////////////////////
 	// Target device access details
@@ -251,7 +256,12 @@ func main() {
 	defer cancel()
 	iosxr.ctx = ctx
 
-	ch, errCh, err := iosxr.GetSubscription("BGP", "gpbkv")
+	subMode := "gpb"
+	if *kvMode {
+		fmt.Println("self-describing kv subscription mode")
+		subMode = "gpbkv"
+	}
+	ch, errCh, err := iosxr.GetSubscription("BGP", subMode)
 	check(err)
 
 	////////////////////////////////////////////
@@ -290,22 +300,39 @@ func main() {
 			message.GetEncodingPath(),
 		)
 
-		b, err := json.Marshal(message.GetDataGpbkv())
-		check(err)
+		if *kvMode {
+			b, err := json.Marshal(message.GetDataGpbkv())
+			check(err)
 
-		j := string(b)
+			j := string(b)
 
-		// https://go.dev/play/p/uyWenG-1Keu
-		data := gjson.Get(
-			j,
-			"0.fields.0.fields.#(name==neighbor-address).ValueByType.StringValue",
-		)
-		fmt.Println("  Neighbor: ", data)
+			// https://go.dev/play/p/uyWenG-1Keu
+			data := gjson.Get(
+				j,
+				"0.fields.0.fields.#(name==neighbor-address).ValueByType.StringValue",
+			)
+			fmt.Println("  Neighbor: ", data)
 
-		data = gjson.Get(
-			j,
-			"0.fields.1.fields.#(name==connection-state).ValueByType.StringValue",
-		)
-		fmt.Println("  Connection state: ", data)
+			data = gjson.Get(
+				j,
+				"0.fields.1.fields.#(name==connection-state).ValueByType.StringValue",
+			)
+			fmt.Println("  Connection state: ", data)
+		}
+
+		for _, row := range message.GetDataGpb().GetRow() {
+			content := row.GetContent()
+			nbr := new(bgp.BgpNbrBag)
+			err = proto.Unmarshal(content, nbr)
+			if err != nil {
+				fmt.Printf("could decode Content: %v\n", err)
+				return
+			}
+			state := nbr.GetConnectionState()
+			addr := nbr.GetConnectionRemoteAddress().Ipv4Address
+
+			fmt.Println("  Neighbor: ", addr)
+			fmt.Println("  Connection state: ", state)
+		}
 	}
 }
