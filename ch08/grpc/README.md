@@ -86,9 +86,6 @@ gRPC session timed out after 10 seconds: context deadline exceeded
 
 - [http://ops.openconfig.net](http://ops.openconfig.net/branches/models/telemetry-version/)
 
-## IOS XR output examples
-
-You can find some of the helpful IOS XR show commands and outputs in the `xr-output-examples` directory. 
 
 ## Protobuf files
 
