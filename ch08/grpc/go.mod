@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/openconfig/goyang v1.0.0
-	github.com/openconfig/ygot v0.20.0
+	github.com/openconfig/ygot v0.22.1
 	github.com/tidwall/gjson v1.14.1
 	google.golang.org/grpc v1.46.0
 	google.golang.org/protobuf v1.28.0

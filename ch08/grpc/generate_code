@@ -1,8 +1,5 @@
-go get github.com/openconfig/ygot/generator
-go install github.com/openconfig/ygot/generator
-
 mkdir -p pkg/oc
-generator -path=yang \
+go run github.com/openconfig/ygot/generator -path=yang \
   -generate_fakeroot \
   -fakeroot_name=device \
   -output_file=pkg/oc/oc.go \
