@@ -50,6 +50,8 @@ We use a slightly modified version of the `openconfig-telemetry` model. For deta
 
 ## Running the example
 
+By default the example runs in the `gpb` subscription mode. To run in the self-describing kv mode add the `-kvmode=true` flag.
+
 ```bash
 $ go run grpc
 
