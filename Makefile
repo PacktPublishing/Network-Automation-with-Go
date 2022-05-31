@@ -1,7 +1,8 @@
-DEFAULT: lab
+DEFAULT: help
 
 include .github/targets.mk
 include topo-base/targets.mk
+include topo-full/targets.mk
 include ch07/targets.mk
 include ch10/targets.mk
 include ch12/targets.mk
@@ -19,7 +20,7 @@ CWD=$(shell pwd)
 SHELL=/bin/bash
 
 ## Cleanup the lab environment
-cleanup: 10-down lab-down
+cleanup: base-down full-down
 
 ## Clone Arista's cEOS image after uploading it
 clone:

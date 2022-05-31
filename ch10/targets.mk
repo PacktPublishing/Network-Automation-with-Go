@@ -1,11 +1,3 @@
-## Chapter 10 lab
-10-up:
-	cd topo-full; sudo containerlab deploy -t ./topo.yml --reconfigure
-
-## Chapter 10 cleanup
-10-down:
-	cd topo-full; sudo containerlab destroy -t ./topo.yml --cleanup	
-
 bgp-ping-build:
 	cd ch10/bgp-ping; go build -o bgp-ping main.go
 

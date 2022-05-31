@@ -48,7 +48,8 @@ topology:
   links:
     - endpoints: ["srl:e1-1", "ceos:eth1"]
     - endpoints: ["cvx:swp1", "ceos:eth2"]
+    - endpoints: ["cvx:swp2", "ceos:eth3"]
     # host links
     - endpoints: ["srl:e1-2", "host-1:eth1"]
-    - endpoints: ["ceos:eth3", "host-2:eth1"]
-    - endpoints: ["cvx:swp2", "host-3:eth1"]
+    - endpoints: ["ceos:eth4", "host-2:eth1"]
+    - endpoints: ["cvx:swp3", "host-3:eth1"]

@@ -11,6 +11,14 @@
             192.0.2.3/31: {}
         type: swp
       swp2:
+        link:
+          state:
+            down: {}
+        ip:
+          address:
+            192.0.2.5/31: {}
+        type: swp
+      swp3:
         ip:
           address:
             203.0.113.129/25: {}
@@ -33,6 +41,10 @@
             enable: on
             neighbor:
               192.0.2.2:
+                remote-as: 65001
+                type: numbered
+            neighbor:
+              192.0.2.4:
                 remote-as: 65001
                 type: numbered
               203.0.113.254:

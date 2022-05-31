@@ -1,7 +1,7 @@
 ## Base topology lab
-lab-up:
+lab-base:
 	sudo containerlab deploy -t topo-base/topo.yml --reconfigure
 
 ## Base topology cleanup
-lab-down:
+base-down:
 	sudo containerlab destroy -t topo-base/topo.yml --cleanup	
