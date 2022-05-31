@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
 	"math/rand"
 	"os"
 	"os/signal"
@@ -147,20 +148,50 @@ func (x *xrgrpc) ReplaceConfig(json string) error {
 	return nil
 }
 
-func (x *xrgrpc) DeleteConfig(json string) error {
+func (x *xrgrpc) checkConfig(json string) error {
 	rand.Seed(time.Now().UnixNano())
 	id := rand.Int63()
+	cfgEmpty := true
 
 	// 'g' is the gRPC stub.
 	g := xr.NewGRPCConfigOperClient(x.conn)
 
-	// 'a' is the object we send to the router via the stub.
-	a := xr.ConfigArgs{ReqId: id, Yangjson: json}
+	// 'cga' is the object we send to the router via the stub.
+	cga := xr.ConfigGetArgs{ReqId: id, Yangpathjson: json}
+
+	// 'st' is the streamed result that comes back from the target.
+	st, err := g.GetConfig(x.ctx, &cga)
+	if err != nil {
+		return fmt.Errorf("cannot get config from %s: %w", x.conn.Target(), err)
+	}
+	var cfg string
+	for {
+		// Loop through the responses in the stream until there is nothing left.
+		r, err := st.Recv()
+		if err == io.EOF {
+			break
+		}
+		if len(r.GetErrors()) != 0 {
+			return fmt.Errorf("get config error triggered by remote host for ReqId: %v; %s",
+				id, r.GetErrors())
+		}
+		if len(r.GetYangjson()) > 0 {
+			cfgEmpty = false
+			cfg += r.GetYangjson()
+		}
+	}
+	id++
+
+	if cfgEmpty {
+		return nil
+	}
+
+	ca := xr.ConfigArgs{ReqId: id, Yangjson: json}
 
 	// 'r' is the result that comes back from the target.
-	r, err := g.DeleteConfig(x.ctx, &a)
+	r, err := g.DeleteConfig(x.ctx, &ca)
 	if err != nil {
-		return fmt.Errorf("cannot delete the config: %w", err)
+		return fmt.Errorf("cannot delete the config from %s: %w", x.conn.Target(), err)
 	}
 	if len(r.GetErrors()) != 0 {
 		return fmt.Errorf(
@@ -234,7 +265,7 @@ func main() {
 	/////////////////////
 	// It fails if the device is already configured on a different ASN.
 	// Hence, we delete any existing BGP config first
-	if err := iosxr.DeleteConfig(xrBGPConf); err != nil {
+	if err := iosxr.checkConfig(xrBGPConf); err != nil {
 		check(err)
 	}
 
