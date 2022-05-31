@@ -4,6 +4,7 @@ include .github/targets.mk
 include topo-base/targets.mk
 include topo-full/targets.mk
 include ch07/targets.mk
+include ch09/targets.mk
 include ch10/targets.mk
 include ch12/targets.mk
 

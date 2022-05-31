@@ -43,7 +43,6 @@
               192.0.2.2:
                 remote-as: 65001
                 type: numbered
-            neighbor:
               192.0.2.4:
                 remote-as: 65001
                 type: numbered
