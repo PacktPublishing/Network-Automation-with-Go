@@ -94,14 +94,6 @@ func (x *xrgrpc) Connect() (err error) {
 	var opts []grpc.DialOption
 	opts = append(opts, grpc.WithTransportCredentials(creds))
 
-	// Add gRPC overall timeout to the config options array.
-	// Hardcoded at 10 seconds. Don't do this at home.
-	ctx, _ := context.WithTimeout(
-		context.Background(),
-		time.Second*time.Duration(10),
-	)
-	x.ctx = ctx
-
 	// Add user/password to config options array.
 	opts = append(opts, grpc.WithPerRPCCredentials(&loginCreds{
 		Username:   x.Username,
@@ -220,6 +212,20 @@ func main() {
 			},
 		},
 	}
+
+	// Add gRPC overall timeout to the config options array.
+	// The program will terminate in 10 seconds
+	ctx, _ := context.WithTimeout(
+		context.Background(),
+		time.Second*time.Duration(10),
+	)
+	iosxr.ctx = ctx
+	fmt.Printf(
+		"\nThis program will run for %s%d%s seconds\n\n",
+		blue,
+		10,
+		white,
+	)
 
 	/////////////////////////////
 	// Read device config inputs
