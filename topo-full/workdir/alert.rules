@@ -1,6 +1,7 @@
 groups:
 - name: thebook
-  rules:
+  interval: 10s
+  rules: 
   - alert: HighLinkUtilization
     expr: rate(interfaces_interface_state_counters_in_pkts[30s]) > 50
     for: 0m

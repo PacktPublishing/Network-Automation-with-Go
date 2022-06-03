@@ -1,11 +1,8 @@
-global:
-  resolve_timeout: 20s
 route:
   receiver: 'event-manager'
-  group_wait: 30s
-  group_interval: 1m
-  
-
+  group_wait: 5s
+  group_interval: 20s
+ 
 receivers:
   - name: 'event-manager'
     webhook_configs:
