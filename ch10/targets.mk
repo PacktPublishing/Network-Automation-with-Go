@@ -19,7 +19,7 @@ traffic-start:
 	docker exec -d clab-netgo-host-1 ./ethr -c 203.0.113.251 -b 400K -d 60s -p udp -l 1KB
 
 top-talkers-start: traffic-start
-	@echo "run 'cd ch10/top-talkers; sudo ip netns exec clab-netgo-host-2 go run main.go; cd ../../'"
+	@echo "run 'cd ch10/top-talkers; sudo ip netns exec clab-netgo-host-2 ${GOBIN} run main.go; cd ../../'"
 	
 10-stop: bgp-ping-stop
 	sudo pkill -f bgp-ping

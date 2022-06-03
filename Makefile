@@ -8,6 +8,9 @@ include ch09/targets.mk
 include ch10/targets.mk
 include ch12/targets.mk
 
+GOBIN=$(shell which go)
+
+
 .DEFAULT_GOAL := help
 
 .EXPORT_ALL_VARIABLES:

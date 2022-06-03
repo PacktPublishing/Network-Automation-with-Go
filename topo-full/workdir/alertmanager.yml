@@ -1,0 +1,12 @@
+global:
+  resolve_timeout: 20s
+route:
+  receiver: 'event-manager'
+  group_wait: 30s
+  group_interval: 1m
+  
+
+receivers:
+  - name: 'event-manager'
+    webhook_configs:
+    - url: http://clab-netgo-cvx:10000/alert

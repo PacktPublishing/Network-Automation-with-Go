@@ -1,25 +1,17 @@
-username: admin
-password: admin
-insecure: true
-encoding: json_ietf
 log: true
+skip-verify: true
 
 targets:
-  # Add targets configuration here
-  # e.g:
-  # 192.168.1.131:57400:
-  #   username: gnmic
-  #   password: secret_password
-
+  203.0.113.129:9339:
+    username: cumulus
+    password: cumulus
 
 subscriptions:
-  # Add subscriptions configuration here
-  # e.g:
-  # sub1:
-  #   paths:
-  #     - /interface/statistics
-  #   stream-mode: sample
-  #   sample-interval: 1s
+  counters:
+    target: netq
+    paths:
+      - /interfaces
+    updates-only: true
 
 outputs:
   prom-output:

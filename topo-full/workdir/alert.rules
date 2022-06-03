@@ -1,0 +1,12 @@
+groups:
+- name: thebook
+  rules:
+  - alert: HighLinkUtilization
+    expr: rate(interfaces_interface_state_counters_in_pkts[30s]) > 50
+    for: 0m
+    labels:
+      severity: warning
+    annotations:
+      summary: Transit link {{ $labels.interface_name }} is under high load
+      description: "Transit link {{ $labels.interface_name }} is under high load LABELS = {{ $labels }}"
+      value: '{{ $value }}'
