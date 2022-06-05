@@ -41,5 +41,6 @@
   environment:
     GOPATH: "/home/{{ ansible_user }}/go"
     GOROOT: "{{ go_root }}"
+    PATH: "PATH=$PATH:{{ go_root }}/bin"
   with_items: "{{ go_packages }}"
   become: false

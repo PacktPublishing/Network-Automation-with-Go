@@ -57,6 +57,7 @@
         instance_region: "{{ ec2_region }}"
         instance_ssh: "{{ ssh_info }}"
         instance_scp: "{{ scp_info }}"
+        instance_grafana: "{{ grafana_info }}"
         groups:
           - my_instances
       with_items: "{{ ansible_node_facts.instances }}"
@@ -85,6 +86,8 @@
         msg:
           - "SSH: {{ hostvars[inventory_hostname]['instance_ssh'] }}"
           - "To upload cEOS image: {{ hostvars[inventory_hostname]['instance_scp'] }}"
+          - "To connect to Grafana (once deployed): {{ hostvars[inventory_hostname]['instance_grafana'] }}"
       when:
         - hostvars[inventory_hostname]['instance_ssh'] is defined
         - hostvars[inventory_hostname]['instance_scp'] is defined
+        - hostvars[inventory_hostname]['instance_grafana'] is defined

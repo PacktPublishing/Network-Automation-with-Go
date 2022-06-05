@@ -46,6 +46,7 @@
       - docker-ce
       - docker-ce-cli
       - containerd.io
+      - docker-compose
     state: present
 
 - name: Ensure group "docker" exists
