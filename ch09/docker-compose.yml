@@ -32,6 +32,20 @@ services:
       - '--config.file=/etc/alertmanager/config.yml'
       - '--storage.path=/alertmanager'
 
+  grafana:
+    image: grafana/grafana:8.3.3
+    container_name: grafana
+    volumes:
+      - ../topo-full/workdir/dashboards:/etc/grafana/provisioning/dashboards
+      - ../topo-full/workdir/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
+    environment:
+      - GF_SECURITY_ADMIN_USER=${ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+      
 networks:
   default:
     external: true

@@ -11,12 +11,15 @@ bgp-ping-start: bgp-ping-build
 	cd ch10/bgp-ping; docker-compose up -d; cd ../../
 	@echo 'http://localhost:3000'
 
+
+DURATION?=60s
+
 traffic-start:
 	docker exec -d clab-netgo-cvx systemctl restart hsflowd
 	docker exec -d clab-netgo-host-3 ./ethr -s
-	docker exec -d clab-netgo-host-1 ./ethr -c 203.0.113.253 -b 900K -d 60s -p udp -l 1KB
-	docker exec -d clab-netgo-host-1 ./ethr -c 203.0.113.252 -b 600K -d 60s -p udp -l 1KB
-	docker exec -d clab-netgo-host-1 ./ethr -c 203.0.113.251 -b 400K -d 60s -p udp -l 1KB
+	docker exec -d clab-netgo-host-1 ./ethr -c 203.0.113.253 -b 900K -d ${DURATION} -p udp -l 1KB
+	docker exec -d clab-netgo-host-1 ./ethr -c 203.0.113.252 -b 600K -d ${DURATION} -p udp -l 1KB
+	docker exec -d clab-netgo-host-1 ./ethr -c 203.0.113.251 -b 400K -d ${DURATION} -p udp -l 1KB
 
 top-talkers-start: traffic-start
 	@echo "run 'cd ch10/top-talkers; sudo ip netns exec clab-netgo-host-2 ${GOBIN} run main.go; cd ../../'"
