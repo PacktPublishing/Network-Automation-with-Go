@@ -14,6 +14,6 @@
 
 - name: Change home directory
   ansible.builtin.user:
-    name: ansible_user
+    name: "{{ ansible_user }}"
     home: "/home/{{ ansible_user }}/network-automation-with-go"
     
