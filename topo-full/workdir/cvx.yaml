@@ -1,4 +1,81 @@
 - set:
+    router:
+      bgp:
+        autonomous-system: 65002
+        enable: on
+        router-id: 198.51.100.2
+      policy:
+        prefix-list:
+          ADVERTISE:
+            rule:
+              '10':
+                action: deny
+                match:
+                  203.0.113.252/32: {}
+              '20':
+                action: deny
+                match:
+                  203.0.113.251/32: {}
+        route-map:
+          PREPENDMAP:
+            rule:
+              '10':
+                action:
+                  permit: {}
+                set:
+                  as-path-prepend:
+                    as: 65002
+          UNSUPPRESSMAP:
+            rule:
+              '10':
+                action:
+                  permit: {}
+                match:
+                  ip-prefix-list: ADVERTISE
+                  type: ipv4
+    vrf:
+      default:
+        router:
+          bgp:
+            address-family:
+              ipv4-unicast:
+                aggregate-route:
+                  203.0.113.128/25:
+                    summary-only: on
+                enable: on
+                redistribute:
+                  connected:
+                    enable: on
+                  static:
+                    enable: on
+            enable: on
+            neighbor:
+              192.0.2.2:
+                remote-as: 65001
+                type: numbered
+              192.0.2.4:
+                address-family:
+                  ipv4-unicast:
+                    policy:
+                      outbound:
+                        route-map: PREPENDMAP
+                        unsuppress-map: UNSUPPRESSMAP
+                remote-as: 65001
+                type: numbered
+              203.0.113.254:
+                remote-as: 65005
+                type: numbered
+          static:
+            203.0.113.251/32:
+              address-family: ipv4-unicast
+              via:
+                swp3:
+                  type: interface
+            203.0.113.252/32:
+              address-family: ipv4-unicast
+              via:
+                swp3:
+                  type: interface
     interface:
       lo:
         ip:
@@ -9,43 +86,13 @@
         ip:
           address:
             192.0.2.3/31: {}
+      swp1-3:
         type: swp
       swp2:
-        link:
-          state:
-            down: {}
         ip:
           address:
             192.0.2.5/31: {}
-        type: swp
       swp3:
         ip:
           address:
             203.0.113.129/25: {}
-        type: swp
-    router:
-      bgp:
-        autonomous-system: 65002
-        enable: on
-        router-id: 198.51.100.2
-    vrf:
-      default:
-        router:
-          bgp:
-            address-family:
-              ipv4-unicast:
-                enable: on
-                redistribute:
-                  connected:
-                    enable: on
-            enable: on
-            neighbor:
-              192.0.2.2:
-                remote-as: 65001
-                type: numbered
-              192.0.2.4:
-                remote-as: 65001
-                type: numbered
-              203.0.113.254:
-                remote-as: 65005
-                type: numbered
