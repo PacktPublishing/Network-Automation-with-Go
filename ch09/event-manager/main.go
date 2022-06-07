@@ -47,10 +47,10 @@ type Rule struct {
 }
 
 type PrefixList struct {
-	Rule map[string]Rule `json:"rule"`
+	Rules map[string]Rule `json:"rule"`
 }
 type Policy struct {
-	PrefixList map[string]PrefixList `json:"prefix-list"`
+	PrefixLists map[string]PrefixList `json:"prefix-list"`
 }
 
 type Router struct {
@@ -61,7 +61,7 @@ type nvue struct {
 	Router Router `json:"router"`
 }
 
-func enableSuppress(intf string, action string) error {
+func toggleSuppress(intf string, action string) error {
 	log.Printf("%s needs to %s backup prefixes", intf, action)
 	ruleIDs, ok := backupRules[intf]
 	if !ok {
@@ -71,15 +71,15 @@ func enableSuppress(intf string, action string) error {
 	}
 
 	var pl PrefixList
-	pl.Rule = make(map[string]Rule)
+	pl.Rules = make(map[string]Rule)
 	for _, ruleID := range ruleIDs {
-		pl.Rule[strconv.Itoa(ruleID)] = Rule{
+		pl.Rules[strconv.Itoa(ruleID)] = Rule{
 			Action: action,
 		}
 	}
 
 	var payload nvue
-	payload.Router.Policy.PrefixList = map[string]PrefixList{
+	payload.Router.Policy.PrefixLists = map[string]PrefixList{
 		plName: pl,
 	}
 
@@ -103,7 +103,7 @@ func alertHandler(w http.ResponseWriter, req *http.Request) {
 	}
 	for _, alert := range alerts.Alerts {
 		if alert.Status == "firing" {
-			if err := enableSuppress(alert.Labels.InterfaceName, "permit"); err != nil {
+			if err := toggleSuppress(alert.Labels.InterfaceName, "permit"); err != nil {
 				fmt.Println(err)
 				w.WriteHeader(http.StatusInternalServerError)
 				return
@@ -111,7 +111,7 @@ func alertHandler(w http.ResponseWriter, req *http.Request) {
 			continue
 		}
 		// alert is resolved
-		if err := enableSuppress(alert.Labels.InterfaceName, "deny"); err != nil {
+		if err := toggleSuppress(alert.Labels.InterfaceName, "deny"); err != nil {
 			fmt.Println(err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return

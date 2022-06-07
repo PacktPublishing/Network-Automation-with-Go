@@ -4,7 +4,7 @@ scrape_configs:
     static_configs:
       - targets: ['clab-netgo-host-2:9313']
   - job_name: 'event-trigger'
-    scrape_interval: 10s
+    scrape_interval: 2s
     static_configs:
       - targets: ['clab-netgo-host-3:9313']
 

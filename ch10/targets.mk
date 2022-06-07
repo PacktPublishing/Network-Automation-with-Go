@@ -21,13 +21,15 @@ traffic-start:
 	docker exec -d clab-netgo-host-1 ./ethr -c 203.0.113.252 -b 600K -d ${DURATION} -p udp -l 1KB
 	docker exec -d clab-netgo-host-1 ./ethr -c 203.0.113.251 -b 400K -d ${DURATION} -p udp -l 1KB
 
+traffic-stop:
+	sudo pkill -f ethr
+
 top-talkers-start: traffic-start
 	@echo "run 'cd ch10/top-talkers; sudo ip netns exec clab-netgo-host-2 ${GOBIN} run main.go; cd ../../'"
 	
-10-stop: bgp-ping-stop
+10-stop: bgp-ping-stop traffic-stop
 	sudo pkill -f bgp-ping
 	sudo pkill -f cloudprober
-	sudo pkill -f ethr
 
 
 capture-start: traffic-start

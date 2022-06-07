@@ -34,7 +34,7 @@
           "custom": {
             "axisLabel": "",
             "axisPlacement": "auto",
-            "barAlignment": 0,
+            "barAlignment": -1,
             "drawStyle": "line",
             "fillOpacity": 0,
             "gradientMode": "none",
@@ -43,13 +43,16 @@
               "tooltip": false,
               "viz": false
             },
-            "lineInterpolation": "linear",
+            "lineInterpolation": "smooth",
+            "lineStyle": {
+              "fill": "solid"
+            },
             "lineWidth": 1,
-            "pointSize": 5,
+            "pointSize": 1,
             "scaleDistribution": {
               "type": "linear"
             },
-            "showPoints": "auto",
+            "showPoints": "never",
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -101,7 +104,7 @@
           },
           "exemplar": true,
           "expr": "rate(interfaces_interface_state_counters_in_pkts{interface_name=\"swp1\"}[30s])",
-          "interval": "",
+          "interval": "5s",
           "legendFormat": "{{interface_name}}",
           "refId": "A"
         },
@@ -113,8 +116,8 @@
           "exemplar": true,
           "expr": "rate(interfaces_interface_state_counters_in_pkts{interface_name=\"swp2\"}[30s])",
           "hide": false,
-          "interval": "",
-          "legendFormat": "{{interface_name}}",
+          "interval": "5s",
+          "legendFormat": "{{interface_name}}(backup)",
           "refId": "B"
         }
       ],
@@ -137,6 +140,6 @@
   "timezone": "",
   "title": "event-manager",
   "uid": "7CZQnRj7z",
-  "version": 2,
+  "version": 3,
   "weekStart": ""
 }
