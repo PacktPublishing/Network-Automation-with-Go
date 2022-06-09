@@ -1,6 +1,6 @@
 # Setting Up a Testing Environment
 
-You can run the Go code example of the first part of the book in the [Go Playground][] or on your personal computer if you have already installed Go. Code examples in chapters six and later interact with a virtual network topology---which we run in containers with Containerlab. 
+You can run the Go code example of the first part of the book in the [Go Playground][] or on your personal computer if you have already installed Go. Code examples in chapters six and later interact with a virtual network topology, which we run in containers with Containerlab. 
 
 ## What Is a Testing Environment?
 
