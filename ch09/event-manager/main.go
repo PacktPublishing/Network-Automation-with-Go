@@ -123,7 +123,7 @@ func alertHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func main() {
-	fmt.Println("Alert manager event trigger webhook")
+	fmt.Println("AlertManager event-triggered webhook")
 	http.HandleFunc("/alert", alertHandler)
 
 	log.Println("Starting web server at", listenAddr)
