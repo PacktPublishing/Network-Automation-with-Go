@@ -61,7 +61,7 @@ type nvue struct {
 	Router Router `json:"router"`
 }
 
-func toggleSuppress(intf string, action string) error {
+func toggleBackup(intf string, action string) error {
 	log.Printf("%s needs to %s backup prefixes", intf, action)
 	ruleIDs, ok := backupRules[intf]
 	if !ok {
@@ -103,7 +103,7 @@ func alertHandler(w http.ResponseWriter, req *http.Request) {
 	}
 	for _, alert := range alerts.Alerts {
 		if alert.Status == "firing" {
-			if err := toggleSuppress(alert.Labels.InterfaceName, "permit"); err != nil {
+			if err := toggleBackup(alert.Labels.InterfaceName, "permit"); err != nil {
 				fmt.Println(err)
 				w.WriteHeader(http.StatusInternalServerError)
 				return
@@ -111,7 +111,7 @@ func alertHandler(w http.ResponseWriter, req *http.Request) {
 			continue
 		}
 		// alert is resolved
-		if err := toggleSuppress(alert.Labels.InterfaceName, "deny"); err != nil {
+		if err := toggleBackup(alert.Labels.InterfaceName, "deny"); err != nil {
 			fmt.Println(err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
