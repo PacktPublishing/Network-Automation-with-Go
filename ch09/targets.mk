@@ -4,7 +4,7 @@ gnmic-start:
 	gnmic --config /workdir/topo-full/workdir/gnmic.yaml \
 	subscribe
 	cd ch09/; docker-compose up -d; cd ../
-	@echo "run 'sudo ip netns exec clab-netgo-cvx ${GOBIN} run main.go'"
+	@echo "run 'sudo ip netns exec clab-netgo-host-2 ${GOBIN} run ch09/event-manager/main.go'"
 
 gnmic-stop: 
 	cd ch09/; docker-compose down; cd ../

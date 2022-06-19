@@ -140,7 +140,7 @@ type cvx struct {
 
 func sendBytes(b []byte) error {
 	var (
-		hostname    = "localhost"
+		hostname    = "clab-netgo-cvx"
 		defaultPort = 8765
 		username    = "cumulus"
 		password    = "cumulus"

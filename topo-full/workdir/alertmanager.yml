@@ -6,4 +6,4 @@ route:
 receivers:
   - name: 'event-manager'
     webhook_configs:
-    - url: http://clab-netgo-cvx:10000/alert
+    - url: http://clab-netgo-host-2:10000/alert
