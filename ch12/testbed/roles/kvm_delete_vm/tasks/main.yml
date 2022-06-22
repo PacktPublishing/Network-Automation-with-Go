@@ -1,0 +1,17 @@
+- name: Delete VM
+  community.libvirt.virt:
+    name: "{{ vm_name }}"
+    state: destroyed
+  ignore_errors: true
+
+- name: Undefine VM
+  community.libvirt.virt:
+    command: undefine
+    name: "{{ vm_name }}"
+  ignore_errors: true
+
+- name: Remove base image from libvirt directory
+  ansible.builtin.file:
+    path: "{{ libvirt_pool_dir }}/{{ vm_name }}.qcow2"
+    state: absent
+  become: true

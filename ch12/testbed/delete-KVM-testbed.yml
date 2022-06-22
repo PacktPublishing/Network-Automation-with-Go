@@ -1,0 +1,16 @@
+# Play 1: Delete an instance on KVM
+# ansible-playbook delete-KVM-testbed.yml -v --ask-become-pass
+- name: Delete KVM instance
+  hosts: localhost
+  become: false
+  gather_facts: false
+  vars_files:
+    - ./vars/kvm_common.yml
+
+  tasks:
+    - name: Include Linux distribution variables
+      ansible.builtin.include_vars: "./vars/kvm_{{ linux_distro }}.yml"
+
+    - name: Delete VM instance in KVM
+      ansible.builtin.include_role:
+        name: kvm_delete_vm

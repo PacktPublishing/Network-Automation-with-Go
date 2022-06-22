@@ -10,7 +10,7 @@
     - {role: check_vars, when: not skip_check}
 
   tasks:
-    - name: Check we SSH key exists
+    - name: Check if SSH key exists
       ansible.builtin.stat:
         path: "{{ temp_dir }}/{{ ssh_key_filename }}.pub"
       register: key

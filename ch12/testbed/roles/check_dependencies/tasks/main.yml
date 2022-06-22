@@ -1,0 +1,5 @@
+- name: Install System dependencies
+  include_tasks: system.yml
+
+- name: Install Ansible Collections dependencies
+  include_tasks: collections.yml

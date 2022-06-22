@@ -10,3 +10,4 @@ settings.json
 clab-netgo
 !/ch07/*.cfg
 output.json
+.vscode

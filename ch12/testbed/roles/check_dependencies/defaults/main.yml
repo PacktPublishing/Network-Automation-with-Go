@@ -1,0 +1,16 @@
+# Common to all distros
+common_software: # TODO
+
+# ansible_distribution_file_variety
+base_software:
+  Debian: # TODO
+  RedHat:
+    - libguestfs-tools
+    - python3-libvirt
+    - libvirt-devel
+    - python38-devel
+
+python_libraries: # TODO
+
+ansible_collections:
+  - community.libvirt:1.1.0

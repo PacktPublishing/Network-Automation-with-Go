@@ -22,7 +22,7 @@ ubuntu_ami_20_04:
   ap_southeast_1: ami-0292c68e0ac530398
 
 # Release 20220309 (21.10)
-#ubuntu_ami:
+# ubuntu_ami:
 ubuntu_ami_21_10:
   us_east_1: ami-026a2c62c35267e08
   us_east_2: ami-0bc8b75555ca2d100
@@ -43,7 +43,7 @@ ubuntu_ami_21_10:
 
 # Release 20220420 (22.04)
 ubuntu_ami:
-#ubuntu_ami_22_04:
+# ubuntu_ami_22_04:
   us_east_1: ami-09d56f8956ab235b3
   us_east_2: ami-0aeb7c931a5a61206
   us_west_1: ami-0dc5e9ff792ec08e3

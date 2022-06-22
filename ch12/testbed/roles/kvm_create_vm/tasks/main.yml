@@ -1,0 +1,31 @@
+- name: Get VMs list
+  community.libvirt.virt:
+    command: list_vms
+  register: existing_vms
+  changed_when: false
+
+- name: Create VM if it does not exist
+  block:
+    - name: Copy base image to libvirt directory
+      ansible.builtin.copy:
+        dest: "{{ libvirt_pool_dir }}/{{ vm_name }}.qcow2"
+        src: "{{ qcow_dir }}/{{ base_image_name }}"
+        force: false
+        remote_src: true
+        mode: 0660
+      become: true
+
+    - name: Initiate VM from template
+      community.libvirt.virt:
+        command: define
+        xml: "{{ lookup('template', 'vm-template.xml.j2') }}"
+  when: "vm_name not in existing_vms.list_vms"
+
+- name: Ensure VM is started
+  community.libvirt.virt:
+    name: "{{ vm_name }}"
+    state: running
+  register: vm_start_results
+  until: "vm_start_results is success"
+  retries: 15
+  delay: 2

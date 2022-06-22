@@ -1,0 +1,12 @@
+base_image_name: jammy-server-cloudimg-amd64.img
+base_image_url: "https://cloud-images.ubuntu.com/jammy/current/{{ base_image_name }}"
+
+vm_username: ubuntu
+custom_settings: >
+ virt-customize -a "{{ qcow_dir }}/{{ base_image_name }}"
+  --hostname {{ vm_name }}
+  --root-password password:{{ vm_root_pass }}
+  --ssh-inject 'root:file:{{ temp_dir }}/{{ ssh_key_filename }}.pub'
+  --copy-in files/70-netplan-set.yaml:/etc/netplan
+  --run-command 'adduser ubuntu --disabled-password --gecos ""'
+  --uninstall cloud-init

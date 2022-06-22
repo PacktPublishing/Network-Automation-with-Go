@@ -1,0 +1,10 @@
+base_image_name: Fedora-Cloud-Base-35-1.2.x86_64.qcow2
+base_image_url: "https://download.fedoraproject.org/pub/fedora/linux/releases/35/Cloud/x86_64/images/{{ base_image_name }}"
+
+vm_username: fedora
+custom_settings: >
+ virt-customize -a "{{ qcow_dir }}/{{ base_image_name }}"
+  --hostname {{ vm_name }}
+  --root-password password:{{ vm_root_pass }}
+  --ssh-inject 'root:file:{{ temp_dir }}/{{ ssh_key_filename }}.pub'
+  --uninstall cloud-init --selinux-relabel

@@ -1,0 +1,16 @@
+- name: Install base packages
+  ansible.builtin.package:
+    # name: "{{ base_software[ansible_distribution_file_variety] | union(common_software) }}"
+    name: "{{ base_software['RedHat'] }}"
+    state: present
+    update_cache: true
+  register: package_check
+  until: package_check is not failed
+  retries: 3
+  delay: 1
+  become: true
+
+- name: Install Python dependencies
+  ansible.builtin.pip:
+    name: "{{ python_libraries }}"
+    executable: pip3

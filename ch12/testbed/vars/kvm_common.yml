@@ -1,0 +1,17 @@
+skip_check: true
+ceos_image: cEOS64-lab-4.28.0F.tar
+path_to_image: ~/Downloads
+ssh_key_filename: id_rsa
+temp_dir: ../../lab-state
+qcow_dir: images
+linux_distro: "{{ kvm_distro | default('ubuntu') }}"
+supported_distros: ['fedora', 'ubuntu']
+delete: true
+
+vm_name: "{{ name | default('testbed') }}"
+vm_vcpus: 2
+vm_ram_mb: 4096
+vm_net: default
+libvirt_pool_dir: /var/lib/libvirt/images
+
+vm_root_pass: password

@@ -11,4 +11,3 @@
     repo: https://github.com/PacktPublishing/Network-Automation-with-Go.git
     dest: "/home/{{ ansible_user }}/network-automation-with-go"
   become: false
-

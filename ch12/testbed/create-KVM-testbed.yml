@@ -1,0 +1,69 @@
+# Play 1: Create an instance on KVM
+# echo '/usr/lib64/libpopt.so*' > /usr/lib64/guestfs/supermin.d/zz-workaround
+# ansible-playbook create-KVM-testbed.yml -v --ask-become-pass
+# sudo virsh console testbed
+- name: Create KVM instance
+  hosts: localhost
+  become: false
+  gather_facts: true
+  vars_files:
+    - ./vars/kvm_common.yml
+
+  roles:
+    - {role: check_dependencies, when: not skip_check}
+
+  tasks:
+    - name: Check if SSH key exists
+      ansible.builtin.stat:
+        path: "{{ temp_dir }}/{{ ssh_key_filename }}.pub"
+      register: key
+
+    - name: Fail if SSH key not found
+      fail:
+        msg: "SSH key is not found in {{ temp_dir }}. Make sure that `make generate-ssh-key` completes successfully."
+      when: not key.stat.exists
+
+    - name: Store SSH pub Key in a fact
+      ansible.builtin.set_fact:
+        pub_key: "{{ lookup('file', path) }}"
+      vars:
+        path: "{{ temp_dir }}/{{ ssh_key_filename }}.pub"
+
+    - name: Include Linux distribution variables
+      ansible.builtin.include_vars: "./vars/kvm_{{ linux_distro }}.yml"
+
+    - name: Check if base image is present
+      ansible.builtin.stat:
+        path: "{{ qcow_dir }}/{{ base_image_name }}"
+      register: img
+
+    - name: Get base image
+      block:
+        - name: Download base image
+          ansible.builtin.get_url:
+            url: "{{ base_image_url }}"
+            dest: "{{ qcow_dir }}/{{ base_image_name }}"
+
+        - name: Customize the base image
+          ansible.builtin.command: "{{ custom_settings }}"
+          environment:
+            LIBGUESTFS_BACKEND: direct
+            LIBGUESTFS_DEBUG: 1
+            LIBGUESTFS_TRACE: 1
+          ignore_errors: true
+      when: not img.stat.exists
+
+    # ansible-galaxy collection install community.libvirt -p collections
+    # alternatives --set python /usr/bin/python3.8
+    # yum install libvirt-devel python3-libvirt python38-devel
+    # git clone https://github.com/libvirt/libvirt-python.git && cd libvirt-python
+    # python3.8 setup.py build
+    # python3.8 setup.py install --user
+    - name: Create VM instance in KVM
+      ansible.builtin.include_role:
+        name: kvm_create_vm
+
+# Windows ReFS is Microsoft’s ZFS/Btrfs copy.
+# This filesystem has not yet been reverse engineered and implemented in the Linux kernel
+# libguestfs doesn't support it.
+# https://libguestfs.org/guestfs-faq.1.html#windows-refs

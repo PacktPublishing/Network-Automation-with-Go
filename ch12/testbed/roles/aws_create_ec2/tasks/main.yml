@@ -57,7 +57,7 @@
     scp_info: >
       scp -i lab-state/{{ ssh_key_filename }} {{ path_to_image }}/{{ ceos_image }}
       {{ ec2_username }}@{{ ec2.instances[0].public_dns_name }}:./network-automation-with-go
-      
+
 - name: Save grafana details
   ansible.builtin.set_fact:
     grafana_info: http://{{ ec2.instances[0].public_dns_name }}:3000
