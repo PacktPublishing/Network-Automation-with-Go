@@ -165,11 +165,11 @@ Then, SSH to the instance and import the image with the `docker` command.
 ```bash
 Network-Automation-with-Go$ ssh -i lab-state/id_rsa fedora@ec2-54-86-51-96.compute-1.amazonaws.com
 fedora@testbed ~ ⇨  cd network-automation-with-go && make clone
-docker import cEOS64-lab-4.28.0F.tar ceos:4.28.0F
+docker import cEOS64-lab-4.28.0F.tar ceos:4.28
 sha256:dcdc721054804ed4ea92f970b5923d8501c28526ef175242cfab0d158ac0085c
 ```
 
-You can now reference this image (`ceos:4.28.0F`) in the `image` section of one or more routers in the topology file.
+You can now reference this image (`ceos:4.28`) in the `image` section of one or more routers in the topology file.
 
 ```bash
 ubuntu@testbed topo ⇨  docker exec -it clab-netgo-ceos Cli
@@ -194,7 +194,7 @@ topology:
       image: ghcr.io/nokia/srlinux:21.6.4
     ceos:
       kind: ceos
-      image: ceos:4.28.0F
+      image: ceos:4.28
     cvx:
       kind: cvx
       image: networkop/cx:5.0.0
@@ -243,7 +243,7 @@ Run 'containerlab version upgrade' to upgrade or go check other installation opt
 +---+-----------------+--------------+------------------------------+------+---------+----------------+----------------------+
 | # |      Name       | Container ID |            Image             | Kind |  State  |  IPv4 Address  |     IPv6 Address     |
 +---+-----------------+--------------+------------------------------+------+---------+----------------+----------------------+
-| 1 | clab-netgo-ceos | 53274759376c | ceos:4.28.0F                 | ceos | running | 172.20.20.3/24 | 2001:172:20:20::3/64 |
+| 1 | clab-netgo-ceos | 53274759376c | ceos:4.28                    | ceos | running | 172.20.20.3/24 | 2001:172:20:20::3/64 |
 | 2 | clab-netgo-cvx  | 404c58026c11 | networkop/cx:5.0.0           | cvx  | running | 172.20.20.2/24 | 2001:172:20:20::2/64 |
 | 3 | clab-netgo-srl  | 16a5cf8add7a | ghcr.io/nokia/srlinux:21.6.4 | srl  | running | 172.20.20.4/24 | 2001:172:20:20::4/64 |
 +---+-----------------+--------------+------------------------------+------+---------+----------------+----------------------+

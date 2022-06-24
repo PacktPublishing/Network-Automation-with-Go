@@ -8,7 +8,7 @@ topology:
       startup-config: ./workdir/srl.json
     ceos:
       kind: ceos
-      image: ceos:4.28.0F
+      image: ceos:4.28
       startup-config: ./workdir/ceos.startup
     cvx:
       kind: cvx

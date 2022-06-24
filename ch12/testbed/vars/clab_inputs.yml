@@ -1,5 +1,5 @@
 # Containerlab specific
-clab_version: 0.25.1
+clab_version: 0.27.1
 clab_dir: /usr/local/bin
 clab_base_url: https://github.com/srl-labs/containerlab/releases/download/
 clab_download_url: "{{ clab_base_url }}v{{ clab_version }}/containerlab_{{ clab_version }}_{{ go_os }}_{{ go_arch }}.tar.gz"

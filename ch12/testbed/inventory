@@ -1,0 +1,7 @@
+[local-vm]
+192.168.122.18
+
+[local-vm:vars]
+ansible_user=fedora
+ansible_password=fedora
+ansible_sudo_pass=fedora

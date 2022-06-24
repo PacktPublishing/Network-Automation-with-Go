@@ -1,0 +1,13 @@
+# ansible-playbook configure-local-vm.yml -i inventory -v
+- name: Configure Instance(s)
+  hosts: local-vm
+  gather_facts: true
+  vars_files:
+    - ./vars/go_inputs.yml
+    - ./vars/clab_inputs.yml
+    - ./vars/aws_common.yml
+
+  roles:
+    - {role: configure_instance, become: true}
+
+

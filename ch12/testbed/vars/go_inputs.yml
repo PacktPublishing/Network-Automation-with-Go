@@ -1,5 +1,5 @@
 # Go specific
-go_version: 1.18.1
+go_version: 1.18.3
 go_path: "{{ lookup('env','HOME') }}/go"
 go_dest: /usr/local
 go_root: "{{ go_dest }}/go"
