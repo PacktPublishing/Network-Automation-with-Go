@@ -18,7 +18,11 @@ var (
 	username     = "admin"
 	password     = "admin"
 	source       = "203.0.113.3"
-	destinations = []string{"203.0.113.251", "203.0.113.252", "203.0.113.253"}
+	destinations = []string{
+		"203.0.113.251",
+		"203.0.113.252",
+		"203.0.113.253",
+	}
 )
 
 func main() {
@@ -28,15 +32,20 @@ func main() {
 		log.Fatal(err)
 	}
 	defer conn.Close()
-	Sys := system.NewSystemClient(conn)
+	sysSvc := system.NewSystemClient(conn)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	ctx = metadata.AppendToOutgoingContext(ctx, "username", username, "password", password)
-
-	traceCh := make(chan map[string][]mapset.Set, len(destinations))
+	ctx = metadata.AppendToOutgoingContext(
+		ctx,
+		"username",
+		username,
+		"password",
+		password,
+	)
 
 	var wg sync.WaitGroup
 	wg.Add(len(destinations))
+	traceCh := make(chan map[string][]mapset.Set, len(destinations))
 
 	for _, dest := range destinations {
 		go func(d string) {
@@ -46,7 +55,7 @@ func main() {
 			retryCount := 0
 
 		START:
-			response, err := Sys.Traceroute(ctx, &system.TracerouteRequest{
+			response, err := sysSvc.Traceroute(ctx, &system.TracerouteRequest{
 				Destination: d,
 				Source:      source,
 			})
@@ -129,7 +138,11 @@ func main() {
 
 				log.Printf("Found different paths at hop %d", hop)
 				log.Printf("Destination %s: %+v", myDest, myPaths)
-				log.Printf("Destination %s: %+v", otherDest, otherPaths)
+				log.Printf(
+					"Destination %s: %+v",
+					otherDest,
+					otherPaths,
+				)
 				found[otherDest] = myDest
 			}
 		}
