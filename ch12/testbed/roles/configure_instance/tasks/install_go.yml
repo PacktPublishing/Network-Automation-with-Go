@@ -30,12 +30,6 @@
     path: "/home/{{ ansible_user }}/.bashrc"
     line: "export PATH=$PATH:{{ go_root }}/bin:$HOME/go/bin"
 
-# .bash_profile does not exist in Ubuntu
-- name: Temporary ASSUME_NO_MOVING_GC for Go1.18
-  ansible.builtin.lineinfile:
-    path: "/home/{{ ansible_user }}/.bashrc"
-    line: "export ASSUME_NO_MOVING_GC_UNSAFE_RISK_IT_WITH=go1.18"
-
 - name: Install Go packages
   ansible.builtin.command: "go install {{ item }}"
   environment:
