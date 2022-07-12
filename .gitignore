@@ -1,5 +1,4 @@
 file*
-*.cfg
 !ansible.cfg
 settings.json
 /ch02/hello/go.mod
@@ -8,6 +7,5 @@ settings.json
 .topo.yaml
 .topo.yml
 clab-netgo
-!/ch07/*.cfg
 output.json
 .vscode
