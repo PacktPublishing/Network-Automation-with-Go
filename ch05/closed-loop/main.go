@@ -10,10 +10,10 @@ import (
 	"time"
 
 	"github.com/mitchellh/hashstructure/v2"
-	"github.com/scrapli/scrapligo/cfg"
-	"github.com/scrapli/scrapligo/driver/base"
-	"github.com/scrapli/scrapligo/driver/core"
+	"github.com/scrapli/scrapligo/driver/options"
+	"github.com/scrapli/scrapligo/platform"
 	"github.com/scrapli/scrapligo/driver/network"
+	cfg "github.com/scrapli/scrapligocfg"
 	"gopkg.in/yaml.v2"
 )
 
@@ -72,7 +72,7 @@ func (r Router) getOper(s Service) (o DeviceInfo, err error) {
 }
 
 func (r Router) sendConfig(conf string) error {
-	c, err := cfg.NewCfgDriver(r.Conn, r.Platform)
+	c, err := cfg.NewCfg(r.Conn, r.Platform)
 	if err != nil {
 		return fmt.Errorf("failed create config driver for %s: %w", r.Hostname, err)
 	}
@@ -205,20 +205,23 @@ func main() {
 	////////////////////////////////////////
 	// Open connection to the network device
 	///////////////////////////////////////
-	conn, err := core.NewCoreDriver(
-		iosxr.Hostname,
+	conn, err := platform.NewPlatform(
 		iosxr.Platform,
-		base.WithAuthStrictKey(iosxr.StrictKey),
-		base.WithAuthUsername(iosxr.Username),
-		base.WithAuthPassword(iosxr.Password),
-		base.WithSSHConfigFile("ssh_config"),
+		iosxr.Hostname,
+		options.WithAuthNoStrictKey(),
+		options.WithAuthUsername(iosxr.Username),
+		options.WithAuthPassword(iosxr.Password),
+		options.WithSSHConfigFile("ssh_config"),
 	)
 	check(err)
-	iosxr.Conn = conn
 
-	err = conn.Open()
+	driver, err := conn.GetNetworkDriver()
 	check(err)
-	defer conn.Close()
+
+	iosxr.Conn = driver
+	err = driver.Open()
+	check(err)
+	defer driver.Close()
 
 	////////////////////////////////
 	// Backup config
