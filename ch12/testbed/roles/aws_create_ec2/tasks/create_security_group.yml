@@ -24,6 +24,10 @@
         to_port: 3000
         from_port: 3000
         cidr_ip: 0.0.0.0/0
+      - proto: tcp
+        to_port: 2345
+        from_port: 2345
+        cidr_ip: 0.0.0.0/0
     rules_egress:
       - proto: all
         cidr_ip: 0.0.0.0/0

@@ -9,3 +9,5 @@ settings.json
 clab-netgo
 output.json
 .vscode
+ch05/closed-loop/backups/*.cfg
+ch08/grpc/xr-data/*.cfg
