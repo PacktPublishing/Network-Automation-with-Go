@@ -10,8 +10,8 @@ import (
 	"encoding/json"
 
 	resty "github.com/go-resty/resty/v2"
-	"github.com/scrapli/scrapligo/driver/base"
-	"github.com/scrapli/scrapligo/driver/core"
+	"github.com/scrapli/scrapligo/driver/options"
+	"github.com/scrapli/scrapligo/platform"
 )
 
 type Authentication struct {
@@ -73,25 +73,32 @@ func (r CVX) GetRoutes(wg *sync.WaitGroup) {
 func (r SRL) GetRoutes(wg *sync.WaitGroup) {
 	lookupCmd := "show network-instance default route-table ipv4-unicast summary"
 
-	conn, err := core.NewSROSClassicDriver(
+	conn, err := platform.NewPlatform(
+		"nokia_srl",
 		r.Hostname,
-		base.WithAuthStrictKey(false),
-		base.WithAuthUsername(r.Username),
-		base.WithAuthPassword(r.Password),
+		options.WithAuthNoStrictKey(),
+		options.WithAuthUsername(r.Username),
+		options.WithAuthPassword(r.Password),
+		options.WithTermWidth(176),
 	)
+	if err != nil {
+		r.Resp.check(err, "failed to create connection for: "+r.Hostname)
+		return
+	}
+	driver, err := conn.GetNetworkDriver()
 	if err != nil {
 		r.Resp.check(err, "failed to create driver for: "+r.Hostname)
 		return
 	}
 
-	err = conn.Open()
+	err = driver.Open()
 	if err != nil {
 		r.Resp.check(err, "failed to open driver for: "+r.Hostname)
 		return
 	}	
-	defer conn.Close()
+	defer driver.Close()
 
-	resp, err := conn.SendCommand(lookupCmd)
+	resp, err := driver.SendCommand(lookupCmd)
 	if err != nil {
 		r.Resp.check(err, "failed to send command for: "+r.Hostname)
 		return
@@ -111,25 +118,31 @@ func (r CEOS) GetRoutes(wg *sync.WaitGroup) {
 
 	lookupCmd := "sh ip route"
 
-	conn, err := core.NewEOSDriver(
+	conn, err := platform.NewPlatform(
+		"arista_eos",
 		r.Hostname,
-		base.WithAuthStrictKey(false),
-		base.WithAuthUsername(r.Username),
-		base.WithAuthPassword(r.Password),
+		options.WithAuthNoStrictKey(),
+		options.WithAuthUsername(r.Username),
+		options.WithAuthPassword(r.Password),
 	)
+	if err != nil {
+		r.Resp.check(err, "failed to create connection for: "+r.Hostname)
+		return
+	}
+	driver, err := conn.GetNetworkDriver()
 	if err != nil {
 		r.Resp.check(err, "failed to create driver for: "+r.Hostname)
 		return
 	}
 
-	err = conn.Open()
+	err = driver.Open()
 	if err != nil {
 		r.Resp.check(err, "failed to open driver for: "+r.Hostname)
 		return
 	}
-	defer conn.Close()
+	defer driver.Close()
 
-	resp, err := conn.SendCommand(lookupCmd)
+	resp, err := driver.SendCommand(lookupCmd)
 	if err != nil {
 		r.Resp.check(err, "failed to send command for: "+r.Hostname)
 		return
