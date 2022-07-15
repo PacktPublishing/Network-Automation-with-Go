@@ -8,9 +8,9 @@ import (
 	"os"
 	"text/template"
 
-	"github.com/scrapli/scrapligo/cfg"
-	"github.com/scrapli/scrapligo/driver/base"
-	"github.com/scrapli/scrapligo/driver/core"
+	"github.com/scrapli/scrapligo/driver/options"
+	"github.com/scrapli/scrapligo/platform"
+	cfg "github.com/scrapli/scrapligocfg"
 	"gopkg.in/yaml.v2"
 )
 
@@ -80,9 +80,10 @@ func check(err error) {
 }
 
 func main() {
-	hostname := flag.String("device", "clab-netgo-ceos", "Device Hostname")
-	username := flag.String("username", "admin", "SSH Username")
+	hostname := flag.String("device", "clab-netgo-ceos", "Device hostname")
+	username := flag.String("username", "admin", "SSH username")
 	password := flag.String("password", "admin", "SSH password")
+	nos := flag.String("nos", "arista_eos", "Network operating system")
 	flag.Parse()
 
 	// read and parse the input file
@@ -99,19 +100,23 @@ func main() {
 	config, err := devConfig(input)
 	check(err)
 
-	conn, err := core.NewEOSDriver(
+	conn, err := platform.NewPlatform(
+		*nos,
 		*hostname,
-		base.WithAuthStrictKey(false),
-		base.WithAuthUsername(*username),
-		base.WithAuthPassword(*password),
+		options.WithAuthNoStrictKey(),
+		options.WithAuthUsername(*username),
+		options.WithAuthPassword(*password),
 	)
 	check(err)
 
-	err = conn.Open()
+	driver, err := conn.GetNetworkDriver()
 	check(err)
-	defer conn.Close()
 
-	conf, err := cfg.NewEOSCfg(conn)
+	err = driver.Open()
+	check(err)
+	defer driver.Close()
+
+	conf, err := cfg.NewCfg(driver, *nos)
 	check(err)
 
 	err = conf.Prepare()
