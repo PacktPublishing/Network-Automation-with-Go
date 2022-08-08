@@ -86,7 +86,7 @@ func main() {
 		////////////////////////////////
 		// Read input data for gNMI request
 		////////////////////////////////
-		gdata, err := os.Open("api-xr.yml")
+		gdata, err := os.Open("api-ceos.yml")
 		check(err)
 		defer gdata.Close()
 
@@ -98,14 +98,14 @@ func main() {
 
 		// It fails if the device is already configured on a different ASN.
 		// Hence, we delete any existing BGP config first
-		delReq, err := api.NewSetRequest(
-			api.Delete("Cisco-IOS-XR-ipv4-bgp-cfg:bgp"))
-		check(err)
+		// delReq, err := api.NewSetRequest(
+		// 	api.Delete("Cisco-IOS-XR-ipv4-bgp-cfg:bgp"))
+		// check(err)
 		
-		delResp, err := tg.Set(ctx, delReq)
-		check(err)
+		// delResp, err := tg.Set(ctx, delReq)
+		// check(err)
 
-		fmt.Println(prototext.Format(delResp))
+		// fmt.Println(prototext.Format(delResp))
 
 
 		for _, data := range info {

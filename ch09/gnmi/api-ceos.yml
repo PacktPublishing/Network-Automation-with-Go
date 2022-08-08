@@ -1,0 +1,11 @@
+  # https://yangcatalog.org/yang-search/yang_tree/openconfig-interfaces@2021-04-06
+- prefix: ""
+  encoding: "json_ietf"
+  path: '/interfaces/interface[name="Ethernet2"]/subinterfaces/subinterface[index=0]/openconfig-if-ip:ipv4/addresses'
+  value: '{"address":{"ip":"192.0.2.2","config":{"prefix-length":31}}}'
+
+  # https://yangcatalog.org/yang-search/yang_tree/openconfig-interfaces@2021-04-06
+- prefix: ""
+  encoding: "json_ietf"
+  path: '/interfaces/interface[name="Ethernet3"]/subinterfaces/subinterface[index=0]/openconfig-if-ip:ipv4/addresses'
+  value: '{"address":{"ip":"192.0.2.4","config":{"prefix-length":31}}}'
