@@ -2,19 +2,25 @@
 - prefix: ""
   encoding: "json_ietf"
   path: "/interfaces/interface[name=\"Loopback0\"]/subinterfaces/subinterface[index=0]/openconfig-if-ip:ipv4"
-  value: '{"addresses":{"address":{"ip":"198.51.100.0","config":{"ip":"198.51.100.0","prefix-length":32}}}}'
+  value: '{"addresses":{"address":{"ip":"198.51.100.0","config":{"prefix-length":32}}}}'
 
   # https://yangcatalog.org/yang-search/yang_tree/openconfig-interfaces@2021-04-06
 - prefix: ""
   encoding: "json_ietf"
-  path: "/interfaces/interface[name=\"GigabitEthernet0/0/0/4\"]/subinterfaces/subinterface[index=0]/openconfig-if-ip:ipv4"
-  value: '{"addresses":{"address":{"ip":"192.0.2.0","config":{"ip":"192.0.2.0","prefix-length":31}}}}'
+  path: "/interfaces/interface[name=\"GigabitEthernet0/0/0/4\"]/subinterfaces/subinterface[index=0]/openconfig-if-ip:ipv4/addresses"
+  value: '{"address":{"ip":"192.0.2.0","config":{"prefix-length":31}}}'
 
   # https://yangcatalog.org/yang-search/yang_tree/openconfig-interfaces@2021-04-06
 - prefix: ""
   encoding: "json_ietf"
   path: "/interfaces/interface[name=\"GigabitEthernet0/0/0/4\"]/config/enabled"
   value: true
+
+  # https://yangcatalog.org/yang-search/yang_tree/openconfig-routing-policy@2022-05-24
+- prefix: ""
+  encoding: "json_ietf"
+  path: "routing-policy/policy-definitions/policy-definition"
+  value: '[{"name":"PERMIT_ALL","config":{"name":"PERMIT_ALL"},"statements":{"statement":[{"name":"id-1","config":{"name":"id-1"},"actions":{"config":{"policy-result":"ACCEPT_ROUTE"}}}]}}]'
 
   # https://yangcatalog.org/yang-search/yang_tree/openconfig-network-instance@2021-11-17
 - prefix: ""
@@ -33,10 +39,3 @@
   encoding: "json_ietf"
   path: "/system/config/hostname"
   value: "net-go"
-
-#
-#
-#
-#
-# path: "/interfaces/interface[name=\"Loopback0\"]/subinterfaces/subinterface[index=0]/openconfig-if-ip:ipv4/addresses/address[ip=\"198.51.100.0\"]/config"
-# value: '{"ip": "198.51.100.0", "prefix-length": 32}'

@@ -1,0 +1,29 @@
+{
+    "routing-policy": {
+      "policy-definitions": {
+        "policy-definition": [
+          {
+            "name": "PERMIT-ALL",
+            "config": {
+              "name": "PERMIT-ALL"
+            },
+            "statements": {
+              "statement": [
+                {
+                  "name": "id-1",
+                  "config": {
+                    "name": "id-1"
+                  },
+                  "actions": {
+                    "config": {
+                      "policy-result": "ACCEPT_ROUTE"
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  }

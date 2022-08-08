@@ -1,10 +1,4 @@
 router:
-# - hostname: clab-netgo-srl
-#   port: 57400
-#   skipverify: true
-#   username: admin
-#   password: admin
-
 - hostname: sandbox-iosxr-1.cisco.com
   port: 57777
   skipverify: true
