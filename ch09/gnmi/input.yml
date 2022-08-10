@@ -7,6 +7,6 @@ router:
 
 - hostname: clab-netgo-ceos
   port: 6030
-  skipverify: true
+  insecure: true
   username: admin
   password: admin

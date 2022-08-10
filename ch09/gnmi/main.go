@@ -22,7 +22,7 @@ type Router struct {
 	Port       string `yaml:"port"`
 	Username   string `yaml:"username"`
 	Password   string `yaml:"password"`
-	SkipVerify bool   `yaml:"skipverify"`
+	Insecure bool   `yaml:"insecure"`
 }
 
 type Data struct {
@@ -42,7 +42,7 @@ func (r Router) createTarget() (*target.Target, error) {
 		api.Address(r.Hostname+":"+r.Port),
 		api.Username(r.Username),
 		api.Password(r.Password),
-		api.SkipVerify(r.SkipVerify),
+		api.Insecure(r.Insecure),
 	)
 }
 
@@ -96,17 +96,6 @@ func main() {
 		err = d.Decode(&info)
 		check(err)
 
-		// It fails if the device is already configured on a different ASN.
-		// Hence, we delete any existing BGP config first
-		// delReq, err := api.NewSetRequest(
-		// 	api.Delete("Cisco-IOS-XR-ipv4-bgp-cfg:bgp"))
-		// check(err)
-		
-		// delResp, err := tg.Set(ctx, delReq)
-		// check(err)
-
-		// fmt.Println(prototext.Format(delResp))
-
 
 		for _, data := range info {
 			////////////////////////////////
@@ -135,7 +124,6 @@ func main() {
 			)
 
 			check(err)
-			//fmt.Println(prototext.Format(setReq))
 
 			////////////////////////////////
 			// Send the Update gNMI SetRequest to the target
@@ -146,5 +134,4 @@ func main() {
 			fmt.Println(prototext.Format(configResp))
 		}
 	}
-
 }
