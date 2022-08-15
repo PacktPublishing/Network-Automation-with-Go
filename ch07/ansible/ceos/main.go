@@ -8,9 +8,9 @@ import (
 	"os"
 	"text/template"
 
-	"github.com/scrapli/scrapligo/cfg"
-	"github.com/scrapli/scrapligo/driver/base"
-	"github.com/scrapli/scrapligo/driver/core"
+	cfg "github.com/scrapli/scrapligocfg"
+	"github.com/scrapli/scrapligo/driver/options"
+	"github.com/scrapli/scrapligo/platform"
 
 	"gopkg.in/yaml.v2"
 )
@@ -151,19 +151,22 @@ func main() {
 	config, err := devConfig(input)
 	r.check(err, "Couldn't create an EOS specific config for: "+string(src))
 
-	conn, err := core.NewEOSDriver(
+	conn, err := platform.NewPlatform(
+		"arista_eos",
 		moduleArgs.Host,
-		base.WithAuthStrictKey(false),
-		base.WithAuthUsername(moduleArgs.User),
-		base.WithAuthPassword(moduleArgs.Password),
+		options.WithAuthNoStrictKey(),
+		options.WithAuthUsername(moduleArgs.User),
+		options.WithAuthPassword(moduleArgs.Password),
 	)
 	r.check(err, "Couldn't create client connection for: "+moduleArgs.Host)
+	driver, err := conn.GetNetworkDriver()
+	r.check(err, "Couldn't create driver for: "+moduleArgs.Host)
 
-	err = conn.Open()
+	err = driver.Open()
 	r.check(err, "Couldn't connect to: "+moduleArgs.Host)
-	defer conn.Close()
+	defer driver.Close()
 
-	conf, err := cfg.NewEOSCfg(conn)
+	conf, err := cfg.NewCfg(driver, "arista_eos")
 	r.check(err, "Couldn't create a config with scrapli for: "+moduleArgs.Host)
 
 	err = conf.Prepare()

@@ -6,8 +6,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/scrapli/scrapligo/driver/base"
-	"github.com/scrapli/scrapligo/driver/core"
+	"github.com/scrapli/scrapligo/driver/options"
+	"github.com/scrapli/scrapligo/platform"
 	"gopkg.in/yaml.v2"
 )
 
@@ -33,15 +33,21 @@ var m sync.RWMutex = sync.RWMutex{}
 func getVersion(r Router, out chan data, wg *sync.WaitGroup, isAlive map[string]bool) {
 	defer wg.Done()
 	
-	d, err := core.NewCoreDriver(
-		r.Hostname,
+	p, err := platform.NewPlatform(
 		r.Platform,
-		base.WithAuthStrictKey(r.StrictKey),
-		base.WithAuthUsername(r.Username),
-		base.WithAuthPassword(r.Password),
-		base.WithSSHConfigFile("ssh_config"),
+		r.Hostname,
+		options.WithAuthNoStrictKey(),
+		options.WithAuthUsername(r.Username),
+		options.WithAuthPassword(r.Password),
+		options.WithSSHConfigFile("ssh_config"),
 	)
 
+	if err != nil {
+		fmt.Printf("failed to create platform for %s: %+v\n", r.Hostname, err)
+		return
+	}
+
+	d, err := p.GetNetworkDriver()
 	if err != nil {
 		fmt.Printf("failed to create driver for %s: %+v\n", r.Hostname, err)
 		return

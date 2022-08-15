@@ -1,0 +1,23 @@
+  # https://yangcatalog.org/yang-search/yang_tree/openconfig-if-ip@2019-01-08
+- prefix: "/interfaces/interface[name=Ethernet2]"
+  encoding: "json_ietf"
+  path: '/subinterfaces/subinterface[index=0]/ipv4/addresses/address[ip=192.0.2.2]'
+  value: '{"config":{"ip":"192.0.2.2","prefix-length":31}}'
+
+  # https://yangcatalog.org/yang-search/yang_tree/openconfig-interfaces@2021-04-06
+- prefix: ""
+  encoding: "json_ietf"
+  path: '/interfaces/interface[name=Ethernet2]/config/description'
+  value: 'PRIMARY: TO -> CVX:swp1'
+
+  # https://yangcatalog.org/yang-search/yang_tree/openconfig-if-ip@2019-01-08
+- prefix: "/interfaces/interface[name=Ethernet3]"
+  encoding: "json_ietf"
+  path: '/subinterfaces/subinterface[index=0]/ipv4/addresses/address[ip=192.0.2.4]'
+  value: '{"config":{"ip":"192.0.2.4","prefix-length":31}}'
+
+  # https://yangcatalog.org/yang-search/yang_tree/openconfig-interfaces@2021-04-06
+- prefix: ""
+  encoding: "json_ietf"
+  path: '/interfaces/interface[name=Ethernet3]/config/description'
+  value: 'BACKUP: TO -> CVX:swp2'

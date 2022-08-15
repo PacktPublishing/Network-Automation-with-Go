@@ -1,0 +1,41 @@
+  # https://yangcatalog.org/yang-search/yang_tree/openconfig-interfaces@2021-04-06
+- prefix: ""
+  encoding: "json_ietf"
+  path: "/interfaces/interface[name=\"Loopback0\"]/subinterfaces/subinterface[index=0]/openconfig-if-ip:ipv4"
+  value: '{"addresses":{"address":{"ip":"198.51.100.0","config":{"prefix-length":32}}}}'
+
+  # https://yangcatalog.org/yang-search/yang_tree/openconfig-interfaces@2021-04-06
+- prefix: ""
+  encoding: "json_ietf"
+  path: "/interfaces/interface[name=\"GigabitEthernet0/0/0/4\"]/subinterfaces/subinterface[index=0]/openconfig-if-ip:ipv4/addresses"
+  value: '{"address":{"ip":"192.0.2.0","config":{"prefix-length":31}}}'
+
+  # https://yangcatalog.org/yang-search/yang_tree/openconfig-interfaces@2021-04-06
+- prefix: ""
+  encoding: "json_ietf"
+  path: "/interfaces/interface[name=\"GigabitEthernet0/0/0/4\"]/config/enabled"
+  value: true
+
+  # https://yangcatalog.org/yang-search/yang_tree/openconfig-routing-policy@2022-05-24
+- prefix: ""
+  encoding: "json_ietf"
+  path: "routing-policy/policy-definitions/policy-definition"
+  value: '[{"name":"PERMIT_ALL","config":{"name":"PERMIT_ALL"},"statements":{"statement":[{"name":"id-1","config":{"name":"id-1"},"actions":{"config":{"policy-result":"ACCEPT_ROUTE"}}}]}}]'
+
+  # https://yangcatalog.org/yang-search/yang_tree/openconfig-network-instance@2021-11-17
+- prefix: ""
+  encoding: "json_ietf"
+  path: "/network-instances/network-instance[name=\"default\"]/protocols/protocol[identifier=\"BGP\"][name=\"default\"]"
+  value: '{"config":{"identifier":"BGP","name":"default"},"bgp":{"global":{"config":{"as":65000,"router-id":"198.51.100.0"},"afi-safis":{"afi-safi":[{"afi-safi-name":"IPV4_UNICAST","config":{"afi-safi-name":"IPV4_UNICAST","enabled":true}}]}},"neighbors":{"neighbor":[{"neighbor-address":"192.0.2.1","config":{"neighbor-address":"192.0.2.1","peer-as":65001},"afi-safis":{"afi-safi":[{"afi-safi-name":"IPV4_UNICAST","config":{"afi-safi-name":"IPV4_UNICAST","enabled":true},"apply-policy":{"config":{"import-policy":["PERMIT_ALL"],"export-policy":["PERMIT_ALL"]}}}]}}]}}}'
+
+  # https://yangcatalog.org/yang-search/yang_tree/openconfig-network-instance@2021-11-17
+# - prefix: ""
+#   encoding: "json_ietf"
+#   path: "/network-instances/network-instance[name=\"default\"]/table-connection"
+#   value: ''
+
+  # https://yangcatalog.org/yang-search/yang_tree/openconfig-system@2021-07-20
+- prefix: ""
+  encoding: "json_ietf"
+  path: "/system/config/hostname"
+  value: "net-go"

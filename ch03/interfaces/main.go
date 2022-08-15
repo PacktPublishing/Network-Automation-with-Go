@@ -5,8 +5,8 @@ import (
 	//"strconv"
 	"strings"
 
-	"github.com/scrapli/scrapligo/driver/base"
-	"github.com/scrapli/scrapligo/driver/core"
+	"github.com/scrapli/scrapligo/driver/options"
+	"github.com/scrapli/scrapligo/platform"
 )
 
 type NetworkDevice struct {
@@ -22,15 +22,20 @@ type Inventory struct {
 }
 
 func getUptime(r NetworkDevice) (string, error) {
-	d, err := core.NewCoreDriver(
-		r.Hostname,
+	p, err := platform.NewPlatform(
 		r.Platform,
-		base.WithAuthStrictKey(r.StrictKey),
-		base.WithAuthUsername(r.Username),
-		base.WithAuthPassword(r.Password),
-		base.WithSSHConfigFile("ssh_config"),
+		r.Hostname,
+		options.WithAuthNoStrictKey(),
+		options.WithAuthUsername(r.Username),
+		options.WithAuthPassword(r.Password),
+		options.WithSSHConfigFile("ssh_config"),
 	)
 
+	if err != nil {
+		return "", fmt.Errorf("failed to create platform for %s: %w", r.Hostname, err)
+	}
+
+	d, err := p.GetNetworkDriver()
 	if err != nil {
 		return "", fmt.Errorf("failed to create driver for %s: %w", r.Hostname, err)
 	}

@@ -22,7 +22,7 @@ type Router struct {
 	Port       string `yaml:"port"`
 	Username   string `yaml:"username"`
 	Password   string `yaml:"password"`
-	SkipVerify bool   `yaml:"skipverify"`
+	Insecure bool   `yaml:"insecure"`
 }
 
 type Data struct {
@@ -42,7 +42,7 @@ func (r Router) createTarget() (*target.Target, error) {
 		api.Address(r.Hostname+":"+r.Port),
 		api.Username(r.Username),
 		api.Password(r.Password),
-		api.SkipVerify(r.SkipVerify),
+		api.Insecure(r.Insecure),
 	)
 }
 
@@ -86,7 +86,7 @@ func main() {
 		////////////////////////////////
 		// Read input data for gNMI request
 		////////////////////////////////
-		gdata, err := os.Open("api.yml")
+		gdata, err := os.Open("api-ceos.yml")
 		check(err)
 		defer gdata.Close()
 
@@ -96,65 +96,37 @@ func main() {
 		err = d.Decode(&info)
 		check(err)
 
+
 		for _, data := range info {
 			////////////////////////////////
 			// Create a GetRequest
 			////////////////////////////////
-			getReq, err := api.NewGetRequest(
-				api.Path(data.Prefix+data.Path),
-				api.Encoding(data.Encoding))
-			check(err)
-
-			fmt.Println(prototext.Format(getReq))
+			// getReq, err := api.NewGetRequest(
+			// 	api.Path(data.Prefix+data.Path),
+			// 	api.Encoding(data.Encoding))
+			// check(err)
 
 			////////////////////////////////
 			// Send the created gNMI GetRequest to the created target
 			////////////////////////////////
-			getResp, err := tg.Get(ctx, getReq)
-			check(err)
+			// getResp, err := tg.Get(ctx, getReq)
+			// check(err)
 
-			fmt.Println(prototext.Format(getResp))
+			// fmt.Println(prototext.Format(getResp))
 
 			////////////////////////////////
 			// Create an Update gNMI SetRequest
 			////////////////////////////////
-			// setReq, err := api.NewSetRequest(
-			// 	api.Update(
-			// 		api.Path(data.Prefix+data.Path),
-			// 		api.Value(data.Value, data.Encoding)),
-			// )
-
-			////////////////////////////////
-			// Create a Delete gNMI SetRequest
-			////////////////////////////////
-			clean, err := api.NewSetRequest(
-				api.Delete(data.Prefix + data.Path))
-
-			check(err)
-			fmt.Println(prototext.Format(clean))
-
-			////////////////////////////////
-			// Send the Delete gNMI SetRequest to the target
-			////////////////////////////////
-			cleanResp, err := tg.Set(ctx, clean)
-			check(err)
-
-			fmt.Println(prototext.Format(cleanResp))
-
-			////////////////////////////////
-			// Create a Replace gNMI SetRequest
-			////////////////////////////////
 			setReq, err := api.NewSetRequest(
-				api.Replace(
+				api.Update(
 					api.Path(data.Prefix+data.Path),
 					api.Value(data.Value, data.Encoding)),
 			)
 
 			check(err)
-			fmt.Println(prototext.Format(setReq))
 
 			////////////////////////////////
-			// Send the Replace gNMI SetRequest to the target
+			// Send the Update gNMI SetRequest to the target
 			////////////////////////////////
 			configResp, err := tg.Set(ctx, setReq)
 			check(err)
@@ -162,5 +134,4 @@ func main() {
 			fmt.Println(prototext.Format(configResp))
 		}
 	}
-
 }

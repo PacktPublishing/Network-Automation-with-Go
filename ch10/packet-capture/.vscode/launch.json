@@ -6,9 +6,9 @@
             "type": "go",
             "request": "attach",
             "mode": "remote",
-            "remotePath": "/workdir/packet-capture",
+            "remotePath": "/workdir/ch10/packet-capture",
             "port": 2345,
-            "host": "clab-netgo-host-2",  
+            "host": "ec2-3-224-127-79.compute-1.amazonaws.com",  
 
         },
 	]
