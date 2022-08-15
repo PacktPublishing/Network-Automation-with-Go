@@ -41,6 +41,10 @@ interface Loopback0
 !
 ip routing
 !
+{{ if .MgmtIPv4Gateway }}ip route 0.0.0.0/0 {{ .MgmtIPv4Gateway }}{{end}}
+!
+ip name-server 8.8.8.8
+!
 router bgp 65001
    router-id 198.51.100.1
    neighbor 192.0.2.0 remote-as 65000
