@@ -22,7 +22,11 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+
+      - name: Set up Organization name for container tag
+        run: |
+          echo ORG=$(echo ${{ github.repository_owner }} | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
 
       - name: Docker meta
         id: meta
@@ -30,7 +34,7 @@ jobs:
         with:
           # list of Docker images to use as base name for tags
           images: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+            ${{ env.REGISTRY }}/${{ env.ORG }}/${{ env.IMAGE_NAME }}
           # generate Docker tags based on the following events/attributes
           tags: |
             type=schedule
