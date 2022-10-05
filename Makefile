@@ -35,7 +35,7 @@ env-build: generate-ssh-key check-aws-key check-aws-secret ## Build test envirom
 	--env AWS_ACCESS_KEY_ID \
 	--env AWS_SECRET_ACCESS_KEY \
 	--volume ${CWD}:/network-automation-with-go:Z \
-	ghcr.io/packtpublishing/builder:0.3.0 \
+	ghcr.io/packtpublishing/network-automation-with-go/builder:0.3.3 \
 	ansible-playbook /network-automation-with-go/ch12/testbed/create-EC2-testbed.yml \
 	--extra-vars "instance_type=$(VM_SIZE) \
 	aws_region=$(AWS_REGION) \
@@ -46,7 +46,7 @@ env-delete: check-aws-key check-aws-secret ## Delete test enviroment on AWS. Mak
 	--env AWS_ACCESS_KEY_ID \
 	--env AWS_SECRET_ACCESS_KEY \
 	--volume ${CWD}:/network-automation-with-go:Z \
-	ghcr.io/packtpublishing/builder:0.3.0 \
+	ghcr.io/packtpublishing/network-automation-with-go/builder:0.3.3 \
 	ansible-playbook /network-automation-with-go/ch12/testbed/delete-EC2-testbed.yml
 
 env-show:  ## Show test environment details
