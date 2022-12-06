@@ -1,6 +1,3 @@
-# Network-Automation-with-Go
-Network Automation with Go, Published by Packt
-
 # Network Automation with Go
 
 <a href="https://www.packtpub.com/product/network-automation-with-go/9781800560925?utm_source=github&utm_medium=repository&utm_campaign=9781800560925"><img src="https://static.packt-cdn.com/products/9781800560925/cover/smaller" alt="Early Access" height="256px" align="right"></a>
