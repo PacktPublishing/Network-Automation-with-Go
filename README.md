@@ -64,3 +64,8 @@ is a Specialist Solutions Architect at Red Hat. In his role, he helps customers 
 
 **Michael**
 is a Cloud Infrastructure Solutions Architect, currently working in the networking business unit of NVIDIA. Throughout his career, he held multiple roles ranging from network operations, through software development to systems architecture and design. He enjoys breaking the boundaries between different disciplines and coming up with creative solutions to satisfy business needs and solve technical problems in the most optimal way. He is a prolific open-source contributor and writer with much of his work focused on cloud-native infrastructure, automation, and orchestration.
+
+### Download a free PDF
+
+ <i>If you have already purchased a print or Kindle version of this book, you can get a DRM-free PDF version at no cost.<br>Simply click on the link to claim your free PDF.</i>
+<p align="center"> <a href="https://packt.link/free-ebook/9781800560925">https://packt.link/free-ebook/9781800560925 </a> </p>
