@@ -96,7 +96,7 @@ func main() {
 	ios := NetworkDevice{
 		Hostname:  "sandbox-iosxe-latest-1.cisco.com",
 		Platform:  "cisco_iosxe",
-		Username:  "developer",
+		Username:  "admin",
 		Password:  "C1sco12345",
 		StrictKey: false,
 	}
