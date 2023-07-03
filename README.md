@@ -54,6 +54,7 @@ We also provide a PDF file that has color images of the screenshots/diagrams use
 
 ## Errata
 * Page 64 - In the second code block; the second comment shows the Binary value of the localhost variable which has a decimal value of 127,0,0,1 as 1111 1111,0000 0000,0000 0000,0000 0001 which is not correct and it should be 0111 1111,0000 0000,0000 0000,0000 0001.
+* Page 64 - In the second code block; the ipv4 in the first and second comment is meant to be the ipAddr and localhost variables respectively.
 
 ### Related products
 *  Python Network Programming Techniques[[Packt]](https://www.packtpub.com/product/python-network-programming-techniques/9781838646639?utm_source=github&utm_medium=repository&utm_campaign=9781838646639) [[Amazon]](https://www.amazon.com/dp/1838646639)
